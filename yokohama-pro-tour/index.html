@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FAB Asia Tour 2026 — Enes' Trip Guide</title>
+  <title>FAB Asia Tour 2026 — Trip Planner</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -82,13 +82,13 @@
     /* ── HERO ── */
     .hero {
       position: relative;
-      min-height: 92vh;
+      min-height: 48vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 4rem 1.5rem 6rem;
+      padding: 3rem 1.5rem 4rem;
       overflow: hidden;
     }
 
@@ -112,30 +112,12 @@
       pointer-events: none;
     }
 
-    .hero-eyebrow {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 1.25rem;
-      position: relative;
-    }
-
     .hero h1 {
-      font-size: clamp(2.4rem, 8vw, 5.5rem);
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      line-height: 1.05;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
       position: relative;
-    }
-
-    .hero h1 .grad {
-      display: block;
-      background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 40%, #f59e0b 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
     }
 
     .hero-sub {
@@ -203,23 +185,31 @@
     }
     .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* ── SCROLL INDICATOR ── */
-    .scroll-hint {
-      position: absolute;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
+    /* ── COLLAPSIBLE SECTIONS ── */
+    .collapsible-trigger {
+      cursor: pointer;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 0.4rem;
-      color: var(--muted);
-      font-size: 0.75rem;
-      animation: bob 2s ease-in-out infinite;
+      justify-content: space-between;
+      user-select: none;
     }
-    @keyframes bob {
-      0%, 100% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(6px); }
+    .collapsible-trigger:hover h2 { color: var(--accent2); }
+    .collapse-chevron {
+      font-size: 1rem;
+      color: var(--muted);
+      transition: transform 0.25s;
+      margin-left: 0.75rem;
+      flex-shrink: 0;
+    }
+    .section-collapsed .collapse-chevron { transform: rotate(-90deg); }
+    .collapsible-body {
+      overflow: hidden;
+      transition: max-height 0.35s ease, opacity 0.25s ease;
+      opacity: 1;
+    }
+    .section-collapsed .collapsible-body {
+      max-height: 0 !important;
+      opacity: 0;
     }
 
     /* ── SECTIONS ── */
@@ -750,11 +740,12 @@
       <li><a href="#events">Events</a></li>
       <li><a href="#flights">Flights</a></li>
       <li><a href="#timeline">Timeline</a></li>
-      <li><a href="#stay">Where to Stay</a></li>
+      <li><a href="#checklist">Checklist</a></li>
+      <li><a href="#stay">Stay</a></li>
       <li><a href="#explore">Explore</a></li>
       <li><a href="#transport">Transport</a></li>
       <li><a href="#visa">Visa</a></li>
-      <li><a href="#checklist">Checklist</a></li>
+      <li><a href="#packing">Packing</a></li>
     </ul>
   </nav>
 
@@ -762,25 +753,16 @@
   <div class="hero">
     <div class="hero-bg"></div>
     <div class="hero-grid"></div>
-    <div class="hero-eyebrow">🃏 Flesh and Blood · Competitive Travel</div>
-    <h1>
-      FAB Asia Tour<br />
-      <span class="grad">2026</span>
-    </h1>
-    <p class="hero-sub">Enes' complete trip guide — Calling: Shanghai &amp; Pro Tour: Yokohama. Mar 27 – Apr 13 from Stuttgart.</p>
+    <h1>FAB Asia Tour 2026</h1>
+    <p class="hero-sub">Shanghai Calling &amp; Yokohama Pro Tour · Mar 27 – Apr 13 · Stuttgart</p>
     <div class="hero-meta">
       <div class="hero-pill">✈️ STR → PVG → NRT → STR</div>
-      <div class="hero-pill">🏙 Shanghai + Yokohama</div>
       <div class="hero-pill">📅 Mar 27 – Apr 13</div>
-      <div class="hero-pill">🎴 2 Competitive Events</div>
+      <div class="hero-pill">🎴 2 Events</div>
     </div>
     <div class="hero-cta">
-      <a href="#timeline" class="btn btn-primary">View Timeline</a>
-      <a href="#checklist" class="btn btn-outline">Booking Checklist</a>
-    </div>
-    <div class="scroll-hint">
-      <span>scroll</span>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      <a href="#checklist" class="btn btn-primary">Booking Checklist</a>
+      <a href="#timeline" class="btn btn-outline">Timeline</a>
     </div>
   </div>
 
@@ -812,30 +794,6 @@
       <div class="event-badge badge-protour">Pro Tour</div>
     </div>
 
-    <div class="cards-grid" style="margin-top: 1.5rem;">
-      <div class="card">
-        <div class="card-icon">📋</div>
-        <h3>Register: Calling Shanghai</h3>
-        <p>Registration opens on the official FAB site. Keep an eye on the event page and register as soon as slots open — Callings sell out fast.</p>
-        <p style="margin-top:0.5rem;"><a href="https://fabtcg.com" target="_blank">fabtcg.com →</a></p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🎟</div>
-        <h3>Register: Pro Tour Yokohama</h3>
-        <p>Confirm your qualification pathway and register on the official FAB site. Check the Player Center for your invite status and Pro Tour eligibility.</p>
-        <p style="margin-top:0.5rem;"><a href="https://fabtcg.com" target="_blank">fabtcg.com →</a></p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🎴</div>
-        <h3>Deck Prep</h3>
-        <p>Both events have a 3-day gap between them (Apr 6–8). Use the flight from PVG to NRT and your Tokyo/Yokohama days to review the metagame and finalise your list.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🌏</div>
-        <h3>FAB in Asia</h3>
-        <p>Both events draw strong Asia-Pacific talent. Expect large fields with diverse regional metas, particularly Chinese and Japanese players with regional card access.</p>
-      </div>
-    </div>
   </section>
 
   <div class="divider"></div>
@@ -1003,13 +961,106 @@
 
   <div class="divider"></div>
 
-  <!-- WHERE TO STAY -->
-  <section id="stay">
+  <!-- CHECKLIST -->
+  <section id="checklist">
     <div class="section-header">
-      <div class="section-tag">Accommodation</div>
-      <h2>Where to Stay</h2>
+      <div class="section-tag">Booking Checklist</div>
+      <h2>Everything You Need to Book</h2>
+      <p>Tap each item to mark it done. Progress saves in your browser.</p>
+    </div>
+
+    <div class="checklist-progress">
+      <div class="progress-label">
+        <span>Booking progress</span>
+        <strong id="progress-text">0 / 8 done</strong>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="checklist" id="checklist">
+
+      <div class="check-item" data-id="leg1">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Book Leg 1: STR → PVG (Fri, Mar 27)</div>
+        <div class="check-tag tag-flight">Flight</div>
+      </div>
+
+      <div class="check-item" data-id="leg2">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Book Leg 2: PVG → NRT (Sun, Apr 6)</div>
+        <div class="check-tag tag-flight">Flight</div>
+      </div>
+
+      <div class="check-item" data-id="leg3">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Book Leg 3: NRT → STR (Mon, Apr 13)</div>
+        <div class="check-tag tag-flight">Flight</div>
+      </div>
+
+      <div class="check-item" data-id="hotel-shanghai">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Book hotel Shanghai (Mar 28 – Apr 6, near Pudong/Bund)</div>
+        <div class="check-tag tag-hotel">Hotel</div>
+      </div>
+
+      <div class="check-item" data-id="hotel-tokyo">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Book hotel Tokyo/Yokohama (Apr 6–13, Shinjuku or Yokohama)</div>
+        <div class="check-tag tag-hotel">Hotel</div>
+      </div>
+
+      <div class="check-item" data-id="reg-shanghai">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Register for Calling: Shanghai (fabtcg.com)</div>
+        <div class="check-tag tag-event">Event</div>
+      </div>
+
+      <div class="check-item" data-id="reg-yokohama">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Register for Pro Tour: Yokohama (fabtcg.com)</div>
+        <div class="check-tag tag-event">Event</div>
+      </div>
+
+      <div class="check-item" data-id="insurance">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Travel health insurance (China + Japan, Mar 27 – Apr 13)</div>
+        <div class="check-tag tag-misc">Misc</div>
+      </div>
+
+    </div>
+  </section>
+  <div class="divider"></div>
+
+  <!-- WHERE TO STAY -->
+  <section id="stay" class="collapsible-section">
+    <div class="section-header">
+      <div class="collapsible-trigger" data-target="stay-body">
+        <div>
+          <div class="section-tag">Accommodation</div>
+          <h2>Where to Stay <span class="collapse-chevron">›</span></h2>
+        </div>
+      </div>
       <p>Two separate hotel bookings needed — Shanghai (Mar 28 – Apr 6) and Tokyo/Yokohama (Apr 6–13).</p>
     </div>
+    <div class="collapsible-body" id="stay-body">
 
     <!-- Shanghai Hotels -->
     <div style="margin-bottom: 2.5rem;">
@@ -1118,17 +1169,24 @@
         <span><strong>Pro Tour venue is TBD.</strong> Once announced, consider moving base to Yokohama for Apr 9–12. Shinjuku ↔ Yokohama is 35–45 min by direct train, so either works. Book flexible rates until the venue is confirmed.</span>
       </div>
     </div>
+
+    </div><!-- /collapsible-body -->
   </section>
 
   <div class="divider"></div>
 
   <!-- EXPLORE -->
-  <section id="explore">
+  <section id="explore" class="collapsible-section section-collapsed">
     <div class="section-header">
-      <div class="section-tag">Between Events</div>
-      <h2>Explore Shanghai &amp; Tokyo</h2>
+      <div class="collapsible-trigger" data-target="explore-body">
+        <div>
+          <div class="section-tag">Between Events</div>
+          <h2>Explore Shanghai &amp; Tokyo <span class="collapse-chevron">›</span></h2>
+        </div>
+      </div>
       <p>Make the most of your free days in two of Asia's greatest cities.</p>
     </div>
+    <div class="collapsible-body" id="explore-body">
 
     <div style="margin-bottom: 2.5rem;">
       <div class="section-tag" style="margin-bottom: 1.25rem; color: var(--gold);">🇨🇳 Shanghai (Mar 28 – Apr 2)</div>
@@ -1206,16 +1264,23 @@
         </div>
       </div>
     </div>
+
+    </div><!-- /collapsible-body -->
   </section>
 
   <div class="divider"></div>
 
   <!-- TRANSPORT -->
-  <section id="transport">
+  <section id="transport" class="collapsible-section section-collapsed">
     <div class="section-header">
-      <div class="section-tag">Getting Around</div>
-      <h2>Transport Guide</h2>
+      <div class="collapsible-trigger" data-target="transport-body">
+        <div>
+          <div class="section-tag">Getting Around</div>
+          <h2>Transport Guide <span class="collapse-chevron">›</span></h2>
+        </div>
+      </div>
     </div>
+    <div class="collapsible-body" id="transport-body">
 
     <div class="transport-grid">
       <div class="transport-card">
@@ -1265,17 +1330,24 @@
         </ul>
       </div>
     </div>
+
+    </div><!-- /collapsible-body -->
   </section>
 
   <div class="divider"></div>
 
   <!-- VISA -->
-  <section id="visa">
+  <section id="visa" class="collapsible-section section-collapsed">
     <div class="section-header">
-      <div class="section-tag">Visa &amp; Entry</div>
-      <h2>Entry Requirements</h2>
-      <p>Good news — German passport holders enter both countries visa-free.</p>
+      <div class="collapsible-trigger" data-target="visa-body">
+        <div>
+          <div class="section-tag">Visa &amp; Entry</div>
+          <h2>Entry Requirements <span class="collapse-chevron">›</span></h2>
+        </div>
+      </div>
+      <p>German passport holders enter both countries visa-free.</p>
     </div>
+    <div class="collapsible-body" id="visa-body">
 
     <div class="visa-grid">
       <div class="visa-card">
@@ -1301,106 +1373,25 @@
       <span class="tip-icon">⚠️</span>
       <span><strong>China note:</strong> VPN usage, payment apps, and internet restrictions are different. Install a reliable VPN (Mullvad, ExpressVPN) <em>before</em> you land in China, as the App Store/Google Play are inaccessible once there. Also set up Alipay before departure.</span>
     </div>
+
+    </div><!-- /collapsible-body -->
   </section>
 
-  <div class="divider"></div>
-
-  <!-- CHECKLIST -->
-  <section id="checklist">
-    <div class="section-header">
-      <div class="section-tag">Booking Checklist</div>
-      <h2>Everything You Need to Book</h2>
-      <p>Tap each item to mark it done. Progress saves in your browser.</p>
-    </div>
-
-    <div class="checklist-progress">
-      <div class="progress-label">
-        <span>Booking progress</span>
-        <strong id="progress-text">0 / 8 done</strong>
-      </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
-      </div>
-    </div>
-
-    <div class="checklist" id="checklist">
-
-      <div class="check-item" data-id="leg1">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Book Leg 1: STR → PVG (Fri, Mar 27)</div>
-        <div class="check-tag tag-flight">Flight</div>
-      </div>
-
-      <div class="check-item" data-id="leg2">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Book Leg 2: PVG → NRT (Sun, Apr 6)</div>
-        <div class="check-tag tag-flight">Flight</div>
-      </div>
-
-      <div class="check-item" data-id="leg3">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Book Leg 3: NRT → STR (Mon, Apr 13)</div>
-        <div class="check-tag tag-flight">Flight</div>
-      </div>
-
-      <div class="check-item" data-id="hotel-shanghai">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Book hotel Shanghai (Mar 28 – Apr 6, near Pudong/Bund)</div>
-        <div class="check-tag tag-hotel">Hotel</div>
-      </div>
-
-      <div class="check-item" data-id="hotel-tokyo">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Book hotel Tokyo/Yokohama (Apr 6–13, Shinjuku or Yokohama)</div>
-        <div class="check-tag tag-hotel">Hotel</div>
-      </div>
-
-      <div class="check-item" data-id="reg-shanghai">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Register for Calling: Shanghai (fabtcg.com)</div>
-        <div class="check-tag tag-event">Event</div>
-      </div>
-
-      <div class="check-item" data-id="reg-yokohama">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Register for Pro Tour: Yokohama (fabtcg.com)</div>
-        <div class="check-tag tag-event">Event</div>
-      </div>
-
-      <div class="check-item" data-id="insurance">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Travel health insurance (China + Japan, Mar 27 – Apr 13)</div>
-        <div class="check-tag tag-misc">Misc</div>
-      </div>
-
-    </div>
-  </section>
 
   <div class="divider"></div>
 
   <!-- PACKING -->
-  <section>
+  <section id="packing" class="collapsible-section section-collapsed">
     <div class="section-header">
-      <div class="section-tag">Preparation</div>
-      <h2>Packing List</h2>
-      <p>Curated for a 18-day April trip covering two countries and two competitive FAB events.</p>
+      <div class="collapsible-trigger" data-target="packing-body">
+        <div>
+          <div class="section-tag">Preparation</div>
+          <h2>Packing List <span class="collapse-chevron">›</span></h2>
+        </div>
+      </div>
+      <p>18-day April trip covering two countries and two competitive FAB events.</p>
     </div>
+    <div class="collapsible-body" id="packing-body">
 
     <div class="packing-grid">
       <div class="pack-card">
@@ -1457,6 +1448,8 @@
       <span class="tip-icon">🧳</span>
       <span><strong>Coin lockers:</strong> Every Japanese train station has coin lockers (¥300–700). Store your bag while exploring between tournament days — no need to carry everything to the venue.</span>
     </div>
+
+    </div><!-- /collapsible-body -->
   </section>
 
   <!-- FOOTER -->
@@ -1505,6 +1498,32 @@
     });
 
     updateProgress();
+
+    // Collapsible sections
+    function initCollapsible(body, collapsed) {
+      if (collapsed) {
+        body.style.maxHeight = '0';
+      } else {
+        body.style.maxHeight = body.scrollHeight + 'px';
+      }
+    }
+
+    document.querySelectorAll('.collapsible-trigger').forEach(trigger => {
+      const targetId = trigger.dataset.target;
+      const body = document.getElementById(targetId);
+      const section = trigger.closest('section');
+      const isCollapsed = section.classList.contains('section-collapsed');
+      initCollapsible(body, isCollapsed);
+
+      trigger.addEventListener('click', () => {
+        const nowCollapsed = section.classList.toggle('section-collapsed');
+        if (nowCollapsed) {
+          body.style.maxHeight = '0';
+        } else {
+          body.style.maxHeight = body.scrollHeight + 'px';
+        }
+      });
+    });
   </script>
 
 </body>
