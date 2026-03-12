@@ -286,7 +286,7 @@
       border-radius: 16px;
       padding: 2rem;
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto 1fr auto auto;
       align-items: center;
       gap: 1.5rem;
       margin-bottom: 1.25rem;
@@ -318,6 +318,54 @@
     }
     .badge-calling  { background: rgba(245,158,11,0.15); color: var(--gold); border: 1px solid rgba(245,158,11,0.25); }
     .badge-protour  { background: rgba(168,85,247,0.15); color: var(--purple); border: 1px solid rgba(168,85,247,0.25); }
+
+    /* ── COUNTDOWN ── */
+    .event-countdown {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 90px;
+      background: rgba(14,165,233,0.06);
+      border: 1px solid rgba(14,165,233,0.15);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .event-countdown .cd-number {
+      font-size: 2.2rem;
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .event-countdown .cd-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+    .event-countdown.cd-calling .cd-number {
+      background: linear-gradient(135deg, var(--gold) 0%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .event-countdown.cd-calling { border-color: rgba(245,158,11,0.2); background: rgba(245,158,11,0.06); }
+    .event-countdown.cd-protour .cd-number {
+      background: linear-gradient(135deg, var(--purple) 0%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .event-countdown.cd-protour { border-color: rgba(168,85,247,0.2); background: rgba(168,85,247,0.06); }
+    .event-countdown.cd-past .cd-number { font-size: 1.1rem; }
+    @media (max-width: 640px) { .event-countdown { flex-direction: row; gap: 0.5rem; min-width: unset; justify-content: flex-start; } }
 
     /* ── FLIGHT TABLE ── */
     .schedule-wrapper {
@@ -781,6 +829,10 @@
         <h3>Calling: Shanghai</h3>
         <p>Ritz-Carlton Shanghai Pudong, 8 Pudong Avenue. One of FAB's flagship Calling-tier events — large open field, multiple rounds of Swiss, cut to top 8 single elimination.</p>
       </div>
+      <div class="event-countdown cd-calling" id="cd-shanghai">
+        <div class="cd-number" id="cd-shanghai-num">–</div>
+        <div class="cd-label" id="cd-shanghai-lbl">days to go</div>
+      </div>
       <div class="event-badge badge-calling">Calling</div>
     </div>
 
@@ -790,6 +842,10 @@
         <div class="event-date">Apr 9–12, 2026 · Thursday–Sunday</div>
         <h3>Pro Tour: Yokohama</h3>
         <p>Venue TBD in Yokohama, Japan. The Pro Tour is FAB's highest competitive tier — invite-only or qualified entry, elite field, Road to Worlds implications.</p>
+      </div>
+      <div class="event-countdown cd-protour" id="cd-yokohama">
+        <div class="cd-number" id="cd-yokohama-num">–</div>
+        <div class="cd-label" id="cd-yokohama-lbl">days to go</div>
       </div>
       <div class="event-badge badge-protour">Pro Tour</div>
     </div>
@@ -1498,6 +1554,37 @@
     });
 
     updateProgress();
+
+    // Event countdowns
+    (function() {
+      function daysUntil(dateStr) {
+        const target = new Date(dateStr + 'T00:00:00');
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        return Math.round((target - today) / 86400000);
+      }
+      function setCountdown(numId, lblId, wrapperId, dateStr) {
+        const d = daysUntil(dateStr);
+        const numEl = document.getElementById(numId);
+        const lblEl = document.getElementById(lblId);
+        const wrap = document.getElementById(wrapperId);
+        if (!numEl) return;
+        if (d > 0) {
+          numEl.textContent = d;
+          lblEl.textContent = d === 1 ? 'day to go' : 'days to go';
+        } else if (d === 0) {
+          numEl.textContent = 'TODAY';
+          lblEl.textContent = 'it\'s happening!';
+          wrap.classList.add('cd-past');
+        } else {
+          numEl.textContent = Math.abs(d);
+          lblEl.textContent = Math.abs(d) === 1 ? 'day ago' : 'days ago';
+          wrap.classList.add('cd-past');
+        }
+      }
+      setCountdown('cd-shanghai-num', 'cd-shanghai-lbl', 'cd-shanghai', '2026-04-03');
+      setCountdown('cd-yokohama-num', 'cd-yokohama-lbl', 'cd-yokohama', '2026-04-09');
+    })();
 
     // Collapsible sections
     function initCollapsible(body, collapsed) {

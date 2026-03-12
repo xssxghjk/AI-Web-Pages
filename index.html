@@ -177,6 +177,37 @@
       gap: 0.3rem;
     }
 
+    .card-countdowns {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-top: 0.25rem;
+    }
+    .cd-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid;
+    }
+    .cd-pill-calling {
+      background: rgba(245,158,11,0.1);
+      border-color: rgba(245,158,11,0.25);
+      color: #f59e0b;
+    }
+    .cd-pill-protour {
+      background: rgba(124,106,247,0.1);
+      border-color: rgba(124,106,247,0.25);
+      color: #a855f7;
+    }
+    .cd-pill .cd-days {
+      font-size: 1rem;
+      font-weight: 900;
+    }
+
     /* ── Footer ── */
     footer {
       text-align: center;
@@ -207,6 +238,16 @@
         <div class="card-tag">Travel Guide</div>
         <h2>FAB Asia Tour 2026</h2>
         <p>Enes' complete trip guide — Calling: Shanghai (Apr 3–5) &amp; Pro Tour: Yokohama (Apr 9–12). Flights, hotels, timeline, visa, and interactive booking checklist.</p>
+        <div class="card-countdowns">
+          <div class="cd-pill cd-pill-calling">
+            <span class="cd-days" id="hub-cd-shanghai">–</span>
+            <span>days · Shanghai</span>
+          </div>
+          <div class="cd-pill cd-pill-protour">
+            <span class="cd-days" id="hub-cd-yokohama">–</span>
+            <span>days · Yokohama</span>
+          </div>
+        </div>
         <div class="card-arrow">View page →</div>
       </a>
 
@@ -218,6 +259,27 @@
   <footer>
     Built with Claude · <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank">View on GitHub</a>
   </footer>
+
+  <script>
+    (function() {
+      function daysUntil(dateStr) {
+        const target = new Date(dateStr + 'T00:00:00');
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        return Math.round((target - today) / 86400000);
+      }
+      function setHubCountdown(elId, dateStr) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const d = daysUntil(dateStr);
+        if (d > 0) el.textContent = d;
+        else if (d === 0) el.textContent = '🔴';
+        else el.textContent = '✓';
+      }
+      setHubCountdown('hub-cd-shanghai', '2026-04-03');
+      setHubCountdown('hub-cd-yokohama', '2026-04-09');
+    })();
+  </script>
 
 </body>
 </html>
