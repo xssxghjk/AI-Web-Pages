@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Yokohama Pro Tour Trip Guide</title>
+  <title>FAB Asia Tour 2026 — Enes' Trip Guide</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,10 +15,11 @@
       --accent: #0ea5e9;
       --accent2: #38bdf8;
       --gold: #f59e0b;
+      --red: #ef4444;
       --text: #e2e8f0;
       --muted: #64748b;
       --green: #22c55e;
-      --red: #ef4444;
+      --purple: #a855f7;
     }
 
     html { scroll-behavior: smooth; }
@@ -96,7 +97,8 @@
       inset: 0;
       background:
         radial-gradient(ellipse 80% 50% at 50% -10%, rgba(14,165,233,0.18) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(245,158,11,0.08) 0%, transparent 60%);
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(245,158,11,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 10% 70%, rgba(168,85,247,0.06) 0%, transparent 50%);
       pointer-events: none;
     }
 
@@ -128,7 +130,7 @@
       position: relative;
     }
 
-    .hero h1 .city {
+    .hero h1 .grad {
       display: block;
       background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 40%, #f59e0b 100%);
       -webkit-background-clip: text;
@@ -138,16 +140,16 @@
 
     .hero-sub {
       margin-top: 1.25rem;
-      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
       color: var(--muted);
-      max-width: 520px;
+      max-width: 560px;
       position: relative;
     }
 
     .hero-meta {
       margin-top: 2rem;
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
       justify-content: center;
       position: relative;
@@ -185,7 +187,6 @@
       text-decoration: none;
       display: inline-block;
     }
-
     .btn:hover { transform: translateY(-1px); text-decoration: none; }
 
     .btn-primary {
@@ -216,7 +217,6 @@
       font-size: 0.75rem;
       animation: bob 2s ease-in-out infinite;
     }
-
     @keyframes bob {
       0%, 100% { transform: translateX(-50%) translateY(0); }
       50% { transform: translateX(-50%) translateY(6px); }
@@ -229,9 +229,7 @@
       padding: 5rem 1.5rem;
     }
 
-    .section-header {
-      margin-bottom: 2.5rem;
-    }
+    .section-header { margin-bottom: 2.5rem; }
 
     .section-tag {
       font-size: 0.72rem;
@@ -252,7 +250,7 @@
       margin-top: 0.6rem;
       color: var(--muted);
       font-size: 1rem;
-      max-width: 540px;
+      max-width: 580px;
     }
 
     /* ── DIVIDER ── */
@@ -277,22 +275,11 @@
       padding: 1.5rem;
       transition: border-color 0.2s, transform 0.2s;
     }
+    .card:hover { border-color: rgba(14,165,233,0.4); transform: translateY(-2px); }
 
-    .card:hover {
-      border-color: rgba(14,165,233,0.4);
-      transform: translateY(-2px);
-    }
+    .card-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
 
-    .card-icon {
-      font-size: 1.8rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .card h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 0.4rem;
-    }
+    .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
 
     .card p, .card li {
       font-size: 0.875rem;
@@ -300,26 +287,56 @@
       line-height: 1.65;
     }
 
-    .card ul {
-      padding-left: 1.1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-    }
+    .card ul { padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.3rem; }
 
-    /* ── SCHEDULE TABLE ── */
+    /* ── EVENT BANNER ── */
+    .event-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.25rem;
+      transition: border-color 0.2s;
+    }
+    .event-banner:hover { border-color: rgba(14,165,233,0.4); }
+    @media (max-width: 640px) { .event-banner { grid-template-columns: 1fr; } }
+
+    .event-banner .event-icon { font-size: 3rem; text-align: center; }
+
+    .event-banner h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .event-banner .event-date {
+      font-size: 0.85rem;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .event-banner p { font-size: 0.875rem; color: var(--muted); }
+
+    .event-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      white-space: nowrap;
+      align-self: flex-start;
+    }
+    .badge-calling  { background: rgba(245,158,11,0.15); color: var(--gold); border: 1px solid rgba(245,158,11,0.25); }
+    .badge-protour  { background: rgba(168,85,247,0.15); color: var(--purple); border: 1px solid rgba(168,85,247,0.25); }
+
+    /* ── FLIGHT TABLE ── */
     .schedule-wrapper {
       overflow-x: auto;
       border-radius: 14px;
       border: 1px solid var(--border);
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.875rem;
-    }
-
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
     thead tr { background: var(--surface2); }
 
     th {
@@ -340,7 +357,6 @@
     }
 
     tr:last-child td { border-bottom: none; }
-
     tr:hover td { background: rgba(14,165,233,0.03); }
 
     .badge {
@@ -352,82 +368,14 @@
       border-radius: 999px;
     }
 
-    .badge-final    { background: rgba(245,158,11,0.15); color: var(--gold); }
-    .badge-semi     { background: rgba(14,165,233,0.12); color: var(--accent2); }
-    .badge-quarter  { background: rgba(34,197,94,0.12); color: var(--green); }
-    .badge-round    { background: rgba(100,116,139,0.15); color: #94a3b8; }
-    .badge-qualif   { background: rgba(168,85,247,0.12); color: #c084fc; }
+    .badge-leg1  { background: rgba(14,165,233,0.12); color: var(--accent2); }
+    .badge-leg2  { background: rgba(245,158,11,0.15); color: var(--gold); }
+    .badge-leg3  { background: rgba(168,85,247,0.12); color: var(--purple); }
 
-    /* ── VENUE CARDS ── */
-    .venue-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
-      transition: border-color 0.2s;
-    }
-
-    .venue-card:hover { border-color: rgba(14,165,233,0.4); }
-
-    @media (max-width: 640px) { .venue-card { grid-template-columns: 1fr; } }
-
-    .venue-visual {
-      min-height: 220px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 5rem;
-      background: radial-gradient(circle at 30% 50%, rgba(14,165,233,0.12), transparent);
-    }
-
-    .venue-info { padding: 1.75rem; }
-
-    .venue-info h3 {
-      font-size: 1.2rem;
-      font-weight: 800;
-      margin-bottom: 0.4rem;
-    }
-
-    .venue-info .address {
-      font-size: 0.8rem;
-      color: var(--accent);
-      margin-bottom: 1rem;
-    }
-
-    .venue-info p {
-      font-size: 0.875rem;
-      color: var(--muted);
-      margin-bottom: 1rem;
-    }
-
-    .venue-stats {
-      display: flex;
-      gap: 1.25rem;
-      flex-wrap: wrap;
-    }
-
-    .venue-stat strong {
-      display: block;
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--accent);
-    }
-
-    .venue-stat span {
-      font-size: 0.72rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
+    .price-cell { font-weight: 700; color: var(--green); }
 
     /* ── TIMELINE ── */
-    .timeline {
-      position: relative;
-      padding-left: 2rem;
-    }
+    .timeline { position: relative; padding-left: 2rem; }
 
     .timeline::before {
       content: '';
@@ -439,10 +387,7 @@
       background: var(--border);
     }
 
-    .tl-item {
-      position: relative;
-      margin-bottom: 2rem;
-    }
+    .tl-item { position: relative; margin-bottom: 2rem; }
 
     .tl-item::before {
       content: '';
@@ -456,6 +401,9 @@
       border: 2px solid var(--bg);
     }
 
+    .tl-item.tl-event::before { background: var(--gold); }
+    .tl-item.tl-fly::before { background: var(--purple); }
+
     .tl-day {
       font-size: 0.72rem;
       font-weight: 700;
@@ -464,17 +412,11 @@
       color: var(--accent);
       margin-bottom: 0.3rem;
     }
+    .tl-item.tl-event .tl-day { color: var(--gold); }
+    .tl-item.tl-fly .tl-day { color: var(--purple); }
 
-    .tl-item h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 0.3rem;
-    }
-
-    .tl-item p {
-      font-size: 0.875rem;
-      color: var(--muted);
-    }
+    .tl-item h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .tl-item p { font-size: 0.875rem; color: var(--muted); }
 
     /* ── TIP BOX ── */
     .tip-box {
@@ -490,8 +432,22 @@
       align-items: flex-start;
       margin-top: 1.25rem;
     }
-
     .tip-box .tip-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+
+    .warn-box {
+      background: rgba(245,158,11,0.07);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-left: 3px solid var(--gold);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      font-size: 0.875rem;
+      color: var(--muted);
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      margin-top: 1.25rem;
+    }
+    .warn-box .tip-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
 
     /* ── HOTEL CARDS ── */
     .hotels-grid {
@@ -510,7 +466,6 @@
       gap: 0.5rem;
       transition: border-color 0.2s, transform 0.2s;
     }
-
     .hotel-card:hover { border-color: rgba(14,165,233,0.4); transform: translateY(-2px); }
 
     .hotel-tier {
@@ -522,41 +477,16 @@
       border-radius: 999px;
       width: fit-content;
     }
-
     .tier-luxury { background: rgba(245,158,11,0.12); color: var(--gold); }
     .tier-mid    { background: rgba(14,165,233,0.12); color: var(--accent2); }
-    .tier-budget { background: rgba(34,197,94,0.12); color: var(--green); }
+    .tier-budget { background: rgba(34,197,94,0.12);  color: var(--green); }
 
-    .hotel-name {
-      font-size: 1rem;
-      font-weight: 700;
-    }
+    .hotel-name { font-size: 1rem; font-weight: 700; }
+    .hotel-location { font-size: 0.8rem; color: var(--muted); }
+    .hotel-price { font-size: 1.15rem; font-weight: 800; color: var(--text); margin-top: 0.25rem; }
+    .hotel-price span { font-size: 0.75rem; font-weight: 400; color: var(--muted); }
 
-    .hotel-location {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .hotel-price {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: var(--text);
-      margin-top: 0.25rem;
-    }
-
-    .hotel-price span {
-      font-size: 0.75rem;
-      font-weight: 400;
-      color: var(--muted);
-    }
-
-    .hotel-features {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-top: 0.25rem;
-    }
-
+    .hotel-features { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.25rem; }
     .feat-chip {
       font-size: 0.72rem;
       background: var(--surface2);
@@ -566,7 +496,7 @@
       color: var(--muted);
     }
 
-    /* ── FOOD SECTION ── */
+    /* ── FOOD ── */
     .food-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -579,16 +509,10 @@
       border-radius: 14px;
       padding: 1.25rem 1.5rem;
     }
-
     .food-card .food-emoji { font-size: 2rem; margin-bottom: 0.6rem; }
     .food-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; }
     .food-card p { font-size: 0.825rem; color: var(--muted); }
-    .food-card .price-range {
-      margin-top: 0.6rem;
-      font-size: 0.8rem;
-      color: var(--green);
-      font-weight: 600;
-    }
+    .food-card .price-range { margin-top: 0.6rem; font-size: 0.8rem; color: var(--green); font-weight: 600; }
 
     /* ── TRANSPORT ── */
     .transport-grid {
@@ -612,16 +536,94 @@
       gap: 0.5rem;
       margin-bottom: 0.75rem;
     }
-
-    .transport-card p, .transport-card li {
-      font-size: 0.85rem;
-      color: var(--muted);
-      line-height: 1.65;
-    }
-
+    .transport-card p, .transport-card li { font-size: 0.85rem; color: var(--muted); line-height: 1.65; }
     .transport-card ul { padding-left: 1.1rem; }
 
-    /* ── PACKING LIST ── */
+    /* ── CHECKLIST ── */
+    .checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+    .check-item:hover { border-color: rgba(14,165,233,0.4); }
+    .check-item.done { background: rgba(34,197,94,0.05); border-color: rgba(34,197,94,0.25); }
+
+    .check-box {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .check-item.done .check-box {
+      background: var(--green);
+      border-color: var(--green);
+    }
+    .check-box svg { display: none; }
+    .check-item.done .check-box svg { display: block; }
+
+    .check-label { font-size: 0.9rem; font-weight: 600; flex: 1; }
+    .check-item.done .check-label { text-decoration: line-through; color: var(--muted); }
+
+    .check-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+    }
+    .tag-flight { background: rgba(168,85,247,0.12); color: var(--purple); }
+    .tag-hotel  { background: rgba(14,165,233,0.12); color: var(--accent2); }
+    .tag-event  { background: rgba(245,158,11,0.15); color: var(--gold); }
+    .tag-misc   { background: rgba(100,116,139,0.15); color: #94a3b8; }
+
+    .checklist-progress {
+      margin-bottom: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+    .progress-label strong { color: var(--text); }
+    .progress-bar-bg {
+      height: 6px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--green));
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── PACKING ── */
     .packing-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -647,27 +649,79 @@
       gap: 0.4rem;
     }
 
-    .pack-card ul {
-      list-style: none;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
+    .pack-card ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+    .pack-card li { font-size: 0.85rem; color: var(--text); display: flex; align-items: center; gap: 0.5rem; }
+    .pack-card li::before { content: '✓'; color: var(--green); font-size: 0.75rem; flex-shrink: 0; }
+
+    /* ── VISA GRID ── */
+    .visa-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
     }
 
-    .pack-card li {
+    .visa-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+
+    .visa-card .visa-flag { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .visa-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .visa-ok {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--green);
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.2);
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+    .visa-card p { font-size: 0.875rem; color: var(--muted); }
+
+    /* ── BOOKING LINKS ── */
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .link-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+
+    .link-card .leg-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .link-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .link-card .route { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.75rem; }
+    .link-card .link-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .link-card .link-list a {
       font-size: 0.85rem;
-      color: var(--text);
+      color: var(--accent);
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.35rem;
     }
-
-    .pack-card li::before {
-      content: '✓';
+    .link-card .link-list a::before { content: '→'; font-size: 0.8rem; }
+    .est-price {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
       color: var(--green);
-      font-size: 0.75rem;
-      flex-shrink: 0;
+      font-weight: 700;
     }
 
     /* ── FOOTER ── */
@@ -678,7 +732,6 @@
       font-size: 0.82rem;
       border-top: 1px solid var(--border);
     }
-
     footer a { color: var(--accent); }
 
     /* ── RESPONSIVE ── */
@@ -694,13 +747,14 @@
   <nav>
     <a class="nav-back" href="../">← Hub</a>
     <ul class="nav-links">
-      <li><a href="#schedule">Schedule</a></li>
-      <li><a href="#venue">Venue</a></li>
-      <li><a href="#itinerary">Itinerary</a></li>
+      <li><a href="#events">Events</a></li>
+      <li><a href="#flights">Flights</a></li>
+      <li><a href="#timeline">Timeline</a></li>
       <li><a href="#stay">Where to Stay</a></li>
-      <li><a href="#eat">Where to Eat</a></li>
-      <li><a href="#transport">Getting Around</a></li>
-      <li><a href="#pack">Packing</a></li>
+      <li><a href="#explore">Explore</a></li>
+      <li><a href="#transport">Transport</a></li>
+      <li><a href="#visa">Visa</a></li>
+      <li><a href="#checklist">Checklist</a></li>
     </ul>
   </nav>
 
@@ -708,21 +762,21 @@
   <div class="hero">
     <div class="hero-bg"></div>
     <div class="hero-grid"></div>
-    <div class="hero-eyebrow">🎾 Complete Trip Guide</div>
+    <div class="hero-eyebrow">🃏 Flesh and Blood · Competitive Travel</div>
     <h1>
-      Yokohama<br />
-      <span class="city">Pro Tour</span>
+      FAB Asia Tour<br />
+      <span class="grad">2026</span>
     </h1>
-    <p class="hero-sub">Everything you need for an unforgettable week courtside at the Yokohama Pro Tour — from first serve to farewell ramen.</p>
+    <p class="hero-sub">Enes' complete trip guide — Calling: Shanghai &amp; Pro Tour: Yokohama. Mar 27 – Apr 13 from Stuttgart.</p>
     <div class="hero-meta">
-      <div class="hero-pill">📅 October 2025</div>
-      <div class="hero-pill">📍 Yokohama, Japan</div>
-      <div class="hero-pill">🏟 Yokohama Tennis Center</div>
-      <div class="hero-pill">🎟 ATP 250</div>
+      <div class="hero-pill">✈️ STR → PVG → NRT → STR</div>
+      <div class="hero-pill">🏙 Shanghai + Yokohama</div>
+      <div class="hero-pill">📅 Mar 27 – Apr 13</div>
+      <div class="hero-pill">🎴 2 Competitive Events</div>
     </div>
     <div class="hero-cta">
-      <a href="#schedule" class="btn btn-primary">View Schedule</a>
-      <a href="#itinerary" class="btn btn-outline">Day-by-Day Itinerary</a>
+      <a href="#timeline" class="btn btn-primary">View Timeline</a>
+      <a href="#checklist" class="btn btn-outline">Booking Checklist</a>
     </div>
     <div class="scroll-hint">
       <span>scroll</span>
@@ -730,278 +784,220 @@
     </div>
   </div>
 
-  <!-- OVERVIEW -->
-  <section id="overview">
+  <!-- EVENTS -->
+  <section id="events">
     <div class="section-header">
-      <div class="section-tag">Tournament Overview</div>
-      <h2>About the Tournament</h2>
-      <p>The Yokohama Pro Tour is a premier ATP 250 event held each autumn in the heart of Japan's most dynamic city.</p>
+      <div class="section-tag">The Events</div>
+      <h2>Two Tournaments, One Epic Trip</h2>
+      <p>Back-to-back competitive FAB events across two of Asia's most exciting cities.</p>
     </div>
-    <div class="cards-grid">
-      <div class="card">
-        <div class="card-icon">🏆</div>
-        <h3>ATP 250 Series</h3>
-        <p>Prize money of US $670,000 with 250 ranking points awarded to the champion. Top seeds include world-top-20 players competing on outdoor hard courts.</p>
+
+    <div class="event-banner">
+      <div class="event-icon">🏆</div>
+      <div>
+        <div class="event-date">Apr 3–5, 2026 · Friday–Sunday</div>
+        <h3>Calling: Shanghai</h3>
+        <p>Ritz-Carlton Shanghai Pudong, 8 Pudong Avenue. One of FAB's flagship Calling-tier events — large open field, multiple rounds of Swiss, cut to top 8 single elimination.</p>
       </div>
-      <div class="card">
-        <div class="card-icon">📅</div>
-        <h3>Tournament Dates</h3>
-        <p>Main draw runs Monday–Sunday over 7 days. Qualifying rounds are held the Saturday & Sunday prior. Finals are played on the final Sunday afternoon.</p>
+      <div class="event-badge badge-calling">Calling</div>
+    </div>
+
+    <div class="event-banner">
+      <div class="event-icon">👑</div>
+      <div>
+        <div class="event-date">Apr 9–12, 2026 · Thursday–Sunday</div>
+        <h3>Pro Tour: Yokohama</h3>
+        <p>Venue TBD in Yokohama, Japan. The Pro Tour is FAB's highest competitive tier — invite-only or qualified entry, elite field, Road to Worlds implications.</p>
       </div>
+      <div class="event-badge badge-protour">Pro Tour</div>
+    </div>
+
+    <div class="cards-grid" style="margin-top: 1.5rem;">
       <div class="card">
-        <div class="card-icon">🌤</div>
-        <h3>October Weather</h3>
-        <p>Expect mild autumn weather — highs around 20–23 °C (68–73 °F), low humidity, and mostly clear skies. Perfect conditions for outdoor tennis.</p>
+        <div class="card-icon">📋</div>
+        <h3>Register: Calling Shanghai</h3>
+        <p>Registration opens on the official FAB site. Keep an eye on the event page and register as soon as slots open — Callings sell out fast.</p>
+        <p style="margin-top:0.5rem;"><a href="https://fabtcg.com" target="_blank">fabtcg.com →</a></p>
       </div>
       <div class="card">
         <div class="card-icon">🎟</div>
-        <h3>Tickets</h3>
-        <ul>
-          <li>Qualifying: Free entry</li>
-          <li>First rounds: ¥2,000–¥4,500</li>
-          <li>Quarterfinals: ¥5,000–¥8,000</li>
-          <li>Semifinals: ¥8,000–¥15,000</li>
-          <li>Final: ¥12,000–¥30,000</li>
-        </ul>
+        <h3>Register: Pro Tour Yokohama</h3>
+        <p>Confirm your qualification pathway and register on the official FAB site. Check the Player Center for your invite status and Pro Tour eligibility.</p>
+        <p style="margin-top:0.5rem;"><a href="https://fabtcg.com" target="_blank">fabtcg.com →</a></p>
       </div>
       <div class="card">
-        <div class="card-icon">🇯🇵</div>
-        <h3>Visa & Entry</h3>
-        <p>Most nationalities receive a 90-day visa-free entry to Japan. Check your country's status at the Japanese embassy website before travel.</p>
+        <div class="card-icon">🎴</div>
+        <h3>Deck Prep</h3>
+        <p>Both events have a 3-day gap between them (Apr 6–8). Use the flight from PVG to NRT and your Tokyo/Yokohama days to review the metagame and finalise your list.</p>
       </div>
       <div class="card">
-        <div class="card-icon">💴</div>
-        <h3>Currency & Budget</h3>
-        <p>Japan uses JPY (¥). The country is predominantly cash-based — carry ¥10,000–20,000 daily. ATMs at 7-Eleven and Japan Post accept foreign cards.</p>
+        <div class="card-icon">🌏</div>
+        <h3>FAB in Asia</h3>
+        <p>Both events draw strong Asia-Pacific talent. Expect large fields with diverse regional metas, particularly Chinese and Japanese players with regional card access.</p>
       </div>
     </div>
   </section>
 
   <div class="divider"></div>
 
-  <!-- SCHEDULE -->
-  <section id="schedule">
+  <!-- FLIGHTS -->
+  <section id="flights">
     <div class="section-header">
-      <div class="section-tag">Tournament Schedule</div>
-      <h2>Match Schedule</h2>
-      <p>Full week at a glance. All times JST (UTC+9).</p>
+      <div class="section-tag">Flight Itinerary</div>
+      <h2>Three One-Way Tickets</h2>
+      <p>No roundtrips — STR has no direct Asia flights, always 1 stop. Three independent legs booked separately.</p>
     </div>
 
     <div class="schedule-wrapper">
       <table>
         <thead>
           <tr>
+            <th>Leg</th>
+            <th>Route</th>
             <th>Date</th>
-            <th>Day</th>
-            <th>Session</th>
-            <th>Round</th>
-            <th>Court</th>
-            <th>Notes</th>
+            <th>Details</th>
+            <th>Best Options</th>
+            <th>Est. Price</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Sat Oct 4</td>
-            <td>Day −2</td>
-            <td>10:00 – 18:00</td>
-            <td><span class="badge badge-qualif">Qualifying R1</span></td>
-            <td>Courts 2–5</td>
-            <td>Free entry</td>
+            <td><span class="badge badge-leg1">Leg 1</span></td>
+            <td><strong>STR → PVG</strong></td>
+            <td>Fri, Mar 27<br/><small style="color:var(--muted)">Arrive Sat Mar 28</small></td>
+            <td>1 stop (ZRH / IST / VIE / AMS)<br/>~15–17h total</td>
+            <td>China Eastern, Turkish Airlines, Austrian, KLM</td>
+            <td class="price-cell">€430–600</td>
           </tr>
           <tr>
-            <td>Sun Oct 5</td>
-            <td>Day −1</td>
-            <td>10:00 – 17:00</td>
-            <td><span class="badge badge-qualif">Qualifying Final</span></td>
-            <td>Courts 2–4</td>
-            <td>Free entry</td>
+            <td><span class="badge badge-leg2">Leg 2</span></td>
+            <td><strong>PVG → NRT</strong></td>
+            <td>Sun, Apr 6</td>
+            <td>Direct · ~3h</td>
+            <td>Spring Airlines (en.ch.com), Jetstar Japan</td>
+            <td class="price-cell">€75–120</td>
           </tr>
           <tr>
-            <td>Mon Oct 6</td>
-            <td>Day 1</td>
-            <td>11:00 / 18:00</td>
-            <td><span class="badge badge-round">1st Round</span></td>
-            <td>Centre Court</td>
-            <td>Night session starts 18:00</td>
-          </tr>
-          <tr>
-            <td>Tue Oct 7</td>
-            <td>Day 2</td>
-            <td>11:00 / 18:00</td>
-            <td><span class="badge badge-round">1st Round</span></td>
-            <td>Centre Court</td>
-            <td>Top seeds enter</td>
-          </tr>
-          <tr>
-            <td>Wed Oct 8</td>
-            <td>Day 3</td>
-            <td>11:00 / 17:30</td>
-            <td><span class="badge badge-round">2nd Round</span></td>
-            <td>Centre Court</td>
-            <td></td>
-          </tr>
-          <tr>
-            <td>Thu Oct 9</td>
-            <td>Day 4</td>
-            <td>11:00 / 17:30</td>
-            <td><span class="badge badge-round">2nd Round</span></td>
-            <td>Centre Court</td>
-            <td></td>
-          </tr>
-          <tr>
-            <td>Fri Oct 10</td>
-            <td>Day 5</td>
-            <td>13:00 / 17:00</td>
-            <td><span class="badge badge-quarter">Quarterfinals</span></td>
-            <td>Centre Court</td>
-            <td>Two QF matches</td>
-          </tr>
-          <tr>
-            <td>Sat Oct 11</td>
-            <td>Day 6</td>
-            <td>13:00 / 17:30</td>
-            <td><span class="badge badge-semi">Semifinals</span></td>
-            <td>Centre Court</td>
-            <td>Best day to attend</td>
-          </tr>
-          <tr>
-            <td>Sun Oct 12</td>
-            <td>Day 7</td>
-            <td>14:00</td>
-            <td><span class="badge badge-final">Final</span></td>
-            <td>Centre Court</td>
-            <td>Followed by trophy ceremony</td>
+            <td><span class="badge badge-leg3">Leg 3</span></td>
+            <td><strong>NRT → STR</strong></td>
+            <td>Mon, Apr 13</td>
+            <td>1 stop (IST / AMS / ZRH)<br/>~15–17h total</td>
+            <td>Turkish Airlines, KLM, SWISS</td>
+            <td class="price-cell">€500–620</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="tip-box">
-      <span class="tip-icon">💡</span>
-      <span><strong>Pro tip:</strong> Saturday Semifinals offer the best value — two top-4 matches back-to-back, often more exciting than the Final, at lower ticket prices. Book these early!</span>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- VENUE -->
-  <section id="venue">
-    <div class="section-header">
-      <div class="section-tag">Venue</div>
-      <h2>The Courts</h2>
+    <div class="warn-box" style="margin-top:1.25rem;">
+      <span class="tip-icon">✈️</span>
+      <span><strong>Total estimated flights: €1,005–1,340.</strong> Book Leg 1 and Leg 3 as early as possible — European ↔ Asia fares spike quickly. Leg 2 (PVG → NRT) is typically cheap; Spring Airlines is the budget leader on this route.</span>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-      <div class="venue-card">
-        <div class="venue-visual">🎾</div>
-        <div class="venue-info">
-          <h3>Yokohama Tennis Center</h3>
-          <div class="address">📍 Koen-dori, Kanagawa-ku, Yokohama 221-0056</div>
-          <p>State-of-the-art outdoor hard court facility built for international ATP events. The Centre Court seats 5,200 spectators with excellent sightlines from every seat.</p>
-          <div class="venue-stats">
-            <div class="venue-stat"><strong>5,200</strong><span>Centre Court seats</span></div>
-            <div class="venue-stat"><strong>6</strong><span>Show courts</span></div>
-            <div class="venue-stat"><strong>12</strong><span>Practice courts</span></div>
+    <div style="margin-top: 2rem;">
+      <div class="section-tag" style="margin-bottom: 1rem;">Booking Links</div>
+      <div class="links-grid">
+        <div class="link-card">
+          <div class="leg-label" style="color: var(--accent2);">Leg 1 — STR → PVG</div>
+          <h3>Stuttgart to Shanghai</h3>
+          <div class="route">📅 Fri, Mar 27 · Depart Stuttgart</div>
+          <div class="link-list">
+            <a href="https://www.swoodoo.com" target="_blank">swoodoo.com/de (STR → PVG)</a>
+            <a href="https://www.kayak.de" target="_blank">kayak.de</a>
+            <a href="https://flights.google.com" target="_blank">Google Flights</a>
           </div>
+          <div class="est-price">€430–600 estimated</div>
+        </div>
+        <div class="link-card">
+          <div class="leg-label" style="color: var(--gold);">Leg 2 — PVG → NRT</div>
+          <h3>Shanghai to Tokyo</h3>
+          <div class="route">📅 Sun, Apr 6 · Direct ~3h</div>
+          <div class="link-list">
+            <a href="https://www.ch.com" target="_blank">en.ch.com (Spring Airlines)</a>
+            <a href="https://www.kayak.de" target="_blank">kayak.de (PVG → NRT, Apr 6)</a>
+          </div>
+          <div class="est-price">€75–120 estimated</div>
+        </div>
+        <div class="link-card">
+          <div class="leg-label" style="color: var(--purple);">Leg 3 — NRT → STR</div>
+          <h3>Tokyo back to Stuttgart</h3>
+          <div class="route">📅 Mon, Apr 13 · Via IST/AMS/ZRH</div>
+          <div class="link-list">
+            <a href="https://www.turkishairlines.com" target="_blank">turkishairlines.com</a>
+            <a href="https://www.kayak.de" target="_blank">kayak.de (NRT → STR, Apr 13)</a>
+            <a href="https://www.klm.com" target="_blank">klm.com</a>
+          </div>
+          <div class="est-price">€500–620 estimated</div>
         </div>
       </div>
     </div>
-
-    <div class="cards-grid" style="margin-top: 1.25rem;">
-      <div class="card">
-        <div class="card-icon">🚇</div>
-        <h3>Getting to the Venue</h3>
-        <ul>
-          <li>Takashimacho Station (Minatomirai line) — 8 min walk</li>
-          <li>Shin-Yokohama Station (Shinkansen + JR) — taxi 15 min</li>
-          <li>Yokohama Station — bus #103, 25 min</li>
-        </ul>
-      </div>
-      <div class="card">
-        <div class="card-icon">🍱</div>
-        <h3>Inside the Venue</h3>
-        <ul>
-          <li>4 food stalls (bento, ramen, yakitori, coffee)</li>
-          <li>Official merchandise stand — opens Day 1</li>
-          <li>Free bag check at east gate</li>
-          <li>No outside food/large containers</li>
-        </ul>
-      </div>
-      <div class="card">
-        <div class="card-icon">🎒</div>
-        <h3>What to Bring</h3>
-        <ul>
-          <li>Printed or digital ticket (QR code)</li>
-          <li>Sunscreen + sunglasses</li>
-          <li>Light jacket for evening sessions</li>
-          <li>Cash ¥ (limited card acceptance)</li>
-          <li>Empty refillable water bottle</li>
-        </ul>
-      </div>
-    </div>
   </section>
 
   <div class="divider"></div>
 
-  <!-- ITINERARY -->
-  <section id="itinerary">
+  <!-- TIMELINE -->
+  <section id="timeline">
     <div class="section-header">
       <div class="section-tag">Day-by-Day</div>
-      <h2>Suggested Itinerary</h2>
-      <p>A week that mixes world-class tennis with Yokohama's best sights, food, and culture.</p>
+      <h2>Full Trip Timeline</h2>
+      <p>Mar 27 – Apr 13, 2026. 18 days total including travel, exploration, and two competitive events.</p>
     </div>
 
     <div class="timeline">
-      <div class="tl-item">
-        <div class="tl-day">Day 0 · Friday Oct 3</div>
-        <h3>Arrival Day</h3>
-        <p>Fly into Narita or Haneda. Take the Narita Express or Limousine Bus to Yokohama (45–90 min). Check in, explore the waterfront at Minato Mirai, dinner at the World Porters food hall.</p>
+
+      <div class="tl-item tl-fly">
+        <div class="tl-day">Fri Mar 27</div>
+        <h3>Depart Stuttgart ✈️</h3>
+        <p>Fly STR → PVG (1 stop via ZRH/IST/VIE/AMS). Long travel day — ~15–17h. Arrive Shanghai Pudong Saturday morning.</p>
       </div>
+
       <div class="tl-item">
-        <div class="tl-day">Day 1 · Saturday Oct 4</div>
-        <h3>Qualifying + Chinatown</h3>
-        <p>Free qualifying matches at the venue in the morning — great chance to watch future stars up close. Afternoon: stroll Yokohama Chinatown (the largest in Asia). Try pork steamed buns (nikuman) for ¥400.</p>
+        <div class="tl-day">Sat Mar 28 – Sun Mar 29</div>
+        <h3>Weekend in Shanghai</h3>
+        <p>Arrive and settle in. Explore the Bund waterfront, Nanjing Road, and the French Concession. Jet-lag recovery days — take it easy, eat well, soak in the city.</p>
       </div>
+
       <div class="tl-item">
-        <div class="tl-day">Day 2 · Sunday Oct 5</div>
-        <h3>Qualifying Finals + Sankeien Garden</h3>
-        <p>Morning qualifying finals. Afternoon off — visit the beautiful Sankeien Garden (¥700 entry). Evening: pre-tournament atmosphere at Kannai bar district.</p>
+        <div class="tl-day">Mon Mar 30 – Tue Apr 2</div>
+        <h3>Shanghai Exploration &amp; Tournament Prep</h3>
+        <p>More time to explore: Yu Garden, Xintiandi, Tianzifang art district. Use Apr 1–2 as prep days — review pairings, finalise deck list, test against the Shanghai meta online.</p>
       </div>
+
+      <div class="tl-item tl-event">
+        <div class="tl-day">Fri Apr 3 – Sun Apr 5 ⭐</div>
+        <h3>Calling: Shanghai</h3>
+        <p>Three competition days at the Ritz-Carlton Shanghai Pudong, 8 Pudong Avenue. Friday–Saturday Swiss rounds, Sunday top cut. Give it everything!</p>
+      </div>
+
+      <div class="tl-item tl-fly">
+        <div class="tl-day">Sun Apr 6</div>
+        <h3>Fly to Tokyo ✈️</h3>
+        <p>PVG → NRT direct, ~3h. Quick hop — depart afternoon, arrive evening Japan time. Easy travel day after the Calling. Check into Tokyo/Yokohama hotel.</p>
+      </div>
+
       <div class="tl-item">
-        <div class="tl-day">Day 3–4 · Mon–Tue Oct 6–7</div>
-        <h3>Main Draw Opens</h3>
-        <p>Full day at the venue. Arrive early for practice session views. Night sessions under the lights are spectacular. Try the venue yakitori between matches.</p>
+        <div class="tl-day">Sun Apr 6 – Tue Apr 8</div>
+        <h3>Tokyo / Yokohama Exploration</h3>
+        <p>Three days to decompress and explore. Shinjuku (nightlife, Golden Gai), Shibuya (crossing, fashion), Akihabara (TCG shops!), and Yokohama harbour (Minato Mirai, Chinatown). Scout the Pro Tour venue.</p>
       </div>
-      <div class="tl-item">
-        <div class="tl-day">Day 5 · Wednesday Oct 8</div>
-        <h3>2nd Round + Yamashita Park</h3>
-        <p>Morning match session, then afternoon break. Walk Yamashita Park and the red-brick warehouses (Akarenga). Sunset views over the harbor from Marine Tower.</p>
+
+      <div class="tl-item tl-event">
+        <div class="tl-day">Thu Apr 9 – Sun Apr 12 ⭐⭐</div>
+        <h3>Pro Tour: Yokohama</h3>
+        <p>Four days of elite FAB competition in Yokohama. Thursday–Friday Swiss rounds, Saturday top cut, Sunday finals. The pinnacle of the trip — compete at the highest level.</p>
       </div>
-      <div class="tl-item">
-        <div class="tl-day">Day 6 · Thursday Oct 9</div>
-        <h3>2nd Round + Motomachi</h3>
-        <p>Full tennis day. Evening: explore Motomachi Shopping Street and the hillside Yamate Western residences for colonial-era architecture.</p>
+
+      <div class="tl-item tl-fly">
+        <div class="tl-day">Mon Apr 13</div>
+        <h3>Fly Home ✈️</h3>
+        <p>NRT → STR (1 stop via IST/AMS/ZRH), ~15–17h. Early check-out from hotel. Head to Narita Airport (~90 min from Yokohama via JR Narita Express).</p>
       </div>
-      <div class="tl-item">
-        <div class="tl-day">Day 7 · Friday Oct 10</div>
-        <h3>Quarterfinals</h3>
-        <p>Two quarterfinal matches. Pick a side to root for. Early evening dinner at a local izakaya to celebrate your team.</p>
-      </div>
-      <div class="tl-item">
-        <div class="tl-day">Day 8 · Saturday Oct 11 ⭐</div>
-        <h3>Semifinals — Best Day of the Week</h3>
-        <p>The crown jewel of the trip. Two back-to-back semifinals. Electric atmosphere, fans in full voice. Stay for both matches and the sunset over the courts.</p>
-      </div>
-      <div class="tl-item">
-        <div class="tl-day">Day 9 · Sunday Oct 12</div>
-        <h3>The Final</h3>
-        <p>Trophy day. Arrive early for the warm-up. After the ceremony, head to Minato Mirai for a celebratory dinner with harbor views. Fireworks some years from the waterfront.</p>
-      </div>
-      <div class="tl-item">
-        <div class="tl-day">Day 10 · Monday Oct 13</div>
-        <h3>Departure / Tokyo Day Trip</h3>
-        <p>Late checkout. Option: quick Tokyo day trip (25 min by train). Shinjuku, Shibuya, or Asakusa all easily reachable. Fly home from Narita or Haneda.</p>
-      </div>
+
+    </div>
+
+    <div class="tip-box">
+      <span class="tip-icon">💡</span>
+      <span><strong>Gap between events:</strong> Apr 6–8 (Sun–Tue) gives you exactly 3 free days in Tokyo/Yokohama between the two tournaments. This is your recovery window, deck-review time, and a chance to explore Akihabara's FAB card shops for pre-event singles.</span>
     </div>
   </section>
 
@@ -1012,142 +1008,202 @@
     <div class="section-header">
       <div class="section-tag">Accommodation</div>
       <h2>Where to Stay</h2>
-      <p>All picks are within 15 minutes of the venue and close to Yokohama's best restaurants.</p>
+      <p>Two separate hotel bookings needed — Shanghai (Mar 28 – Apr 6) and Tokyo/Yokohama (Apr 6–13).</p>
     </div>
 
-    <div class="hotels-grid">
-      <div class="hotel-card">
-        <div class="hotel-tier tier-luxury">Luxury</div>
-        <div class="hotel-name">InterContinental Yokohama Grand</div>
-        <div class="hotel-location">📍 Minato Mirai — 10 min to venue</div>
-        <div class="hotel-price">¥35,000 <span>/ night</span></div>
-        <div class="hotel-features">
-          <span class="feat-chip">Harbor view</span>
-          <span class="feat-chip">Spa</span>
-          <span class="feat-chip">Pool</span>
-          <span class="feat-chip">Concierge</span>
+    <!-- Shanghai Hotels -->
+    <div style="margin-bottom: 2.5rem;">
+      <div class="section-tag" style="margin-bottom: 1rem; color: var(--gold);">🇨🇳 Shanghai — Mar 28 to Apr 6 (9 nights)</div>
+      <p style="font-size: 0.875rem; color: var(--muted); margin-bottom: 1.25rem;">Book near Pudong / the Bund area — the Calling venue (Ritz-Carlton Pudong) is at 8 Pudong Avenue.</p>
+      <div class="hotels-grid">
+        <div class="hotel-card">
+          <div class="hotel-tier tier-luxury">Luxury</div>
+          <div class="hotel-name">Ritz-Carlton Shanghai Pudong</div>
+          <div class="hotel-location">📍 8 Pudong Avenue — The venue itself</div>
+          <div class="hotel-price">~€250 <span>/ night</span></div>
+          <div class="hotel-features">
+            <span class="feat-chip">Tournament venue</span>
+            <span class="feat-chip">Bund views</span>
+            <span class="feat-chip">Zero commute</span>
+          </div>
         </div>
-      </div>
-      <div class="hotel-card">
-        <div class="hotel-tier tier-luxury">Luxury</div>
-        <div class="hotel-name">Yokohama Royal Park Hotel</div>
-        <div class="hotel-location">📍 Landmark Tower — 12 min to venue</div>
-        <div class="hotel-price">¥28,000 <span>/ night</span></div>
-        <div class="hotel-features">
-          <span class="feat-chip">Sky lounge</span>
-          <span class="feat-chip">City views</span>
-          <span class="feat-chip">Fine dining</span>
+        <div class="hotel-card">
+          <div class="hotel-tier tier-luxury">Luxury</div>
+          <div class="hotel-name">The Peninsula Shanghai</div>
+          <div class="hotel-location">📍 The Bund — 10 min to venue</div>
+          <div class="hotel-price">~€220 <span>/ night</span></div>
+          <div class="hotel-features">
+            <span class="feat-chip">Iconic Bund address</span>
+            <span class="feat-chip">Pool</span>
+            <span class="feat-chip">Concierge</span>
+          </div>
         </div>
-      </div>
-      <div class="hotel-card">
-        <div class="hotel-tier tier-mid">Mid-range</div>
-        <div class="hotel-name">APA Hotel Yokohama Kannai</div>
-        <div class="hotel-location">📍 Kannai — 8 min walk to venue</div>
-        <div class="hotel-price">¥12,000 <span>/ night</span></div>
-        <div class="hotel-features">
-          <span class="feat-chip">Central location</span>
-          <span class="feat-chip">Onsen bath</span>
-          <span class="feat-chip">Breakfast</span>
+        <div class="hotel-card">
+          <div class="hotel-tier tier-mid">Mid-range</div>
+          <div class="hotel-name">CITICHAMP Hotel Lujiazui</div>
+          <div class="hotel-location">📍 Pudong Lujiazui — walking distance</div>
+          <div class="hotel-price">~€80 <span>/ night</span></div>
+          <div class="hotel-features">
+            <span class="feat-chip">Close to venue</span>
+            <span class="feat-chip">Good value</span>
+            <span class="feat-chip">Subway access</span>
+          </div>
         </div>
-      </div>
-      <div class="hotel-card">
-        <div class="hotel-tier tier-mid">Mid-range</div>
-        <div class="hotel-name">Dormy Inn Yokohama</div>
-        <div class="hotel-location">📍 Near Kannai Station</div>
-        <div class="hotel-price">¥9,500 <span>/ night</span></div>
-        <div class="hotel-features">
-          <span class="feat-chip">Free ramen nights</span>
-          <span class="feat-chip">Onsen</span>
-          <span class="feat-chip">Breakfast</span>
-        </div>
-      </div>
-      <div class="hotel-card">
-        <div class="hotel-tier tier-budget">Budget</div>
-        <div class="hotel-name">Toyoko Inn Yokohama Kannai</div>
-        <div class="hotel-location">📍 2 min from Kannai Station</div>
-        <div class="hotel-price">¥6,500 <span>/ night</span></div>
-        <div class="hotel-features">
-          <span class="feat-chip">Free breakfast</span>
-          <span class="feat-chip">Compact + clean</span>
-        </div>
-      </div>
-      <div class="hotel-card">
-        <div class="hotel-tier tier-budget">Budget</div>
-        <div class="hotel-name">Sakura Hostel Yokohama</div>
-        <div class="hotel-location">📍 Chinatown area</div>
-        <div class="hotel-price">¥3,200 <span>/ night (dorm)</span></div>
-        <div class="hotel-features">
-          <span class="feat-chip">Social atmosphere</span>
-          <span class="feat-chip">Lockers</span>
-          <span class="feat-chip">Bike rental</span>
+        <div class="hotel-card">
+          <div class="hotel-tier tier-budget">Budget</div>
+          <div class="hotel-name">Hanting Hotel Pudong</div>
+          <div class="hotel-location">📍 Pudong district</div>
+          <div class="hotel-price">~€40 <span>/ night</span></div>
+          <div class="hotel-features">
+            <span class="feat-chip">Budget pick</span>
+            <span class="feat-chip">Clean &amp; reliable</span>
+            <span class="feat-chip">Breakfast included</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="tip-box">
-      <span class="tip-icon">💡</span>
-      <span><strong>Book early:</strong> Tournament week fills up 3–4 months in advance. The Kannai / Minato Mirai area puts you within walking distance of both the courts and the waterfront dining scene.</span>
+    <!-- Tokyo / Yokohama Hotels -->
+    <div>
+      <div class="section-tag" style="margin-bottom: 1rem; color: var(--purple);">🇯🇵 Tokyo / Yokohama — Apr 6 to Apr 13 (7 nights)</div>
+      <p style="font-size: 0.875rem; color: var(--muted); margin-bottom: 1.25rem;">Shinjuku base = best transport hub for both Tokyo sightseeing and Yokohama (via direct trains). Or stay in Yokohama itself once the venue is announced.</p>
+      <div class="hotels-grid">
+        <div class="hotel-card">
+          <div class="hotel-tier tier-luxury">Luxury</div>
+          <div class="hotel-name">Hyatt Regency Tokyo</div>
+          <div class="hotel-location">📍 Shinjuku — excellent transport hub</div>
+          <div class="hotel-price">~¥28,000 <span>/ night</span></div>
+          <div class="hotel-features">
+            <span class="feat-chip">Shinjuku location</span>
+            <span class="feat-chip">City views</span>
+            <span class="feat-chip">Great access</span>
+          </div>
+        </div>
+        <div class="hotel-card">
+          <div class="hotel-tier tier-mid">Mid-range</div>
+          <div class="hotel-name">Shinjuku Granbell Hotel</div>
+          <div class="hotel-location">📍 Shinjuku — central, stylish</div>
+          <div class="hotel-price">~¥14,000 <span>/ night</span></div>
+          <div class="hotel-features">
+            <span class="feat-chip">Design hotel</span>
+            <span class="feat-chip">Great nightlife access</span>
+            <span class="feat-chip">Rooftop bar</span>
+          </div>
+        </div>
+        <div class="hotel-card">
+          <div class="hotel-tier tier-mid">Mid-range</div>
+          <div class="hotel-name">APA Hotel Yokohama-Kannai</div>
+          <div class="hotel-location">📍 Kannai, Yokohama — near harbour</div>
+          <div class="hotel-price">~¥12,000 <span>/ night</span></div>
+          <div class="hotel-features">
+            <span class="feat-chip">Yokohama base</span>
+            <span class="feat-chip">Onsen bath</span>
+            <span class="feat-chip">Near venue area</span>
+          </div>
+        </div>
+        <div class="hotel-card">
+          <div class="hotel-tier tier-budget">Budget</div>
+          <div class="hotel-name">Dormy Inn Shinjuku</div>
+          <div class="hotel-location">📍 Shinjuku — compact + clean</div>
+          <div class="hotel-price">~¥8,500 <span>/ night</span></div>
+          <div class="hotel-features">
+            <span class="feat-chip">Free late-night ramen</span>
+            <span class="feat-chip">Natural hot spring</span>
+            <span class="feat-chip">Great value</span>
+          </div>
+        </div>
+      </div>
+      <div class="tip-box">
+        <span class="tip-icon">💡</span>
+        <span><strong>Pro Tour venue is TBD.</strong> Once announced, consider moving base to Yokohama for Apr 9–12. Shinjuku ↔ Yokohama is 35–45 min by direct train, so either works. Book flexible rates until the venue is confirmed.</span>
+      </div>
     </div>
   </section>
 
   <div class="divider"></div>
 
-  <!-- WHERE TO EAT -->
-  <section id="eat">
+  <!-- EXPLORE -->
+  <section id="explore">
     <div class="section-header">
-      <div class="section-tag">Food & Drink</div>
-      <h2>Where to Eat</h2>
-      <p>Yokohama is a food city — birthplace of Japanese ramen, home to Asia's largest Chinatown, and packed with izakayas.</p>
+      <div class="section-tag">Between Events</div>
+      <h2>Explore Shanghai &amp; Tokyo</h2>
+      <p>Make the most of your free days in two of Asia's greatest cities.</p>
     </div>
 
-    <div class="food-grid">
-      <div class="food-card">
-        <div class="food-emoji">🍜</div>
-        <h3>Ramen Museum (Shin-Yokohama)</h3>
-        <p>Eight legendary ramen shops recreated in a 1950s Showa-era atmosphere. A must for any noodle fan. Try a "mini" set of three different bowls.</p>
-        <div class="price-range">¥800–¥1,200 per bowl</div>
+    <div style="margin-bottom: 2.5rem;">
+      <div class="section-tag" style="margin-bottom: 1.25rem; color: var(--gold);">🇨🇳 Shanghai (Mar 28 – Apr 2)</div>
+      <div class="food-grid">
+        <div class="food-card">
+          <div class="food-emoji">🌃</div>
+          <h3>The Bund</h3>
+          <p>Iconic waterfront promenade facing the Lujiazui skyline. Best at night when the towers light up. 10 min walk from the tournament venue.</p>
+        </div>
+        <div class="food-card">
+          <div class="food-emoji">🏛</div>
+          <h3>French Concession</h3>
+          <p>Tree-lined streets, art deco architecture, independent cafés, and boutique restaurants. Great for leisurely exploration on a rest day.</p>
+        </div>
+        <div class="food-card">
+          <div class="food-emoji">🏯</div>
+          <h3>Yu Garden &amp; Old Town</h3>
+          <p>Classical Chinese garden with pavilions and ponds. Surrounded by a bustling bazaar — pick up snacks and souvenirs. ~30 min from Pudong.</p>
+        </div>
+        <div class="food-card">
+          <div class="food-emoji">🍜</div>
+          <h3>Xiaolongbao (Soup Dumplings)</h3>
+          <p>Shanghai's signature dish. Go to Din Tai Fung or Jia Jia Tang Bao near People's Square. Cheap, incredible, and perfect pre-event fuel.</p>
+          <div class="price-range">¥30–80 for a basket</div>
+        </div>
+        <div class="food-card">
+          <div class="food-emoji">🥢</div>
+          <h3>Xintiandi &amp; Tianzifang</h3>
+          <p>Hip neighbourhoods with great food, bars, and street art. Xintiandi is more upscale; Tianzifang is artsy and maze-like. Both walkable from the Bund.</p>
+        </div>
+        <div class="food-card">
+          <div class="food-emoji">☕</div>
+          <h3>Specialty Coffee Scene</h3>
+          <p>Shanghai has one of Asia's best third-wave coffee scenes. Seesaw and M Stand are the local champions — find one near your hotel for morning prep sessions.</p>
+          <div class="price-range">¥30–50</div>
+        </div>
       </div>
-      <div class="food-card">
-        <div class="food-emoji">🥟</div>
-        <h3>Yokohama Chinatown</h3>
-        <p>250+ restaurants in the largest Chinatown in Asia. Highlights: Heichinrou for dim sum, and the street-food stalls for buta nikuman (pork buns).</p>
-        <div class="price-range">¥400–¥3,000</div>
-      </div>
-      <div class="food-card">
-        <div class="food-emoji">🐟</div>
-        <h3>Yokohama Central Fish Market</h3>
-        <p>Morning-fresh sushi and seafood bowls (kaisendon). Go before 8am for the best selection. Arrive by 7:30am to beat the lines on weekends.</p>
-        <div class="price-range">¥1,200–¥2,800</div>
-      </div>
-      <div class="food-card">
-        <div class="food-emoji">🍺</div>
-        <h3>Akarenga Warehouse Bars</h3>
-        <p>The historic red-brick warehouses on the waterfront house craft beer bars, wine shops, and casual restaurants with harbor views — ideal for evening post-match drinks.</p>
-        <div class="price-range">¥600–¥2,000</div>
-      </div>
-      <div class="food-card">
-        <div class="food-emoji">🍣</div>
-        <h3>Umeyama Sushi (Kannai)</h3>
-        <p>A beloved neighbourhood counter sushi spot near the venue. Chef Umeyama has been operating for 30 years. Book a week in advance for omakase.</p>
-        <div class="price-range">¥4,000–¥12,000</div>
-      </div>
-      <div class="food-card">
-        <div class="food-emoji">🍖</div>
-        <h3>Kannai Izakaya Row</h3>
-        <p>The streets around Kannai Station fill with izakayas (Japanese gastropubs) from 6pm. Order yakitori, edamame, and cold Sapporo for the full evening experience.</p>
-        <div class="price-range">¥1,500–¥3,500</div>
-      </div>
-      <div class="food-card">
-        <div class="food-emoji">☕</div>
-        <h3>Bread, Espresso & Motomachi</h3>
-        <p>Motomachi Shopping Street is dotted with excellent independent cafés. Perfect for a slow morning croissant before catching the day session.</p>
-        <div class="price-range">¥400–¥900</div>
-      </div>
-      <div class="food-card">
-        <div class="food-emoji">🍦</div>
-        <h3>Bashamichi Ice Cream Street</h3>
-        <p>A famous strip of shops near the venue serving soft-serve ice cream in unique Japanese flavours. A local tradition since 1895.</p>
-        <div class="price-range">¥350–¥600</div>
+    </div>
+
+    <div>
+      <div class="section-tag" style="margin-bottom: 1.25rem; color: var(--purple);">🇯🇵 Tokyo / Yokohama (Apr 6–8)</div>
+      <div class="food-grid">
+        <div class="food-card">
+          <div class="food-emoji">🃏</div>
+          <h3>Akihabara — TCG Shopping</h3>
+          <p>Card shops galore. Yellow Submarine, Hareruya, BigMagic — all stocked with FAB singles. A must-visit for last-minute deck upgrades before the Pro Tour.</p>
+          <div class="price-range">Budget as needed!</div>
+        </div>
+        <div class="food-card">
+          <div class="food-emoji">🌆</div>
+          <h3>Shinjuku &amp; Shibuya</h3>
+          <p>Shinjuku: neon nightlife, Golden Gai, kabukicho. Shibuya: the famous crossing, massive scramble, shopping. Both within 10 min of each other.</p>
+        </div>
+        <div class="food-card">
+          <div class="food-emoji">⛩</div>
+          <h3>Meiji Shrine + Harajuku</h3>
+          <p>A peaceful forest shrine in the middle of Tokyo. Right next to Harajuku's Takeshita Street. Good half-day trip before tournament days start.</p>
+        </div>
+        <div class="food-card">
+          <div class="food-emoji">🚢</div>
+          <h3>Yokohama Harbour</h3>
+          <p>Minato Mirai waterfront, the red-brick warehouses (Akarenga), and Yamashita Park. Great views, relaxed vibe, and excellent seafood restaurants.</p>
+        </div>
+        <div class="food-card">
+          <div class="food-emoji">🍜</div>
+          <h3>Ramen Museum (Shin-Yokohama)</h3>
+          <p>Eight legendary ramen shops in a retro 1950s setting. Try a "mini" flight of three different bowls. A pilgrimage for noodle fans.</p>
+          <div class="price-range">¥900–1,200 per bowl</div>
+        </div>
+        <div class="food-card">
+          <div class="food-emoji">🥟</div>
+          <h3>Yokohama Chinatown</h3>
+          <p>The largest Chinatown in Asia — 250+ restaurants. Hit the street stalls for pork buns (nikuman) and explore the labyrinthine lanes.</p>
+          <div class="price-range">¥400–2,500</div>
+        </div>
       </div>
     </div>
   </section>
@@ -1163,51 +1219,49 @@
 
     <div class="transport-grid">
       <div class="transport-card">
-        <h3><span>✈️</span> Arriving in Japan</h3>
+        <h3><span>✈️</span> NRT → Yokohama</h3>
         <ul>
-          <li><strong>Haneda (HND)</strong> — 35 min to Yokohama by Keikyu rail (¥560). Most convenient airport.</li>
-          <li><strong>Narita (NRT)</strong> — 60–90 min via Narita Express to Yokohama Station (¥4,370).</li>
-          <li>Buy a Suica/Pasmo IC card at the airport — works on all trains, subways, and convenience stores.</li>
+          <li><strong>JR Narita Express (N'EX)</strong> — ~90 min, ¥4,370 to Yokohama Station. The most convenient direct option.</li>
+          <li>Buy an IC card (Suica/Pasmo) at the airport — works for all trains, metro, buses, and convenience stores.</li>
+          <li>Limousine Bus: ~90 min, cheaper but slower in traffic.</li>
         </ul>
       </div>
       <div class="transport-card">
-        <h3><span>🚇</span> Local Rail</h3>
+        <h3><span>🚇</span> Tokyo ↔ Yokohama</h3>
         <ul>
-          <li><strong>Minatomirai Line</strong> — runs from Yokohama Station through Minato Mirai to Motomachi-Chukagai. Covers most tourist areas.</li>
-          <li><strong>JR Negishi Line</strong> — connects Kannai, Sakuragicho, and Yokohama stations.</li>
-          <li>Single rides: ¥180–¥280. Day passes available for ¥460.</li>
-        </ul>
-      </div>
-      <div class="transport-card">
-        <h3><span>🚌</span> Bus & Taxi</h3>
-        <ul>
-          <li>Yokohama Loop Bus (¥200/ride, day pass ¥500) — hits all major attractions.</li>
-          <li>Taxis are metered and reliable; base fare ¥730. Useful after night sessions.</li>
-          <li>Uber operates in Yokohama. DiDi is also available.</li>
-        </ul>
-      </div>
-      <div class="transport-card">
-        <h3><span>🚴</span> Cycling</h3>
-        <ul>
-          <li>Yokohama has a popular shared bike scheme (Docomo Bike Share). ¥165 per 30 min.</li>
-          <li>Flat terrain around the waterfront makes cycling easy and enjoyable.</li>
-          <li>Bike lanes along Minato Mirai waterfront.</li>
-        </ul>
-      </div>
-      <div class="transport-card">
-        <h3><span>🚅</span> Day Trip to Tokyo</h3>
-        <ul>
-          <li>Yokohama ↔ Shibuya: 25 min by Tokyu Toyoko Line (¥280).</li>
-          <li>Yokohama ↔ Shinjuku: 35 min via Shonan-Shinjuku Line (¥680).</li>
+          <li><strong>Tokyu Toyoko Line</strong>: Shibuya ↔ Yokohama ~30 min (¥280).</li>
+          <li><strong>Shonan-Shinjuku Line (JR)</strong>: Shinjuku ↔ Yokohama ~40 min (¥680).</li>
           <li>IC card valid on all routes — no separate ticket needed.</li>
+        </ul>
+      </div>
+      <div class="transport-card">
+        <h3><span>🚇</span> Shanghai Metro</h3>
+        <ul>
+          <li>Massive, efficient metro network. Line 2 connects Pudong (venue area) to central Shanghai.</li>
+          <li>Use the Shanghai Metro app or Alipay/WeChat Pay for ticketing.</li>
+          <li>Fares ¥3–9. Day passes available.</li>
+        </ul>
+      </div>
+      <div class="transport-card">
+        <h3><span>🚕</span> Ride Hailing</h3>
+        <ul>
+          <li><strong>China:</strong> DiDi (like Uber) — works with a foreign card, but best to load WeChat Pay beforehand.</li>
+          <li><strong>Japan:</strong> Uber works in Tokyo/Yokohama. Taxis are reliable with base fare ¥730.</li>
+          <li>Use after late-night sessions when trains are less frequent.</li>
         </ul>
       </div>
       <div class="transport-card">
         <h3><span>📶</span> Connectivity</h3>
         <ul>
-          <li>Buy a pocket WiFi or SIM at the airport (IIJmio, Docomo Tourist SIM).</li>
-          <li>Most venues, cafés, and convenience stores offer free WiFi.</li>
-          <li>Google Maps works excellently for public transport navigation in Japan.</li>
+          <li><strong>China:</strong> Get a local SIM or portable WiFi at PVG. Google/WhatsApp are blocked — use a VPN. WeChat is essential.</li>
+          <li><strong>Japan:</strong> IIJmio or Docomo Tourist SIM from the airport. Google Maps works perfectly for train navigation.</li>
+        </ul>
+      </div>
+      <div class="transport-card">
+        <h3><span>💴</span> Money</h3>
+        <ul>
+          <li><strong>China (CNY):</strong> Alipay/WeChat Pay are dominant. Set up Alipay with a foreign card before leaving Germany. Cash still useful as backup.</li>
+          <li><strong>Japan (JPY):</strong> Primarily cash-based. Carry ¥10,000–20,000 daily. 7-Eleven ATMs accept foreign cards reliably.</li>
         </ul>
       </div>
     </div>
@@ -1215,117 +1269,243 @@
 
   <div class="divider"></div>
 
-  <!-- PACKING LIST -->
-  <section id="pack">
+  <!-- VISA -->
+  <section id="visa">
+    <div class="section-header">
+      <div class="section-tag">Visa &amp; Entry</div>
+      <h2>Entry Requirements</h2>
+      <p>Good news — German passport holders enter both countries visa-free.</p>
+    </div>
+
+    <div class="visa-grid">
+      <div class="visa-card">
+        <div class="visa-flag">🇨🇳</div>
+        <h3>China</h3>
+        <div class="visa-ok">✓ Visa-free · German passport</div>
+        <p>Up to <strong>15 days</strong> visa-free for German passport holders (updated 2024 policy). Your stay is Mar 28 – Apr 6 = <strong>10 days</strong> — well within the limit.</p>
+      </div>
+      <div class="visa-card">
+        <div class="visa-flag">🇯🇵</div>
+        <h3>Japan</h3>
+        <div class="visa-ok">✓ Visa-free · German passport</div>
+        <p>Up to <strong>90 days</strong> visa-free for German citizens. Your stay is Apr 6–13 = <strong>7 days</strong> — no issues whatsoever.</p>
+      </div>
+      <div class="visa-card">
+        <div class="visa-flag">🏥</div>
+        <h3>Travel Insurance</h3>
+        <p>Get a travel health insurance policy covering <strong>both China and Japan</strong> for the full trip duration (Mar 27 – Apr 13). ADAC, HanseMerkur, or AXA are solid German options.</p>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="tip-icon">⚠️</span>
+      <span><strong>China note:</strong> VPN usage, payment apps, and internet restrictions are different. Install a reliable VPN (Mullvad, ExpressVPN) <em>before</em> you land in China, as the App Store/Google Play are inaccessible once there. Also set up Alipay before departure.</span>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CHECKLIST -->
+  <section id="checklist">
+    <div class="section-header">
+      <div class="section-tag">Booking Checklist</div>
+      <h2>Everything You Need to Book</h2>
+      <p>Tap each item to mark it done. Progress saves in your browser.</p>
+    </div>
+
+    <div class="checklist-progress">
+      <div class="progress-label">
+        <span>Booking progress</span>
+        <strong id="progress-text">0 / 8 done</strong>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="checklist" id="checklist">
+
+      <div class="check-item" data-id="leg1">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Book Leg 1: STR → PVG (Fri, Mar 27)</div>
+        <div class="check-tag tag-flight">Flight</div>
+      </div>
+
+      <div class="check-item" data-id="leg2">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Book Leg 2: PVG → NRT (Sun, Apr 6)</div>
+        <div class="check-tag tag-flight">Flight</div>
+      </div>
+
+      <div class="check-item" data-id="leg3">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Book Leg 3: NRT → STR (Mon, Apr 13)</div>
+        <div class="check-tag tag-flight">Flight</div>
+      </div>
+
+      <div class="check-item" data-id="hotel-shanghai">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Book hotel Shanghai (Mar 28 – Apr 6, near Pudong/Bund)</div>
+        <div class="check-tag tag-hotel">Hotel</div>
+      </div>
+
+      <div class="check-item" data-id="hotel-tokyo">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Book hotel Tokyo/Yokohama (Apr 6–13, Shinjuku or Yokohama)</div>
+        <div class="check-tag tag-hotel">Hotel</div>
+      </div>
+
+      <div class="check-item" data-id="reg-shanghai">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Register for Calling: Shanghai (fabtcg.com)</div>
+        <div class="check-tag tag-event">Event</div>
+      </div>
+
+      <div class="check-item" data-id="reg-yokohama">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Register for Pro Tour: Yokohama (fabtcg.com)</div>
+        <div class="check-tag tag-event">Event</div>
+      </div>
+
+      <div class="check-item" data-id="insurance">
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">Travel health insurance (China + Japan, Mar 27 – Apr 13)</div>
+        <div class="check-tag tag-misc">Misc</div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- PACKING -->
+  <section>
     <div class="section-header">
       <div class="section-tag">Preparation</div>
       <h2>Packing List</h2>
-      <p>Curated for an October tennis trip to Japan. Travel light — laundromats are everywhere.</p>
+      <p>Curated for a 18-day April trip covering two countries and two competitive FAB events.</p>
     </div>
 
     <div class="packing-grid">
       <div class="pack-card">
-        <h3>🎾 Tennis Days</h3>
+        <h3>🎴 Tournament Days</h3>
         <ul>
-          <li>Sun hat / cap</li>
-          <li>Sunscreen SPF 50+</li>
-          <li>Sunglasses (polarised)</li>
-          <li>Light jacket for evenings</li>
-          <li>Comfortable walking shoes</li>
-          <li>Small backpack / tote</li>
-          <li>Reusable water bottle</li>
-        </ul>
-      </div>
-      <div class="pack-card">
-        <h3>🇯🇵 Japan Essentials</h3>
-        <ul>
-          <li>Passport + entry docs</li>
-          <li>Cash (¥ yen)</li>
-          <li>IC card (Suica/Pasmo)</li>
-          <li>Pocket WiFi / SIM</li>
+          <li>Deck(s) + sleeves + deckboxes</li>
+          <li>Life pad / dice</li>
+          <li>Tournament registration confirmation</li>
+          <li>Comfortable clothing (long days!)</li>
+          <li>Snacks for between rounds</li>
           <li>Portable charger</li>
-          <li>Universal adapter</li>
-          <li>Small towel (onsen)</li>
+          <li>Pen + notepad</li>
         </ul>
       </div>
       <div class="pack-card">
-        <h3>👔 Clothing</h3>
+        <h3>✈️ Travel Essentials</h3>
         <ul>
-          <li>3–4 casual day outfits</li>
-          <li>1 smart-casual evening outfit</li>
-          <li>Light rain jacket</li>
-          <li>Slip-on shoes (temples)</li>
-          <li>Comfortable sneakers</li>
-          <li>Warm layer for evenings</li>
-        </ul>
-      </div>
-      <div class="pack-card">
-        <h3>💊 Health & Comfort</h3>
-        <ul>
+          <li>Passport (valid 6+ months)</li>
           <li>Travel insurance docs</li>
-          <li>Prescription medications</li>
-          <li>Blister plasters</li>
-          <li>Anti-diarrhoea tablets</li>
-          <li>Hand sanitiser</li>
+          <li>Cash (CNY + JPY)</li>
+          <li>IC card (Suica/Pasmo) for Japan</li>
+          <li>Alipay set up for China</li>
+          <li>VPN installed before China</li>
+          <li>Universal adapter (Type A for Japan)</li>
+        </ul>
+      </div>
+      <div class="pack-card">
+        <h3>👔 Clothing (April)</h3>
+        <ul>
+          <li>Light jacket (Shanghai ~18°C)</li>
+          <li>Light layer (Tokyo ~14–18°C)</li>
+          <li>Comfortable walking shoes</li>
+          <li>4–5 casual day outfits</li>
+          <li>1 smart-casual outfit</li>
+          <li>Slip-ons for temples/venues</li>
+          <li>Compact rain jacket</li>
+        </ul>
+      </div>
+      <div class="pack-card">
+        <h3>💊 Health &amp; Comfort</h3>
+        <ul>
+          <li>Travel health insurance card</li>
+          <li>Prescription medications (extra)</li>
           <li>Face masks (polite in crowds)</li>
+          <li>Hand sanitiser</li>
+          <li>Blister plasters</li>
+          <li>Electrolyte tablets</li>
+          <li>Eye mask + earplugs (flights)</li>
         </ul>
       </div>
     </div>
 
     <div class="tip-box">
       <span class="tip-icon">🧳</span>
-      <span><strong>Coin lockers:</strong> Every train station has coin lockers (¥300–¥700). Store your bag while exploring between sessions — no need to carry everything to the courts.</span>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- TIPS SECTION -->
-  <section>
-    <div class="section-header">
-      <div class="section-tag">Insider Knowledge</div>
-      <h2>Pro Tips</h2>
-    </div>
-
-    <div class="cards-grid">
-      <div class="card">
-        <div class="card-icon">🎫</div>
-        <h3>Ticket Strategy</h3>
-        <p>Buy Semifinals tickets the moment they go on sale. They sell out in hours. For rounds 1–2, tickets are often available day-of at the gate — save money and stay flexible.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🌅</div>
-        <h3>Arrive at Opening</h3>
-        <p>The gates open 2 hours before the first match. Arriving early gives you access to player practice sessions on the show courts — completely free and often closer than match seats.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🤫</div>
-        <h3>Japanese Tennis Culture</h3>
-        <p>Japanese crowds are respectful and quiet between points. Follow the lead: no loud cheering mid-rally. Applause is generous and warm after every point.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">📱</div>
-        <h3>ATP Live App</h3>
-        <p>Download the ATP Tour app for real-time scores, draw updates, and order-of-play changes. Essential for planning your day when sessions run long or short.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🥡</div>
-        <h3>Convenience Stores</h3>
-        <p>7-Eleven, FamilyMart, and Lawson serve excellent hot food 24/7 for ¥200–¥500. An onigiri (rice ball) + hot green tea from the konbini is the perfect pre-match breakfast.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">♨️</div>
-        <h3>Post-Match Onsen</h3>
-        <p>After a long day on your feet, head to an onsen (hot spring bath). Most hotels in Yokohama have house onsen, or try Yokohama Manyo Club on the waterfront (¥3,000, open late).</p>
-      </div>
+      <span><strong>Coin lockers:</strong> Every Japanese train station has coin lockers (¥300–700). Store your bag while exploring between tournament days — no need to carry everything to the venue.</span>
     </div>
   </section>
 
   <!-- FOOTER -->
   <footer>
-    <p style="margin-bottom: 0.4rem;">🎾 Yokohama Pro Tour Trip Guide · Built by Claude for <a href="../">AI Web Pages Hub</a></p>
-    <p>All prices approximate · Always verify schedules on the official ATP Tour website</p>
+    <p style="margin-bottom: 0.4rem;">🃏 FAB Asia Tour 2026 · Built by Claude for <a href="../">AI Web Pages Hub</a></p>
+    <p>All prices approximate · Always verify tournament info on <a href="https://fabtcg.com" target="_blank">fabtcg.com</a></p>
   </footer>
+
+  <script>
+    // Checklist with localStorage persistence
+    const STORAGE_KEY = 'fab-asia-2026-checklist';
+    const items = document.querySelectorAll('.check-item');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+
+    function loadState() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch { return {}; }
+    }
+
+    function saveState(state) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function updateProgress() {
+      const total = items.length;
+      const done = document.querySelectorAll('.check-item.done').length;
+      const pct = Math.round((done / total) * 100);
+      progressFill.style.width = pct + '%';
+      progressText.textContent = done + ' / ' + total + ' done';
+    }
+
+    // Load saved state
+    const state = loadState();
+    items.forEach(item => {
+      const id = item.dataset.id;
+      if (state[id]) item.classList.add('done');
+
+      item.addEventListener('click', () => {
+        item.classList.toggle('done');
+        state[item.dataset.id] = item.classList.contains('done');
+        saveState(state);
+        updateProgress();
+      });
+    });
+
+    updateProgress();
+  </script>
 
 </body>
 </html>
