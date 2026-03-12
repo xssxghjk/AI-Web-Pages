@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yokohama Pro Tour Trip Guide</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #05080f;
+      --surface: #0c1120;
+      --surface2: #111827;
+      --border: #1e2d45;
+      --accent: #0ea5e9;
+      --accent2: #38bdf8;
+      --gold: #f59e0b;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5,8,15,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .nav-back {
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--text); text-decoration: none; }
+
+    .nav-links {
+      display: flex;
+      gap: 0.25rem;
+      list-style: none;
+      overflow-x: auto;
+    }
+
+    .nav-links a {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+      text-decoration: none;
+    }
+    .nav-links a:hover { background: var(--surface); color: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 1.5rem 6rem;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(14,165,233,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(245,158,11,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(14,165,233,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(14,165,233,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.25rem;
+      position: relative;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 8vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      position: relative;
+    }
+
+    .hero h1 .city {
+      display: block;
+      background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 40%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      margin-top: 1.25rem;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--muted);
+      max-width: 520px;
+      position: relative;
+    }
+
+    .hero-meta {
+      margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+    }
+
+    .hero-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(14,165,233,0.1);
+      border: 1px solid rgba(14,165,233,0.25);
+      border-radius: 999px;
+      padding: 0.45rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .hero-cta {
+      margin-top: 2.5rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+    }
+
+    .btn {
+      padding: 0.7rem 1.5rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn:hover { transform: translateY(-1px); text-decoration: none; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(14,165,233,0.35);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 28px rgba(14,165,233,0.5); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── SCROLL INDICATOR ── */
+    .scroll-hint {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      animation: bob 2s ease-in-out infinite;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 5rem 1.5rem;
+    }
+
+    .section-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .section-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+
+    .section-header h2 {
+      font-size: clamp(1.6rem, 4vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .section-header p {
+      margin-top: 0.6rem;
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 540px;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── CARDS GRID ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .card:hover {
+      border-color: rgba(14,165,233,0.4);
+      transform: translateY(-2px);
+    }
+
+    .card-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .card p, .card li {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .card ul {
+      padding-left: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    /* ── SCHEDULE TABLE ── */
+    .schedule-wrapper {
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    thead tr { background: var(--surface2); }
+
+    th {
+      text-align: left;
+      padding: 0.85rem 1.1rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.85rem 1.1rem;
+      border-bottom: 1px solid rgba(30,45,69,0.6);
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tr:hover td { background: rgba(14,165,233,0.03); }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+    }
+
+    .badge-final    { background: rgba(245,158,11,0.15); color: var(--gold); }
+    .badge-semi     { background: rgba(14,165,233,0.12); color: var(--accent2); }
+    .badge-quarter  { background: rgba(34,197,94,0.12); color: var(--green); }
+    .badge-round    { background: rgba(100,116,139,0.15); color: #94a3b8; }
+    .badge-qualif   { background: rgba(168,85,247,0.12); color: #c084fc; }
+
+    /* ── VENUE CARDS ── */
+    .venue-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      transition: border-color 0.2s;
+    }
+
+    .venue-card:hover { border-color: rgba(14,165,233,0.4); }
+
+    @media (max-width: 640px) { .venue-card { grid-template-columns: 1fr; } }
+
+    .venue-visual {
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      background: radial-gradient(circle at 30% 50%, rgba(14,165,233,0.12), transparent);
+    }
+
+    .venue-info { padding: 1.75rem; }
+
+    .venue-info h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+    }
+
+    .venue-info .address {
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .venue-info p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .venue-stats {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .venue-stat strong {
+      display: block;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .venue-stat span {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── TIMELINE ── */
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .tl-item {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .tl-item::before {
+      content: '';
+      position: absolute;
+      left: -1.65rem;
+      top: 6px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg);
+    }
+
+    .tl-day {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.3rem;
+    }
+
+    .tl-item h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    .tl-item p {
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    /* ── TIP BOX ── */
+    .tip-box {
+      background: rgba(14,165,233,0.07);
+      border: 1px solid rgba(14,165,233,0.2);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      font-size: 0.875rem;
+      color: var(--muted);
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      margin-top: 1.25rem;
+    }
+
+    .tip-box .tip-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+
+    /* ── HOTEL CARDS ── */
+    .hotels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .hotel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .hotel-card:hover { border-color: rgba(14,165,233,0.4); transform: translateY(-2px); }
+
+    .hotel-tier {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      width: fit-content;
+    }
+
+    .tier-luxury { background: rgba(245,158,11,0.12); color: var(--gold); }
+    .tier-mid    { background: rgba(14,165,233,0.12); color: var(--accent2); }
+    .tier-budget { background: rgba(34,197,94,0.12); color: var(--green); }
+
+    .hotel-name {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .hotel-location {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .hotel-price {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 0.25rem;
+    }
+
+    .hotel-price span {
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .hotel-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.25rem;
+    }
+
+    .feat-chip {
+      font-size: 0.72rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.15rem 0.5rem;
+      color: var(--muted);
+    }
+
+    /* ── FOOD SECTION ── */
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .food-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .food-card .food-emoji { font-size: 2rem; margin-bottom: 0.6rem; }
+    .food-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .food-card p { font-size: 0.825rem; color: var(--muted); }
+    .food-card .price-range {
+      margin-top: 0.6rem;
+      font-size: 0.8rem;
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    /* ── TRANSPORT ── */
+    .transport-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .transport-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+
+    .transport-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .transport-card p, .transport-card li {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .transport-card ul { padding-left: 1.1rem; }
+
+    /* ── PACKING LIST ── */
+    .packing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .pack-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .pack-card h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .pack-card ul {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .pack-card li {
+      font-size: 0.85rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .pack-card li::before {
+      content: '✓';
+      color: var(--green);
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      border-top: 1px solid var(--border);
+    }
+
+    footer a { color: var(--accent); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      section { padding: 3.5rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-back" href="../">← Hub</a>
+    <ul class="nav-links">
+      <li><a href="#schedule">Schedule</a></li>
+      <li><a href="#venue">Venue</a></li>
+      <li><a href="#itinerary">Itinerary</a></li>
+      <li><a href="#stay">Where to Stay</a></li>
+      <li><a href="#eat">Where to Eat</a></li>
+      <li><a href="#transport">Getting Around</a></li>
+      <li><a href="#pack">Packing</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-eyebrow">🎾 Complete Trip Guide</div>
+    <h1>
+      Yokohama<br />
+      <span class="city">Pro Tour</span>
+    </h1>
+    <p class="hero-sub">Everything you need for an unforgettable week courtside at the Yokohama Pro Tour — from first serve to farewell ramen.</p>
+    <div class="hero-meta">
+      <div class="hero-pill">📅 October 2025</div>
+      <div class="hero-pill">📍 Yokohama, Japan</div>
+      <div class="hero-pill">🏟 Yokohama Tennis Center</div>
+      <div class="hero-pill">🎟 ATP 250</div>
+    </div>
+    <div class="hero-cta">
+      <a href="#schedule" class="btn btn-primary">View Schedule</a>
+      <a href="#itinerary" class="btn btn-outline">Day-by-Day Itinerary</a>
+    </div>
+    <div class="scroll-hint">
+      <span>scroll</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section id="overview">
+    <div class="section-header">
+      <div class="section-tag">Tournament Overview</div>
+      <h2>About the Tournament</h2>
+      <p>The Yokohama Pro Tour is a premier ATP 250 event held each autumn in the heart of Japan's most dynamic city.</p>
+    </div>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">🏆</div>
+        <h3>ATP 250 Series</h3>
+        <p>Prize money of US $670,000 with 250 ranking points awarded to the champion. Top seeds include world-top-20 players competing on outdoor hard courts.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📅</div>
+        <h3>Tournament Dates</h3>
+        <p>Main draw runs Monday–Sunday over 7 days. Qualifying rounds are held the Saturday & Sunday prior. Finals are played on the final Sunday afternoon.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌤</div>
+        <h3>October Weather</h3>
+        <p>Expect mild autumn weather — highs around 20–23 °C (68–73 °F), low humidity, and mostly clear skies. Perfect conditions for outdoor tennis.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎟</div>
+        <h3>Tickets</h3>
+        <ul>
+          <li>Qualifying: Free entry</li>
+          <li>First rounds: ¥2,000–¥4,500</li>
+          <li>Quarterfinals: ¥5,000–¥8,000</li>
+          <li>Semifinals: ¥8,000–¥15,000</li>
+          <li>Final: ¥12,000–¥30,000</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-icon">🇯🇵</div>
+        <h3>Visa & Entry</h3>
+        <p>Most nationalities receive a 90-day visa-free entry to Japan. Check your country's status at the Japanese embassy website before travel.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">💴</div>
+        <h3>Currency & Budget</h3>
+        <p>Japan uses JPY (¥). The country is predominantly cash-based — carry ¥10,000–20,000 daily. ATMs at 7-Eleven and Japan Post accept foreign cards.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- SCHEDULE -->
+  <section id="schedule">
+    <div class="section-header">
+      <div class="section-tag">Tournament Schedule</div>
+      <h2>Match Schedule</h2>
+      <p>Full week at a glance. All times JST (UTC+9).</p>
+    </div>
+
+    <div class="schedule-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Day</th>
+            <th>Session</th>
+            <th>Round</th>
+            <th>Court</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Sat Oct 4</td>
+            <td>Day −2</td>
+            <td>10:00 – 18:00</td>
+            <td><span class="badge badge-qualif">Qualifying R1</span></td>
+            <td>Courts 2–5</td>
+            <td>Free entry</td>
+          </tr>
+          <tr>
+            <td>Sun Oct 5</td>
+            <td>Day −1</td>
+            <td>10:00 – 17:00</td>
+            <td><span class="badge badge-qualif">Qualifying Final</span></td>
+            <td>Courts 2–4</td>
+            <td>Free entry</td>
+          </tr>
+          <tr>
+            <td>Mon Oct 6</td>
+            <td>Day 1</td>
+            <td>11:00 / 18:00</td>
+            <td><span class="badge badge-round">1st Round</span></td>
+            <td>Centre Court</td>
+            <td>Night session starts 18:00</td>
+          </tr>
+          <tr>
+            <td>Tue Oct 7</td>
+            <td>Day 2</td>
+            <td>11:00 / 18:00</td>
+            <td><span class="badge badge-round">1st Round</span></td>
+            <td>Centre Court</td>
+            <td>Top seeds enter</td>
+          </tr>
+          <tr>
+            <td>Wed Oct 8</td>
+            <td>Day 3</td>
+            <td>11:00 / 17:30</td>
+            <td><span class="badge badge-round">2nd Round</span></td>
+            <td>Centre Court</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>Thu Oct 9</td>
+            <td>Day 4</td>
+            <td>11:00 / 17:30</td>
+            <td><span class="badge badge-round">2nd Round</span></td>
+            <td>Centre Court</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>Fri Oct 10</td>
+            <td>Day 5</td>
+            <td>13:00 / 17:00</td>
+            <td><span class="badge badge-quarter">Quarterfinals</span></td>
+            <td>Centre Court</td>
+            <td>Two QF matches</td>
+          </tr>
+          <tr>
+            <td>Sat Oct 11</td>
+            <td>Day 6</td>
+            <td>13:00 / 17:30</td>
+            <td><span class="badge badge-semi">Semifinals</span></td>
+            <td>Centre Court</td>
+            <td>Best day to attend</td>
+          </tr>
+          <tr>
+            <td>Sun Oct 12</td>
+            <td>Day 7</td>
+            <td>14:00</td>
+            <td><span class="badge badge-final">Final</span></td>
+            <td>Centre Court</td>
+            <td>Followed by trophy ceremony</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip-box">
+      <span class="tip-icon">💡</span>
+      <span><strong>Pro tip:</strong> Saturday Semifinals offer the best value — two top-4 matches back-to-back, often more exciting than the Final, at lower ticket prices. Book these early!</span>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- VENUE -->
+  <section id="venue">
+    <div class="section-header">
+      <div class="section-tag">Venue</div>
+      <h2>The Courts</h2>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+      <div class="venue-card">
+        <div class="venue-visual">🎾</div>
+        <div class="venue-info">
+          <h3>Yokohama Tennis Center</h3>
+          <div class="address">📍 Koen-dori, Kanagawa-ku, Yokohama 221-0056</div>
+          <p>State-of-the-art outdoor hard court facility built for international ATP events. The Centre Court seats 5,200 spectators with excellent sightlines from every seat.</p>
+          <div class="venue-stats">
+            <div class="venue-stat"><strong>5,200</strong><span>Centre Court seats</span></div>
+            <div class="venue-stat"><strong>6</strong><span>Show courts</span></div>
+            <div class="venue-stat"><strong>12</strong><span>Practice courts</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards-grid" style="margin-top: 1.25rem;">
+      <div class="card">
+        <div class="card-icon">🚇</div>
+        <h3>Getting to the Venue</h3>
+        <ul>
+          <li>Takashimacho Station (Minatomirai line) — 8 min walk</li>
+          <li>Shin-Yokohama Station (Shinkansen + JR) — taxi 15 min</li>
+          <li>Yokohama Station — bus #103, 25 min</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-icon">🍱</div>
+        <h3>Inside the Venue</h3>
+        <ul>
+          <li>4 food stalls (bento, ramen, yakitori, coffee)</li>
+          <li>Official merchandise stand — opens Day 1</li>
+          <li>Free bag check at east gate</li>
+          <li>No outside food/large containers</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎒</div>
+        <h3>What to Bring</h3>
+        <ul>
+          <li>Printed or digital ticket (QR code)</li>
+          <li>Sunscreen + sunglasses</li>
+          <li>Light jacket for evening sessions</li>
+          <li>Cash ¥ (limited card acceptance)</li>
+          <li>Empty refillable water bottle</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ITINERARY -->
+  <section id="itinerary">
+    <div class="section-header">
+      <div class="section-tag">Day-by-Day</div>
+      <h2>Suggested Itinerary</h2>
+      <p>A week that mixes world-class tennis with Yokohama's best sights, food, and culture.</p>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-day">Day 0 · Friday Oct 3</div>
+        <h3>Arrival Day</h3>
+        <p>Fly into Narita or Haneda. Take the Narita Express or Limousine Bus to Yokohama (45–90 min). Check in, explore the waterfront at Minato Mirai, dinner at the World Porters food hall.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">Day 1 · Saturday Oct 4</div>
+        <h3>Qualifying + Chinatown</h3>
+        <p>Free qualifying matches at the venue in the morning — great chance to watch future stars up close. Afternoon: stroll Yokohama Chinatown (the largest in Asia). Try pork steamed buns (nikuman) for ¥400.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">Day 2 · Sunday Oct 5</div>
+        <h3>Qualifying Finals + Sankeien Garden</h3>
+        <p>Morning qualifying finals. Afternoon off — visit the beautiful Sankeien Garden (¥700 entry). Evening: pre-tournament atmosphere at Kannai bar district.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">Day 3–4 · Mon–Tue Oct 6–7</div>
+        <h3>Main Draw Opens</h3>
+        <p>Full day at the venue. Arrive early for practice session views. Night sessions under the lights are spectacular. Try the venue yakitori between matches.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">Day 5 · Wednesday Oct 8</div>
+        <h3>2nd Round + Yamashita Park</h3>
+        <p>Morning match session, then afternoon break. Walk Yamashita Park and the red-brick warehouses (Akarenga). Sunset views over the harbor from Marine Tower.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">Day 6 · Thursday Oct 9</div>
+        <h3>2nd Round + Motomachi</h3>
+        <p>Full tennis day. Evening: explore Motomachi Shopping Street and the hillside Yamate Western residences for colonial-era architecture.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">Day 7 · Friday Oct 10</div>
+        <h3>Quarterfinals</h3>
+        <p>Two quarterfinal matches. Pick a side to root for. Early evening dinner at a local izakaya to celebrate your team.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">Day 8 · Saturday Oct 11 ⭐</div>
+        <h3>Semifinals — Best Day of the Week</h3>
+        <p>The crown jewel of the trip. Two back-to-back semifinals. Electric atmosphere, fans in full voice. Stay for both matches and the sunset over the courts.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">Day 9 · Sunday Oct 12</div>
+        <h3>The Final</h3>
+        <p>Trophy day. Arrive early for the warm-up. After the ceremony, head to Minato Mirai for a celebratory dinner with harbor views. Fireworks some years from the waterfront.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">Day 10 · Monday Oct 13</div>
+        <h3>Departure / Tokyo Day Trip</h3>
+        <p>Late checkout. Option: quick Tokyo day trip (25 min by train). Shinjuku, Shibuya, or Asakusa all easily reachable. Fly home from Narita or Haneda.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- WHERE TO STAY -->
+  <section id="stay">
+    <div class="section-header">
+      <div class="section-tag">Accommodation</div>
+      <h2>Where to Stay</h2>
+      <p>All picks are within 15 minutes of the venue and close to Yokohama's best restaurants.</p>
+    </div>
+
+    <div class="hotels-grid">
+      <div class="hotel-card">
+        <div class="hotel-tier tier-luxury">Luxury</div>
+        <div class="hotel-name">InterContinental Yokohama Grand</div>
+        <div class="hotel-location">📍 Minato Mirai — 10 min to venue</div>
+        <div class="hotel-price">¥35,000 <span>/ night</span></div>
+        <div class="hotel-features">
+          <span class="feat-chip">Harbor view</span>
+          <span class="feat-chip">Spa</span>
+          <span class="feat-chip">Pool</span>
+          <span class="feat-chip">Concierge</span>
+        </div>
+      </div>
+      <div class="hotel-card">
+        <div class="hotel-tier tier-luxury">Luxury</div>
+        <div class="hotel-name">Yokohama Royal Park Hotel</div>
+        <div class="hotel-location">📍 Landmark Tower — 12 min to venue</div>
+        <div class="hotel-price">¥28,000 <span>/ night</span></div>
+        <div class="hotel-features">
+          <span class="feat-chip">Sky lounge</span>
+          <span class="feat-chip">City views</span>
+          <span class="feat-chip">Fine dining</span>
+        </div>
+      </div>
+      <div class="hotel-card">
+        <div class="hotel-tier tier-mid">Mid-range</div>
+        <div class="hotel-name">APA Hotel Yokohama Kannai</div>
+        <div class="hotel-location">📍 Kannai — 8 min walk to venue</div>
+        <div class="hotel-price">¥12,000 <span>/ night</span></div>
+        <div class="hotel-features">
+          <span class="feat-chip">Central location</span>
+          <span class="feat-chip">Onsen bath</span>
+          <span class="feat-chip">Breakfast</span>
+        </div>
+      </div>
+      <div class="hotel-card">
+        <div class="hotel-tier tier-mid">Mid-range</div>
+        <div class="hotel-name">Dormy Inn Yokohama</div>
+        <div class="hotel-location">📍 Near Kannai Station</div>
+        <div class="hotel-price">¥9,500 <span>/ night</span></div>
+        <div class="hotel-features">
+          <span class="feat-chip">Free ramen nights</span>
+          <span class="feat-chip">Onsen</span>
+          <span class="feat-chip">Breakfast</span>
+        </div>
+      </div>
+      <div class="hotel-card">
+        <div class="hotel-tier tier-budget">Budget</div>
+        <div class="hotel-name">Toyoko Inn Yokohama Kannai</div>
+        <div class="hotel-location">📍 2 min from Kannai Station</div>
+        <div class="hotel-price">¥6,500 <span>/ night</span></div>
+        <div class="hotel-features">
+          <span class="feat-chip">Free breakfast</span>
+          <span class="feat-chip">Compact + clean</span>
+        </div>
+      </div>
+      <div class="hotel-card">
+        <div class="hotel-tier tier-budget">Budget</div>
+        <div class="hotel-name">Sakura Hostel Yokohama</div>
+        <div class="hotel-location">📍 Chinatown area</div>
+        <div class="hotel-price">¥3,200 <span>/ night (dorm)</span></div>
+        <div class="hotel-features">
+          <span class="feat-chip">Social atmosphere</span>
+          <span class="feat-chip">Lockers</span>
+          <span class="feat-chip">Bike rental</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <span class="tip-icon">💡</span>
+      <span><strong>Book early:</strong> Tournament week fills up 3–4 months in advance. The Kannai / Minato Mirai area puts you within walking distance of both the courts and the waterfront dining scene.</span>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- WHERE TO EAT -->
+  <section id="eat">
+    <div class="section-header">
+      <div class="section-tag">Food & Drink</div>
+      <h2>Where to Eat</h2>
+      <p>Yokohama is a food city — birthplace of Japanese ramen, home to Asia's largest Chinatown, and packed with izakayas.</p>
+    </div>
+
+    <div class="food-grid">
+      <div class="food-card">
+        <div class="food-emoji">🍜</div>
+        <h3>Ramen Museum (Shin-Yokohama)</h3>
+        <p>Eight legendary ramen shops recreated in a 1950s Showa-era atmosphere. A must for any noodle fan. Try a "mini" set of three different bowls.</p>
+        <div class="price-range">¥800–¥1,200 per bowl</div>
+      </div>
+      <div class="food-card">
+        <div class="food-emoji">🥟</div>
+        <h3>Yokohama Chinatown</h3>
+        <p>250+ restaurants in the largest Chinatown in Asia. Highlights: Heichinrou for dim sum, and the street-food stalls for buta nikuman (pork buns).</p>
+        <div class="price-range">¥400–¥3,000</div>
+      </div>
+      <div class="food-card">
+        <div class="food-emoji">🐟</div>
+        <h3>Yokohama Central Fish Market</h3>
+        <p>Morning-fresh sushi and seafood bowls (kaisendon). Go before 8am for the best selection. Arrive by 7:30am to beat the lines on weekends.</p>
+        <div class="price-range">¥1,200–¥2,800</div>
+      </div>
+      <div class="food-card">
+        <div class="food-emoji">🍺</div>
+        <h3>Akarenga Warehouse Bars</h3>
+        <p>The historic red-brick warehouses on the waterfront house craft beer bars, wine shops, and casual restaurants with harbor views — ideal for evening post-match drinks.</p>
+        <div class="price-range">¥600–¥2,000</div>
+      </div>
+      <div class="food-card">
+        <div class="food-emoji">🍣</div>
+        <h3>Umeyama Sushi (Kannai)</h3>
+        <p>A beloved neighbourhood counter sushi spot near the venue. Chef Umeyama has been operating for 30 years. Book a week in advance for omakase.</p>
+        <div class="price-range">¥4,000–¥12,000</div>
+      </div>
+      <div class="food-card">
+        <div class="food-emoji">🍖</div>
+        <h3>Kannai Izakaya Row</h3>
+        <p>The streets around Kannai Station fill with izakayas (Japanese gastropubs) from 6pm. Order yakitori, edamame, and cold Sapporo for the full evening experience.</p>
+        <div class="price-range">¥1,500–¥3,500</div>
+      </div>
+      <div class="food-card">
+        <div class="food-emoji">☕</div>
+        <h3>Bread, Espresso & Motomachi</h3>
+        <p>Motomachi Shopping Street is dotted with excellent independent cafés. Perfect for a slow morning croissant before catching the day session.</p>
+        <div class="price-range">¥400–¥900</div>
+      </div>
+      <div class="food-card">
+        <div class="food-emoji">🍦</div>
+        <h3>Bashamichi Ice Cream Street</h3>
+        <p>A famous strip of shops near the venue serving soft-serve ice cream in unique Japanese flavours. A local tradition since 1895.</p>
+        <div class="price-range">¥350–¥600</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- TRANSPORT -->
+  <section id="transport">
+    <div class="section-header">
+      <div class="section-tag">Getting Around</div>
+      <h2>Transport Guide</h2>
+    </div>
+
+    <div class="transport-grid">
+      <div class="transport-card">
+        <h3><span>✈️</span> Arriving in Japan</h3>
+        <ul>
+          <li><strong>Haneda (HND)</strong> — 35 min to Yokohama by Keikyu rail (¥560). Most convenient airport.</li>
+          <li><strong>Narita (NRT)</strong> — 60–90 min via Narita Express to Yokohama Station (¥4,370).</li>
+          <li>Buy a Suica/Pasmo IC card at the airport — works on all trains, subways, and convenience stores.</li>
+        </ul>
+      </div>
+      <div class="transport-card">
+        <h3><span>🚇</span> Local Rail</h3>
+        <ul>
+          <li><strong>Minatomirai Line</strong> — runs from Yokohama Station through Minato Mirai to Motomachi-Chukagai. Covers most tourist areas.</li>
+          <li><strong>JR Negishi Line</strong> — connects Kannai, Sakuragicho, and Yokohama stations.</li>
+          <li>Single rides: ¥180–¥280. Day passes available for ¥460.</li>
+        </ul>
+      </div>
+      <div class="transport-card">
+        <h3><span>🚌</span> Bus & Taxi</h3>
+        <ul>
+          <li>Yokohama Loop Bus (¥200/ride, day pass ¥500) — hits all major attractions.</li>
+          <li>Taxis are metered and reliable; base fare ¥730. Useful after night sessions.</li>
+          <li>Uber operates in Yokohama. DiDi is also available.</li>
+        </ul>
+      </div>
+      <div class="transport-card">
+        <h3><span>🚴</span> Cycling</h3>
+        <ul>
+          <li>Yokohama has a popular shared bike scheme (Docomo Bike Share). ¥165 per 30 min.</li>
+          <li>Flat terrain around the waterfront makes cycling easy and enjoyable.</li>
+          <li>Bike lanes along Minato Mirai waterfront.</li>
+        </ul>
+      </div>
+      <div class="transport-card">
+        <h3><span>🚅</span> Day Trip to Tokyo</h3>
+        <ul>
+          <li>Yokohama ↔ Shibuya: 25 min by Tokyu Toyoko Line (¥280).</li>
+          <li>Yokohama ↔ Shinjuku: 35 min via Shonan-Shinjuku Line (¥680).</li>
+          <li>IC card valid on all routes — no separate ticket needed.</li>
+        </ul>
+      </div>
+      <div class="transport-card">
+        <h3><span>📶</span> Connectivity</h3>
+        <ul>
+          <li>Buy a pocket WiFi or SIM at the airport (IIJmio, Docomo Tourist SIM).</li>
+          <li>Most venues, cafés, and convenience stores offer free WiFi.</li>
+          <li>Google Maps works excellently for public transport navigation in Japan.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- PACKING LIST -->
+  <section id="pack">
+    <div class="section-header">
+      <div class="section-tag">Preparation</div>
+      <h2>Packing List</h2>
+      <p>Curated for an October tennis trip to Japan. Travel light — laundromats are everywhere.</p>
+    </div>
+
+    <div class="packing-grid">
+      <div class="pack-card">
+        <h3>🎾 Tennis Days</h3>
+        <ul>
+          <li>Sun hat / cap</li>
+          <li>Sunscreen SPF 50+</li>
+          <li>Sunglasses (polarised)</li>
+          <li>Light jacket for evenings</li>
+          <li>Comfortable walking shoes</li>
+          <li>Small backpack / tote</li>
+          <li>Reusable water bottle</li>
+        </ul>
+      </div>
+      <div class="pack-card">
+        <h3>🇯🇵 Japan Essentials</h3>
+        <ul>
+          <li>Passport + entry docs</li>
+          <li>Cash (¥ yen)</li>
+          <li>IC card (Suica/Pasmo)</li>
+          <li>Pocket WiFi / SIM</li>
+          <li>Portable charger</li>
+          <li>Universal adapter</li>
+          <li>Small towel (onsen)</li>
+        </ul>
+      </div>
+      <div class="pack-card">
+        <h3>👔 Clothing</h3>
+        <ul>
+          <li>3–4 casual day outfits</li>
+          <li>1 smart-casual evening outfit</li>
+          <li>Light rain jacket</li>
+          <li>Slip-on shoes (temples)</li>
+          <li>Comfortable sneakers</li>
+          <li>Warm layer for evenings</li>
+        </ul>
+      </div>
+      <div class="pack-card">
+        <h3>💊 Health & Comfort</h3>
+        <ul>
+          <li>Travel insurance docs</li>
+          <li>Prescription medications</li>
+          <li>Blister plasters</li>
+          <li>Anti-diarrhoea tablets</li>
+          <li>Hand sanitiser</li>
+          <li>Face masks (polite in crowds)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <span class="tip-icon">🧳</span>
+      <span><strong>Coin lockers:</strong> Every train station has coin lockers (¥300–¥700). Store your bag while exploring between sessions — no need to carry everything to the courts.</span>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- TIPS SECTION -->
+  <section>
+    <div class="section-header">
+      <div class="section-tag">Insider Knowledge</div>
+      <h2>Pro Tips</h2>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">🎫</div>
+        <h3>Ticket Strategy</h3>
+        <p>Buy Semifinals tickets the moment they go on sale. They sell out in hours. For rounds 1–2, tickets are often available day-of at the gate — save money and stay flexible.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌅</div>
+        <h3>Arrive at Opening</h3>
+        <p>The gates open 2 hours before the first match. Arriving early gives you access to player practice sessions on the show courts — completely free and often closer than match seats.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🤫</div>
+        <h3>Japanese Tennis Culture</h3>
+        <p>Japanese crowds are respectful and quiet between points. Follow the lead: no loud cheering mid-rally. Applause is generous and warm after every point.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📱</div>
+        <h3>ATP Live App</h3>
+        <p>Download the ATP Tour app for real-time scores, draw updates, and order-of-play changes. Essential for planning your day when sessions run long or short.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🥡</div>
+        <h3>Convenience Stores</h3>
+        <p>7-Eleven, FamilyMart, and Lawson serve excellent hot food 24/7 for ¥200–¥500. An onigiri (rice ball) + hot green tea from the konbini is the perfect pre-match breakfast.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">♨️</div>
+        <h3>Post-Match Onsen</h3>
+        <p>After a long day on your feet, head to an onsen (hot spring bath). Most hotels in Yokohama have house onsen, or try Yokohama Manyo Club on the waterfront (¥3,000, open late).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p style="margin-bottom: 0.4rem;">🎾 Yokohama Pro Tour Trip Guide · Built by Claude for <a href="../">AI Web Pages Hub</a></p>
+    <p>All prices approximate · Always verify schedules on the official ATP Tour website</p>
+  </footer>
+
+</body>
+</html>

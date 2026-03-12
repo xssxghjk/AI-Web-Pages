@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page Not Found — AI Web Pages</title>
+  <!-- GitHub Pages SPA routing: redirect to hub with path stored in session -->
+  <script>
+    // Preserve the path and redirect to the hub
+    const path = window.location.pathname;
+    // If the path has a known sub-page, try to redirect there via root
+    sessionStorage.setItem('redirect', path);
+    window.location.replace('/AI-Web-Pages/' + (path.replace(/^\/AI-Web-Pages/, '').replace(/^\//, '') || ''));
+  </script>
+  <style>
+    body {
+      background: #0d0d0f;
+      color: #e8e8f0;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+    h1 { font-size: 4rem; margin-bottom: 0.5rem; }
+    p { color: #888899; margin-bottom: 1.5rem; }
+    a {
+      color: #7c6af7;
+      padding: 0.6rem 1.5rem;
+      border: 1px solid #7c6af7;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    a:hover { background: rgba(124,106,247,0.1); }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>404</h1>
+    <p>Page not found. Redirecting you to the hub…</p>
+    <a href="/AI-Web-Pages/">Go to Hub</a>
+  </div>
+</body>
+</html>
