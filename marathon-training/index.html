@@ -434,6 +434,34 @@
   .section-sub { color: var(--text2); font-size: 13px; }
 
   .inline-note { font-size: 11px; color: var(--warning); margin-top: 4px; font-style: italic; }
+
+  /* Race Countdown Hero */
+  .race-hero {
+    background: linear-gradient(135deg, rgba(108,99,255,0.12) 0%, rgba(78,205,196,0.08) 100%);
+    border: 1px solid rgba(108,99,255,0.35);
+    border-radius: 14px;
+    padding: 18px 24px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .race-hero-number {
+    font-size: 56px;
+    font-weight: 900;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    flex-shrink: 0;
+  }
+  .race-hero-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); margin-top: 2px; }
+  .race-hero-date { font-size: 14px; color: var(--text2); margin-top: 4px; }
+  .race-hero-bar { flex: 1; min-width: 120px; }
+  .race-hero-bar-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; display: flex; justify-content: space-between; }
+  @media (max-width: 480px) { .race-hero-number { font-size: 42px; } }
 </style>
 </head>
 <body>
@@ -474,6 +502,23 @@
     <div class="section-header">
       <div class="section-title">Dashboard</div>
       <div class="section-sub" id="dashSubtitle">Your training at a glance</div>
+    </div>
+
+    <!-- Race Countdown Hero -->
+    <div class="race-hero" id="raceHero">
+      <div>
+        <div class="race-hero-number" id="heroRaceDays">—</div>
+        <div class="race-hero-label">Days to Race Day</div>
+        <div class="race-hero-date" id="heroRaceDate"></div>
+      </div>
+      <div class="race-hero-bar">
+        <div class="race-hero-bar-label">
+          <span id="heroPhaseLabel"></span>
+          <span id="heroProgPct"></span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="heroProgBar" style="width:0%"></div></div>
+        <div style="font-size:11px;color:var(--text2);margin-top:6px;" id="heroWeekLabel"></div>
+      </div>
     </div>
 
     <!-- Stats -->
@@ -557,9 +602,15 @@
       <button class="modal-btn" id="btnSkipped" onclick="setStatus('skipped')">⏭️ Skipped</button>
       <button class="modal-btn" id="btnModified" onclick="setStatus('modified')">🔄 Modified</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Time Logged (minutes)</label>
-      <input type="number" class="form-input" id="modalTime" placeholder="e.g. 35" min="0" max="300">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-group">
+        <label class="form-label">Time Logged (min)</label>
+        <input type="number" class="form-input" id="modalTime" placeholder="e.g. 35" min="0" max="300">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Distance (km)</label>
+        <input type="number" class="form-input" id="modalKm" placeholder="e.g. 5.2" min="0" max="100" step="0.1">
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">Notes</label>
@@ -972,6 +1023,7 @@ function openDayModal(weekNum, dayOfWeek) {
   `;
 
   document.getElementById('modalTime').value = existing?.time || '';
+  document.getElementById('modalKm').value = existing?.km || '';
   document.getElementById('modalNotes').value = existing?.notes || '';
 
   updateModalButtons(modalStatus);
@@ -992,10 +1044,11 @@ function setStatus(s) {
 function saveModal() {
   if (!modalDate) return;
   const time = parseInt(document.getElementById('modalTime').value) || null;
+  const km = parseFloat(document.getElementById('modalKm').value) || null;
   const notes = document.getElementById('modalNotes').value.trim() || null;
 
-  if (modalStatus || time || notes) {
-    setDayData(modalDate, { status: modalStatus, time, notes });
+  if (modalStatus || time || km || notes) {
+    setDayData(modalDate, { status: modalStatus, time, km, notes });
   } else {
     setDayData(modalDate, null);
   }
@@ -1023,7 +1076,7 @@ function closeModalOutside(e) {
 // ============================================================
 function calcStats() {
   const t = today();
-  let totalCompleted = 0, totalSkipped = 0, totalModified = 0, totalTime = 0;
+  let totalCompleted = 0, totalSkipped = 0, totalModified = 0, totalTime = 0, totalKm = 0;
   let streak = 0, longestStreak = 0, tempStreak = 0;
   let weeksCompleted = 0;
 
@@ -1050,6 +1103,7 @@ function calcStats() {
     if (val.status === 'skipped') totalSkipped++;
     if (val.status === 'modified') totalModified++;
     if (val.time) totalTime += val.time;
+    if (val.km) totalKm += val.km;
   }
 
   // Weeks completed = weeks where all scheduled workouts are marked
@@ -1070,7 +1124,7 @@ function calcStats() {
   const wd = getWeekDayForDate(t);
   const currentWeek = wd ? wd.weekNum : 20;
 
-  return { totalCompleted, totalSkipped, totalModified, totalTime, streak, weeksCompleted, currentWeek };
+  return { totalCompleted, totalSkipped, totalModified, totalTime, totalKm, streak, weeksCompleted, currentWeek };
 }
 
 function getWeekCompletion(weekNum) {
@@ -1099,35 +1153,41 @@ function renderStats() {
   const s = calcStats();
   const raceDate = getDateForWeekDay(20, 0); // Week 20, Sunday
   const daysToRace = Math.ceil((raceDate - today()) / 86400000);
+  const totalDays = Math.ceil((raceDate - new Date('2026-03-13')) / 86400000);
+  const elapsed = totalDays - Math.max(0, daysToRace);
+  const racePct = Math.min(100, Math.round(elapsed / totalDays * 100));
 
+  // Race hero
+  document.getElementById('heroRaceDays').textContent = daysToRace > 0 ? daysToRace : '🏅';
+  document.getElementById('heroRaceDate').textContent = daysToRace > 0
+    ? `Race: Sun ${raceDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+    : 'Race Day — Go get it! 🎉';
+  document.getElementById('heroPhaseLabel').textContent = getPhase(s.currentWeek).name + ` · Week ${s.currentWeek}/20`;
+  document.getElementById('heroProgPct').textContent = racePct + '%';
+  document.getElementById('heroProgBar').style.width = racePct + '%';
+  document.getElementById('heroWeekLabel').textContent = `${elapsed} of ${totalDays} training days elapsed`;
+
+  // Stats grid — 4 cards only
   document.getElementById('statsGrid').innerHTML = `
     <div class="stat-card">
-      <div class="stat-value">${s.totalCompleted}</div>
-      <div class="stat-label">Runs Completed</div>
+      <div class="stat-value">${s.totalCompleted + s.totalModified}</div>
+      <div class="stat-label">Workouts Done</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value">${Math.round(s.totalTime / 60 * 10)/10}h</div>
+      <div class="stat-value">${Math.round(s.totalKm * 10) / 10}</div>
+      <div class="stat-label">Total KM</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${Math.round(s.totalTime / 60 * 10) / 10}h</div>
       <div class="stat-label">Time Logged</div>
     </div>
     <div class="stat-card">
       <div class="stat-value">${s.streak}</div>
-      <div class="stat-label">Current Streak</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${s.weeksCompleted}</div>
-      <div class="stat-label">Weeks Done</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${s.totalSkipped}</div>
-      <div class="stat-label">Days Skipped</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${daysToRace > 0 ? daysToRace : '🏅'}</div>
-      <div class="stat-label">${daysToRace > 0 ? 'Days to Race' : 'Race Day!'}</div>
+      <div class="stat-label">Workout Streak</div>
     </div>
   `;
 
-  // Progress bar
+  // Overall progress bar card
   const pct = Math.min(100, Math.round((s.currentWeek - 1) / 20 * 100));
   document.getElementById('progBar').style.width = pct + '%';
   document.getElementById('progPct').textContent = pct + '%';
@@ -1159,6 +1219,7 @@ function renderToday() {
       ${dd.status === 'skipped' ? '<span style="color:var(--danger)">⏭️ Skipped</span>' : ''}
       ${dd.status === 'modified' ? '<span style="color:var(--warning)">🔄 Modified</span>' : ''}
       ${dd.time ? `<span style="color:var(--text2);font-size:12px;margin-left:8px">⏱ ${dd.time} min</span>` : ''}
+      ${dd.km ? `<span style="color:var(--accent2);font-size:12px;margin-left:8px">📍 ${dd.km} km</span>` : ''}
       ${dd.notes ? `<div class="inline-note">"${dd.notes}"</div>` : ''}
     </div>
   ` : '';
@@ -1410,7 +1471,7 @@ function renderProgress() {
           <div>
             <div style="font-size:13px;font-weight:600;">${formatDate(d)} — ${workout.short}</div>
             <div style="font-size:11px;color:var(--text2);">
-              Week ${wd.weekNum}${val.time ? ` · ${val.time} min` : ''}
+              Week ${wd.weekNum}${val.time ? ` · ${val.time} min` : ''}${val.km ? ` · ${val.km} km` : ''}
               ${val.notes ? `· "${val.notes}"` : ''}
             </div>
           </div>
