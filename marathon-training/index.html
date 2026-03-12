@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Couch to Half Marathon — 20-Week Plan</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #242838;
+    --border: #2e3347;
+    --accent: #6c63ff;
+    --accent2: #4ecdc4;
+    --success: #51cf66;
+    --warning: #ffd43b;
+    --danger: #ff6b6b;
+    --text: #e8eaf6;
+    --text2: #9ba3bf;
+    --run: #6c63ff;
+    --strength: #ff8c42;
+    --cross: #4ecdc4;
+    --rest: #2e3347;
+    --race: #ffd43b;
+    --phase1: #ff6b6b;
+    --phase2: #ffa94d;
+    --phase3: #51cf66;
+    --phase4: #4ecdc4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  a { color: var(--accent); }
+
+  /* Header */
+  .app-header {
+    background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .app-title { font-size: 20px; font-weight: 700; }
+  .app-title span { color: var(--accent); }
+  .countdown-badge {
+    background: linear-gradient(135deg, var(--accent), #9c58ff);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #5a52e0; }
+  .btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
+  .btn-danger:hover { background: var(--danger); color: #fff; }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  /* Nav Tabs */
+  .nav-tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab {
+    padding: 12px 20px;
+    cursor: pointer;
+    color: var(--text2);
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Main Layout */
+  .main { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .icon { font-size: 18px; }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-value { font-size: 24px; font-weight: 800; color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Progress Bar */
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 99px;
+    height: 10px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.5s ease;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  /* Today's Workout */
+  .today-card {
+    background: linear-gradient(135deg, #1a1d35 0%, #1a2535 100%);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .today-badge {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .today-workout-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+  .today-workout-desc { color: var(--text2); margin-bottom: 16px; }
+  .checkin-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-checkin {
+    flex: 1;
+    min-width: 90px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .btn-checkin:hover { border-color: var(--accent); }
+  .btn-checkin.active-completed { background: rgba(81,207,102,0.2); border-color: var(--success); color: var(--success); }
+  .btn-checkin.active-skipped { background: rgba(255,107,107,0.2); border-color: var(--danger); color: var(--danger); }
+  .btn-checkin.active-modified { background: rgba(255,212,59,0.2); border-color: var(--warning); color: var(--warning); }
+
+  /* Week Grid */
+  .week-section { margin-bottom: 24px; }
+  .week-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .week-title { font-size: 15px; font-weight: 700; }
+  .phase-badge {
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .phase-1 { background: rgba(255,107,107,0.2); color: var(--phase1); border: 1px solid rgba(255,107,107,0.4); }
+  .phase-2 { background: rgba(255,169,77,0.2); color: var(--phase2); border: 1px solid rgba(255,169,77,0.4); }
+  .phase-3 { background: rgba(81,207,102,0.2); color: var(--phase3); border: 1px solid rgba(81,207,102,0.4); }
+  .phase-4 { background: rgba(78,205,196,0.2); color: var(--phase4); border: 1px solid rgba(78,205,196,0.4); }
+  .week-completion { font-size: 12px; color: var(--text2); }
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  .day-cell {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 6px;
+    min-height: 80px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .day-cell:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .day-cell.is-today { border-color: var(--accent); background: rgba(108,99,255,0.1); }
+  .day-cell.is-past { opacity: 0.7; }
+  .day-cell.status-completed { background: rgba(81,207,102,0.1); border-color: rgba(81,207,102,0.4); }
+  .day-cell.status-skipped { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.3); }
+  .day-cell.status-modified { background: rgba(255,212,59,0.1); border-color: rgba(255,212,59,0.3); }
+  .day-cell.is-rest { opacity: 0.5; cursor: default; }
+  .day-cell.is-rest:hover { border-color: var(--border); transform: none; }
+  .day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text2); margin-bottom: 4px; }
+  .day-date { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .day-type-icon { font-size: 14px; margin-bottom: 2px; }
+  .day-workout-short { font-size: 10px; color: var(--text2); line-height: 1.3; }
+  .day-status-icon { position: absolute; top: 6px; right: 6px; font-size: 14px; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(4px);
+  }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 480px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .modal-subtitle { color: var(--text2); font-size: 13px; margin-bottom: 20px; }
+  .modal-workout { background: var(--surface2); border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 14px; }
+  .modal-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .modal-btn {
+    padding: 12px 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .modal-btn:hover { border-color: var(--accent); }
+  .modal-btn.active-completed { background: rgba(81,207,102,0.2); border-color: var(--success); color: var(--success); }
+  .modal-btn.active-skipped { background: rgba(255,107,107,0.2); border-color: var(--danger); color: var(--danger); }
+  .modal-btn.active-modified { background: rgba(255,212,59,0.2); border-color: var(--warning); color: var(--warning); }
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .form-input:focus { outline: none; border-color: var(--accent); }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* Heat Map */
+  .heatmap-grid {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+    overflow-x: auto;
+  }
+  .heatmap-week { display: flex; flex-direction: column; gap: 3px; }
+  .heatmap-cell {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .heatmap-cell:hover { transform: scale(1.4); }
+  .heatmap-cell.hm-completed { background: var(--success); border-color: var(--success); }
+  .heatmap-cell.hm-skipped { background: var(--danger); border-color: var(--danger); opacity: 0.7; }
+  .heatmap-cell.hm-modified { background: var(--warning); border-color: var(--warning); }
+  .heatmap-cell.hm-future { background: var(--surface2); }
+  .heatmap-cell.hm-rest { background: var(--border); opacity: 0.4; }
+  .heatmap-labels { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+  .heatmap-label { font-size: 11px; color: var(--text2); display: flex; align-items: center; gap: 4px; }
+  .heatmap-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* Weekly Summaries */
+  .week-summary-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .week-summary-row:last-child { border-bottom: none; }
+  .wsrow-week { width: 70px; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .wsrow-bar { flex: 1; }
+  .wsrow-pct { width: 40px; text-align: right; font-size: 12px; color: var(--text2); }
+
+  /* Injury Pause */
+  .pause-banner {
+    background: rgba(255,212,59,0.1);
+    border: 1px solid rgba(255,212,59,0.4);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .pause-text { flex: 1; font-size: 13px; }
+
+  /* Export */
+  .export-area {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 12px;
+    color: var(--text2);
+    word-break: break-all;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: monospace;
+    white-space: pre-wrap;
+  }
+
+  .hidden { display: none !important; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .week-grid { grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .day-cell { padding: 5px 3px; min-height: 65px; }
+    .day-name { font-size: 9px; }
+    .day-date { font-size: 10px; }
+    .day-workout-short { font-size: 9px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .main { padding: 12px; }
+    .modal-actions { grid-template-columns: 1fr; }
+  }
+
+  /* Workout type colors */
+  .wt-run { color: var(--run); }
+  .wt-strength { color: var(--strength); }
+  .wt-cross { color: var(--cross); }
+  .wt-rest { color: var(--text2); }
+  .wt-race { color: var(--race); }
+
+  .tag {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .tag-run { background: rgba(108,99,255,0.2); color: var(--run); }
+  .tag-strength { background: rgba(255,140,66,0.2); color: var(--strength); }
+  .tag-cross { background: rgba(78,205,196,0.2); color: var(--cross); }
+  .tag-rest { background: rgba(46,51,71,0.6); color: var(--text2); }
+  .tag-race { background: rgba(255,212,59,0.2); color: var(--race); }
+
+  .section-header { margin-bottom: 20px; }
+  .section-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .section-sub { color: var(--text2); font-size: 13px; }
+
+  .inline-note { font-size: 11px; color: var(--warning); margin-top: 4px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="app-title">🏃 Couch to <span>Half Marathon</span></div>
+    <div id="countdownBadge" class="countdown-badge">Loading...</div>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm" onclick="exportData()">⬆ Export</button>
+      <button class="btn btn-ghost btn-sm" onclick="togglePause()">⏸ Pause</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmReset()">↺ Reset</button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav-tabs" id="navTabs">
+  <div class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Dashboard</div>
+  <div class="nav-tab" data-tab="calendar" onclick="switchTab('calendar')">📅 Full Calendar</div>
+  <div class="nav-tab" data-tab="heatmap" onclick="switchTab('heatmap')">🔥 Activity</div>
+  <div class="nav-tab" data-tab="progress" onclick="switchTab('progress')">📈 Progress</div>
+</nav>
+
+<div id="pauseBanner" class="hidden">
+  <div class="main" style="padding-top:0; padding-bottom:0;">
+    <div class="pause-banner">
+      <span>⚠️</span>
+      <span class="pause-text" id="pauseText">Training is paused.</span>
+      <button class="btn btn-sm btn-ghost" onclick="resumeTraining()">Resume Training</button>
+    </div>
+  </div>
+</div>
+
+<main class="main" id="mainContent">
+
+  <!-- DASHBOARD TAB -->
+  <div id="tab-dashboard">
+    <div class="section-header">
+      <div class="section-title">Dashboard</div>
+      <div class="section-sub" id="dashSubtitle">Your training at a glance</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid"></div>
+
+    <!-- Overall Progress -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🎯</span> Overall Progress</div>
+      <div class="progress-label">
+        <span id="progWeekLabel">Week 1 of 20</span>
+        <span id="progPct">0%</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progBar" style="width:0%"></div></div>
+      <div class="progress-label" style="margin-top:6px;">
+        <span id="phaseLabel" style="color:var(--accent)"></span>
+        <span id="raceCountdown" style="color:var(--accent2)"></span>
+      </div>
+    </div>
+
+    <!-- Today's Workout -->
+    <div id="todaySection"></div>
+
+    <!-- This Week -->
+    <div class="card" id="thisWeekCard">
+      <div class="card-title"><span class="icon">📆</span> This Week</div>
+      <div id="thisWeekGrid"></div>
+    </div>
+  </div>
+
+  <!-- CALENDAR TAB -->
+  <div id="tab-calendar" class="hidden">
+    <div class="section-header">
+      <div class="section-title">Full Training Calendar</div>
+      <div class="section-sub">All 20 weeks — click any day to log it</div>
+    </div>
+    <div id="fullCalendar"></div>
+  </div>
+
+  <!-- HEATMAP TAB -->
+  <div id="tab-heatmap" class="hidden">
+    <div class="section-header">
+      <div class="section-title">Activity Map</div>
+      <div class="section-sub">Your training consistency at a glance</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="icon">🔥</span> Activity Heat Map</div>
+      <div class="heatmap-grid" id="heatmapGrid"></div>
+      <div class="heatmap-labels">
+        <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--success)"></span> Completed</span>
+        <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--warning)"></span> Modified</span>
+        <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--danger); opacity:0.7"></span> Skipped</span>
+        <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--border)"></span> Rest</span>
+        <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--surface2); border:1px solid var(--border)"></span> Upcoming</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="icon">📊</span> Weekly Summary</div>
+      <div id="weeklySummaryList"></div>
+    </div>
+  </div>
+
+  <!-- PROGRESS TAB -->
+  <div id="tab-progress" class="hidden">
+    <div class="section-header">
+      <div class="section-title">Progress</div>
+      <div class="section-sub">Track your journey</div>
+    </div>
+    <div id="progressContent"></div>
+  </div>
+
+</main>
+
+<!-- Day Check-In Modal -->
+<div id="modalOverlay" class="modal-overlay hidden" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-subtitle" id="modalSubtitle"></div>
+    <div class="modal-workout" id="modalWorkout"></div>
+    <div class="modal-actions">
+      <button class="modal-btn" id="btnCompleted" onclick="setStatus('completed')">✅ Completed</button>
+      <button class="modal-btn" id="btnSkipped" onclick="setStatus('skipped')">⏭️ Skipped</button>
+      <button class="modal-btn" id="btnModified" onclick="setStatus('modified')">🔄 Modified</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Time Logged (minutes)</label>
+      <input type="number" class="form-input" id="modalTime" placeholder="e.g. 35" min="0" max="300">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="modalNotes" rows="3" placeholder="How did it go? Any observations..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="clearDayStatus()">Clear</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pause Modal -->
+<div id="pauseModal" class="modal-overlay hidden" onclick="closePauseOutside(event)">
+  <div class="modal">
+    <div class="modal-title">⏸ Pause Training</div>
+    <div class="modal-subtitle">Pausing will shift your schedule forward</div>
+    <div class="form-group">
+      <label class="form-label">Reason</label>
+      <textarea class="form-input" id="pauseReason" rows="2" placeholder="Injury, illness, travel..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Pause Duration (days)</label>
+      <input type="number" class="form-input" id="pauseDays" placeholder="e.g. 7" min="1" max="90">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="document.getElementById('pauseModal').classList.add('hidden')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmPause()">Confirm Pause</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div id="exportModal" class="modal-overlay hidden" onclick="closeExportOutside(event)">
+  <div class="modal">
+    <div class="modal-title">⬆ Export Data</div>
+    <div class="modal-subtitle">Copy your training data as JSON</div>
+    <div class="export-area" id="exportArea"></div>
+    <div class="modal-footer" style="margin-top:12px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('exportModal').classList.add('hidden')">Close</button>
+      <button class="btn btn-primary" onclick="copyExport()">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// TRAINING PLAN DATA
+// ============================================================
+const PLAN_START = new Date('2026-03-13'); // Tomorrow
+
+const PHASES = [
+  { name: 'Foundation', weeks: [1,2,3,4,5], cls: 'phase-1' },
+  { name: 'Base Building', weeks: [6,7,8,9,10], cls: 'phase-2' },
+  { name: 'Endurance', weeks: [11,12,13,14,15,16,17], cls: 'phase-3' },
+  { name: 'Taper', weeks: [18,19,20], cls: 'phase-4' },
+];
+
+function getPhase(weekNum) {
+  for (const p of PHASES) if (p.weeks.includes(weekNum)) return p;
+  return PHASES[0];
+}
+
+// Day of week labels
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+// Workout types: run, strength, cross, rest, race
+const PLAN = buildPlan();
+
+function buildPlan() {
+  const weeks = [];
+  // Each week: array of 7 days [Sun Mon Tue Wed Thu Fri Sat]
+  // Workout object: { type, short, desc }
+
+  function R(short, desc) { return { type:'run', short, desc }; }
+  function S(short, desc) { return { type:'strength', short, desc }; }
+  function C(short, desc) { return { type:'cross', short, desc }; }
+  function rest() { return { type:'rest', short:'Rest', desc:'Rest day. Recovery is part of training!' }; }
+  function yoga() { return { type:'rest', short:'Rest/Yoga', desc:'Rest or light yoga. Keep it easy.' }; }
+
+  // Week 1
+  weeks.push([
+    rest(), // Sun
+    rest(), // Mon
+    R('Run/Walk ×8','1 min run / 2 min walk — repeat 8 times (~24 min). Walk warm-up 5 min + cool-down 5 min.'), // Tue
+    S('Strength','Full body strength training ~30 min. Focus on core, glutes, single-leg work.'), // Wed
+    R('Run/Walk ×8','1 min run / 2 min walk — repeat 8 times (~24 min). Walk warm-up 5 min + cool-down 5 min.'), // Thu
+    yoga(), // Fri
+    R('Long Run/Walk ×10','1 min run / 2 min walk — repeat 10 times (~30 min). Easy effort.'), // Sat
+  ]);
+
+  // Week 2
+  weeks.push([
+    C('Cross-train 30 min','30 min easy cross-training: cycling, swimming, elliptical, or brisk walk.'), // Sun
+    rest(), // Mon
+    R('Run/Walk ×8','90 sec run / 90 sec walk — repeat 8 times (~24 min). Easy effort.'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('Run/Walk ×8','90 sec run / 90 sec walk — repeat 8 times (~24 min).'), // Thu
+    yoga(), // Fri
+    R('Long Run/Walk ×10','90 sec run / 90 sec walk — repeat 10 times (~30 min). Easy effort.'), // Sat
+  ]);
+
+  // Week 3
+  weeks.push([
+    C('Cross-train 35 min','35 min easy cross-training.'), // Sun
+    rest(), // Mon
+    R('Run/Walk ×7','2 min run / 1 min walk — repeat 7 times (~21 min). Building run time!'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('Run/Walk ×7','2 min run / 1 min walk — repeat 7 times (~21 min).'), // Thu
+    yoga(), // Fri
+    R('Long Run/Walk ×10','2 min run / 1 min walk — repeat 10 times (~30 min). Easy pace.'), // Sat
+  ]);
+
+  // Week 4
+  weeks.push([
+    C('Cross-train 35 min','35 min easy cross-training.'), // Sun
+    rest(), // Mon
+    R('Run/Walk ×6','3 min run / 1 min walk — repeat 6 times (~24 min). Good progress!'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('Run/Walk ×6','3 min run / 1 min walk — repeat 6 times (~24 min).'), // Thu
+    yoga(), // Fri
+    R('Long Run/Walk ×8','3 min run / 1 min walk — repeat 8 times (~32 min). Easy effort.'), // Sat
+  ]);
+
+  // Week 5
+  weeks.push([
+    C('Cross-train 40 min','40 min easy cross-training.'), // Sun
+    rest(), // Mon
+    R('Run/Walk ×5','4 min run / 1 min walk — repeat 5 times (~25 min).'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('Run/Walk ×5','4 min run / 1 min walk — repeat 5 times (~25 min).'), // Thu
+    yoga(), // Fri
+    R('Long Run/Walk 35 min','4 min run / 1 min walk — repeat 7 times (~35 min). Keep it easy.'), // Sat
+  ]);
+
+  // Week 6
+  weeks.push([
+    C('Cross-train 40 min','40 min easy cross-training.'), // Sun
+    rest(), // Mon
+    R('Run/Walk ×5','5 min run / 1 min walk — repeat 5 times (~30 min). Nearly continuous!'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('20 min continuous','Run continuously for 20 min at easy conversational pace. Big milestone!'), // Thu
+    yoga(), // Fri
+    R('Run/Walk ×7','5 min run / 1 min walk — repeat 7 times (~42 min). Easy effort.'), // Sat
+  ]);
+
+  // Week 7
+  weeks.push([
+    C('Cross-train 40 min','40 min easy cross-training.'), // Sun
+    rest(), // Mon
+    R('25 min easy','25 min continuous easy run. Conversational pace throughout.'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('20 min + strides','20 min easy run, then 4×30 sec strides (fast but controlled). Walk 60 sec between.'), // Thu
+    yoga(), // Fri
+    R('35 min (~5km)','35 min continuous run. You\'re running a 5K! Easy effort.'), // Sat
+  ]);
+
+  // Week 8
+  weeks.push([
+    C('Cross-train 45 min','45 min easy cross-training.'), // Sun
+    rest(), // Mon
+    R('25 min easy','25 min continuous easy run.'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('25 min + strides','25 min easy run, then strides. 4×30 sec at faster pace.'), // Thu
+    yoga(), // Fri
+    R('40 min run','40 min continuous run. Easy conversational pace. Great work!'), // Sat
+  ]);
+
+  // Week 9
+  weeks.push([
+    C('Cross-train 45 min','45 min easy cross-training.'), // Sun
+    rest(), // Mon
+    R('30 min easy','30 min continuous easy run.'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('25 min + 5 strides','25 min easy run + 5×30 sec strides with 60 sec walk recovery.'), // Thu
+    yoga(), // Fri
+    R('45 min run','45 min continuous easy run. Building that endurance base!'), // Sat
+  ]);
+
+  // Week 10
+  weeks.push([
+    C('Cross-train 45 min','45 min easy cross-training.'), // Sun
+    rest(), // Mon
+    R('30 min easy','30 min easy continuous run.'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('30 min easy','30 min easy continuous run.'), // Thu
+    yoga(), // Fri
+    R('50 min (~7-8km)','50 min continuous run. Roughly 7-8km! You are building real fitness.'), // Sat
+  ]);
+
+  // Week 11
+  weeks.push([
+    C('Cross-train 45 min','45 min easy cross-training.'), // Sun
+    rest(), // Mon
+    R('30 min easy','30 min easy continuous run.'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('Tempo 10/10/10','10 min easy warm-up, 10 min at comfortably hard tempo pace, 10 min easy cool-down.'), // Thu
+    yoga(), // Fri
+    R('55 min run','55 min continuous easy run. Stay at conversational pace.'), // Sat
+  ]);
+
+  // Week 12
+  weeks.push([
+    C('Cross-train 45 min','45 min easy cross-training.'), // Sun
+    rest(), // Mon
+    R('35 min easy','35 min easy continuous run.'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('Hills session','15 min easy, then 4×1 min uphill running (hard effort), jog back down, 10 min easy cool-down.'), // Thu
+    yoga(), // Fri
+    R('60 min (~10km)','60 min easy run — you\'re hitting the 10K distance! Huge milestone!'), // Sat
+  ]);
+
+  // Week 13
+  weeks.push([
+    C('Cross-train 50 min','50 min easy cross-training.'), // Sun
+    rest(), // Mon
+    R('35 min easy','35 min easy continuous run.'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('Tempo 10/15/10','10 min easy, 15 min tempo (comfortably hard), 10 min easy cool-down.'), // Thu
+    yoga(), // Fri
+    R('70 min run','70 min easy long run. Focus on time on feet, not pace.'), // Sat
+  ]);
+
+  // Week 14
+  weeks.push([
+    C('Cross-train 50 min','50 min easy cross-training.'), // Sun
+    rest(), // Mon
+    R('40 min easy','40 min easy continuous run.'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('30 min + 6 strides','30 min easy + 6×30 sec strides. Feeling stronger!'), // Thu
+    yoga(), // Fri
+    R('75 min (~12km)','75 min easy long run — around 12km. Excellent endurance building!'), // Sat
+  ]);
+
+  // Week 15
+  weeks.push([
+    C('Cross-train 50 min','50 min easy cross-training.'), // Sun
+    rest(), // Mon
+    R('40 min easy','40 min easy run.'), // Tue
+    S('Strength','Full body strength ~30 min.'), // Wed
+    R('Tempo 10/20/10','10 min easy, 20 min tempo, 10 min easy. Strong effort today!'), // Thu
+    yoga(), // Fri
+    R('85 min (~14km)','85 min easy long run — approximately 14km. Almost there!'), // Sat
+  ]);
+
+  // Week 16
+  weeks.push([
+    C('Cross-train 45 min','45 min easy cross-training — slightly reduced as we peak.'), // Sun
+    rest(), // Mon
+    R('45 min easy','45 min easy run.'), // Tue
+    S('Strength 25 min','Shorter strength session — 25 min. Reduce intensity slightly.'), // Wed
+    R('35 min + strides','35 min easy + strides. Staying sharp.'), // Thu
+    yoga(), // Fri
+    R('95 min (~16km)','95 min long run — roughly 16km. Your longest yet!'), // Sat
+  ]);
+
+  // Week 17 (Peak)
+  weeks.push([
+    rest(), // Sun — rest this week (peak week)
+    rest(), // Mon
+    R('45 min easy','45 min easy run. Peak week — keep it controlled!'), // Tue
+    S('Strength 25 min','Strength 25 min — reduced volume.'), // Wed
+    R('Tempo 10/20/10','10 min easy, 20 min tempo, 10 min easy. Peak effort!'), // Thu
+    yoga(), // Fri
+    R('105-110 min (~18km)','105-110 min long run — approximately 18km. Your peak training run! Amazing!'), // Sat
+  ]);
+
+  // Week 18 (Taper begins)
+  weeks.push([
+    C('Walk 30 min','30 min easy walk. Taper week — let the body recover.'), // Sun
+    rest(), // Mon
+    R('35 min easy','35 min easy run. Begin taper — trust the process!'), // Tue
+    S('Light Strength 20 min','Light strength 20 min. Maintenance only.'), // Wed
+    R('30 min + 4 strides','30 min easy + 4×30 sec strides. Keeping legs fresh.'), // Thu
+    yoga(), // Fri
+    R('75 min easy','75 min easy long run. Noticeably shorter — that\'s the taper!'), // Sat
+  ]);
+
+  // Week 19
+  weeks.push([
+    rest(), // Sun
+    rest(), // Mon
+    R('30 min easy','30 min very easy run. Stay relaxed — trust your training!'), // Tue
+    { type:'cross', short:'Stretch only', desc:'Stretching and mobility work only. No running. ~20-30 min.' }, // Wed
+    R('25 min + 4 strides','25 min easy + 4×20 sec strides. Keep legs feeling light.'), // Thu
+    yoga(), // Fri
+    R('45 min easy','45 min easy run. Last somewhat long run before race!'), // Sat
+  ]);
+
+  // Week 20 (Race Week)
+  weeks.push([
+    { type:'race', short:'RACE DAY! 🏅', desc:'HALF MARATHON RACE DAY! You\'ve done the work. Trust your training, enjoy the journey, and cross that finish line! 21.1km — you\'ve got this! 🎉' }, // Sun
+    rest(), // Mon
+    R('20 min easy','Short easy 20 min run. Stay relaxed, don\'t do anything new.'), // Tue
+    rest(), // Wed — rest
+    R('15 min + 3 strides','15 min easy shakeout run + 3 strides. Legs should feel springy!'), // Thu
+    rest(), // Fri — rest
+    rest(), // Sat — rest before race
+  ]);
+
+  return weeks;
+}
+
+// Get the date for a given week (1-indexed) and day offset (0=Sun of that week)
+function getDateForWeekDay(weekNum, dayOfWeek) {
+  // Plan starts on Friday March 13, 2026
+  // Week 1 starts on the Sunday of the week containing March 13
+  // Actually, let's map: Plan starts March 13 (Friday = dayOfWeek index 5)
+  // Week 1 day 0 = Sunday before March 13 = March 8 (or actually, let's treat the plan as starting from March 13)
+  // Let me think more carefully:
+  // PLAN_START = March 13 = Friday
+  // I'll define: Week 1 starts on Monday March 9 (the Monday before March 13)
+  // So week N starts on Monday of week N: PLAN_START_MONDAY + (N-1)*7 days
+  // Days: Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6 -> but plan structure is [Sun,Mon,Tue,Wed,Thu,Fri,Sat]
+
+  // Plan week 1: The first actual workout day is March 13 (Fri/Sat based on plan)
+  // Wait — the plan has Tue/Thu as run days. March 13 is a Friday.
+  // Let's define: Week 1 Mon = March 9, 2026
+  // So Week 1 starts (Sun) = March 8
+  // Actually, let me define week start as Sunday:
+  // Week 1 Sun = March 8, Week 1 Mon = March 9, ..., Week 1 Sat = March 14
+
+  const week1Sun = new Date('2026-03-08'); // Sunday of week 1
+  const startMs = week1Sun.getTime();
+  const offsetDays = (weekNum - 1) * 7 + dayOfWeek;
+  const d = new Date(startMs + offsetDays * 86400000);
+  return d;
+}
+
+// Get week number and day index for a given date
+function getWeekDayForDate(date) {
+  const week1Sun = new Date('2026-03-08');
+  const diffMs = date.getTime() - week1Sun.getTime();
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffDays < 0 || diffDays >= 140) return null;
+  const weekNum = Math.floor(diffDays / 7) + 1;
+  const dayOfWeek = diffDays % 7;
+  return { weekNum, dayOfWeek };
+}
+
+function dateKey(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function formatDate(date) {
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function today() {
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+// ============================================================
+// STORAGE
+// ============================================================
+const LS_KEY = 'c2hm_v1';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { days: {}, pause: null };
+}
+
+function saveData(data) {
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+}
+
+let appData = loadData();
+
+function getDayData(dateStr) {
+  return appData.days[dateStr] || null;
+}
+
+function setDayData(dateStr, obj) {
+  if (obj === null) {
+    delete appData.days[dateStr];
+  } else {
+    appData.days[dateStr] = obj;
+  }
+  saveData(appData);
+}
+
+// ============================================================
+// MODAL STATE
+// ============================================================
+let modalDate = null;
+let modalStatus = null;
+
+function openDayModal(weekNum, dayOfWeek) {
+  const workout = PLAN[weekNum-1][dayOfWeek];
+  if (workout.type === 'rest') return;
+
+  const date = getDateForWeekDay(weekNum, dayOfWeek);
+  modalDate = dateKey(date);
+
+  const existing = getDayData(modalDate);
+  modalStatus = existing ? existing.status : null;
+
+  document.getElementById('modalTitle').textContent = `${DOW[dayOfWeek]}, ${formatDate(date)}`;
+  document.getElementById('modalSubtitle').textContent = `Week ${weekNum} — ${getPhase(weekNum).name}`;
+  document.getElementById('modalWorkout').innerHTML = `
+    <span class="tag tag-${workout.type}">${workout.type}</span>
+    <strong style="margin-left:6px">${workout.short}</strong>
+    <div style="margin-top:6px;color:var(--text2);font-size:12px;">${workout.desc}</div>
+  `;
+
+  document.getElementById('modalTime').value = existing?.time || '';
+  document.getElementById('modalNotes').value = existing?.notes || '';
+
+  updateModalButtons(modalStatus);
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+
+function updateModalButtons(status) {
+  document.getElementById('btnCompleted').className = 'modal-btn' + (status === 'completed' ? ' active-completed' : '');
+  document.getElementById('btnSkipped').className = 'modal-btn' + (status === 'skipped' ? ' active-skipped' : '');
+  document.getElementById('btnModified').className = 'modal-btn' + (status === 'modified' ? ' active-modified' : '');
+}
+
+function setStatus(s) {
+  modalStatus = (modalStatus === s) ? null : s;
+  updateModalButtons(modalStatus);
+}
+
+function saveModal() {
+  if (!modalDate) return;
+  const time = parseInt(document.getElementById('modalTime').value) || null;
+  const notes = document.getElementById('modalNotes').value.trim() || null;
+
+  if (modalStatus || time || notes) {
+    setDayData(modalDate, { status: modalStatus, time, notes });
+  } else {
+    setDayData(modalDate, null);
+  }
+  closeModal();
+  render();
+}
+
+function clearDayStatus() {
+  if (modalDate) setDayData(modalDate, null);
+  closeModal();
+  render();
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.add('hidden');
+  modalDate = null;
+}
+
+function closeModalOutside(e) {
+  if (e.target.id === 'modalOverlay') closeModal();
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function calcStats() {
+  const t = today();
+  let totalCompleted = 0, totalSkipped = 0, totalModified = 0, totalTime = 0;
+  let streak = 0, longestStreak = 0, tempStreak = 0;
+  let weeksCompleted = 0;
+
+  // Streak: count back from yesterday
+  for (let i = 1; i <= 140; i++) {
+    const d = new Date(t.getTime() - i * 86400000);
+    const key = dateKey(d);
+    const wd = getWeekDayForDate(d);
+    if (!wd) break;
+    const workout = PLAN[wd.weekNum-1][wd.dayOfWeek];
+    if (workout.type === 'rest') continue;
+    const dd = getDayData(key);
+    if (dd && (dd.status === 'completed' || dd.status === 'modified')) {
+      streak++;
+    } else if (dd && dd.status === 'skipped') {
+      break;
+    } else if (d < t) {
+      break;
+    }
+  }
+
+  for (const [key, val] of Object.entries(appData.days)) {
+    if (val.status === 'completed') totalCompleted++;
+    if (val.status === 'skipped') totalSkipped++;
+    if (val.status === 'modified') totalModified++;
+    if (val.time) totalTime += val.time;
+  }
+
+  // Weeks completed = weeks where all scheduled workouts are marked
+  for (let w = 1; w <= 20; w++) {
+    let allDone = true;
+    for (let d = 0; d < 7; d++) {
+      const workout = PLAN[w-1][d];
+      if (workout.type === 'rest') continue;
+      const date = getDateForWeekDay(w, d);
+      if (date >= t) { allDone = false; break; }
+      const dd = getDayData(dateKey(date));
+      if (!dd || dd.status === 'skipped') { allDone = false; break; }
+    }
+    if (allDone) weeksCompleted++;
+  }
+
+  // Current week
+  const wd = getWeekDayForDate(t);
+  const currentWeek = wd ? wd.weekNum : 20;
+
+  return { totalCompleted, totalSkipped, totalModified, totalTime, streak, weeksCompleted, currentWeek };
+}
+
+function getWeekCompletion(weekNum) {
+  const t = today();
+  let total = 0, done = 0;
+  for (let d = 0; d < 7; d++) {
+    const workout = PLAN[weekNum-1][d];
+    if (workout.type === 'rest') continue;
+    const date = getDateForWeekDay(weekNum, d);
+    if (date > t) continue; // future
+    total++;
+    const dd = getDayData(dateKey(date));
+    if (dd && (dd.status === 'completed' || dd.status === 'modified')) done++;
+  }
+  return total > 0 ? Math.round(done / total * 100) : 0;
+}
+
+function getWeekScheduledCount(weekNum) {
+  return PLAN[weekNum-1].filter(w => w.type !== 'rest').length;
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderStats() {
+  const s = calcStats();
+  const raceDate = getDateForWeekDay(20, 0); // Week 20, Sunday
+  const daysToRace = Math.ceil((raceDate - today()) / 86400000);
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-value">${s.totalCompleted}</div>
+      <div class="stat-label">Runs Completed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${Math.round(s.totalTime / 60 * 10)/10}h</div>
+      <div class="stat-label">Time Logged</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${s.streak}</div>
+      <div class="stat-label">Current Streak</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${s.weeksCompleted}</div>
+      <div class="stat-label">Weeks Done</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${s.totalSkipped}</div>
+      <div class="stat-label">Days Skipped</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${daysToRace > 0 ? daysToRace : '🏅'}</div>
+      <div class="stat-label">${daysToRace > 0 ? 'Days to Race' : 'Race Day!'}</div>
+    </div>
+  `;
+
+  // Progress bar
+  const pct = Math.min(100, Math.round((s.currentWeek - 1) / 20 * 100));
+  document.getElementById('progBar').style.width = pct + '%';
+  document.getElementById('progPct').textContent = pct + '%';
+  document.getElementById('progWeekLabel').textContent = `Week ${s.currentWeek} of 20`;
+  document.getElementById('phaseLabel').textContent = getPhase(s.currentWeek).name;
+  document.getElementById('raceCountdown').textContent = daysToRace > 0 ? `Race in ${daysToRace} days` : '🏅 Race Day!';
+  document.getElementById('countdownBadge').textContent = daysToRace > 0 ? `${daysToRace} days to race` : '🏅 Race Day!';
+}
+
+function renderToday() {
+  const t = today();
+  const wd = getWeekDayForDate(t);
+  const sec = document.getElementById('todaySection');
+
+  if (!wd) {
+    sec.innerHTML = '<div class="card"><div class="card-title">No workout data for today</div></div>';
+    return;
+  }
+
+  const { weekNum, dayOfWeek } = wd;
+  const workout = PLAN[weekNum-1][dayOfWeek];
+  const dateStr = dateKey(t);
+  const dd = getDayData(dateStr);
+  const phase = getPhase(weekNum);
+
+  const statusHtml = dd ? `
+    <div style="margin-bottom:12px;">
+      ${dd.status === 'completed' ? '<span style="color:var(--success)">✅ Completed</span>' : ''}
+      ${dd.status === 'skipped' ? '<span style="color:var(--danger)">⏭️ Skipped</span>' : ''}
+      ${dd.status === 'modified' ? '<span style="color:var(--warning)">🔄 Modified</span>' : ''}
+      ${dd.time ? `<span style="color:var(--text2);font-size:12px;margin-left:8px">⏱ ${dd.time} min</span>` : ''}
+      ${dd.notes ? `<div class="inline-note">"${dd.notes}"</div>` : ''}
+    </div>
+  ` : '';
+
+  if (workout.type === 'rest') {
+    sec.innerHTML = `
+      <div class="today-card">
+        <div class="today-badge">Today</div>
+        <div class="today-workout-title">😴 Rest Day</div>
+        <div class="today-workout-desc">${workout.desc}</div>
+      </div>
+    `;
+    return;
+  }
+
+  const typeIcon = { run:'🏃', strength:'💪', cross:'🚴', race:'🏅' }[workout.type] || '📋';
+
+  sec.innerHTML = `
+    <div class="today-card">
+      <div class="today-badge">Today — Week ${weekNum} ${phase.name}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="font-size:24px">${typeIcon}</span>
+        <div class="today-workout-title">${workout.short}</div>
+      </div>
+      <div class="today-workout-desc">${workout.desc}</div>
+      ${statusHtml}
+      <div class="checkin-buttons">
+        <button class="btn-checkin ${dd?.status === 'completed' ? 'active-completed' : ''}" onclick="quickCheckin('completed')">✅ Completed</button>
+        <button class="btn-checkin ${dd?.status === 'skipped' ? 'active-skipped' : ''}" onclick="quickCheckin('skipped')">⏭️ Skipped</button>
+        <button class="btn-checkin ${dd?.status === 'modified' ? 'active-modified' : ''}" onclick="quickCheckin('modified')">🔄 Modified</button>
+        <button class="btn-checkin" onclick="openDayModal(${weekNum}, ${dayOfWeek})" style="border-color:var(--accent);color:var(--accent);">📝 Add Notes</button>
+      </div>
+    </div>
+  `;
+}
+
+function quickCheckin(status) {
+  const t = today();
+  const dateStr = dateKey(t);
+  const existing = getDayData(dateStr);
+  if (existing?.status === status) {
+    setDayData(dateStr, existing.time || existing.notes ? { ...existing, status: null } : null);
+  } else {
+    setDayData(dateStr, { ...(existing || {}), status });
+  }
+  render();
+}
+
+function renderThisWeek() {
+  const t = today();
+  const wd = getWeekDayForDate(t);
+  if (!wd) return;
+  const { weekNum } = wd;
+  renderWeekGrid(document.getElementById('thisWeekGrid'), weekNum, true);
+}
+
+function renderWeekGrid(container, weekNum, compact) {
+  const t = today();
+  let html = '<div class="week-grid">';
+  for (let d = 0; d < 7; d++) {
+    const workout = PLAN[weekNum-1][d];
+    const date = getDateForWeekDay(weekNum, d);
+    const dateStr = dateKey(date);
+    const dd = getDayData(dateStr);
+    const isToday = dateStr === dateKey(t);
+    const isPast = date < t;
+    const isRest = workout.type === 'rest';
+    const statusCls = dd?.status ? `status-${dd.status}` : '';
+    const todayCls = isToday ? 'is-today' : '';
+    const pastCls = isPast && !isToday ? 'is-past' : '';
+    const restCls = isRest ? 'is-rest' : '';
+
+    const typeIcon = { run:'🏃', strength:'💪', cross:'🚴', rest:'😴', race:'🏅' }[workout.type] || '📋';
+    const statusIcon = dd?.status === 'completed' ? '✅' : dd?.status === 'skipped' ? '⏭️' : dd?.status === 'modified' ? '🔄' : '';
+
+    const clickHandler = isRest ? '' : `onclick="openDayModal(${weekNum}, ${d})"`;
+
+    html += `
+      <div class="day-cell ${statusCls} ${todayCls} ${pastCls} ${restCls}" ${clickHandler}>
+        <div class="day-name">${DOW[d]}</div>
+        <div class="day-date">${formatDate(date)}</div>
+        <div class="day-type-icon">${typeIcon}</div>
+        <div class="day-workout-short wt-${workout.type}">${workout.short}</div>
+        ${statusIcon ? `<div class="day-status-icon">${statusIcon}</div>` : ''}
+      </div>
+    `;
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderFullCalendar() {
+  const cal = document.getElementById('fullCalendar');
+  let html = '';
+  for (let w = 1; w <= 20; w++) {
+    const phase = getPhase(w);
+    const pct = getWeekCompletion(w);
+    const weekStart = getDateForWeekDay(w, 1); // Monday
+    const weekEnd = getDateForWeekDay(w, 6); // Saturday
+    html += `
+      <div class="week-section">
+        <div class="week-header">
+          <div class="week-title">Week ${w} — ${formatDate(weekStart)} to ${formatDate(weekEnd)}</div>
+          <span class="phase-badge ${phase.cls}">${phase.name}</span>
+          <span class="week-completion">${pct}% done</span>
+        </div>
+        <div id="calWeek${w}"></div>
+      </div>
+    `;
+  }
+  cal.innerHTML = html;
+  for (let w = 1; w <= 20; w++) {
+    renderWeekGrid(document.getElementById(`calWeek${w}`), w, false);
+  }
+}
+
+function renderHeatmap() {
+  const t = today();
+  const grid = document.getElementById('heatmapGrid');
+  // Group by week columns
+  let html = '';
+  for (let w = 1; w <= 20; w++) {
+    html += '<div class="heatmap-week">';
+    for (let d = 0; d < 7; d++) {
+      const workout = PLAN[w-1][d];
+      const date = getDateForWeekDay(w, d);
+      const dateStr = dateKey(date);
+      const dd = getDayData(dateStr);
+      const isFuture = date > t;
+      let cls = '';
+      if (workout.type === 'rest') cls = 'hm-rest';
+      else if (isFuture) cls = 'hm-future';
+      else if (dd?.status === 'completed') cls = 'hm-completed';
+      else if (dd?.status === 'skipped') cls = 'hm-skipped';
+      else if (dd?.status === 'modified') cls = 'hm-modified';
+      else cls = 'hm-future'; // past but unlogged
+
+      const title = `W${w} ${DOW[d]}: ${workout.short}`;
+      html += `<div class="heatmap-cell ${cls}" title="${title}"></div>`;
+    }
+    html += '</div>';
+  }
+  grid.innerHTML = html;
+
+  // Weekly summary
+  const list = document.getElementById('weeklySummaryList');
+  let listHtml = '';
+  for (let w = 1; w <= 20; w++) {
+    const pct = getWeekCompletion(w);
+    const phase = getPhase(w);
+    const scheduled = getWeekScheduledCount(w);
+    const weekStart = getDateForWeekDay(w, 1);
+    const t2 = today();
+    const isFuture = weekStart > t2;
+    listHtml += `
+      <div class="week-summary-row">
+        <div class="wsrow-week">Week ${w}</div>
+        <div style="flex:1;display:flex;align-items:center;gap:8px;">
+          <span class="phase-badge ${phase.cls}" style="font-size:9px;padding:1px 6px;">${phase.name}</span>
+          <div class="wsrow-bar">
+            <div class="progress-bar-wrap" style="height:6px;">
+              <div class="progress-bar-fill" style="width:${isFuture?0:pct}%;background:${pct===100?'var(--success)':pct>50?'var(--accent)':'var(--warning)'}"></div>
+            </div>
+          </div>
+        </div>
+        <div class="wsrow-pct">${isFuture ? '—' : pct + '%'}</div>
+      </div>
+    `;
+  }
+  list.innerHTML = listHtml;
+}
+
+function renderProgress() {
+  const s = calcStats();
+  const raceDate = getDateForWeekDay(20, 0);
+  const daysToRace = Math.max(0, Math.ceil((raceDate - today()) / 86400000));
+  const totalWorkouts = PLAN.flat().filter(w => w.type !== 'rest').length;
+
+  let html = `
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">${s.totalCompleted + s.totalModified}</div>
+        <div class="stat-label">Workouts Done</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${totalWorkouts}</div>
+        <div class="stat-label">Total Planned</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${Math.round((s.totalCompleted + s.totalModified) / totalWorkouts * 100)}%</div>
+        <div class="stat-label">Overall Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${s.totalTime}m</div>
+        <div class="stat-label">Total Time</div>
+      </div>
+    </div>
+  `;
+
+  // Phase progress
+  html += '<div class="card"><div class="card-title"><span class="icon">🔄</span> Phase Progress</div>';
+  for (const phase of PHASES) {
+    let pDone = 0, pTotal = 0;
+    for (const w of phase.weeks) {
+      for (let d = 0; d < 7; d++) {
+        const workout = PLAN[w-1][d];
+        if (workout.type === 'rest') continue;
+        pTotal++;
+        const date = getDateForWeekDay(w, d);
+        if (date > today()) continue;
+        const dd = getDayData(dateKey(date));
+        if (dd && (dd.status === 'completed' || dd.status === 'modified')) pDone++;
+      }
+    }
+    const pct = pTotal > 0 ? Math.round(pDone / pTotal * 100) : 0;
+    html += `
+      <div style="margin-bottom:14px;">
+        <div class="progress-label">
+          <span><span class="phase-badge ${phase.cls}">${phase.name}</span> Weeks ${phase.weeks[0]}-${phase.weeks[phase.weeks.length-1]}</span>
+          <span>${pDone}/${pTotal} workouts (${pct}%)</span>
+        </div>
+        <div class="progress-bar-wrap" style="margin-top:6px;">
+          <div class="progress-bar-fill" style="width:${pct}%;background:${pct===100?'var(--success)':''}"></div>
+        </div>
+      </div>
+    `;
+  }
+  html += '</div>';
+
+  // Recent activity
+  html += '<div class="card"><div class="card-title"><span class="icon">📋</span> Recent Logged Days</div>';
+  const entries = Object.entries(appData.days)
+    .filter(([,v]) => v.status || v.notes)
+    .sort(([a],[b]) => b.localeCompare(a))
+    .slice(0, 15);
+
+  if (entries.length === 0) {
+    html += '<div style="color:var(--text2);font-size:13px;">No workouts logged yet. Start marking your days!</div>';
+  } else {
+    for (const [key, val] of entries) {
+      const d = new Date(key + 'T00:00:00');
+      const wd = getWeekDayForDate(d);
+      if (!wd) continue;
+      const workout = PLAN[wd.weekNum-1][wd.dayOfWeek];
+      const icon = val.status === 'completed' ? '✅' : val.status === 'skipped' ? '⏭️' : val.status === 'modified' ? '🔄' : '📝';
+      html += `
+        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:18px">${icon}</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;">${formatDate(d)} — ${workout.short}</div>
+            <div style="font-size:11px;color:var(--text2);">
+              Week ${wd.weekNum}${val.time ? ` · ${val.time} min` : ''}
+              ${val.notes ? `· "${val.notes}"` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+  html += '</div>';
+
+  document.getElementById('progressContent').innerHTML = html;
+}
+
+// ============================================================
+// TABS
+// ============================================================
+let currentTab = 'dashboard';
+
+function switchTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
+  document.getElementById('tab-' + tab).classList.remove('hidden');
+  currentTab = tab;
+  renderTab(tab);
+}
+
+function renderTab(tab) {
+  if (tab === 'dashboard') {
+    renderStats();
+    renderToday();
+    renderThisWeek();
+  } else if (tab === 'calendar') {
+    renderFullCalendar();
+  } else if (tab === 'heatmap') {
+    renderHeatmap();
+  } else if (tab === 'progress') {
+    renderProgress();
+  }
+}
+
+function render() {
+  renderTab(currentTab);
+}
+
+// ============================================================
+// PAUSE/INJURY
+// ============================================================
+function togglePause() {
+  if (appData.pause) {
+    resumeTraining();
+  } else {
+    document.getElementById('pauseModal').classList.remove('hidden');
+  }
+}
+
+function confirmPause() {
+  const reason = document.getElementById('pauseReason').value.trim();
+  const days = parseInt(document.getElementById('pauseDays').value) || 7;
+  appData.pause = { reason, days, since: dateKey(today()) };
+  saveData(appData);
+  document.getElementById('pauseModal').classList.add('hidden');
+  updatePauseBanner();
+  render();
+}
+
+function resumeTraining() {
+  appData.pause = null;
+  saveData(appData);
+  updatePauseBanner();
+  render();
+}
+
+function updatePauseBanner() {
+  const banner = document.getElementById('pauseBanner');
+  if (appData.pause) {
+    banner.classList.remove('hidden');
+    document.getElementById('pauseText').textContent =
+      `Training paused${appData.pause.reason ? ` — ${appData.pause.reason}` : ''}. Duration: ${appData.pause.days} days from ${appData.pause.since}.`;
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+function closePauseOutside(e) {
+  if (e.target.id === 'pauseModal') document.getElementById('pauseModal').classList.add('hidden');
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function exportData() {
+  const exported = {
+    exportDate: new Date().toISOString(),
+    planStart: '2026-03-13',
+    raceDate: dateKey(getDateForWeekDay(20, 0)),
+    stats: calcStats(),
+    days: appData.days,
+  };
+  document.getElementById('exportArea').textContent = JSON.stringify(exported, null, 2);
+  document.getElementById('exportModal').classList.remove('hidden');
+}
+
+function copyExport() {
+  const text = document.getElementById('exportArea').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = 'Copy to Clipboard', 2000);
+  });
+}
+
+function closeExportOutside(e) {
+  if (e.target.id === 'exportModal') document.getElementById('exportModal').classList.add('hidden');
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function confirmReset() {
+  if (confirm('Reset ALL training data? This cannot be undone.')) {
+    if (confirm('Are you sure? All progress will be lost.')) {
+      appData = { days: {}, pause: null };
+      saveData(appData);
+      updatePauseBanner();
+      render();
+    }
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+updatePauseBanner();
+render();
+</script>
+</body>
+</html>
