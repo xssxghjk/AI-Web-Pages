@@ -17,7 +17,6 @@
       --text: #e2e8f0;
       --muted: #64748b;
       --muted2: #8898aa;
-      /* Tier colours */
       --t1: #0ea5e9;
       --t1-bg: rgba(14,165,233,0.08);
       --t1-border: rgba(14,165,233,0.25);
@@ -30,7 +29,6 @@
       --t4: #a855f7;
       --t4-bg: rgba(168,85,247,0.08);
       --t4-border: rgba(168,85,247,0.25);
-      /* Result colours */
       --win: #22c55e;
       --win-bg: rgba(34,197,94,0.08);
       --loss: #ef4444;
@@ -189,7 +187,7 @@
 
     /* ── MAIN ── */
     .main {
-      max-width: 820px;
+      max-width: 1000px;
       margin: 2rem auto;
       padding: 0 1.25rem 4rem;
     }
@@ -201,39 +199,56 @@
       font-size: 0.95rem;
     }
 
-    /* ── REPORT CARD ── */
-    .report-card {
+    /* ── TILES GRID ── */
+    .tiles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    /* ── REPORT TILE ── */
+    .report-tile {
+      display: block;
+      text-decoration: none;
+      color: inherit;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      margin-bottom: 1.5rem;
+      border-radius: 14px;
       overflow: hidden;
-      /* left accent bar set via tier class */
       border-left-width: 3px;
+      transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+      position: relative;
     }
-    .report-card.tier-1 { border-left-color: var(--t1); }
-    .report-card.tier-2 { border-left-color: var(--t2); }
-    .report-card.tier-3 { border-left-color: var(--t3); }
-    .report-card.tier-4 { border-left-color: var(--t4); }
+    .report-tile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+    .report-tile.tier-1 { border-left-color: var(--t1); }
+    .report-tile.tier-2 { border-left-color: var(--t2); }
+    .report-tile.tier-3 { border-left-color: var(--t3); }
+    .report-tile.tier-4 { border-left-color: var(--t4); }
+    .report-tile.tier-1:hover { border-color: var(--t1-border); }
+    .report-tile.tier-2:hover { border-color: var(--t2-border); }
+    .report-tile.tier-3:hover { border-color: var(--t3-border); }
+    .report-tile.tier-4:hover { border-color: var(--t4-border); }
 
-    /* report header */
-    .report-header {
-      padding: 1.25rem 1.5rem 1rem;
-      border-bottom: 1px solid var(--border);
+    .tile-body {
+      padding: 1.1rem 1.25rem 1rem;
     }
-    .report-meta {
+
+    .tile-meta {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
       flex-wrap: wrap;
-      margin-bottom: 0.55rem;
+      margin-bottom: 0.6rem;
     }
     .tier-badge {
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       font-weight: 800;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      padding: 0.2rem 0.65rem;
+      padding: 0.18rem 0.6rem;
       border-radius: 999px;
       border: 1px solid;
     }
@@ -242,246 +257,69 @@
     .tier-badge.t3 { color: var(--t3); background: var(--t3-bg); border-color: var(--t3-border); }
     .tier-badge.t4 { color: var(--t4); background: var(--t4-bg); border-color: var(--t4-border); }
     .hero-badge {
-      font-size: 0.7rem;
+      font-size: 0.67rem;
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 0.2rem 0.65rem;
+      padding: 0.18rem 0.6rem;
       border-radius: 999px;
       background: rgba(255,255,255,0.05);
       border: 1px solid var(--border2);
       color: var(--muted2);
     }
-    .report-title {
-      font-size: 1.3rem;
+
+    .tile-title {
+      font-size: 1.1rem;
       font-weight: 800;
       letter-spacing: -0.01em;
-      line-height: 1.2;
+      line-height: 1.25;
+      margin-bottom: 0.6rem;
     }
-    .report-footer-meta {
+
+    .tile-footer {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      margin-top: 0.45rem;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.5rem;
     }
-    .report-date {
-      font-size: 0.8rem;
+    .tile-date {
+      font-size: 0.78rem;
       color: var(--muted);
     }
-    .report-record {
-      font-size: 0.85rem;
+    .tile-record {
+      font-size: 0.82rem;
       font-weight: 700;
     }
     .rr-win  { color: var(--win); }
     .rr-loss { color: var(--loss); }
     .rr-sep  { color: var(--muted); margin: 0 0.1rem; }
 
-    /* ── SECTIONS INSIDE REPORT ── */
-    .rep-section {
-      padding: 1.1rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .rep-section:last-child { border-bottom: none; }
-
-    .rep-section-label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.65rem;
+    .tile-cta {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-    }
-    .rep-section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .summary-text {
-      font-size: 0.9rem;
-      color: var(--muted2);
-      line-height: 1.65;
-    }
-
-    /* learnings */
-    .learnings-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .learning-item {
-      display: flex;
-      align-items: baseline;
-      gap: 0.55rem;
-      font-size: 0.875rem;
-      line-height: 1.55;
-    }
-    .learning-tag {
-      font-size: 0.62rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0.18rem 0.55rem;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border2);
-      color: var(--muted2);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .learning-text {
-      color: var(--muted2);
-    }
-
-    /* collapsible */
-    .collapsible-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 0.88rem;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: left;
-      padding: 0;
-      transition: color 0.15s;
-    }
-    .collapsible-btn:hover { color: var(--accent); }
-    .collapsible-btn .count-pill {
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 0.15rem 0.5rem;
-      border-radius: 999px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
+      gap: 0.35rem;
+      padding: 0.55rem 1.25rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.78rem;
+      font-weight: 600;
       color: var(--muted);
+      transition: color 0.15s, background 0.15s;
     }
-    .collapsible-btn .chevron {
+    .report-tile:hover .tile-cta {
+      color: var(--accent);
+      background: rgba(14,165,233,0.04);
+    }
+    .tile-cta-arrow {
       margin-left: auto;
-      font-size: 1.1rem;
-      color: var(--muted);
-      transition: transform 0.25s;
-      display: inline-block;
+      font-size: 1rem;
+      transition: transform 0.15s;
     }
-    .collapsible-btn[aria-expanded="true"] .chevron {
-      transform: rotate(90deg);
-    }
-    .collapsible-content {
-      margin-top: 0.85rem;
-      display: none;
-    }
-    .collapsible-content.open { display: block; }
-
-    /* notes list */
-    .notes-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-    .notes-list li {
-      font-size: 0.875rem;
-      color: var(--muted2);
-      line-height: 1.55;
-      padding-left: 1.1rem;
-      position: relative;
-    }
-    .notes-list li::before {
-      content: '–';
-      position: absolute;
-      left: 0;
-      color: var(--muted);
-    }
-
-    /* rounds */
-    .rounds-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .round-item {
-      border-radius: 10px;
-      padding: 0.75rem 1rem;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-    }
-    .round-item.win  { border-color: rgba(34,197,94,0.2);  background: rgba(34,197,94,0.04); }
-    .round-item.loss { border-color: rgba(239,68,68,0.2);  background: rgba(239,68,68,0.04); }
-    .round-header {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 0.5rem;
-    }
-    .round-num {
-      font-size: 0.7rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 6px;
-      padding: 0.15rem 0.45rem;
-      flex-shrink: 0;
-    }
-    .round-opponent {
-      font-size: 0.92rem;
-      font-weight: 700;
-      flex: 1;
-    }
-    .round-result {
-      font-size: 0.72rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
-    }
-    .round-result.win  { color: var(--win);  background: var(--win-bg);  border: 1px solid rgba(34,197,94,0.3); }
-    .round-result.loss { color: var(--loss); background: var(--loss-bg); border: 1px solid rgba(239,68,68,0.3); }
-    .round-score {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--muted);
-      font-variant-numeric: tabular-nums;
-    }
-    .round-notes {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-      padding-top: 0.15rem;
-    }
-    .round-notes li {
-      font-size: 0.835rem;
-      color: var(--muted);
-      line-height: 1.5;
-      padding-left: 1rem;
-      position: relative;
-    }
-    .round-notes li::before {
-      content: '·';
-      position: absolute;
-      left: 0.2rem;
-      color: var(--border2);
-    }
+    .report-tile:hover .tile-cta-arrow { transform: translateX(3px); }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       .filters-bar { gap: 0.75rem; }
-      .report-title { font-size: 1.1rem; }
-      .rep-section { padding: 0.9rem 1.1rem; }
-      .report-header { padding: 1rem 1.1rem 0.85rem; }
+      .tiles-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -513,7 +351,7 @@
   </div>
 
   <main class="main">
-    <div id="reports-container"></div>
+    <div class="tiles-grid" id="reports-container"></div>
     <div class="no-results" id="no-results" style="display:none">No reports match the selected filters.</div>
   </main>
 
@@ -521,9 +359,6 @@
   <script>
   (function () {
 
-    /* ──────────────────────────────────────────
-       HELPERS
-    ────────────────────────────────────────── */
     const TIER_INFO = {
       RTN:          { tier: 1, label: 'Tier 1 · RTN' },
       PQ:           { tier: 1, label: 'Tier 1 · PQ' },
@@ -535,7 +370,7 @@
     };
 
     function getTierLabel(eventType) {
-      return (TIER_INFO[eventType] || { label: 'Tier ?' + ' · ' + eventType }).label;
+      return (TIER_INFO[eventType] || { label: 'Tier ? · ' + eventType }).label;
     }
 
     function computeRecord(rounds) {
@@ -552,129 +387,61 @@
         .replace(/"/g, '&quot;');
     }
 
-    /* Sort newest first */
     REPORTS.sort((a, b) => (a.date < b.date ? 1 : -1));
 
-    /* ──────────────────────────────────────────
-       RENDER FUNCTIONS
-    ────────────────────────────────────────── */
-    function renderRound(round) {
-      const notesHtml = round.notes.length
-        ? `<ul class="round-notes">${round.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>`
-        : '';
-      const scoreHtml = round.score
-        ? `<span class="round-score">${esc(round.score)}</span>`
-        : '';
-      return `
-        <div class="round-item ${round.result}">
-          <div class="round-header">
-            <span class="round-num">R${round.number}</span>
-            <span class="round-opponent">${esc(round.opponent)}</span>
-            <span class="round-result ${round.result}">${round.result === 'win' ? 'Won' : 'Lost'}</span>
-            ${scoreHtml}
-          </div>
-          ${notesHtml}
-        </div>`;
-    }
-
-    function renderReport(r) {
+    /* ── RENDER TILE ── */
+    function renderTile(r) {
       const rec = computeRecord(r.rounds);
       const tierLabel = getTierLabel(r.eventType);
       const tierClass = `t${r.tier}`;
 
-      const generalNotesHtml = r.generalNotes.map(n => `<li>${esc(n)}</li>`).join('');
-      const roundsHtml = r.rounds.map(renderRound).join('');
-      const learningsHtml = r.learnings.map(l =>
-        `<div class="learning-item">
-           <span class="learning-tag">${esc(l.tag)}</span>
-           <span class="learning-text">${esc(l.text)}</span>
-         </div>`
-      ).join('');
-
       return `
-        <article
-          class="report-card tier-${r.tier}"
+        <a
+          class="report-tile tier-${r.tier}"
+          href="./detail.html?id=${esc(r.id)}"
           data-hero="${esc(r.hero.toLowerCase())}"
           data-tier="${r.tier}"
-          id="report-${esc(r.id)}"
         >
-          <!-- Header -->
-          <div class="report-header">
-            <div class="report-meta">
+          <div class="tile-body">
+            <div class="tile-meta">
               <span class="tier-badge ${tierClass}">${esc(tierLabel)}</span>
               <span class="hero-badge">${esc(r.hero)}</span>
             </div>
-            <h2 class="report-title">${esc(r.event)}</h2>
-            <div class="report-footer-meta">
-              <span class="report-date">${esc(r.displayDate)}</span>
-              <span class="report-record">
+            <div class="tile-title">${esc(r.event)}</div>
+            <div class="tile-footer">
+              <span class="tile-date">${esc(r.displayDate)}</span>
+              <span class="tile-record">
                 <span class="rr-win">${rec.wins}W</span>
                 <span class="rr-sep">–</span>
                 <span class="rr-loss">${rec.losses}L</span>
               </span>
             </div>
           </div>
-
-          <!-- Summary -->
-          <div class="rep-section">
-            <div class="rep-section-label">Summary</div>
-            <p class="summary-text">${esc(r.summary)}</p>
+          <div class="tile-cta">
+            View report
+            <span class="tile-cta-arrow">→</span>
           </div>
-
-          <!-- Key Learnings -->
-          <div class="rep-section">
-            <div class="rep-section-label">Key Learnings</div>
-            <div class="learnings-list">${learningsHtml}</div>
-          </div>
-
-          <!-- General Notes (collapsible) -->
-          <div class="rep-section">
-            <button class="collapsible-btn" aria-expanded="false">
-              General Notes
-              <span class="count-pill">${r.generalNotes.length}</span>
-              <span class="chevron">›</span>
-            </button>
-            <div class="collapsible-content">
-              <ul class="notes-list">${generalNotesHtml}</ul>
-            </div>
-          </div>
-
-          <!-- Rounds (collapsible) -->
-          <div class="rep-section">
-            <button class="collapsible-btn" aria-expanded="false">
-              Round by Round
-              <span class="count-pill">${r.rounds.length} rounds</span>
-              <span class="chevron">›</span>
-            </button>
-            <div class="collapsible-content">
-              <div class="rounds-list">${roundsHtml}</div>
-            </div>
-          </div>
-        </article>`;
+        </a>`;
     }
 
-    /* ──────────────────────────────────────────
-       FILTER STATE
-    ────────────────────────────────────────── */
+    /* ── FILTER STATE ── */
     let activeHero = 'all';
     let activeTier = 'all';
 
     function applyFilters() {
-      const cards = document.querySelectorAll('.report-card');
+      const tiles = document.querySelectorAll('.report-tile');
       let visible = 0;
-      cards.forEach(card => {
-        const heroMatch = activeHero === 'all' || card.dataset.hero === activeHero;
-        const tierMatch = activeTier === 'all' || card.dataset.tier === activeTier;
+      tiles.forEach(tile => {
+        const heroMatch = activeHero === 'all' || tile.dataset.hero === activeHero;
+        const tierMatch = activeTier === 'all' || tile.dataset.tier === activeTier;
         const show = heroMatch && tierMatch;
-        card.style.display = show ? '' : 'none';
+        tile.style.display = show ? '' : 'none';
         if (show) visible++;
       });
       document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
     }
 
-    /* ──────────────────────────────────────────
-       BUILD FILTERS
-    ────────────────────────────────────────── */
+    /* ── BUILD FILTERS ── */
     function buildFilters() {
       const heroes = [...new Set(REPORTS.map(r => r.hero))].sort();
       const tiers  = [...new Set(REPORTS.map(r => r.tier))].sort();
@@ -708,9 +475,7 @@
       });
     }
 
-    /* ──────────────────────────────────────────
-       BUILD HERO STATS
-    ────────────────────────────────────────── */
+    /* ── BUILD STATS ── */
     function buildStats() {
       let wins = 0, losses = 0;
       REPORTS.forEach(r => {
@@ -727,29 +492,12 @@
         <span class="stat-pill wr">${wr}% WR</span>`;
     }
 
-    /* ──────────────────────────────────────────
-       COLLAPSIBLES
-    ────────────────────────────────────────── */
-    function initCollapsibles() {
-      document.querySelectorAll('.collapsible-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const expanded = btn.getAttribute('aria-expanded') === 'true';
-          btn.setAttribute('aria-expanded', String(!expanded));
-          const content = btn.nextElementSibling;
-          content.classList.toggle('open', !expanded);
-        });
-      });
-    }
-
-    /* ──────────────────────────────────────────
-       INIT
-    ────────────────────────────────────────── */
+    /* ── INIT ── */
     function init() {
       const container = document.getElementById('reports-container');
-      container.innerHTML = REPORTS.map(renderReport).join('');
+      container.innerHTML = REPORTS.map(renderTile).join('');
       buildStats();
       buildFilters();
-      initCollapsibles();
     }
 
     init();
