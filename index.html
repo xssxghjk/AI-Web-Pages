@@ -233,22 +233,18 @@
     <div class="section-label">Published Pages</div>
     <div class="grid">
 
-      <a class="card" href="./yokohama-pro-tour/">
-        <div class="card-emoji">🃏</div>
-        <div class="card-tag">Travel Guide</div>
-        <h2>FAB Asia Tour 2026</h2>
-        <p>Enes' complete trip guide — Calling: Shanghai (Apr 3–5) &amp; Pro Tour: Yokohama (Apr 9–12). Flights, hotels, timeline, visa, and interactive booking checklist.</p>
+      <a class="card" href="./trips/">
+        <div class="card-emoji">✈️</div>
+        <div class="card-tag">Trips</div>
+        <h2>Trips</h2>
+        <p>Full itineraries, hotel picks, booking checklists, and day-by-day plans — everything you need to join an upcoming trip or see where we've been.</p>
         <div class="card-countdowns">
           <div class="cd-pill cd-pill-calling">
             <span class="cd-days" id="hub-cd-shanghai">–</span>
-            <span>days · Shanghai</span>
-          </div>
-          <div class="cd-pill cd-pill-protour">
-            <span class="cd-days" id="hub-cd-yokohama">–</span>
-            <span>days · Yokohama</span>
+            <span>days · Next Trip</span>
           </div>
         </div>
-        <div class="card-arrow">View page →</div>
+        <div class="card-arrow">View trips →</div>
       </a>
 
       <a class="card" href="./tcg-tournament-reports/">
@@ -298,8 +294,7 @@
         else if (d === 0) el.textContent = '🔴';
         else el.textContent = '✓';
       }
-      setHubCountdown('hub-cd-shanghai', '2026-04-03');
-      setHubCountdown('hub-cd-yokohama', '2026-04-09');
+      setHubCountdown('hub-cd-shanghai', '2026-03-27');
 
       // Race date is dynamic: Week 20 Sunday from the user's plan start date stored in localStorage
       (function() {
