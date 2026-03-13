@@ -31,7 +31,7 @@ const TRIPS = [
     startDate: '2026-03-27',
     endDate: '2026-04-13',
     displayDates: 'Mar 27 – Apr 13, 2026',
-    description: 'Two-stop Asia tour covering Calling: Shanghai (Apr 3–5) and Pro Tour: Yokohama (Apr 9–12). Full itinerary with flights from Stuttgart, hotel picks across all budgets, a day-by-day timeline, and an interactive booking checklist.',
+    description: 'Two-stop Asia tour covering Calling: Shanghai (Apr 3–5) and Pro Tour: Yokohama (Apr 9–12). Full itinerary with flights from Frankfurt, hotel picks across all budgets, a day-by-day timeline, and an interactive booking checklist.',
     link: '../yokohama-pro-tour/',
     tags: ['FaB', 'Tournament'],
   },
