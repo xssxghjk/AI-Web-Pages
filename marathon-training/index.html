@@ -462,6 +462,55 @@
   .race-hero-bar { flex: 1; min-width: 120px; }
   .race-hero-bar-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; display: flex; justify-content: space-between; }
   @media (max-width: 480px) { .race-hero-number { font-size: 42px; } }
+
+  /* Start Screen */
+  .start-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 60px);
+    padding: 24px;
+  }
+  .start-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 48px 40px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+  }
+  .start-icon { font-size: 64px; margin-bottom: 20px; }
+  .start-title { font-size: 28px; font-weight: 900; margin-bottom: 8px; }
+  .start-title span { color: var(--accent); }
+  .start-sub { color: var(--text2); font-size: 15px; line-height: 1.6; margin-bottom: 32px; }
+  .start-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .start-detail-item {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 14px 8px;
+  }
+  .start-detail-value { font-size: 22px; font-weight: 800; color: var(--accent); }
+  .start-detail-label { font-size: 11px; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .btn-start {
+    background: linear-gradient(135deg, var(--accent), #9c58ff);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 32px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: opacity 0.15s;
+  }
+  .btn-start:hover { opacity: 0.88; }
+  .start-note { margin-top: 14px; font-size: 12px; color: var(--text2); }
 </style>
 </head>
 <body>
@@ -470,13 +519,40 @@
   <div class="header-inner">
     <div class="app-title">🏃 Couch to <span>Half Marathon</span></div>
     <div id="countdownBadge" class="countdown-badge">Loading...</div>
-    <div class="header-actions">
+    <div class="header-actions" id="headerActions">
       <button class="btn btn-ghost btn-sm" onclick="exportData()">⬆ Export</button>
       <button class="btn btn-ghost btn-sm" onclick="togglePause()">⏸ Pause</button>
       <button class="btn btn-danger btn-sm" onclick="confirmReset()">↺ Reset</button>
     </div>
   </div>
 </header>
+
+<!-- Start Screen (shown when training has not been started yet) -->
+<div id="startScreen" class="hidden">
+  <div class="start-screen">
+    <div class="start-card">
+      <div class="start-icon">🏃</div>
+      <div class="start-title">Couch to <span>Half Marathon</span></div>
+      <div class="start-sub">A 20-week plan taking you from zero to 21.1 km. Start whenever you're ready — your plan will begin from today.</div>
+      <div class="start-details">
+        <div class="start-detail-item">
+          <div class="start-detail-value">20</div>
+          <div class="start-detail-label">Weeks</div>
+        </div>
+        <div class="start-detail-item">
+          <div class="start-detail-value">4</div>
+          <div class="start-detail-label">Phases</div>
+        </div>
+        <div class="start-detail-item">
+          <div class="start-detail-value">21.1</div>
+          <div class="start-detail-label">KM Goal</div>
+        </div>
+      </div>
+      <button class="btn-start" onclick="startTraining()">Start Training Today</button>
+      <div class="start-note">Week 1 begins from the Sunday of the current week.</div>
+    </div>
+  </div>
+</div>
 
 <nav class="nav-tabs" id="navTabs">
   <div class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Dashboard</div>
@@ -661,8 +737,6 @@
 // ============================================================
 // TRAINING PLAN DATA
 // ============================================================
-const PLAN_START = new Date('2026-03-13'); // Tomorrow
-
 const PHASES = [
   { name: 'Foundation', weeks: [1,2,3,4,5], cls: 'phase-1' },
   { name: 'Base Building', weeks: [6,7,8,9,10], cls: 'phase-2' },
@@ -917,33 +991,16 @@ function buildPlan() {
 
 // Get the date for a given week (1-indexed) and day offset (0=Sun of that week)
 function getDateForWeekDay(weekNum, dayOfWeek) {
-  // Plan starts on Friday March 13, 2026
-  // Week 1 starts on the Sunday of the week containing March 13
-  // Actually, let's map: Plan starts March 13 (Friday = dayOfWeek index 5)
-  // Week 1 day 0 = Sunday before March 13 = March 8 (or actually, let's treat the plan as starting from March 13)
-  // Let me think more carefully:
-  // PLAN_START = March 13 = Friday
-  // I'll define: Week 1 starts on Monday March 9 (the Monday before March 13)
-  // So week N starts on Monday of week N: PLAN_START_MONDAY + (N-1)*7 days
-  // Days: Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6 -> but plan structure is [Sun,Mon,Tue,Wed,Thu,Fri,Sat]
-
-  // Plan week 1: The first actual workout day is March 13 (Fri/Sat based on plan)
-  // Wait — the plan has Tue/Thu as run days. March 13 is a Friday.
-  // Let's define: Week 1 Mon = March 9, 2026
-  // So Week 1 starts (Sun) = March 8
-  // Actually, let me define week start as Sunday:
-  // Week 1 Sun = March 8, Week 1 Mon = March 9, ..., Week 1 Sat = March 14
-
-  const week1Sun = new Date('2026-03-08'); // Sunday of week 1
-  const startMs = week1Sun.getTime();
+  const week1Sun = getWeek1Sun();
+  if (!week1Sun) return null;
   const offsetDays = (weekNum - 1) * 7 + dayOfWeek;
-  const d = new Date(startMs + offsetDays * 86400000);
-  return d;
+  return new Date(week1Sun.getTime() + offsetDays * 86400000);
 }
 
 // Get week number and day index for a given date
 function getWeekDayForDate(date) {
-  const week1Sun = new Date('2026-03-08');
+  const week1Sun = getWeek1Sun();
+  if (!week1Sun) return null;
   const diffMs = date.getTime() - week1Sun.getTime();
   const diffDays = Math.floor(diffMs / 86400000);
   if (diffDays < 0 || diffDays >= 140) return null;
@@ -976,7 +1033,17 @@ function loadData() {
     const raw = localStorage.getItem(LS_KEY);
     if (raw) return JSON.parse(raw);
   } catch(e) {}
-  return { days: {}, pause: null };
+  return { days: {}, pause: null, planStart: null };
+}
+
+// Returns the Sunday of the week containing the plan start date, or null if not started
+function getWeek1Sun() {
+  if (!appData.planStart) return null;
+  const start = new Date(appData.planStart + 'T00:00:00');
+  const day = start.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  const sun = new Date(start.getTime() - day * 86400000);
+  sun.setHours(0,0,0,0);
+  return sun;
 }
 
 function saveData(data) {
@@ -1153,7 +1220,7 @@ function renderStats() {
   const s = calcStats();
   const raceDate = getDateForWeekDay(20, 0); // Week 20, Sunday
   const daysToRace = Math.ceil((raceDate - today()) / 86400000);
-  const totalDays = Math.ceil((raceDate - new Date('2026-03-13')) / 86400000);
+  const totalDays = Math.ceil((raceDate - new Date(appData.planStart + 'T00:00:00')) / 86400000);
   const elapsed = totalDays - Math.max(0, daysToRace);
   const racePct = Math.min(100, Math.round(elapsed / totalDays * 100));
 
@@ -1512,7 +1579,29 @@ function renderTab(tab) {
 }
 
 function render() {
+  if (!appData.planStart) {
+    document.getElementById('startScreen').classList.remove('hidden');
+    document.getElementById('navTabs').classList.add('hidden');
+    document.getElementById('pauseBanner').classList.add('hidden');
+    document.getElementById('mainContent').classList.add('hidden');
+    document.getElementById('headerActions').classList.add('hidden');
+    document.getElementById('countdownBadge').textContent = 'Not started';
+    return;
+  }
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('navTabs').classList.remove('hidden');
+  document.getElementById('mainContent').classList.remove('hidden');
+  document.getElementById('headerActions').classList.remove('hidden');
   renderTab(currentTab);
+}
+
+// ============================================================
+// START TRAINING
+// ============================================================
+function startTraining() {
+  appData.planStart = dateKey(today());
+  saveData(appData);
+  render();
 }
 
 // ============================================================
@@ -1564,7 +1653,7 @@ function closePauseOutside(e) {
 function exportData() {
   const exported = {
     exportDate: new Date().toISOString(),
-    planStart: '2026-03-13',
+    planStart: appData.planStart,
     raceDate: dateKey(getDateForWeekDay(20, 0)),
     stats: calcStats(),
     days: appData.days,
@@ -1591,8 +1680,8 @@ function closeExportOutside(e) {
 // ============================================================
 function confirmReset() {
   if (confirm('Reset ALL training data? This cannot be undone.')) {
-    if (confirm('Are you sure? All progress will be lost.')) {
-      appData = { days: {}, pause: null };
+    if (confirm('Are you sure? All progress and the start date will be cleared.')) {
+      appData = { days: {}, pause: null, planStart: null };
       saveData(appData);
       updatePauseBanner();
       render();
