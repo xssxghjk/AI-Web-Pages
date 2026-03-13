@@ -300,7 +300,28 @@
       }
       setHubCountdown('hub-cd-shanghai', '2026-04-03');
       setHubCountdown('hub-cd-yokohama', '2026-04-09');
-      setHubCountdown('hub-cd-race', '2026-08-23');
+
+      // Race date is dynamic: Week 20 Sunday from the user's plan start date stored in localStorage
+      (function() {
+        const el = document.getElementById('hub-cd-race');
+        if (!el) return;
+        try {
+          const raw = localStorage.getItem('c2hm_v1');
+          if (!raw) return; // plan not started yet — leave default '–'
+          const data = JSON.parse(raw);
+          if (!data.planStart) return;
+          // Replicate marathon app logic: find Sunday of planStart's week, then add 19 weeks
+          const start = new Date(data.planStart + 'T00:00:00');
+          const week1Sun = new Date(start.getTime() - start.getDay() * 86400000);
+          week1Sun.setHours(0, 0, 0, 0);
+          const raceDate = new Date(week1Sun.getTime() + 19 * 7 * 86400000);
+          const raceDateStr = raceDate.toISOString().slice(0, 10);
+          const d = daysUntil(raceDateStr);
+          if (d > 0) el.textContent = d;
+          else if (d === 0) el.textContent = '🔴';
+          else el.textContent = '✓';
+        } catch(e) {}
+      })();
     })();
   </script>
 
