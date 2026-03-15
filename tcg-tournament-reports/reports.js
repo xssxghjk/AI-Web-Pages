@@ -25,7 +25,7 @@ const REPORTS = [
 
   {
     id: 'pq-mainz-2026-03-15',
-    hero: 'Slippy',
+    hero: 'Mario',
     date: '2026-03-15',
     displayDate: '15.03.26',
     event: 'PQ Mainz',
