@@ -172,27 +172,50 @@
   }
 
   /* Today's Workout */
+  @keyframes today-glow {
+    0%, 100% { box-shadow: 0 0 12px rgba(108,99,255,0.4), 0 0 24px rgba(108,99,255,0.15); }
+    50%       { box-shadow: 0 0 20px rgba(108,99,255,0.7), 0 0 40px rgba(108,99,255,0.25); }
+  }
+  @keyframes badge-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.85; transform: scale(1.05); }
+  }
   .today-card {
-    background: linear-gradient(135deg, #1a1d35 0%, #1a2535 100%);
-    border: 1px solid var(--accent);
-    border-radius: 12px;
-    padding: 20px;
+    background: linear-gradient(135deg, #1e2040 0%, #1b2a40 100%);
+    border: 2px solid var(--accent);
+    border-radius: 14px;
+    padding: 22px;
     margin-bottom: 16px;
+    animation: today-glow 3s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+  }
+  .today-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(108,99,255,0.08) 0%, rgba(78,205,196,0.05) 100%);
+    pointer-events: none;
   }
   .today-badge {
-    background: var(--accent);
+    background: linear-gradient(90deg, var(--accent), #8b83ff);
     color: #fff;
-    border-radius: 6px;
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 700;
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    display: inline-block;
-    margin-bottom: 8px;
+    letter-spacing: 1.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+    animation: badge-pulse 2.5s ease-in-out infinite;
+    box-shadow: 0 2px 10px rgba(108,99,255,0.5);
   }
-  .today-workout-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
-  .today-workout-desc { color: var(--text2); margin-bottom: 16px; }
+  .today-badge::before { content: '▶'; font-size: 9px; }
+  .today-workout-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .today-workout-desc { color: var(--text2); margin-bottom: 16px; font-size: 14px; line-height: 1.5; }
   .checkin-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
   .btn-checkin {
     flex: 1;
@@ -254,7 +277,12 @@
     overflow: hidden;
   }
   .day-cell:hover { border-color: var(--accent); transform: translateY(-1px); }
-  .day-cell.is-today { border-color: var(--accent); background: rgba(108,99,255,0.1); }
+  .day-cell.is-today {
+    border-color: var(--accent);
+    border-width: 2px;
+    background: rgba(108,99,255,0.18);
+    box-shadow: 0 0 10px rgba(108,99,255,0.35), inset 0 0 8px rgba(108,99,255,0.08);
+  }
   .day-cell.is-past { opacity: 0.7; }
   .day-cell.status-completed { background: rgba(81,207,102,0.1); border-color: rgba(81,207,102,0.4); }
   .day-cell.status-skipped { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.3); }
