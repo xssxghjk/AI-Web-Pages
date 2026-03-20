@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FaB Tournament Prep</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #05080f;
+      --surface: #0c1120;
+      --surface2: #111827;
+      --border: #1e2d45;
+      --border2: #243348;
+      --accent: #f97316;
+      --accent-bg: rgba(249,115,22,0.08);
+      --accent-border: rgba(249,115,22,0.28);
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --muted2: #8898aa;
+      --t1: #0ea5e9;
+      --t1-bg: rgba(14,165,233,0.08);
+      --t1-border: rgba(14,165,233,0.25);
+      --t2: #22c55e;
+      --t2-bg: rgba(34,197,94,0.08);
+      --t2-border: rgba(34,197,94,0.25);
+      --t3: #f59e0b;
+      --t3-bg: rgba(245,158,11,0.08);
+      --t3-border: rgba(245,158,11,0.25);
+      --t4: #a855f7;
+      --t4-bg: rgba(168,85,247,0.08);
+      --t4-border: rgba(168,85,247,0.25);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5,8,15,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .nav-back {
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: color 0.2s;
+      flex-shrink: 0;
+    }
+    .nav-back:hover { color: var(--text); }
+    .nav-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .nav-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-left: auto;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .nav-sep { color: var(--border2); }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 3.5rem 1.5rem 2.5rem;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(249,115,22,0.05) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+      border-radius: 999px;
+      padding: 0.25rem 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-size: clamp(1.9rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 0.6rem;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 520px;
+      margin-inline: auto;
+      margin-bottom: 1.5rem;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-pill {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.3rem 0.85rem;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      color: var(--muted2);
+    }
+    .stat-pill.accent { color: var(--accent); background: var(--accent-bg); border-color: var(--accent-border); }
+
+    /* ── FILTERS ── */
+    .filters-bar {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      align-items: center;
+      background: var(--surface);
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .filter-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .filter-pills { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .filter-pill {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-pill:hover { border-color: var(--muted2); color: var(--text); }
+    .filter-pill.active {
+      background: var(--accent-bg);
+      border-color: var(--accent-border);
+      color: var(--accent);
+    }
+    .filter-pill.t4.active { background: var(--t4-bg); border-color: var(--t4-border); color: var(--t4); }
+    .filter-pill.t3.active { background: var(--t3-bg); border-color: var(--t3-border); color: var(--t3); }
+    .filter-pill.t2.active { background: var(--t2-bg); border-color: var(--t2-border); color: var(--t2); }
+    .filter-pill.t1.active { background: var(--t1-bg); border-color: var(--t1-border); color: var(--t1); }
+
+    /* ── MAIN ── */
+    .main {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1.25rem 4rem;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 3rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* ── TILES GRID ── */
+    .tiles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    /* ── PREP TILE ── */
+    .prep-tile {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      border-left-width: 3px;
+      transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+    }
+    .prep-tile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+    .prep-tile.tier-1 { border-left-color: var(--t1); }
+    .prep-tile.tier-2 { border-left-color: var(--t2); }
+    .prep-tile.tier-3 { border-left-color: var(--t3); }
+    .prep-tile.tier-4 { border-left-color: var(--t4); }
+    .prep-tile.tier-1:hover { border-color: var(--t1-border); }
+    .prep-tile.tier-2:hover { border-color: var(--t2-border); }
+    .prep-tile.tier-3:hover { border-color: var(--t3-border); }
+    .prep-tile.tier-4:hover { border-color: var(--t4-border); }
+
+    .tile-body {
+      padding: 1.1rem 1.25rem 1rem;
+    }
+
+    .tile-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.6rem;
+    }
+    .tier-badge {
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid;
+    }
+    .tier-badge.t1 { color: var(--t1); background: var(--t1-bg); border-color: var(--t1-border); }
+    .tier-badge.t2 { color: var(--t2); background: var(--t2-bg); border-color: var(--t2-border); }
+    .tier-badge.t3 { color: var(--t3); background: var(--t3-bg); border-color: var(--t3-border); }
+    .tier-badge.t4 { color: var(--t4); background: var(--t4-bg); border-color: var(--t4-border); }
+
+    .tile-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+      margin-bottom: 0.7rem;
+    }
+
+    .tile-formats {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+    .format-pill {
+      font-size: 0.67rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      background: var(--accent-bg);
+      border: 1px solid var(--accent-border);
+      color: var(--accent);
+    }
+    .format-hero {
+      font-size: 0.67rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .tile-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+    .tile-date {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .tile-cta {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.55rem 1.25rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: color 0.15s, background 0.15s;
+    }
+    .prep-tile:hover .tile-cta {
+      color: var(--accent);
+      background: var(--accent-bg);
+    }
+    .tile-cta-arrow {
+      margin-left: auto;
+      font-size: 1rem;
+      transition: transform 0.15s;
+    }
+    .prep-tile:hover .tile-cta-arrow { transform: translateX(3px); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .filters-bar { gap: 0.75rem; }
+      .tiles-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-back" href="../">← Hub</a>
+    <span class="nav-sep">|</span>
+    <span class="nav-title">Tournament Prep</span>
+    <span class="nav-sub">Flesh and Blood</span>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-tag">Flesh and Blood</div>
+    <h1>Tournament Prep</h1>
+    <p>Format-by-format preparation notes, meta predictions, and hero picks for upcoming events.</p>
+    <div class="hero-stats" id="hero-stats"></div>
+  </header>
+
+  <div class="filters-bar">
+    <div class="filter-group">
+      <span class="filter-label">Tier</span>
+      <div class="filter-pills" id="tier-filter"></div>
+    </div>
+  </div>
+
+  <main class="main">
+    <div class="tiles-grid" id="preps-container"></div>
+    <div class="no-results" id="no-results" style="display:none">No prep entries match the selected filters.</div>
+  </main>
+
+  <script src="preps.js"></script>
+  <script>
+  (function () {
+
+    const TIER_INFO = {
+      RTN:          { tier: 1, label: 'Tier 1 · RTN' },
+      PQ:           { tier: 1, label: 'Tier 1 · PQ' },
+      Battleground: { tier: 2, label: 'Tier 2 · Battleground' },
+      Showdown:     { tier: 2, label: 'Tier 2 · Showdown' },
+      Calling:      { tier: 3, label: 'Tier 3 · Calling' },
+      Worlds:       { tier: 4, label: 'Tier 4 · Worlds' },
+      PT:           { tier: 4, label: 'Tier 4 · Pro Tour' },
+    };
+
+    function getTierLabel(eventType) {
+      return (TIER_INFO[eventType] || { label: 'Tier ? · ' + eventType }).label;
+    }
+
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    PREPS.sort((a, b) => (a.date < b.date ? 1 : -1));
+
+    /* ── RENDER TILE ── */
+    function renderTile(p) {
+      const tierLabel = getTierLabel(p.eventType);
+      const tierClass = `t${p.tier}`;
+      const formatsHtml = p.formats.map(f =>
+        `<span class="format-pill">${esc(f.abbr)}</span>
+         <span class="format-hero">${esc(f.hero)}</span>`
+      ).join('');
+
+      return `
+        <a
+          class="prep-tile tier-${p.tier}"
+          href="./detail.html?id=${esc(p.id)}"
+          data-tier="${p.tier}"
+        >
+          <div class="tile-body">
+            <div class="tile-meta">
+              <span class="tier-badge ${tierClass}">${esc(tierLabel)}</span>
+            </div>
+            <div class="tile-title">${esc(p.event)}</div>
+            <div class="tile-formats">${formatsHtml}</div>
+            <div class="tile-footer">
+              <span class="tile-date">${esc(p.displayDate)}</span>
+            </div>
+          </div>
+          <div class="tile-cta">
+            View prep
+            <span class="tile-cta-arrow">→</span>
+          </div>
+        </a>`;
+    }
+
+    /* ── FILTER STATE ── */
+    let activeTier = 'all';
+
+    function applyFilters() {
+      const tiles = document.querySelectorAll('.prep-tile');
+      let visible = 0;
+      tiles.forEach(tile => {
+        const tierMatch = activeTier === 'all' || tile.dataset.tier === activeTier;
+        tile.style.display = tierMatch ? '' : 'none';
+        if (tierMatch) visible++;
+      });
+      document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
+    }
+
+    /* ── BUILD FILTERS ── */
+    function buildFilters() {
+      const tiers = [...new Set(PREPS.map(p => p.tier))].sort();
+      const tierLabels = { 1: 'RTN / PQ', 2: 'BG / Show', 3: 'Calling', 4: 'Worlds / PT' };
+      const tierEl = document.getElementById('tier-filter');
+      tierEl.innerHTML =
+        `<button class="filter-pill active" data-ftype="tier" data-fval="all">All</button>` +
+        tiers.map(t =>
+          `<button class="filter-pill t${t}" data-ftype="tier" data-fval="${t}">${esc(tierLabels[t] || 'Tier ' + t)}</button>`
+        ).join('');
+
+      document.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const fval = btn.dataset.fval;
+          activeTier = fval;
+          document.querySelectorAll('[data-ftype="tier"]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          applyFilters();
+        });
+      });
+    }
+
+    /* ── BUILD STATS ── */
+    function buildStats() {
+      const totalFormats = PREPS.reduce((acc, p) => acc + p.formats.length, 0);
+      document.getElementById('hero-stats').innerHTML = `
+        <span class="stat-pill">${PREPS.length} event${PREPS.length !== 1 ? 's' : ''}</span>
+        <span class="stat-pill accent">${totalFormats} format${totalFormats !== 1 ? 's' : ''} prepped</span>`;
+    }
+
+    /* ── INIT ── */
+    function init() {
+      const container = document.getElementById('preps-container');
+      container.innerHTML = PREPS.map(renderTile).join('');
+      buildStats();
+      buildFilters();
+    }
+
+    init();
+
+  })();
+  </script>
+
+</body>
+</html>
