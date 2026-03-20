@@ -12,6 +12,13 @@ const PREPS = [
         name: 'Silver Age',
         abbr: 'Sage',
         hero: 'Briar',
+        summary: [
+          'Still searching for the optimal list — Nebular Blade + blues is smooth, Electrify is high-variance but hard to cut given its impact when drawn early.',
+          'Oldhim is a near-auto-loss; sideboard solutions (Emissary, tall arcane) remain unsolved. Regular guardians are doable via deck damage threats.',
+          'Ira matchup is roughly 50/50 going first, more favourable going second — card conversion consistency is the key issue.',
+          'Updated list runs Fry + more elemental pumps for smoother hands, noticeably improving the Ira matchup and giving the option to block or take tempo on any hand.',
+          'Core aggro pattern: block efficiently to preserve life → leverage that life lead to take tempo (go close to 1) → threaten lethal without being forced to block with 2–3 cards. Life is the main tempo resource.',
+        ],
         heroReasons: [
           'Solid numbers',
           'Good matchups into aggro decks',
@@ -62,6 +69,13 @@ const PREPS = [
         name: 'Classic Constructed',
         abbr: 'CC',
         hero: 'Mario',
+        summary: [
+          'Hyper Inflation is not worth running — cut it.',
+          'Frailty Trap remains strong and relevant in several matchups.',
+          'vs Victor (defensive): seeing Death Touch early is critical; always play around Iron Grip; stick to a consistent 60-card build even in fatigue games.',
+          'Codex of Inertia is valuable for resetting board states; Spreading Plague can be clutch in the endgame.',
+          'Stealth Attack can be bricky — be cautious with it. Deck damage is a real win condition as long as they can\'t represent multiple Remembrances.',
+        ],
         heroReasons: [
           'Big wide meta, solid numbers, good disruption',
         ],

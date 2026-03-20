@@ -366,6 +366,80 @@
     }
     .not-found h2 { font-size: 1.4rem; margin-bottom: 0.75rem; color: var(--text); }
 
+    /* ── TABS ── */
+    .format-tabs {
+      display: flex;
+      gap: 0.4rem;
+      padding: 0 0 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+    .tab-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted2);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.45rem 1.1rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .tab-btn:hover { border-color: var(--border2); color: var(--text); }
+    .tab-btn.active {
+      background: var(--accent-bg);
+      border-color: var(--accent-border);
+      color: var(--accent);
+    }
+
+    /* ── SUMMARY ── */
+    .summary-card {
+      background: linear-gradient(135deg, rgba(249,115,22,0.06) 0%, rgba(249,115,22,0.02) 100%);
+      border: 1px solid var(--accent-border);
+      border-radius: 12px;
+      padding: 1.1rem 1.4rem;
+      margin-bottom: 0.25rem;
+    }
+    .summary-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .summary-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--accent-border);
+    }
+    .summary-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .summary-list li {
+      font-size: 0.875rem;
+      color: var(--muted2);
+      line-height: 1.6;
+      padding-left: 1.2rem;
+      position: relative;
+    }
+    .summary-list li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 0.7rem;
+      top: 0.25em;
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       .prep-title { font-size: 1.4rem; }
@@ -450,6 +524,15 @@
     function renderFormat(fmt, fmtIndex) {
       const heroReasonsHtml = fmt.heroReasons.map(r => `<li>${esc(r)}</li>`).join('');
 
+      const summaryHtml = fmt.summary && fmt.summary.length
+        ? `<div class="summary-card">
+             <div class="summary-label">Summary</div>
+             <ul class="summary-list">
+               ${fmt.summary.map(s => `<li>${esc(s)}</li>`).join('')}
+             </ul>
+           </div>`
+        : '';
+
       const metaHtml = fmt.predictedMeta.length
         ? `<div class="prep-section">
              <div class="section-label">Predicted Meta</div>
@@ -481,11 +564,13 @@
         : '';
 
       return `
-        <div class="format-card">
+        <div class="format-card" data-format-id="${esc(fmt.id)}">
           <div class="format-card-header">
             <span class="format-abbr-badge">${esc(fmt.abbr)}</span>
             <span class="format-name">${esc(fmt.name)}</span>
           </div>
+
+          ${summaryHtml ? `<div class="prep-section">${summaryHtml}</div>` : ''}
 
           <div class="prep-section">
             <div class="section-label">Hero Pick</div>
@@ -507,7 +592,20 @@
       const formatChipsHtml = p.formats.map(f =>
         `<span class="format-chip">${esc(f.abbr)} · ${esc(f.hero)}</span>`
       ).join('');
-      const formatsHtml = p.formats.map((f, i) => renderFormat(f, i)).join('');
+
+      const tabsHtml = p.formats.length > 1
+        ? `<div class="format-tabs">
+             ${p.formats.map((f, i) =>
+               `<button class="tab-btn${i === 0 ? ' active' : ''}" data-tab="${esc(f.id)}">${esc(f.name)}</button>`
+             ).join('')}
+           </div>`
+        : '';
+
+      const formatsHtml = p.formats.map((f, i) =>
+        `<div class="format-tab-panel" data-panel="${esc(f.id)}"${i !== 0 ? ' style="display:none"' : ''}>
+           ${renderFormat(f, i)}
+         </div>`
+      ).join('');
 
       return `
         <header class="page-header">
@@ -522,6 +620,7 @@
         </header>
 
         <main class="main">
+          ${tabsHtml}
           ${formatsHtml}
         </main>`;
     }
@@ -534,6 +633,21 @@
           btn.setAttribute('aria-expanded', String(!expanded));
           const target = document.getElementById(btn.dataset.target);
           if (target) target.classList.toggle('open', !expanded);
+        });
+      });
+    }
+
+    /* ── TABS ── */
+    function initTabs() {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      if (!tabBtns.length) return;
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabId = btn.dataset.tab;
+          tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+          document.querySelectorAll('.format-tab-panel').forEach(panel => {
+            panel.style.display = panel.dataset.panel === tabId ? '' : 'none';
+          });
         });
       });
     }
@@ -556,6 +670,7 @@
       document.getElementById('nav-title').textContent = prep.event;
       container.innerHTML = renderDetail(prep);
       initCollapsibles();
+      initTabs();
     }
 
   })();
