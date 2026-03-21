@@ -126,35 +126,105 @@
     .stat-pill.loss { color: var(--loss); background: var(--loss-bg); border-color: rgba(239,68,68,0.25); }
     .stat-pill.wr   { color: var(--accent); background: var(--t1-bg); border-color: var(--t1-border); }
 
-    /* ── FILTERS ── */
-    .filters-bar {
-      padding: 1rem 1.5rem;
+    /* ── FILTER TOGGLE ── */
+    .filter-toggle-bar {
+      padding: 0.55rem 1.5rem;
       border-bottom: 1px solid var(--border);
       display: flex;
-      gap: 1.25rem;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--surface);
+    }
+    .filter-toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-toggle-btn:hover { border-color: var(--muted2); color: var(--text); }
+    .filter-toggle-btn.has-filters {
+      background: rgba(14,165,233,0.1);
+      border-color: rgba(14,165,233,0.4);
+      color: var(--accent);
+    }
+    .filter-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.1rem;
+      height: 1.1rem;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #05080f;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 0 0.25rem;
+    }
+    .filter-active-tags {
+      display: flex;
+      gap: 0.3rem;
       flex-wrap: wrap;
       align-items: center;
-      background: var(--surface);
+    }
+    .filter-active-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(14,165,233,0.1);
+      border: 1px solid rgba(14,165,233,0.3);
+      color: var(--accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .filter-active-tag:hover { background: rgba(14,165,233,0.18); }
+    .filter-active-tag .remove { opacity: 0.7; font-size: 0.8rem; line-height: 1; }
+
+    /* ── FILTER PANEL ── */
+    .filter-panel {
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.22s ease, padding 0.22s ease;
+      padding: 0 1.5rem;
+    }
+    .filter-panel.open {
+      max-height: 160px;
+      padding: 0.85rem 1.5rem;
     }
     .filter-group {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       flex-wrap: wrap;
+      margin-bottom: 0.55rem;
     }
+    .filter-group:last-child { margin-bottom: 0; }
     .filter-label {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--muted);
       white-space: nowrap;
+      min-width: 2.5rem;
     }
-    .filter-pills { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .filter-pills { display: flex; gap: 0.3rem; flex-wrap: wrap; }
     .filter-pill {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
-      padding: 0.25rem 0.7rem;
+      padding: 0.2rem 0.6rem;
       border-radius: 999px;
       background: transparent;
       border: 1px solid var(--border2);
@@ -306,7 +376,6 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
-      .filters-bar { gap: 0.75rem; }
       .tiles-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -325,7 +394,17 @@
     <div class="hero-stats" id="hero-stats"></div>
   </header>
 
-  <div class="filters-bar">
+  <div class="filter-toggle-bar">
+    <button class="filter-toggle-btn" id="filter-toggle-btn">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 2.5h10M3 6h6M5 9.5h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      Filter
+      <span class="filter-badge" id="filter-badge" style="display:none"></span>
+    </button>
+    <div class="filter-active-tags" id="filter-active-tags"></div>
+  </div>
+  <div class="filter-panel" id="filter-panel">
     <div class="filter-group">
       <span class="filter-label">Hero</span>
       <div class="filter-pills" id="hero-filter"></div>
@@ -379,7 +458,7 @@
     function renderTile(r) {
       const rec = computeRecord(r.rounds);
       const tierLabel = getTierLabel(r.eventType);
-      const tier = r.tier != null ? r.tier : ((TIER_INFO[r.eventType] || { tier: 1 }).tier);
+      const tier = getTierForReport(r);
       const tierClass = `t${tier}`;
 
       return `
@@ -415,6 +494,11 @@
     let activeHero = 'all';
     let activeTier = 'all';
 
+    function getTierForReport(r) {
+      if (r.tier != null) return r.tier;
+      return (TIER_INFO[r.eventType] || { tier: 1 }).tier;
+    }
+
     function applyFilters() {
       const tiles = document.querySelectorAll('.report-tile');
       let visible = 0;
@@ -426,21 +510,61 @@
         if (show) visible++;
       });
       document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
+      updateFilterUI();
+    }
+
+    const tierLabels = { 1: 'RTN / PQ', 2: 'BG / Show', 3: 'Calling', 4: 'Worlds / PT' };
+    const heroLabelMap = {};
+
+    function updateFilterUI() {
+      const activeCount = (activeHero !== 'all' ? 1 : 0) + (activeTier !== 'all' ? 1 : 0);
+      const badge = document.getElementById('filter-badge');
+      const btn   = document.getElementById('filter-toggle-btn');
+      const tags  = document.getElementById('filter-active-tags');
+
+      badge.style.display = activeCount > 0 ? '' : 'none';
+      badge.textContent = activeCount;
+      btn.classList.toggle('has-filters', activeCount > 0);
+
+      const parts = [];
+      if (activeHero !== 'all') parts.push({ label: heroLabelMap[activeHero] || activeHero, type: 'hero' });
+      if (activeTier !== 'all') parts.push({ label: tierLabels[activeTier] || 'Tier ' + activeTier, type: 'tier' });
+
+      tags.innerHTML = parts.map(p =>
+        `<span class="filter-active-tag" data-clear="${p.type}">
+          ${esc(p.label)}<span class="remove">×</span>
+        </span>`
+      ).join('');
+
+      tags.querySelectorAll('.filter-active-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+          if (tag.dataset.clear === 'hero') setFilter('hero', 'all');
+          if (tag.dataset.clear === 'tier') setFilter('tier', 'all');
+        });
+      });
+    }
+
+    function setFilter(ftype, fval) {
+      if (ftype === 'hero') activeHero = fval;
+      if (ftype === 'tier') activeTier = fval;
+      document.querySelectorAll(`[data-ftype="${ftype}"]`)
+        .forEach(b => b.classList.toggle('active', b.dataset.fval === fval));
+      applyFilters();
     }
 
     /* ── BUILD FILTERS ── */
     function buildFilters() {
       const heroes = [...new Set(REPORTS.map(r => r.hero))].sort();
-      const tiers  = [...new Set(REPORTS.map(r => r.tier))].sort();
+      const tiers  = [...new Set(REPORTS.map(r => getTierForReport(r)))].sort();
 
       const heroEl = document.getElementById('hero-filter');
       heroEl.innerHTML =
         `<button class="filter-pill active" data-ftype="hero" data-fval="all">All</button>` +
-        heroes.map(h =>
-          `<button class="filter-pill" data-ftype="hero" data-fval="${esc(h.toLowerCase())}">${esc(h)}</button>`
-        ).join('');
+        heroes.map(h => {
+          heroLabelMap[h.toLowerCase()] = h;
+          return `<button class="filter-pill" data-ftype="hero" data-fval="${esc(h.toLowerCase())}">${esc(h)}</button>`;
+        }).join('');
 
-      const tierLabels = { 1: 'RTN / PQ', 2: 'BG / Show', 3: 'Calling', 4: 'Worlds / PT' };
       const tierEl = document.getElementById('tier-filter');
       tierEl.innerHTML =
         `<button class="filter-pill active" data-ftype="tier" data-fval="all">All</button>` +
@@ -449,16 +573,14 @@
         ).join('');
 
       document.querySelectorAll('.filter-pill').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const ftype = btn.dataset.ftype;
-          const fval  = btn.dataset.fval;
-          if (ftype === 'hero') activeHero = fval;
-          if (ftype === 'tier') activeTier = fval;
-          document.querySelectorAll(`[data-ftype="${ftype}"]`)
-            .forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          applyFilters();
-        });
+        btn.addEventListener('click', () => setFilter(btn.dataset.ftype, btn.dataset.fval));
+      });
+
+      /* ── FILTER TOGGLE ── */
+      const toggleBtn   = document.getElementById('filter-toggle-btn');
+      const filterPanel = document.getElementById('filter-panel');
+      toggleBtn.addEventListener('click', () => {
+        filterPanel.classList.toggle('open');
       });
     }
 
