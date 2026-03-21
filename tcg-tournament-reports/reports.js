@@ -11,6 +11,7 @@
  *   displayDate – human-readable date shown on the card, e.g. '03.01.26'
  *   event       – event name, e.g. 'RTN Hagen'
  *   eventType   – one of: RTN | PQ | Battleground | Showdown | Calling | Worlds | PT
+ *   format      – one of: CC | Sage | Limited  (Classic Constructed, Silver Age, Limited)
  *   tier        – 1–4, auto-derived from eventType but can be overridden
  *   generalNotes – array of rough note strings (shown collapsed)
  *   rounds      – array of round objects (shown collapsed), in any order (auto-sorted R1→last):
@@ -30,6 +31,7 @@ const REPORTS = [
     displayDate: '21.03.26',
     event: 'PQ Darmstadt',
     eventType: 'PQ',
+    format: 'CC',
     generalNotes: [
       'Anti-fatigue package needed vs Valda — Fatigue is their backup plan',
       'Pilfer the Tomb would have been useful vs Gravy',
@@ -154,6 +156,7 @@ const REPORTS = [
     displayDate: '15.03.26',
     event: 'PQ Mainz',
     eventType: 'PQ',
+    format: 'CC',
     generalNotes: [
       'Need more stealth attacks if playing this many Take Up the Mantles — Whittle from Bones especially',
       'Cremation not convincing',
@@ -264,6 +267,7 @@ const REPORTS = [
     displayDate: '03.01.26',
     event: 'RTN Hagen',
     eventType: 'RTN',
+    format: 'CC',
     tier: 1,
     generalNotes: [
       'Razor reflex really good',
