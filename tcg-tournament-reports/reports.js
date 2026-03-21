@@ -14,9 +14,8 @@
  *   tier        – 1–4, auto-derived from eventType but can be overridden
  *   generalNotes – array of rough note strings (shown collapsed)
  *   rounds      – array of round objects (shown collapsed), in any order (auto-sorted R1→last):
- *                   { number, opponent, result: 'win'|'loss', score: '2–1'|null, notes: [] }
- *                   If a note mentions "went first", "went second", or "won die-roll", a 1st/2nd
- *                   badge is automatically shown on that round.
+ *                   { number, opponent, result: 'win'|'loss', score: '2–1'|null, order: 'first'|'second'|null, notes: [] }
+ *                   Set order to 'first' or 'second' to show the 1st/2nd badge on that round.
  *   summary     – short paragraph shown at the top of the card
  */
 
@@ -49,6 +48,7 @@ const REPORTS = [
         opponent: 'Gravy',
         result: 'loss',
         score: '0–8',
+        order: 'first',
         notes: [
           'Top 4',
           'Had complicated lines that were not seen or played optimally',
@@ -64,6 +64,7 @@ const REPORTS = [
         opponent: 'Kassai',
         result: 'win',
         score: '31–0',
+        order: 'second',
         notes: [
           'Top 8',
           'Presented 70 and tried to fatigue — was not close',
@@ -76,6 +77,7 @@ const REPORTS = [
         opponent: 'Ira',
         result: 'loss',
         score: '0–7',
+        order: 'first',
         notes: [
           'Brain was fried — misplayed multiple times',
           'Thought defensive Ira is closer to fatigue but got beaten up',
@@ -88,6 +90,7 @@ const REPORTS = [
         opponent: 'Jarl',
         result: 'win',
         score: '19–0',
+        order: 'second',
         notes: [
           '3 cards left in deck',
           'Early game was miserable, could not get Chelicera online',
@@ -102,6 +105,7 @@ const REPORTS = [
         opponent: 'Gravy',
         result: 'win',
         score: '19–0',
+        order: 'first',
         notes: [
           'Early turns a little awkward playing around Chum',
           'Opponent never got to resolve second Chum or any Sawbones — made it easy',
@@ -115,6 +119,7 @@ const REPORTS = [
         opponent: 'Valda',
         result: 'win',
         score: '18–0',
+        order: 'second',
         notes: [
           'Valda low-rolled really hard',
           'Hit good value turns',
@@ -129,6 +134,7 @@ const REPORTS = [
         opponent: 'Fang',
         result: 'win',
         score: '11–0',
+        order: 'second',
         notes: [
           'Fang was online early (turn 3)',
           'Hit Codex into Codex into Codex — put very far ahead',
@@ -239,6 +245,7 @@ const REPORTS = [
         opponent: 'Verdance',
         result: 'win',
         score: '18–0',
+        order: 'first',
         notes: [
           'Got Orb Weaver turn 0',
           'Early high roll — non-game',
