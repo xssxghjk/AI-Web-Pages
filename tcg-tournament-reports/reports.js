@@ -13,8 +13,10 @@
  *   eventType   – one of: RTN | PQ | Battleground | Showdown | Calling | Worlds | PT
  *   tier        – 1–4, auto-derived from eventType but can be overridden
  *   generalNotes – array of rough note strings (shown collapsed)
- *   rounds      – array of round objects (shown collapsed), listed highest R# first:
+ *   rounds      – array of round objects (shown collapsed), in any order (auto-sorted R1→last):
  *                   { number, opponent, result: 'win'|'loss', score: '2–1'|null, notes: [] }
+ *                   If a note mentions "went first", "went second", or "won die-roll", a 1st/2nd
+ *                   badge is automatically shown on that round.
  *   summary     – short paragraph shown at the top of the card
  */
 
