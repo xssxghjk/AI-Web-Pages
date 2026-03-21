@@ -37,6 +37,10 @@ const REPORTS = [
       'Need to find correct sideboard plan vs Gravy',
       'Awareness of damage left in deck is key',
       'Remembrance is very good for getting back Retrieve',
+      'Need more Gravy reps',
+      'Need more full fatigue reps',
+      'Need more Vynnset reps (did not come up but a matchup to study)',
+      'Time to finalize sideboard guide',
     ],
     rounds: [
       {
@@ -147,6 +151,8 @@ const REPORTS = [
       { tag: 'vs Kassai',     text: 'Presented 70 and played fatigue — not close. IP on double tarantula for 6 value per card. Get as much deck damage as possible once far enough ahead.' },
       { tag: 'vs Ira',        text: 'Do not approach defensive Ira as a fatigue matchup — it is midrange. Need many more reps. Avoid playing important rounds on a fatigued brain.' },
       { tag: 'Deck Build',    text: 'Add Pilfer the Tomb for the Gravy matchup. Evaluate an anti-fatigue package for Valda and similar matchups.' },
+      { tag: 'Reps Needed',   text: 'Priority matchups to get more reps in: Gravy (full sideboard lines, complicated sequencing around allies), full fatigue mirror situations, Ira (midrange game plan), and Vynnset (not encountered yet but a matchup to study proactively).' },
+      { tag: 'Sideboard',     text: 'Time to finalize the sideboard guide — multiple matchups have unresolved plans (Gravy, Valda anti-fatigue). Consolidate learnings from this event into a concrete guide.' },
     ],
   },
 
