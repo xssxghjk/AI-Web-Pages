@@ -82,7 +82,7 @@
 
     /* ── PAGE HEADER ── */
     .page-header {
-      padding: 3rem 2rem 2.5rem;
+      padding: 1.5rem 2rem 1.25rem;
       border-bottom: 1px solid var(--border);
       position: relative;
       overflow: hidden;
@@ -101,18 +101,18 @@
       max-width: 1100px;
       margin: 0 auto;
       display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 2rem;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .header-left { flex: 1; min-width: 0; }
+    .header-left { width: 100%; text-align: center; }
     .report-meta {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 0.5rem;
       flex-wrap: wrap;
-      margin-bottom: 0.9rem;
+      margin-bottom: 0.5rem;
     }
     .tier-badge {
       font-size: 0.65rem;
@@ -139,15 +139,16 @@
       color: var(--muted2);
     }
     .report-title {
-      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-size: clamp(1.3rem, 3vw, 1.9rem);
       font-weight: 800;
       letter-spacing: -0.03em;
       line-height: 1.1;
-      margin-bottom: 0.8rem;
+      margin-bottom: 0.4rem;
     }
     .header-meta {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 0.6rem;
       flex-wrap: wrap;
       font-size: 0.9rem;
@@ -160,46 +161,6 @@
     .rr-sep  { color: var(--muted); }
     .meta-winrate { color: var(--muted2); }
 
-    .header-right {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 0.75rem;
-      flex-shrink: 0;
-    }
-    /* share button */
-    .btn-share {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 0.5rem 1.1rem;
-      border-radius: 8px;
-      border: 1px solid var(--border2);
-      background: var(--surface);
-      color: var(--muted2);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .btn-share:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: var(--t1-bg);
-    }
-    .btn-share.copied {
-      border-color: var(--win);
-      color: var(--win);
-      background: var(--win-bg);
-    }
-    .copy-feedback {
-      font-size: 0.75rem;
-      color: var(--win);
-      opacity: 0;
-      transition: opacity 0.2s;
-      text-align: right;
-    }
-    .copy-feedback.visible { opacity: 1; }
 
     /* ── MAIN LAYOUT ── */
     .main {
@@ -602,16 +563,6 @@
                 <span class="meta-sep">·</span>
                 <span class="meta-winrate">${winRate}%</span>
               </div>
-            </div>
-            <div class="header-right">
-              <button class="btn-share" id="copy-btn" onclick="copyLink()">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="5" y="5" width="9" height="9" rx="2"/>
-                  <path d="M11 5V3a2 2 0 0 0-2-2H3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/>
-                </svg>
-                Copy link
-              </button>
-              <span class="copy-feedback" id="copy-feedback">Link copied!</span>
             </div>
           </div>
         </header>
