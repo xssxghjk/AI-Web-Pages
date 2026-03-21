@@ -234,14 +234,6 @@
       position: sticky;
       top: 68px;
     }
-    .sidebar-block {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem;
-      margin-bottom: 0.75rem;
-    }
-    .sidebar-block:last-child { margin-bottom: 0; }
     .sidebar-label {
       font-size: 0.65rem;
       font-weight: 700;
@@ -256,24 +248,20 @@
       line-height: 1.7;
     }
 
-    /* collapsible notes in sidebar */
-    .notes-toggle {
-      width: 100%;
+    /* general notes below rounds */
+    .general-notes {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .general-notes-header {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: left;
-      padding: 0;
-      transition: color 0.15s;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
     }
-    .notes-toggle:hover { color: var(--accent); }
-    .notes-toggle .count-pill {
+
+    .count-pill {
       font-size: 0.62rem;
       font-weight: 700;
       padding: 0.12rem 0.45rem;
@@ -282,19 +270,6 @@
       border: 1px solid var(--border2);
       color: var(--muted);
     }
-    .notes-toggle .chevron {
-      margin-left: auto;
-      font-size: 1rem;
-      color: var(--muted);
-      transition: transform 0.25s;
-      display: inline-block;
-    }
-    .notes-toggle[aria-expanded="true"] .chevron { transform: rotate(90deg); }
-    .collapsible-content {
-      margin-top: 0.85rem;
-      display: none;
-    }
-    .collapsible-content.open { display: block; }
 
     .notes-list {
       list-style: none;
@@ -611,15 +586,13 @@
         : 0;
 
       const generalNotesHtml = r.generalNotes && r.generalNotes.length
-        ? `<div class="sidebar-block">
-              <button class="notes-toggle" aria-expanded="false">
-                General Notes
+        ? `<div class="general-notes">
+              <div class="general-notes-header">
+                <span class="rounds-title">General Notes</span>
+                <div class="rounds-header-line"></div>
                 <span class="count-pill">${r.generalNotes.length}</span>
-                <span class="chevron">›</span>
-              </button>
-              <div class="collapsible-content">
-                <ul class="notes-list">${r.generalNotes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>
               </div>
+              <ul class="notes-list">${r.generalNotes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>
             </div>`
         : '';
 
@@ -671,11 +644,8 @@
         <div class="main">
 
           <aside class="sidebar">
-            <div class="sidebar-block">
-              <div class="sidebar-label">Summary</div>
-              <p class="summary-text">${esc(r.summary)}</p>
-            </div>
-            ${generalNotesHtml}
+            <div class="sidebar-label">Summary</div>
+            <p class="summary-text">${esc(r.summary)}</p>
           </aside>
 
           <section class="rounds-section">
@@ -685,6 +655,7 @@
               <span class="rounds-summary">${rec.wins}W – ${rec.losses}L</span>
             </div>
             <div class="rounds-list">${roundsHtml}</div>
+            ${generalNotesHtml}
           </section>
 
         </div>`;
@@ -704,16 +675,8 @@
       });
     };
 
-    /* ── COLLAPSIBLES ── */
-    function initCollapsibles() {
-      document.querySelectorAll('.notes-toggle').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const expanded = btn.getAttribute('aria-expanded') === 'true';
-          btn.setAttribute('aria-expanded', String(!expanded));
-          btn.nextElementSibling.classList.toggle('open', !expanded);
-        });
-      });
-    }
+    /* ── COLLAPSIBLES ── (reserved for future use) */
+    function initCollapsibles() {}
 
     /* ── INIT ── */
     const params = new URLSearchParams(window.location.search);
