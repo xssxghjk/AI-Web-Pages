@@ -15,8 +15,7 @@
  *   generalNotes – array of rough note strings (shown collapsed)
  *   rounds      – array of round objects (shown collapsed), listed highest R# first:
  *                   { number, opponent, result: 'win'|'loss', score: '2–1'|null, notes: [] }
- *   summary     – free-form paragraph shown at the top of the card
- *   learnings   – array of { tag, text } shown expanded as key takeaways
+ *   summary     – short paragraph shown at the top of the card
  */
 
 const REPORTS = [
@@ -142,18 +141,6 @@ const REPORTS = [
       },
     ],
     summary: '4–1 Swiss, Top 4. Lost to Ira in Swiss (misplays, wrong gameplan — played fatigue into midrange) and Gravy in T4 (4 d-reacts denied everything, all 3 Blood in the Waters blocked for 6).',
-    learnings: [
-      { tag: 'Codex Chains',  text: 'Triple codex is a massive swing. First can be awkward (had to discard + IP) but Frailty makes it worth.' },
-      { tag: 'Klaive Timing', text: "Don't be greedy when already ahead — flick when it actually matters." },
-      { tag: 'vs Valda',      text: 'D-reacts cover crushes well. Fatigue is their backup plan — need anti-fatigue package.' },
-      { tag: 'vs Gravy',      text: "Chum complicates sequencing hard. Blood in the Water gets blanked by d-reacts. Need sideboard plan. Pilfer the Tomb would've helped." },
-      { tag: 'vs Jarl',       text: 'Spreading Plague for 5 bloodrots turned the game. Track deck damage — no panic plays that sacrifice it.' },
-      { tag: 'vs Kassai',     text: 'Presented 70, played fatigue — not close. IP on double tarantula for 6 per card.' },
-      { tag: 'vs Ira',        text: 'Play midrange, not fatigue. Need reps.' },
-      { tag: 'Deck Build',    text: 'Add Pilfer the Tomb. Evaluate anti-fatigue package for Valda.' },
-      { tag: 'Reps Needed',   text: 'Gravy (full sideboard lines), full fatigue, Ira, Vynnset.' },
-      { tag: 'Sideboard',     text: 'Finalize the sideboard guide — Gravy and Valda plans still unresolved.' },
-    ],
   },
 
   {
@@ -264,17 +251,6 @@ const REPORTS = [
       },
     ],
     summary: '5–2 at PQ Mainz. Lost to Verdance (bricked d-reacts + TutM in a winning game, went to time) and Ira (two misplays — shouldve won).',
-    learnings: [
-      { tag: 'Deck Build',      text: 'Need more stealth attacks for TutM — Whittle from Bones. Cremation not convincing, cut.' },
-      { tag: 'Sideboard',       text: 'Fix sideboard ratios.' },
-      { tag: 'Codex',           text: 'Codex of Inertia excellent in midrangy matchups.' },
-      { tag: 'vs Levia',        text: 'Deny Blasmo — she has to lose to herself. Track blood debt.' },
-      { tag: 'vs Dio',          text: "Don't threaten fatigue when clearly ahead — it gifts tempo. MaxV double grenade is a blowout." },
-      { tag: 'vs Teklovossen',  text: 'Piercing hits hand cards too. Track card count, deck damage is real.' },
-      { tag: 'vs Puffin',       text: 'Not a great matchup. Watch the Soup Up into Dovetail Palantir line.' },
-      { tag: 'vs Ira',          text: "Never miss triggers. Don't gift MoM. Watch for frailty trap." },
-      { tag: 'Pacing',          text: 'Slow play lost the Verdance game — time is a real threat.' },
-    ],
   },
 
   {
@@ -373,17 +349,6 @@ const REPORTS = [
       },
     ],
     summary: '4–2 at RTN Hagen with Slippy. Lost to Florian (dead hand — 2 codex with only reactions, no stealth attack until T3) and Verdance (8 value down T0, no agency).',
-    learnings: [
-      { tag: 'Deck Cut',        text: 'Snappies out — replace with blade beckoner / blacktec / armory package.' },
-      { tag: 'Card Quality',    text: 'Razor reflex consistently good — keep.' },
-      { tag: 'Sequencing',      text: "Always use first nimbilism if jack hasn't been seen." },
-      { tag: 'vs Florian',      text: "It's a race, not a fatigue game. Earth banish + meet madness is brutal. Cut through is a liability." },
-      { tag: 'vs Kayo',         text: 'Block equip before Stampede. No greedy snappies early. Play around fleshbag.' },
-      { tag: 'vs Verdance',     text: '8+ value down T0 is near-unwinnable.' },
-      { tag: 'Arsenal',         text: "Arsenal on-hits before throwing irrelevant attacks — don't waste tempo." },
-      { tag: 'Sideboard',       text: 'Test blood splattered vest vs aggro.' },
-      { tag: 'Mirror (Slippy)', text: 'Board out codex of inertia.' },
-    ],
   },
 
 ];

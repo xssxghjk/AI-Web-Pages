@@ -236,34 +236,6 @@
       line-height: 1.65;
     }
 
-    /* learnings */
-    .learnings-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .learning-item {
-      display: flex;
-      align-items: baseline;
-      gap: 0.55rem;
-      font-size: 0.875rem;
-      line-height: 1.55;
-    }
-    .learning-tag {
-      font-size: 0.62rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0.18rem 0.55rem;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border2);
-      color: var(--muted2);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .learning-text { color: var(--muted2); }
-
     /* collapsible */
     .collapsible-btn {
       width: 100%;
@@ -482,14 +454,19 @@
       const rec = computeRecord(r.rounds);
       const tierLabel = getTierLabel(r.eventType);
       const tierClass = `t${r.tier}`;
-      const generalNotesHtml = r.generalNotes.map(n => `<li>${esc(n)}</li>`).join('');
       const roundsHtml = r.rounds.map(renderRound).join('');
-      const learningsHtml = r.learnings.map(l =>
-        `<div class="learning-item">
-           <span class="learning-tag">${esc(l.tag)}</span>
-           <span class="learning-text">${esc(l.text)}</span>
-         </div>`
-      ).join('');
+      const generalNotesHtml = r.generalNotes && r.generalNotes.length
+        ? `<div class="rep-section">
+              <button class="collapsible-btn" aria-expanded="false">
+                General Notes
+                <span class="count-pill">${r.generalNotes.length}</span>
+                <span class="chevron">›</span>
+              </button>
+              <div class="collapsible-content">
+                <ul class="notes-list">${r.generalNotes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>
+              </div>
+            </div>`
+        : '';
 
       return `
         <header class="page-header">
@@ -529,31 +506,11 @@
             </div>
 
             <div class="rep-section">
-              <div class="rep-section-label">Key Learnings</div>
-              <div class="learnings-list">${learningsHtml}</div>
+              <div class="rep-section-label">Round by Round</div>
+              <div class="rounds-list">${roundsHtml}</div>
             </div>
 
-            <div class="rep-section">
-              <button class="collapsible-btn" aria-expanded="false">
-                General Notes
-                <span class="count-pill">${r.generalNotes.length}</span>
-                <span class="chevron">›</span>
-              </button>
-              <div class="collapsible-content">
-                <ul class="notes-list">${generalNotesHtml}</ul>
-              </div>
-            </div>
-
-            <div class="rep-section">
-              <button class="collapsible-btn" aria-expanded="false">
-                Round by Round
-                <span class="count-pill">${r.rounds.length} rounds</span>
-                <span class="chevron">›</span>
-              </button>
-              <div class="collapsible-content">
-                <div class="rounds-list">${roundsHtml}</div>
-              </div>
-            </div>
+            ${generalNotesHtml}
 
           </article>
         </main>`;
