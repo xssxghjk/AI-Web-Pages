@@ -77,36 +77,24 @@
 
     /* ── HERO ── */
     .hero {
-      padding: 3.5rem 1.5rem 2.5rem;
+      padding: 1.5rem 1.5rem 1.25rem;
       text-align: center;
       background: linear-gradient(180deg, rgba(14,165,233,0.05) 0%, transparent 100%);
       border-bottom: 1px solid var(--border);
     }
-    .hero-tag {
-      display: inline-block;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--accent);
-      border: 1px solid rgba(14,165,233,0.35);
-      border-radius: 999px;
-      padding: 0.25rem 0.8rem;
-      margin-bottom: 1rem;
-    }
     .hero h1 {
-      font-size: clamp(1.9rem, 5vw, 3rem);
+      font-size: clamp(1.3rem, 3vw, 1.9rem);
       font-weight: 800;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
       line-height: 1.1;
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.4rem;
     }
     .hero p {
       color: var(--muted);
-      font-size: 1rem;
+      font-size: 0.9rem;
       max-width: 520px;
       margin-inline: auto;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
     .hero-stats {
       display: flex;
@@ -126,35 +114,105 @@
     .stat-pill.upcoming { color: var(--upcoming); background: var(--upcoming-bg); border-color: var(--upcoming-border); }
     .stat-pill.past     { color: var(--past);     background: var(--past-bg);     border-color: var(--past-border); }
 
-    /* ── FILTERS ── */
-    .filters-bar {
-      padding: 1rem 1.5rem;
+    /* ── FILTER TOGGLE ── */
+    .filter-toggle-bar {
+      padding: 0.55rem 1.5rem;
       border-bottom: 1px solid var(--border);
       display: flex;
-      gap: 1.25rem;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--surface);
+    }
+    .filter-toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-toggle-btn:hover { border-color: var(--muted2); color: var(--text); }
+    .filter-toggle-btn.has-filters {
+      background: rgba(14,165,233,0.1);
+      border-color: rgba(14,165,233,0.4);
+      color: var(--accent);
+    }
+    .filter-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.1rem;
+      height: 1.1rem;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #05080f;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 0 0.25rem;
+    }
+    .filter-active-tags {
+      display: flex;
+      gap: 0.3rem;
       flex-wrap: wrap;
       align-items: center;
-      background: var(--surface);
+    }
+    .filter-active-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(14,165,233,0.1);
+      border: 1px solid rgba(14,165,233,0.3);
+      color: var(--accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .filter-active-tag:hover { background: rgba(14,165,233,0.18); }
+    .filter-active-tag .remove { opacity: 0.7; font-size: 0.8rem; line-height: 1; }
+
+    /* ── FILTER PANEL ── */
+    .filter-panel {
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.22s ease, padding 0.22s ease;
+      padding: 0 1.5rem;
+    }
+    .filter-panel.open {
+      max-height: 120px;
+      padding: 0.85rem 1.5rem;
     }
     .filter-group {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       flex-wrap: wrap;
+      margin-bottom: 0.55rem;
     }
+    .filter-group:last-child { margin-bottom: 0; }
     .filter-label {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--muted);
       white-space: nowrap;
+      min-width: 2.5rem;
     }
-    .filter-pills { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .filter-pills { display: flex; gap: 0.3rem; flex-wrap: wrap; }
     .filter-pill {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
-      padding: 0.25rem 0.7rem;
+      padding: 0.2rem 0.6rem;
       border-radius: 999px;
       background: transparent;
       border: 1px solid var(--border2);
@@ -190,7 +248,7 @@
     /* ── TILES GRID ── */
     .tiles-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1rem;
     }
 
@@ -333,7 +391,6 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
-      .filters-bar { gap: 0.75rem; }
       .tiles-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -347,13 +404,22 @@
   </nav>
 
   <header class="hero">
-    <div class="hero-tag">Travel</div>
     <h1>Trips</h1>
     <p>Planning a trip? Find full itineraries, booking info, hotel picks, and day-by-day logistics — everything you need to join.</p>
     <div class="hero-stats" id="hero-stats"></div>
   </header>
 
-  <div class="filters-bar">
+  <div class="filter-toggle-bar">
+    <button class="filter-toggle-btn" id="filter-toggle-btn">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 2.5h10M3 6h6M5 9.5h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      Filter
+      <span class="filter-badge" id="filter-badge" style="display:none"></span>
+    </button>
+    <div class="filter-active-tags" id="filter-active-tags"></div>
+  </div>
+  <div class="filter-panel" id="filter-panel">
     <div class="filter-group">
       <span class="filter-label">Status</span>
       <div class="filter-pills" id="status-filter"></div>
@@ -427,6 +493,39 @@
     /* ── FILTER STATE ── */
     let activeStatus = 'all';
     let activeRegion = 'all';
+    const regionLabelMap = {};
+
+    function updateFilterUI() {
+      const activeCount = (activeStatus !== 'all' ? 1 : 0) + (activeRegion !== 'all' ? 1 : 0);
+      const badge = document.getElementById('filter-badge');
+      const btn   = document.getElementById('filter-toggle-btn');
+      const tags  = document.getElementById('filter-active-tags');
+
+      badge.style.display = activeCount > 0 ? '' : 'none';
+      badge.textContent = activeCount;
+      btn.classList.toggle('has-filters', activeCount > 0);
+
+      const parts = [];
+      if (activeStatus !== 'all') parts.push({ label: STATUS_LABELS[activeStatus] || activeStatus, type: 'status' });
+      if (activeRegion !== 'all') parts.push({ label: regionLabelMap[activeRegion] || activeRegion, type: 'region' });
+
+      tags.innerHTML = parts.map(p =>
+        `<span class="filter-active-tag" data-clear="${p.type}">
+          ${esc(p.label)}<span class="remove">×</span>
+        </span>`
+      ).join('');
+
+      tags.querySelectorAll('.filter-active-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+          const ftype = tag.dataset.clear;
+          if (ftype === 'status') activeStatus = 'all';
+          if (ftype === 'region') activeRegion = 'all';
+          document.querySelectorAll(`[data-ftype="${ftype}"]`)
+            .forEach(b => b.classList.toggle('active', b.dataset.fval === 'all'));
+          applyFilters();
+        });
+      });
+    }
 
     function applyFilters() {
       const tiles = document.querySelectorAll('.trip-tile');
@@ -439,6 +538,7 @@
         if (show) visible++;
       });
       document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
+      updateFilterUI();
     }
 
     /* ── BUILD FILTERS ── */
@@ -456,9 +556,10 @@
       const regionEl = document.getElementById('region-filter');
       regionEl.innerHTML =
         `<button class="filter-pill active" data-ftype="region" data-fval="all">All</button>` +
-        regions.map(r =>
-          `<button class="filter-pill" data-ftype="region" data-fval="${esc(r.toLowerCase())}">${esc(r)}</button>`
-        ).join('');
+        regions.map(r => {
+          regionLabelMap[r.toLowerCase()] = r;
+          return `<button class="filter-pill" data-ftype="region" data-fval="${esc(r.toLowerCase())}">${esc(r)}</button>`;
+        }).join('');
 
       document.querySelectorAll('.filter-pill').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -471,6 +572,13 @@
           btn.classList.add('active');
           applyFilters();
         });
+      });
+
+      /* ── FILTER TOGGLE ── */
+      const toggleBtn   = document.getElementById('filter-toggle-btn');
+      const filterPanel = document.getElementById('filter-panel');
+      toggleBtn.addEventListener('click', () => {
+        filterPanel.classList.toggle('open');
       });
     }
 
