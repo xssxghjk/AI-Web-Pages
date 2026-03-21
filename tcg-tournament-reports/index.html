@@ -511,6 +511,12 @@
       });
       document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
       updateFilterUI();
+      const filteredReports = REPORTS.filter(r => {
+        const heroMatch = activeHero === 'all' || r.hero.toLowerCase() === activeHero;
+        const tierMatch = activeTier === 'all' || getTierForReport(r) == activeTier;
+        return heroMatch && tierMatch;
+      });
+      buildStats(filteredReports);
     }
 
     const tierLabels = { 1: 'RTN / PQ', 2: 'BG / Show', 3: 'Calling', 4: 'Worlds / PT' };
@@ -585,9 +591,10 @@
     }
 
     /* ── BUILD STATS ── */
-    function buildStats() {
+    function buildStats(reports) {
+      reports = reports || REPORTS;
       let wins = 0, losses = 0;
-      REPORTS.forEach(r => {
+      reports.forEach(r => {
         const rec = computeRecord(r.rounds);
         wins   += rec.wins;
         losses += rec.losses;
@@ -595,7 +602,7 @@
       const total = wins + losses;
       const wr = total > 0 ? Math.round(wins / total * 100) : 0;
       document.getElementById('hero-stats').innerHTML = `
-        <span class="stat-pill">${REPORTS.length} report${REPORTS.length !== 1 ? 's' : ''}</span>
+        <span class="stat-pill">${reports.length} report${reports.length !== 1 ? 's' : ''}</span>
         <span class="stat-pill win">${wins}W</span>
         <span class="stat-pill loss">${losses}L</span>
         <span class="stat-pill wr">${wr}% WR</span>`;
