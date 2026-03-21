@@ -587,20 +587,6 @@
         </div>`;
     }
 
-    /* ── COPY LINK ── */
-    window.copyLink = function () {
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        const btn = document.getElementById('copy-btn');
-        const fb  = document.getElementById('copy-feedback');
-        btn.classList.add('copied');
-        fb.classList.add('visible');
-        setTimeout(() => {
-          btn.classList.remove('copied');
-          fb.classList.remove('visible');
-        }, 2200);
-      });
-    };
-
     /* ── COLLAPSIBLES ── (reserved for future use) */
     function initCollapsibles() {}
 
