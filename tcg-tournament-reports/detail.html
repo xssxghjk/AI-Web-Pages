@@ -454,10 +454,11 @@
       const orderHtml = order
         ? `<span class="round-order ${order}">${order === 'first' ? '1st' : '2nd'}</span>`
         : '';
+      const roundLabel = round.stage || `R${round.number}`;
       return `
         <div class="round-item ${round.result}">
           <div class="round-header">
-            <span class="round-num">R${round.number}</span>
+            <span class="round-num">${esc(roundLabel)}</span>
             <span class="round-opponent">${esc(round.opponent)}</span>
             <span class="round-result ${round.result}">${round.result === 'win' ? 'Won' : 'Lost'}</span>
             ${scoreHtml}
@@ -470,7 +471,8 @@
     function renderDetail(r) {
       const rec = computeRecord(r.rounds);
       const tierLabel = getTierLabel(r.eventType);
-      const tierClass = `t${r.tier}`;
+      const tier = r.tier != null ? r.tier : ((TIER_INFO[r.eventType] || { tier: 1 }).tier);
+      const tierClass = `t${tier}`;
       const sortedRounds = [...r.rounds].sort((a, b) => a.number - b.number);
       const roundsHtml = sortedRounds.map(renderRound).join('');
       const generalNotesHtml = r.generalNotes && r.generalNotes.length
@@ -516,7 +518,7 @@
         </header>
 
         <main class="main">
-          <article class="report-card tier-${r.tier}">
+          <article class="report-card tier-${tier}">
 
             <div class="rep-section">
               <div class="rep-section-label">Summary</div>

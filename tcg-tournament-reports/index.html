@@ -393,14 +393,15 @@
     function renderTile(r) {
       const rec = computeRecord(r.rounds);
       const tierLabel = getTierLabel(r.eventType);
-      const tierClass = `t${r.tier}`;
+      const tier = r.tier != null ? r.tier : ((TIER_INFO[r.eventType] || { tier: 1 }).tier);
+      const tierClass = `t${tier}`;
 
       return `
         <a
-          class="report-tile tier-${r.tier}"
+          class="report-tile tier-${tier}"
           href="./detail.html?id=${esc(r.id)}"
           data-hero="${esc(r.hero.toLowerCase())}"
-          data-tier="${r.tier}"
+          data-tier="${tier}"
         >
           <div class="tile-body">
             <div class="tile-meta">

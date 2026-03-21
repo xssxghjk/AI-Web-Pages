@@ -14,8 +14,8 @@
  *   tier        – 1–4, auto-derived from eventType but can be overridden
  *   generalNotes – array of rough note strings (shown collapsed)
  *   rounds      – array of round objects (shown collapsed), in any order (auto-sorted R1→last):
- *                   { number, opponent, result: 'win'|'loss', score: '2–1'|null, order: 'first'|'second'|null, notes: [] }
- *                   Set order to 'first' or 'second' to show the 1st/2nd badge on that round.
+ *                   { number, opponent, result: 'win'|'loss', score: '2–1'|null, order: 'first'|'second'|null, stage: 'T8'|'T4'|'T2'|'F'|null, notes: [] }
+ *                   order: show the 1st/2nd badge. stage: override the R-number label (e.g. 'T8', 'T4').
  *   summary     – short paragraph shown at the top of the card
  */
 
@@ -49,8 +49,8 @@ const REPORTS = [
         result: 'loss',
         score: '0–8',
         order: 'first',
+        stage: 'T4',
         notes: [
-          'Top 4',
           'Had complicated lines that were not seen or played optimally',
           'Good early game but denied hard by 4 d-reacts',
           'All 3 Blood in the Waters blocked 6 (twice discarded from hand, 1 from top)',
@@ -65,8 +65,8 @@ const REPORTS = [
         result: 'win',
         score: '31–0',
         order: 'second',
+        stage: 'T8',
         notes: [
-          'Top 8',
           'Presented 70 and tried to fatigue — was not close',
           'Made sure to get as much damage as possible from the deck once far enough ahead',
           'IPed on double tarantula for 6 value per card',
