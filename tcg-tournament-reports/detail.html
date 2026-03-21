@@ -443,15 +443,6 @@
     }
 
     /* ── RENDER FUNCTIONS ── */
-    function detectGoingOrder(notes) {
-      for (const note of notes) {
-        const lower = note.toLowerCase();
-        if (/went first|won die.?roll|going first/.test(lower)) return 'first';
-        if (/went second|going second/.test(lower)) return 'second';
-      }
-      return null;
-    }
-
     function renderRound(round) {
       const notesHtml = round.notes.length
         ? `<ul class="round-notes">${round.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>`
@@ -459,7 +450,7 @@
       const scoreHtml = round.score
         ? `<span class="round-score">${esc(round.score)}</span>`
         : '';
-      const order = detectGoingOrder(round.notes);
+      const order = round.order || null;
       const orderHtml = order
         ? `<span class="round-order ${order}">${order === 'first' ? '1st' : '2nd'}</span>`
         : '';

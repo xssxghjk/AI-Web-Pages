@@ -14,9 +14,8 @@
  *   tier        – 1–4, auto-derived from eventType but can be overridden
  *   generalNotes – array of rough note strings (shown collapsed)
  *   rounds      – array of round objects (shown collapsed), in any order (auto-sorted R1→last):
- *                   { number, opponent, result: 'win'|'loss', score: '2–1'|null, notes: [] }
- *                   If a note mentions "went first", "went second", or "won die-roll", a 1st/2nd
- *                   badge is automatically shown on that round.
+ *                   { number, opponent, result: 'win'|'loss', score: '2–1'|null, order: 'first'|'second'|null, notes: [] }
+ *                   Set order to 'first' or 'second' to show the 1st/2nd badge on that round.
  *   summary     – short paragraph shown at the top of the card
  */
 
@@ -49,8 +48,9 @@ const REPORTS = [
         opponent: 'Gravy',
         result: 'loss',
         score: '0–8',
+        order: 'first',
         notes: [
-          'Top 4 — went first',
+          'Top 4',
           'Had complicated lines that were not seen or played optimally',
           'Good early game but denied hard by 4 d-reacts',
           'All 3 Blood in the Waters blocked 6 (twice discarded from hand, 1 from top)',
@@ -64,8 +64,9 @@ const REPORTS = [
         opponent: 'Kassai',
         result: 'win',
         score: '31–0',
+        order: 'second',
         notes: [
-          'Top 8 — went second',
+          'Top 8',
           'Presented 70 and tried to fatigue — was not close',
           'Made sure to get as much damage as possible from the deck once far enough ahead',
           'IPed on double tarantula for 6 value per card',
@@ -76,8 +77,8 @@ const REPORTS = [
         opponent: 'Ira',
         result: 'loss',
         score: '0–7',
+        order: 'first',
         notes: [
-          'Went first',
           'Brain was fried — misplayed multiple times',
           'Thought defensive Ira is closer to fatigue but got beaten up',
           'Should be ready to play a midrange game, not a fatigue game',
@@ -89,8 +90,9 @@ const REPORTS = [
         opponent: 'Jarl',
         result: 'win',
         score: '19–0',
+        order: 'second',
         notes: [
-          'Went second — 3 cards left in deck',
+          '3 cards left in deck',
           'Early game was miserable, could not get Chelicera online',
           'Turnaround play with Spreading Plague for 5 bloodrots',
           'All anti-fatigue plays worked out perfectly',
@@ -103,8 +105,8 @@ const REPORTS = [
         opponent: 'Gravy',
         result: 'win',
         score: '19–0',
+        order: 'first',
         notes: [
-          'Went first',
           'Early turns a little awkward playing around Chum',
           'Opponent never got to resolve second Chum or any Sawbones — made it easy',
           "Using Mario's go-again on-hit is pretty important — okay to be greedy sometimes",
@@ -117,8 +119,8 @@ const REPORTS = [
         opponent: 'Valda',
         result: 'win',
         score: '18–0',
+        order: 'second',
         notes: [
-          'Went second',
           'Valda low-rolled really hard',
           'Hit good value turns',
           'Was not greedy with flicking Klaive since already ahead',
@@ -132,8 +134,8 @@ const REPORTS = [
         opponent: 'Fang',
         result: 'win',
         score: '11–0',
+        order: 'second',
         notes: [
-          'Went second',
           'Fang was online early (turn 3)',
           'Hit Codex into Codex into Codex — put very far ahead',
           'First Codex very awkward — saw Blunten from Cut from the Same Cloth, had to discard and IP but Frailty still worth',
@@ -243,8 +245,8 @@ const REPORTS = [
         opponent: 'Verdance',
         result: 'win',
         score: '18–0',
+        order: 'first',
         notes: [
-          'Won die-roll',
           'Got Orb Weaver turn 0',
           'Early high roll — non-game',
           'Codex of Inertia really good',
