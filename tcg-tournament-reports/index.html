@@ -200,7 +200,7 @@
       padding: 0 1.5rem;
     }
     .filter-panel.open {
-      max-height: 160px;
+      max-height: 220px;
       padding: 0.85rem 1.5rem;
     }
     .filter-group {
@@ -325,6 +325,17 @@
       border: 1px solid var(--border2);
       color: var(--muted2);
     }
+    .format-badge {
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(139,92,246,0.08);
+      border: 1px solid rgba(139,92,246,0.3);
+      color: #a78bfa;
+    }
 
     .tile-title {
       font-size: 1.1rem;
@@ -413,6 +424,10 @@
       <span class="filter-label">Tier</span>
       <div class="filter-pills" id="tier-filter"></div>
     </div>
+    <div class="filter-group">
+      <span class="filter-label">Format</span>
+      <div class="filter-pills" id="format-filter"></div>
+    </div>
   </div>
 
   <main class="main">
@@ -461,17 +476,23 @@
       const tier = getTierForReport(r);
       const tierClass = `t${tier}`;
 
+      const formatHtml = r.format
+        ? `<span class="format-badge">${esc(r.format)}</span>`
+        : '';
+
       return `
         <a
           class="report-tile tier-${tier}"
           href="./detail.html?id=${esc(r.id)}"
           data-hero="${esc(r.hero.toLowerCase())}"
           data-tier="${tier}"
+          data-format="${esc((r.format || '').toLowerCase())}"
         >
           <div class="tile-body">
             <div class="tile-meta">
               <span class="tier-badge ${tierClass}">${esc(tierLabel)}</span>
               <span class="hero-badge">${esc(r.hero)}</span>
+              ${formatHtml}
             </div>
             <div class="tile-title">${esc(r.event)}</div>
             <div class="tile-footer">
@@ -491,8 +512,9 @@
     }
 
     /* ── FILTER STATE ── */
-    let activeHero = 'all';
-    let activeTier = 'all';
+    let activeHero   = 'all';
+    let activeTier   = 'all';
+    let activeFormat = 'all';
 
     function getTierForReport(r) {
       if (r.tier != null) return r.tier;
@@ -503,27 +525,30 @@
       const tiles = document.querySelectorAll('.report-tile');
       let visible = 0;
       tiles.forEach(tile => {
-        const heroMatch = activeHero === 'all' || tile.dataset.hero === activeHero;
-        const tierMatch = activeTier === 'all' || tile.dataset.tier === activeTier;
-        const show = heroMatch && tierMatch;
+        const heroMatch   = activeHero   === 'all' || tile.dataset.hero   === activeHero;
+        const tierMatch   = activeTier   === 'all' || tile.dataset.tier   === activeTier;
+        const formatMatch = activeFormat === 'all' || tile.dataset.format === activeFormat;
+        const show = heroMatch && tierMatch && formatMatch;
         tile.style.display = show ? '' : 'none';
         if (show) visible++;
       });
       document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
       updateFilterUI();
       const filteredReports = REPORTS.filter(r => {
-        const heroMatch = activeHero === 'all' || r.hero.toLowerCase() === activeHero;
-        const tierMatch = activeTier === 'all' || getTierForReport(r) == activeTier;
-        return heroMatch && tierMatch;
+        const heroMatch   = activeHero   === 'all' || r.hero.toLowerCase() === activeHero;
+        const tierMatch   = activeTier   === 'all' || getTierForReport(r) == activeTier;
+        const formatMatch = activeFormat === 'all' || (r.format || '').toLowerCase() === activeFormat;
+        return heroMatch && tierMatch && formatMatch;
       });
       buildStats(filteredReports);
     }
 
-    const tierLabels = { 1: 'RTN / PQ', 2: 'BG / Show', 3: 'Calling', 4: 'Worlds / PT' };
+    const tierLabels   = { 1: 'RTN / PQ', 2: 'BG / Show', 3: 'Calling', 4: 'Worlds / PT' };
     const heroLabelMap = {};
+    const formatLabelMap = {};
 
     function updateFilterUI() {
-      const activeCount = (activeHero !== 'all' ? 1 : 0) + (activeTier !== 'all' ? 1 : 0);
+      const activeCount = (activeHero !== 'all' ? 1 : 0) + (activeTier !== 'all' ? 1 : 0) + (activeFormat !== 'all' ? 1 : 0);
       const badge = document.getElementById('filter-badge');
       const btn   = document.getElementById('filter-toggle-btn');
       const tags  = document.getElementById('filter-active-tags');
@@ -533,8 +558,9 @@
       btn.classList.toggle('has-filters', activeCount > 0);
 
       const parts = [];
-      if (activeHero !== 'all') parts.push({ label: heroLabelMap[activeHero] || activeHero, type: 'hero' });
-      if (activeTier !== 'all') parts.push({ label: tierLabels[activeTier] || 'Tier ' + activeTier, type: 'tier' });
+      if (activeHero   !== 'all') parts.push({ label: heroLabelMap[activeHero]     || activeHero,   type: 'hero' });
+      if (activeTier   !== 'all') parts.push({ label: tierLabels[activeTier]        || 'Tier ' + activeTier, type: 'tier' });
+      if (activeFormat !== 'all') parts.push({ label: formatLabelMap[activeFormat]  || activeFormat, type: 'format' });
 
       tags.innerHTML = parts.map(p =>
         `<span class="filter-active-tag" data-clear="${p.type}">
@@ -544,15 +570,17 @@
 
       tags.querySelectorAll('.filter-active-tag').forEach(tag => {
         tag.addEventListener('click', () => {
-          if (tag.dataset.clear === 'hero') setFilter('hero', 'all');
-          if (tag.dataset.clear === 'tier') setFilter('tier', 'all');
+          if (tag.dataset.clear === 'hero')   setFilter('hero',   'all');
+          if (tag.dataset.clear === 'tier')   setFilter('tier',   'all');
+          if (tag.dataset.clear === 'format') setFilter('format', 'all');
         });
       });
     }
 
     function setFilter(ftype, fval) {
-      if (ftype === 'hero') activeHero = fval;
-      if (ftype === 'tier') activeTier = fval;
+      if (ftype === 'hero')   activeHero   = fval;
+      if (ftype === 'tier')   activeTier   = fval;
+      if (ftype === 'format') activeFormat = fval;
       document.querySelectorAll(`[data-ftype="${ftype}"]`)
         .forEach(b => b.classList.toggle('active', b.dataset.fval === fval));
       applyFilters();
@@ -560,8 +588,9 @@
 
     /* ── BUILD FILTERS ── */
     function buildFilters() {
-      const heroes = [...new Set(REPORTS.map(r => r.hero))].sort();
-      const tiers  = [...new Set(REPORTS.map(r => getTierForReport(r)))].sort();
+      const heroes  = [...new Set(REPORTS.map(r => r.hero))].sort();
+      const tiers   = [...new Set(REPORTS.map(r => getTierForReport(r)))].sort();
+      const formats = [...new Set(REPORTS.map(r => r.format).filter(Boolean))].sort();
 
       const heroEl = document.getElementById('hero-filter');
       heroEl.innerHTML =
@@ -577,6 +606,14 @@
         tiers.map(t =>
           `<button class="filter-pill t${t}" data-ftype="tier" data-fval="${t}">${esc(tierLabels[t] || 'Tier ' + t)}</button>`
         ).join('');
+
+      const formatEl = document.getElementById('format-filter');
+      formatEl.innerHTML =
+        `<button class="filter-pill active" data-ftype="format" data-fval="all">All</button>` +
+        formats.map(f => {
+          formatLabelMap[f.toLowerCase()] = f;
+          return `<button class="filter-pill" data-ftype="format" data-fval="${esc(f.toLowerCase())}">${esc(f)}</button>`;
+        }).join('');
 
       document.querySelectorAll('.filter-pill').forEach(btn => {
         btn.addEventListener('click', () => setFilter(btn.dataset.ftype, btn.dataset.fval));

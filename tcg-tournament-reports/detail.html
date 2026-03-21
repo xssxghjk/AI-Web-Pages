@@ -138,6 +138,17 @@
       border: 1px solid var(--border2);
       color: var(--muted2);
     }
+    .format-badge {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(139,92,246,0.08);
+      border: 1px solid rgba(139,92,246,0.3);
+      color: #a78bfa;
+    }
     .report-title {
       font-size: clamp(1.3rem, 3vw, 1.9rem);
       font-weight: 800;
@@ -532,6 +543,10 @@
         ? Math.round(rec.wins / (rec.wins + rec.losses) * 100)
         : 0;
 
+      const formatHtml = r.format
+        ? `<span class="format-badge">${esc(r.format)}</span>`
+        : '';
+
       const generalNotesHtml = r.generalNotes && r.generalNotes.length
         ? `<div class="general-notes">
               <div class="general-notes-header">
@@ -550,6 +565,7 @@
               <div class="report-meta">
                 <span class="tier-badge ${tierClass}">${esc(tierLabel)}</span>
                 <span class="hero-badge">${esc(r.hero)}</span>
+                ${formatHtml}
               </div>
               <h1 class="report-title">${esc(r.event)}</h1>
               <div class="header-meta">
