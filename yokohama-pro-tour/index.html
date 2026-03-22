@@ -12,12 +12,14 @@
       --surface: #0c1120;
       --surface2: #111827;
       --border: #1e2d45;
+      --border2: #243348;
       --accent: #0ea5e9;
       --accent2: #38bdf8;
       --gold: #f59e0b;
       --red: #ef4444;
       --text: #e2e8f0;
       --muted: #64748b;
+      --muted2: #8898aa;
       --green: #22c55e;
       --purple: #a855f7;
     }
@@ -39,396 +41,259 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(5,8,15,0.85);
+      background: rgba(5,8,15,0.88);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 0 1.5rem;
-      height: 56px;
+      height: 52px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 1rem;
     }
 
     .nav-back {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: var(--muted);
+      text-decoration: none;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.35rem;
       transition: color 0.2s;
+      flex-shrink: 0;
     }
-    .nav-back:hover { color: var(--text); text-decoration: none; }
+    .nav-back:hover { color: var(--text); }
 
     .nav-links {
       display: flex;
       gap: 0.25rem;
       list-style: none;
-      overflow-x: auto;
+      margin-left: auto;
     }
-
     .nav-links a {
       font-size: 0.8rem;
       font-weight: 600;
       color: var(--muted);
-      padding: 0.35rem 0.75rem;
-      border-radius: 8px;
+      padding: 0.3rem 0.65rem;
+      border-radius: 6px;
       white-space: nowrap;
       transition: background 0.15s, color 0.15s;
       text-decoration: none;
     }
     .nav-links a:hover { background: var(--surface); color: var(--text); }
 
+    .nav-sep { color: var(--border2); }
+    .nav-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
     /* ── HERO ── */
     .hero {
-      position: relative;
-      min-height: 48vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      padding: 1.5rem 1.5rem 1.25rem;
       text-align: center;
-      padding: 3rem 1.5rem 4rem;
-      overflow: hidden;
+      background: linear-gradient(180deg, rgba(14,165,233,0.05) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border);
     }
-
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(14,165,233,0.18) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(245,158,11,0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 30% at 10% 70%, rgba(168,85,247,0.06) 0%, transparent 50%);
-      pointer-events: none;
-    }
-
-    .hero-grid {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(14,165,233,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(14,165,233,0.04) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-    }
-
     .hero h1 {
-      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-size: clamp(1.3rem, 3vw, 1.9rem);
       font-weight: 800;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
       line-height: 1.1;
-      position: relative;
+      margin-bottom: 0.4rem;
     }
-
-    .hero-sub {
-      margin-top: 1.25rem;
-      font-size: clamp(1rem, 2.5vw, 1.2rem);
+    .hero p {
       color: var(--muted);
-      max-width: 560px;
-      position: relative;
-    }
-
-    .hero-meta {
-      margin-top: 2rem;
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      position: relative;
-    }
-
-    .hero-pill {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(14,165,233,0.1);
-      border: 1px solid rgba(14,165,233,0.25);
-      border-radius: 999px;
-      padding: 0.45rem 1rem;
-      font-size: 0.875rem;
-      font-weight: 600;
-    }
-
-    .hero-cta {
-      margin-top: 2.5rem;
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      position: relative;
-    }
-
-    .btn {
-      padding: 0.7rem 1.5rem;
-      border-radius: 10px;
       font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      transition: transform 0.15s, box-shadow 0.15s;
-      text-decoration: none;
-      display: inline-block;
+      max-width: 560px;
+      margin-inline: auto;
     }
-    .btn:hover { transform: translateY(-1px); text-decoration: none; }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #0ea5e9, #38bdf8);
-      color: #fff;
-      box-shadow: 0 4px 20px rgba(14,165,233,0.35);
-    }
-    .btn-primary:hover { box-shadow: 0 6px 28px rgba(14,165,233,0.5); }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* ── SECTIONS ── */
-    section {
-      max-width: 1100px;
+    /* ── MAIN ── */
+    .main {
+      max-width: 860px;
       margin: 0 auto;
-      padding: 5rem 1.5rem;
+      padding: 2.5rem 1.5rem 4rem;
     }
 
-    .section-header { margin-bottom: 2.5rem; }
+    /* ── SECTION ── */
+    .section { margin-bottom: 3rem; }
 
-    .section-tag {
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 0.6rem;
-    }
-
-    .section-header h2 {
-      font-size: clamp(1.6rem, 4vw, 2.5rem);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    .section-header p {
-      margin-top: 0.6rem;
-      color: var(--muted);
+    .section-title {
       font-size: 1rem;
-      max-width: 580px;
-    }
-
-    /* ── DIVIDER ── */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    /* ── EVENT BANNER ── */
-    .event-banner {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2rem;
-      display: grid;
-      grid-template-columns: auto 1fr auto auto;
-      align-items: center;
-      gap: 1.5rem;
-      margin-bottom: 1.25rem;
-      transition: border-color 0.2s;
-    }
-    .event-banner:hover { border-color: rgba(14,165,233,0.4); }
-    @media (max-width: 640px) { .event-banner { grid-template-columns: 1fr; } }
-
-    .event-banner .event-icon { font-size: 3rem; text-align: center; }
-
-    .event-banner h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.25rem; }
-    .event-banner .event-date {
-      font-size: 0.85rem;
-      color: var(--accent);
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-    .event-banner p { font-size: 0.875rem; color: var(--muted); }
-
-    .event-badge {
-      font-size: 0.72rem;
       font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── EVENTS ── */
+    .event-row {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .event-row:last-child { border-bottom: none; }
+
+    .event-row-date {
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+      min-width: 130px;
+    }
+
+    .event-row-main { flex: 1; }
+
+    .event-row-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .event-row-venue {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 0.1rem;
+    }
+
+    .event-row-badge {
+      font-size: 0.62rem;
+      font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      padding: 0.35rem 0.8rem;
+      padding: 0.2rem 0.55rem;
       border-radius: 999px;
       white-space: nowrap;
-      align-self: flex-start;
-    }
-    .badge-calling  { background: rgba(245,158,11,0.15); color: var(--gold); border: 1px solid rgba(245,158,11,0.25); }
-    .badge-protour  { background: rgba(168,85,247,0.15); color: var(--purple); border: 1px solid rgba(168,85,247,0.25); }
-
-    /* ── COUNTDOWN ── */
-    .event-countdown {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-width: 90px;
-      background: rgba(14,165,233,0.06);
-      border: 1px solid rgba(14,165,233,0.15);
-      border-radius: 14px;
-      padding: 0.85rem 1rem;
-      text-align: center;
       flex-shrink: 0;
     }
-    .event-countdown .cd-number {
-      font-size: 2.2rem;
-      font-weight: 900;
-      line-height: 1;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .event-countdown .cd-label {
-      font-size: 0.6rem;
+    .badge-calling { background: rgba(245,158,11,0.12); color: var(--gold); border: 1px solid rgba(245,158,11,0.25); }
+    .badge-protour { background: rgba(168,85,247,0.12); color: var(--purple); border: 1px solid rgba(168,85,247,0.25); }
+
+    .event-countdown {
+      font-size: 0.78rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-top: 0.25rem;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-    .event-countdown.cd-calling .cd-number {
-      background: linear-gradient(135deg, var(--gold) 0%, #fbbf24 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .event-countdown.cd-calling { border-color: rgba(245,158,11,0.2); background: rgba(245,158,11,0.06); }
-    .event-countdown.cd-protour .cd-number {
-      background: linear-gradient(135deg, var(--purple) 0%, #c084fc 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .event-countdown.cd-protour { border-color: rgba(168,85,247,0.2); background: rgba(168,85,247,0.06); }
-    .event-countdown.cd-past .cd-number { font-size: 1.1rem; }
-    @media (max-width: 640px) { .event-countdown { flex-direction: row; gap: 0.5rem; min-width: unset; justify-content: flex-start; } }
+    .cd-calling { color: var(--gold); }
+    .cd-protour { color: var(--purple); }
+    .cd-past    { color: var(--muted); }
 
     /* ── TIMELINE ── */
-    .timeline { position: relative; padding-left: 2rem; }
+    .timeline { position: relative; padding-left: 1.75rem; }
 
     .timeline::before {
       content: '';
       position: absolute;
-      left: 7px;
+      left: 5px;
       top: 8px;
       bottom: 8px;
       width: 2px;
       background: var(--border);
     }
 
-    .tl-item { position: relative; margin-bottom: 2rem; }
+    .tl-item { position: relative; margin-bottom: 1.5rem; }
+    .tl-item:last-child { margin-bottom: 0; }
 
     .tl-item::before {
       content: '';
       position: absolute;
-      left: -1.65rem;
+      left: -1.45rem;
       top: 6px;
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: var(--accent);
+      background: var(--muted);
       border: 2px solid var(--bg);
     }
 
     .tl-item.tl-event::before { background: var(--gold); }
-    .tl-item.tl-fly::before { background: var(--purple); }
+    .tl-item.tl-fly::before   { background: var(--purple); }
 
     .tl-day {
       font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 0.3rem;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
     }
     .tl-item.tl-event .tl-day { color: var(--gold); }
-    .tl-item.tl-fly .tl-day { color: var(--purple); }
+    .tl-item.tl-fly .tl-day   { color: var(--purple); }
 
-    .tl-item h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; }
-    .tl-item p { font-size: 0.875rem; color: var(--muted); }
+    .tl-item h3 { font-size: 0.92rem; font-weight: 700; margin-bottom: 0.15rem; }
+    .tl-item p  { font-size: 0.82rem; color: var(--muted); }
 
     /* ── CHECKLIST ── */
     .checklist {
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
+      gap: 0.4rem;
     }
 
     .check-item {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.85rem;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
       cursor: pointer;
       transition: border-color 0.2s, background 0.2s;
       user-select: none;
     }
-    .check-item:hover { border-color: rgba(14,165,233,0.4); }
-    .check-item.done { background: rgba(34,197,94,0.05); border-color: rgba(34,197,94,0.25); }
+    .check-item:hover { border-color: rgba(14,165,233,0.35); }
+    .check-item.done  { background: rgba(34,197,94,0.04); border-color: rgba(34,197,94,0.2); }
 
     .check-box {
-      width: 22px;
-      height: 22px;
-      border-radius: 6px;
-      border: 2px solid var(--border);
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid var(--border2);
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: background 0.15s, border-color 0.15s;
     }
-    .check-item.done .check-box {
-      background: var(--green);
-      border-color: var(--green);
-    }
+    .check-item.done .check-box { background: var(--green); border-color: var(--green); }
     .check-box svg { display: none; }
     .check-item.done .check-box svg { display: block; }
 
-    .check-label { font-size: 0.9rem; font-weight: 600; flex: 1; }
+    .check-label { font-size: 0.875rem; font-weight: 600; flex: 1; }
     .check-item.done .check-label { text-decoration: line-through; color: var(--muted); }
 
     .check-tag {
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      padding: 0.2rem 0.55rem;
+      padding: 0.18rem 0.5rem;
       border-radius: 999px;
     }
-    .tag-flight { background: rgba(168,85,247,0.12); color: var(--purple); }
-    .tag-hotel  { background: rgba(14,165,233,0.12); color: var(--accent2); }
-    .tag-event  { background: rgba(245,158,11,0.15); color: var(--gold); }
-    .tag-misc   { background: rgba(100,116,139,0.15); color: #94a3b8; }
+    .tag-flight { background: rgba(168,85,247,0.1);  color: var(--purple); }
+    .tag-hotel  { background: rgba(14,165,233,0.1);  color: var(--accent2); }
+    .tag-event  { background: rgba(245,158,11,0.1);  color: var(--gold); }
+    .tag-misc   { background: rgba(100,116,139,0.1); color: #94a3b8; }
 
     .checklist-progress {
-      margin-bottom: 1.5rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
     }
     .progress-label {
       display: flex;
       justify-content: space-between;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--muted);
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.5rem;
     }
     .progress-label strong { color: var(--text); }
     .progress-bar-bg {
-      height: 6px;
+      height: 4px;
       background: var(--border);
       border-radius: 999px;
       overflow: hidden;
@@ -440,28 +305,20 @@
       transition: width 0.4s ease;
     }
 
-    /* ── FOOTER ── */
-    footer {
-      text-align: center;
-      padding: 2rem 1.5rem;
-      color: var(--muted);
-      font-size: 0.82rem;
-      border-top: 1px solid var(--border);
-    }
-    footer a { color: var(--accent); }
-
     /* ── RESPONSIVE ── */
-    @media (max-width: 768px) {
+    @media (max-width: 600px) {
       .nav-links { display: none; }
-      section { padding: 3.5rem 1.25rem; }
+      .event-row { flex-wrap: wrap; gap: 0.4rem; }
+      .event-row-date { min-width: unset; }
     }
   </style>
 </head>
 <body>
 
-  <!-- NAV -->
   <nav>
     <a class="nav-back" href="../trips/">← All Trips</a>
+    <span class="nav-sep">|</span>
+    <span class="nav-title">FAB Asia Tour 2026</span>
     <ul class="nav-links">
       <li><a href="#events">Events</a></li>
       <li><a href="#timeline">Timeline</a></li>
@@ -469,211 +326,167 @@
     </ul>
   </nav>
 
-  <!-- HERO -->
-  <div class="hero">
-    <div class="hero-bg"></div>
-    <div class="hero-grid"></div>
+  <header class="hero">
     <h1>FAB Asia Tour 2026</h1>
-    <p class="hero-sub">Shanghai Calling &amp; Yokohama Pro Tour · Mar 27 – Apr 13 · Stuttgart</p>
-    <div class="hero-meta">
-      <div class="hero-pill">✈️ FRA → PVG → NRT → FRA</div>
-      <div class="hero-pill">📅 Mar 27 – Apr 13</div>
-      <div class="hero-pill">🎴 2 Events</div>
+    <p>Frankfurt → Shanghai → Japan → Frankfurt · Mar 27 – Apr 13</p>
+  </header>
+
+  <div class="main">
+
+    <div class="section" id="events">
+      <div class="section-title">Events</div>
+      <div class="event-row">
+        <div class="event-row-date">Apr 3–5, 2026</div>
+        <div class="event-row-main">
+          <div class="event-row-name">Calling: Shanghai</div>
+          <div class="event-row-venue">Ritz-Carlton Shanghai Pudong, 8 Pudong Avenue</div>
+        </div>
+        <div class="event-countdown cd-calling" id="cd-shanghai"></div>
+        <div class="event-row-badge badge-calling">Calling</div>
+      </div>
+      <div class="event-row">
+        <div class="event-row-date">Apr 9–12, 2026</div>
+        <div class="event-row-main">
+          <div class="event-row-name">Pro Tour: Yokohama</div>
+          <div class="event-row-venue">Venue TBD, Yokohama</div>
+        </div>
+        <div class="event-countdown cd-protour" id="cd-yokohama"></div>
+        <div class="event-row-badge badge-protour">Pro Tour</div>
+      </div>
     </div>
-    <div class="hero-cta">
-      <a href="#checklist" class="btn btn-primary">Booking Checklist</a>
-      <a href="#timeline" class="btn btn-outline">Timeline</a>
+
+    <div class="section" id="timeline">
+      <div class="section-title">Timeline</div>
+      <div class="timeline">
+
+        <div class="tl-item tl-fly">
+          <div class="tl-day">Fri Mar 27</div>
+          <h3>Fly Frankfurt → Shanghai ✈️</h3>
+          <p>FRA → PVG. Arrive Shanghai Pudong Saturday morning.</p>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-day">Sat Mar 28 – Tue Apr 2</div>
+          <h3>Shanghai</h3>
+          <p>Free days for exploration and tournament prep.</p>
+        </div>
+
+        <div class="tl-item tl-event">
+          <div class="tl-day">Fri Apr 3 – Sun Apr 5 ⭐</div>
+          <h3>Calling: Shanghai</h3>
+          <p>Ritz-Carlton Shanghai Pudong. Friday–Saturday Swiss rounds, Sunday top cut.</p>
+        </div>
+
+        <div class="tl-item tl-fly">
+          <div class="tl-day">Sun Apr 6</div>
+          <h3>Fly Shanghai → Tokyo ✈️</h3>
+          <p>PVG → NRT, ~3h. Check into Tokyo/Yokohama hotel.</p>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-day">Mon Apr 7 – Wed Apr 8</div>
+          <h3>Tokyo / Yokohama</h3>
+          <p>Recovery, deck review, and exploration.</p>
+        </div>
+
+        <div class="tl-item tl-event">
+          <div class="tl-day">Thu Apr 9 – Sun Apr 12 ⭐⭐</div>
+          <h3>Pro Tour: Yokohama</h3>
+          <p>Thursday–Friday Swiss rounds, Saturday top cut, Sunday finals.</p>
+        </div>
+
+        <div class="tl-item tl-fly">
+          <div class="tl-day">Mon Apr 13</div>
+          <h3>Fly Japan → Frankfurt ✈️</h3>
+          <p>NRT → FRA. Early check-out, head to Narita Airport.</p>
+        </div>
+
+      </div>
     </div>
+
+    <div class="section" id="checklist">
+      <div class="section-title">Booking Checklist</div>
+
+      <div class="checklist-progress">
+        <div class="progress-label">
+          <span>Progress</span>
+          <strong id="progress-text">0 / 8 done</strong>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="checklist" id="checklist-items">
+
+        <div class="check-item" data-id="leg1">
+          <div class="check-box">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="check-label">Book Leg 1: FRA → PVG (Fri, Mar 27)</div>
+          <div class="check-tag tag-flight">Flight</div>
+        </div>
+
+        <div class="check-item" data-id="leg2">
+          <div class="check-box">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="check-label">Book Leg 2: PVG → NRT (Sun, Apr 6)</div>
+          <div class="check-tag tag-flight">Flight</div>
+        </div>
+
+        <div class="check-item" data-id="leg3">
+          <div class="check-box">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="check-label">Book Leg 3: NRT → FRA (Mon, Apr 13)</div>
+          <div class="check-tag tag-flight">Flight</div>
+        </div>
+
+        <div class="check-item" data-id="hotel-shanghai">
+          <div class="check-box">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="check-label">Book hotel Shanghai (Mar 28 – Apr 6, near Pudong/Bund)</div>
+          <div class="check-tag tag-hotel">Hotel</div>
+        </div>
+
+        <div class="check-item" data-id="hotel-tokyo">
+          <div class="check-box">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="check-label">Book hotel Tokyo/Yokohama (Apr 6–13)</div>
+          <div class="check-tag tag-hotel">Hotel</div>
+        </div>
+
+        <div class="check-item" data-id="reg-shanghai">
+          <div class="check-box">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="check-label">Register for Calling: Shanghai</div>
+          <div class="check-tag tag-event">Event</div>
+        </div>
+
+        <div class="check-item" data-id="reg-yokohama">
+          <div class="check-box">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="check-label">Register for Pro Tour: Yokohama</div>
+          <div class="check-tag tag-event">Event</div>
+        </div>
+
+        <div class="check-item" data-id="insurance">
+          <div class="check-box">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="check-label">Travel health insurance (China + Japan, Mar 27 – Apr 13)</div>
+          <div class="check-tag tag-misc">Misc</div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
-
-  <!-- EVENTS -->
-  <section id="events">
-    <div class="section-header">
-      <div class="section-tag">The Events</div>
-      <h2>Two Tournaments, One Epic Trip</h2>
-    </div>
-
-    <div class="event-banner">
-      <div class="event-icon">🏆</div>
-      <div>
-        <div class="event-date">Apr 3–5, 2026 · Friday–Sunday</div>
-        <h3>Calling: Shanghai</h3>
-        <p>Ritz-Carlton Shanghai Pudong, 8 Pudong Avenue.</p>
-      </div>
-      <div class="event-countdown cd-calling" id="cd-shanghai">
-        <div class="cd-number" id="cd-shanghai-num">–</div>
-        <div class="cd-label" id="cd-shanghai-lbl">days to go</div>
-      </div>
-      <div class="event-badge badge-calling">Calling</div>
-    </div>
-
-    <div class="event-banner">
-      <div class="event-icon">👑</div>
-      <div>
-        <div class="event-date">Apr 9–12, 2026 · Thursday–Sunday</div>
-        <h3>Pro Tour: Yokohama</h3>
-        <p>Venue TBD in Yokohama, Japan.</p>
-      </div>
-      <div class="event-countdown cd-protour" id="cd-yokohama">
-        <div class="cd-number" id="cd-yokohama-num">–</div>
-        <div class="cd-label" id="cd-yokohama-lbl">days to go</div>
-      </div>
-      <div class="event-badge badge-protour">Pro Tour</div>
-    </div>
-
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- TIMELINE -->
-  <section id="timeline">
-    <div class="section-header">
-      <div class="section-tag">Day-by-Day</div>
-      <h2>Full Trip Timeline</h2>
-      <p>Mar 27 – Apr 13, 2026. 18 days total.</p>
-    </div>
-
-    <div class="timeline">
-
-      <div class="tl-item tl-fly">
-        <div class="tl-day">Fri Mar 27</div>
-        <h3>Depart Stuttgart ✈️</h3>
-        <p>Fly FRA → PVG. Arrive Shanghai Pudong Saturday morning.</p>
-      </div>
-
-      <div class="tl-item">
-        <div class="tl-day">Sat Mar 28 – Tue Apr 2</div>
-        <h3>Shanghai</h3>
-        <p>Arrive and settle in. Free days for exploration and tournament prep.</p>
-      </div>
-
-      <div class="tl-item tl-event">
-        <div class="tl-day">Fri Apr 3 – Sun Apr 5 ⭐</div>
-        <h3>Calling: Shanghai</h3>
-        <p>Ritz-Carlton Shanghai Pudong, 8 Pudong Avenue. Friday–Saturday Swiss rounds, Sunday top cut.</p>
-      </div>
-
-      <div class="tl-item tl-fly">
-        <div class="tl-day">Sun Apr 6</div>
-        <h3>Fly to Tokyo ✈️</h3>
-        <p>PVG → NRT direct, ~3h. Check into Tokyo/Yokohama hotel.</p>
-      </div>
-
-      <div class="tl-item">
-        <div class="tl-day">Mon Apr 7 – Wed Apr 8</div>
-        <h3>Tokyo / Yokohama</h3>
-        <p>Free days. Recovery, deck review, and exploration.</p>
-      </div>
-
-      <div class="tl-item tl-event">
-        <div class="tl-day">Thu Apr 9 – Sun Apr 12 ⭐⭐</div>
-        <h3>Pro Tour: Yokohama</h3>
-        <p>Four days of elite FAB competition. Thursday–Friday Swiss rounds, Saturday top cut, Sunday finals.</p>
-      </div>
-
-      <div class="tl-item tl-fly">
-        <div class="tl-day">Mon Apr 13</div>
-        <h3>Fly Home ✈️</h3>
-        <p>NRT → FRA. Early check-out, head to Narita Airport.</p>
-      </div>
-
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- CHECKLIST -->
-  <section id="checklist">
-    <div class="section-header">
-      <div class="section-tag">Booking Checklist</div>
-      <h2>Everything You Need to Book</h2>
-      <p>Tap each item to mark it done. Progress saves in your browser.</p>
-    </div>
-
-    <div class="checklist-progress">
-      <div class="progress-label">
-        <span>Booking progress</span>
-        <strong id="progress-text">0 / 8 done</strong>
-      </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
-      </div>
-    </div>
-
-    <div class="checklist" id="checklist">
-
-      <div class="check-item" data-id="leg1">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Book Leg 1: FRA → PVG (Fri, Mar 27)</div>
-        <div class="check-tag tag-flight">Flight</div>
-      </div>
-
-      <div class="check-item" data-id="leg2">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Book Leg 2: PVG → NRT (Sun, Apr 6)</div>
-        <div class="check-tag tag-flight">Flight</div>
-      </div>
-
-      <div class="check-item" data-id="leg3">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Book Leg 3: NRT → FRA (Mon, Apr 13)</div>
-        <div class="check-tag tag-flight">Flight</div>
-      </div>
-
-      <div class="check-item" data-id="hotel-shanghai">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Book hotel Shanghai (Mar 28 – Apr 6, near Pudong/Bund)</div>
-        <div class="check-tag tag-hotel">Hotel</div>
-      </div>
-
-      <div class="check-item" data-id="hotel-tokyo">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Book hotel Tokyo/Yokohama (Apr 6–13, Shinjuku or Yokohama)</div>
-        <div class="check-tag tag-hotel">Hotel</div>
-      </div>
-
-      <div class="check-item" data-id="reg-shanghai">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Register for Calling: Shanghai (fabtcg.com)</div>
-        <div class="check-tag tag-event">Event</div>
-      </div>
-
-      <div class="check-item" data-id="reg-yokohama">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Register for Pro Tour: Yokohama (fabtcg.com)</div>
-        <div class="check-tag tag-event">Event</div>
-      </div>
-
-      <div class="check-item" data-id="insurance">
-        <div class="check-box">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="check-label">Travel health insurance (China + Japan, Mar 27 – Apr 13)</div>
-        <div class="check-tag tag-misc">Misc</div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <p style="margin-bottom: 0.4rem;">🃏 FAB Asia Tour 2026 · Built by Claude for <a href="../">AI Web Pages Hub</a></p>
-    <p>Always verify tournament info on <a href="https://fabtcg.com" target="_blank">fabtcg.com</a></p>
-  </footer>
 
   <script>
     // Checklist with localStorage persistence
@@ -683,9 +496,8 @@
     const progressText = document.getElementById('progress-text');
 
     function loadState() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-      } catch { return {}; }
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+      catch { return {}; }
     }
 
     function saveState(state) {
@@ -695,16 +507,13 @@
     function updateProgress() {
       const total = items.length;
       const done = document.querySelectorAll('.check-item.done').length;
-      const pct = Math.round((done / total) * 100);
-      progressFill.style.width = pct + '%';
+      progressFill.style.width = Math.round((done / total) * 100) + '%';
       progressText.textContent = done + ' / ' + total + ' done';
     }
 
     const state = loadState();
     items.forEach(item => {
-      const id = item.dataset.id;
-      if (state[id]) item.classList.add('done');
-
+      if (state[item.dataset.id]) item.classList.add('done');
       item.addEventListener('click', () => {
         item.classList.toggle('done');
         state[item.dataset.id] = item.classList.contains('done');
@@ -723,27 +532,22 @@
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         return Math.round((target - today) / 86400000);
       }
-      function setCountdown(numId, lblId, wrapperId, dateStr) {
+      function setCountdown(elId, cls, dateStr) {
+        const el = document.getElementById(elId);
+        if (!el) return;
         const d = daysUntil(dateStr);
-        const numEl = document.getElementById(numId);
-        const lblEl = document.getElementById(lblId);
-        const wrap = document.getElementById(wrapperId);
-        if (!numEl) return;
         if (d > 0) {
-          numEl.textContent = d;
-          lblEl.textContent = d === 1 ? 'day to go' : 'days to go';
+          el.textContent = 'In ' + d + 'd';
         } else if (d === 0) {
-          numEl.textContent = 'TODAY';
-          lblEl.textContent = 'it\'s happening!';
-          wrap.classList.add('cd-past');
+          el.textContent = 'Today';
         } else {
-          numEl.textContent = Math.abs(d);
-          lblEl.textContent = Math.abs(d) === 1 ? 'day ago' : 'days ago';
-          wrap.classList.add('cd-past');
+          el.textContent = Math.abs(d) + 'd ago';
+          el.classList.remove(cls);
+          el.classList.add('cd-past');
         }
       }
-      setCountdown('cd-shanghai-num', 'cd-shanghai-lbl', 'cd-shanghai', '2026-04-03');
-      setCountdown('cd-yokohama-num', 'cd-yokohama-lbl', 'cd-yokohama', '2026-04-09');
+      setCountdown('cd-shanghai', 'cd-calling', '2026-04-03');
+      setCountdown('cd-yokohama', 'cd-protour', '2026-04-09');
     })();
   </script>
 
