@@ -23,6 +23,20 @@ const TRIPS = [
   // ── PASTE YOUR NEXT TRIP HERE (soonest/newest first) ──────────────────────
 
   {
+    id: 'rotterdam-2026-04',
+    title: 'Rotterdam Trip',
+    destination: 'Rotterdam, Netherlands',
+    region: 'Europe',
+    status: 'upcoming',
+    startDate: '2026-04-24',
+    endDate: '2026-04-27',
+    displayDates: 'Apr 24 – 27, 2026',
+    description: 'Long weekend in Rotterdam. Travelling by car from the Karlsruhe area on Friday 24th. Staying at an Airbnb Friday through Monday – most others check out Sunday, so the extra night (Sun → Mon) is still to be confirmed.',
+    link: '#',
+    tags: ['Leisure', 'Europe'],
+  },
+
+  {
     id: 'fab-asia-tour-2026',
     title: 'FAB Asia Tour 2026',
     destination: 'Shanghai & Yokohama',
