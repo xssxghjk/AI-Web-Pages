@@ -38,15 +38,6 @@
       margin: 0 auto;
     }
 
-    header .eyebrow {
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 1.25rem;
-    }
-
     header h1 {
       font-size: clamp(1.75rem, 4vw, 2.5rem);
       font-weight: 700;
@@ -82,15 +73,6 @@
       width: 100%;
       margin: 3rem auto 4rem;
       padding: 0 2rem;
-    }
-
-    .section-label {
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted-2);
-      margin-bottom: 1.5rem;
     }
 
     .grid {
@@ -183,6 +165,40 @@
       font-variant-numeric: tabular-nums;
     }
 
+    /* ── Mobile list ── */
+    @media (max-width: 640px) {
+      header {
+        padding: 2.5rem 1.25rem 2rem;
+      }
+
+      main {
+        margin: 2rem auto 3rem;
+        padding: 0;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+      }
+
+      .card {
+        padding: 1.25rem 1.25rem;
+        border-radius: 0;
+        gap: 0.4rem;
+      }
+
+      .card p {
+        display: none;
+      }
+
+      .card-meta {
+        margin-top: 0.35rem;
+      }
+    }
+
     /* ── Footer ── */
     footer {
       padding: 1.75rem 2rem;
@@ -209,7 +225,6 @@
 <body>
 
   <header>
-    <div class="eyebrow">AI Web Pages</div>
     <h1>Personal Projects Hub</h1>
     <p>A collection of purpose-built micro-sites covering travel, competitive gaming, and endurance training.</p>
   </header>
@@ -217,7 +232,6 @@
   <div class="divider"><hr /></div>
 
   <main>
-    <div class="section-label">Pages</div>
     <div class="grid">
 
       <a class="card" href="./trips/">
@@ -252,12 +266,12 @@
       </a>
 
       <a class="card" href="./tcg-tournament-prep/">
-        <div class="card-category">Tournament Prep</div>
-        <h2>FaB Tournament Prep</h2>
+        <div class="card-category">Tournament Preparations</div>
+        <h2>FaB Tournament Preparations</h2>
         <p>Format-by-format preparation notes, meta analysis, and hero selection for upcoming Flesh and Blood events.</p>
         <div class="card-meta">
           <div class="card-link">
-            View prep notes
+            View preparations
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M2.5 6h7M6.5 3l3 3-3 3"/>
             </svg>
