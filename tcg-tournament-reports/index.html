@@ -294,7 +294,7 @@
     .report-tile.tier-4:hover { border-color: var(--t4-border); }
 
     .tile-body {
-      padding: 1.1rem 1.25rem 1rem;
+      padding: 0.85rem 1rem;
     }
 
     .tile-meta {
@@ -302,7 +302,7 @@
       align-items: center;
       gap: 0.4rem;
       flex-wrap: wrap;
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.4rem;
     }
     .tier-badge {
       font-size: 0.62rem;
@@ -341,11 +341,11 @@
     }
 
     .tile-title {
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       font-weight: 800;
       letter-spacing: -0.01em;
       line-height: 1.25;
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.45rem;
     }
 
     .tile-footer {
@@ -366,27 +366,6 @@
     .rr-loss { color: var(--loss); }
     .rr-sep  { color: var(--muted); margin: 0 0.1rem; }
 
-    .tile-cta {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.55rem 1.25rem;
-      border-top: 1px solid var(--border);
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--muted);
-      transition: color 0.15s, background 0.15s;
-    }
-    .report-tile:hover .tile-cta {
-      color: var(--accent);
-      background: rgba(108,92,231,0.04);
-    }
-    .tile-cta-arrow {
-      margin-left: auto;
-      font-size: 1rem;
-      transition: transform 0.15s;
-    }
-    .report-tile:hover .tile-cta-arrow { transform: translateX(3px); }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
@@ -526,10 +505,6 @@
                 <span class="rr-loss">${rec.losses}L</span>
               </span>
             </div>
-          </div>
-          <div class="tile-cta">
-            View report
-            <span class="tile-cta-arrow">→</span>
           </div>
         </a>`;
     }
