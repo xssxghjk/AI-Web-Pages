@@ -32,7 +32,7 @@ const TRIPS = [
     endDate: '2026-04-27',
     displayDates: 'Apr 24 – 27, 2026',
     description: 'Long weekend in Rotterdam. Travelling by car from the Karlsruhe area on Friday 24th. Staying at an Airbnb Friday through Monday – most others check out Sunday, so the extra night (Sun → Mon) is still to be confirmed.',
-    link: '#',
+    link: '../rotterdam-2026/',
     tags: ['Leisure', 'Europe'],
   },
 

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rotterdam – Apr 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #05080f;
+      --surface: #0c1120;
+      --surface2: #111827;
+      --border: #1e2d45;
+      --border2: #243348;
+      --accent: #0ea5e9;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --muted2: #8898aa;
+      --gold: #f59e0b;
+      --amber-bg: rgba(245,158,11,0.08);
+      --amber-border: rgba(245,158,11,0.25);
+      --green: #22c55e;
+      --green-bg: rgba(34,197,94,0.08);
+      --green-border: rgba(34,197,94,0.25);
+      --red: #ef4444;
+      --red-bg: rgba(239,68,68,0.08);
+      --red-border: rgba(239,68,68,0.25);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5,8,15,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .nav-back {
+      font-size: 0.82rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: color 0.2s;
+      flex-shrink: 0;
+    }
+    .nav-back:hover { color: var(--text); text-decoration: none; }
+    .nav-sep { color: var(--border2); }
+    .nav-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 2.5rem 1.5rem 2rem;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(14,165,233,0.06) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+    .hero h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+    .hero-sub {
+      color: var(--muted2);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── COUNTDOWN ── */
+    .countdown-wrap {
+      display: inline-flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 1rem 1.5rem;
+    }
+    .countdown-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 3.5rem;
+    }
+    .countdown-value {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .countdown-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+    .countdown-sep {
+      font-size: 1.8rem;
+      font-weight: 300;
+      color: var(--border2);
+      align-self: flex-start;
+      padding-top: 0.1rem;
+    }
+    .countdown-done {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--green);
+      padding: 0.5rem 0;
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      max-width: 680px;
+      margin: 2rem auto;
+      padding: 0 1.25rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted2);
+    }
+    .card-header-icon { font-size: 1rem; }
+    .card-body {
+      padding: 1.1rem 1.25rem;
+    }
+
+    /* ── ROW ── */
+    .info-row {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .info-row:first-child { padding-top: 0; }
+    .info-key {
+      flex-shrink: 0;
+      width: 7rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      padding-top: 0.05rem;
+    }
+    .info-val {
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+    .info-val .note {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid;
+      vertical-align: middle;
+      margin-left: 0.4rem;
+    }
+    .badge-amber { color: var(--gold); background: var(--amber-bg); border-color: var(--amber-border); }
+    .badge-green { color: var(--green); background: var(--green-bg); border-color: var(--green-border); }
+    .badge-red   { color: var(--red);   background: var(--red-bg);   border-color: var(--red-border); }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-back" href="../trips/">← Trips</a>
+    <span class="nav-sep">|</span>
+    <span class="nav-title">Rotterdam – Apr 2026</span>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-eyebrow">Europe · Netherlands</div>
+    <h1>Rotterdam</h1>
+    <div class="hero-sub">24 – 27 April 2026</div>
+    <div class="countdown-wrap" id="countdown-wrap">
+      <div class="countdown-unit"><span class="countdown-value" id="cd-days">--</span><span class="countdown-label">Days</span></div>
+      <span class="countdown-sep">:</span>
+      <div class="countdown-unit"><span class="countdown-value" id="cd-hours">--</span><span class="countdown-label">Hours</span></div>
+      <span class="countdown-sep">:</span>
+      <div class="countdown-unit"><span class="countdown-value" id="cd-mins">--</span><span class="countdown-label">Mins</span></div>
+      <span class="countdown-sep">:</span>
+      <div class="countdown-unit"><span class="countdown-value" id="cd-secs">--</span><span class="countdown-label">Secs</span></div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <div class="card">
+      <div class="card-header"><span class="card-header-icon">🗓️</span> Overview</div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="info-key">Dates</span>
+          <span class="info-val">Fri 24 Apr – Mon 27 Apr 2026</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Duration</span>
+          <span class="info-val">3 nights / 4 days</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Destination</span>
+          <span class="info-val">Rotterdam, Netherlands</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-header-icon">🚗</span> Travel</div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="info-key">Departure</span>
+          <span class="info-val">
+            Friday, 24 April
+            <span class="note">Getting a ride by car from the Karlsruhe area. Departure time TBD.</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-header-icon">🏠</span> Accommodation</div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="info-key">Type</span>
+          <span class="info-val">Airbnb</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Check-in</span>
+          <span class="info-val">Friday, 24 April</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Check-out</span>
+          <span class="info-val">
+            Monday, 27 April
+            <span class="badge badge-amber">To confirm</span>
+            <span class="note">Most others check out Sunday. Extra night (Sun → Mon) needs to be confirmed — may need to sort something separate.</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    (function () {
+      const target = new Date('2026-04-24T00:00:00');
+
+      function pad(n) { return String(n).padStart(2, '0'); }
+
+      function tick() {
+        const diff = target - Date.now();
+        if (diff <= 0) {
+          document.getElementById('countdown-wrap').innerHTML =
+            '<span class="countdown-done">Trip has started!</span>';
+          return;
+        }
+        const days  = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const mins  = Math.floor((diff % 3600000)  / 60000);
+        const secs  = Math.floor((diff % 60000)    / 1000);
+        document.getElementById('cd-days').textContent  = days;
+        document.getElementById('cd-hours').textContent = pad(hours);
+        document.getElementById('cd-mins').textContent  = pad(mins);
+        document.getElementById('cd-secs').textContent  = pad(secs);
+      }
+
+      tick();
+      setInterval(tick, 1000);
+    })();
+  </script>
+
+</body>
+</html>
