@@ -149,6 +149,27 @@
       padding: 0.5rem 0;
     }
 
+    /* ── FAB CALLING COUNTDOWN ── */
+    .fab-calling-cd {
+      display: inline-flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: var(--amber-bg);
+      border: 1px solid var(--amber-border);
+      border-radius: 16px;
+      padding: 1rem 1.5rem;
+      margin-top: 1rem;
+    }
+    .fab-calling-cd .countdown-value { color: var(--gold); }
+    .fab-calling-cd .countdown-sep   { color: var(--amber-border); }
+    .fab-calling-done {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gold);
+      padding: 0.5rem 0;
+    }
+
     /* ── CONTENT ── */
     .content {
       max-width: 680px;
@@ -287,6 +308,31 @@
     </div>
 
     <div class="card">
+      <div class="card-header"><span class="card-header-icon">⚔️</span> FaB – Calling: Rotterdam</div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="info-key">Event</span>
+          <span class="info-val">Calling: Rotterdam</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Date</span>
+          <span class="info-val">Saturday, 25 April 2026</span>
+        </div>
+        <div style="text-align:center;">
+          <div class="fab-calling-cd" id="fab-calling-wrap">
+            <div class="countdown-unit"><span class="countdown-value" id="fab-days">--</span><span class="countdown-label">Days</span></div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-unit"><span class="countdown-value" id="fab-hours">--</span><span class="countdown-label">Hours</span></div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-unit"><span class="countdown-value" id="fab-mins">--</span><span class="countdown-label">Mins</span></div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-unit"><span class="countdown-value" id="fab-secs">--</span><span class="countdown-label">Secs</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
       <div class="card-header"><span class="card-header-icon">🏠</span> Accommodation</div>
       <div class="card-body">
         <div class="info-row">
@@ -335,6 +381,32 @@
 
       tick();
       setInterval(tick, 1000);
+    })();
+
+    (function () {
+      const fabTarget = new Date('2026-04-25T00:00:00');
+
+      function pad(n) { return String(n).padStart(2, '0'); }
+
+      function fabTick() {
+        const diff = fabTarget - Date.now();
+        if (diff <= 0) {
+          document.getElementById('fab-calling-wrap').innerHTML =
+            '<span class="fab-calling-done">Calling is here!</span>';
+          return;
+        }
+        const days  = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const mins  = Math.floor((diff % 3600000)  / 60000);
+        const secs  = Math.floor((diff % 60000)    / 1000);
+        document.getElementById('fab-days').textContent  = days;
+        document.getElementById('fab-hours').textContent = pad(hours);
+        document.getElementById('fab-mins').textContent  = pad(mins);
+        document.getElementById('fab-secs').textContent  = pad(secs);
+      }
+
+      fabTick();
+      setInterval(fabTick, 1000);
     })();
   </script>
 
