@@ -305,6 +305,70 @@
       transition: width 0.4s ease;
     }
 
+    /* ── DELETE BUTTON ── */
+    .delete-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    .check-item:hover .delete-btn { opacity: 1; }
+    .delete-btn:hover { color: var(--red); opacity: 1; }
+
+    /* ── ADD ITEM ── */
+    .add-item-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      align-items: center;
+    }
+    .add-item-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.9rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .add-item-input::placeholder { color: var(--muted); }
+    .add-item-input:focus { border-color: var(--accent); }
+    .add-item-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.5rem;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      outline: none;
+    }
+    .add-item-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.65rem 1rem;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .add-item-btn:hover { opacity: 0.85; }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       .nav-links { display: none; }
@@ -351,7 +415,7 @@
         <div class="event-row-date">Apr 9–12, 2026</div>
         <div class="event-row-main">
           <div class="event-row-name">Pro Tour: Yokohama</div>
-          <div class="event-row-venue">Venue TBD, Yokohama</div>
+          <div class="event-row-venue">Yokohama</div>
         </div>
         <div class="event-countdown cd-protour" id="cd-yokohama"></div>
         <div class="event-row-badge badge-protour">Pro Tour</div>
@@ -428,6 +492,7 @@
           </div>
           <div class="check-label">Book Leg 1: FRA → PVG (Thu, Mar 26)</div>
           <div class="check-tag tag-flight">Flight</div>
+          <button class="delete-btn" title="Remove">×</button>
         </div>
 
         <div class="check-item" data-id="leg2">
@@ -436,6 +501,7 @@
           </div>
           <div class="check-label">Book Leg 2: PVG → NRT (Sun, Apr 6)</div>
           <div class="check-tag tag-flight">Flight</div>
+          <button class="delete-btn" title="Remove">×</button>
         </div>
 
         <div class="check-item" data-id="leg3">
@@ -444,6 +510,7 @@
           </div>
           <div class="check-label">Book Leg 3: NRT → FRA (Tue, Apr 14)</div>
           <div class="check-tag tag-flight">Flight</div>
+          <button class="delete-btn" title="Remove">×</button>
         </div>
 
         <div class="check-item" data-id="hotel-shanghai">
@@ -452,6 +519,7 @@
           </div>
           <div class="check-label">Book hotel Shanghai (Mar 28 – Apr 6, near Pudong/Bund)</div>
           <div class="check-tag tag-hotel">Hotel</div>
+          <button class="delete-btn" title="Remove">×</button>
         </div>
 
         <div class="check-item" data-id="hotel-tokyo">
@@ -460,6 +528,7 @@
           </div>
           <div class="check-label">Book hotel Tokyo/Yokohama (Apr 6–13)</div>
           <div class="check-tag tag-hotel">Hotel</div>
+          <button class="delete-btn" title="Remove">×</button>
         </div>
 
         <div class="check-item" data-id="reg-shanghai">
@@ -468,6 +537,7 @@
           </div>
           <div class="check-label">Register for Calling: Shanghai</div>
           <div class="check-tag tag-event">Event</div>
+          <button class="delete-btn" title="Remove">×</button>
         </div>
 
         <div class="check-item" data-id="reg-yokohama">
@@ -476,6 +546,7 @@
           </div>
           <div class="check-label">Register for Pro Tour: Yokohama</div>
           <div class="check-tag tag-event">Event</div>
+          <button class="delete-btn" title="Remove">×</button>
         </div>
 
         <div class="check-item" data-id="insurance">
@@ -484,48 +555,119 @@
           </div>
           <div class="check-label">Travel health insurance (China + Japan, Mar 26 – Apr 14)</div>
           <div class="check-tag tag-misc">Misc</div>
+          <button class="delete-btn" title="Remove">×</button>
         </div>
 
+      </div>
+      <div class="add-item-row">
+        <input type="text" id="new-item-label" class="add-item-input" placeholder="Add a checklist item…" />
+        <select id="new-item-tag" class="add-item-select">
+          <option value="misc">Misc</option>
+          <option value="flight">Flight</option>
+          <option value="hotel">Hotel</option>
+          <option value="event">Event</option>
+        </select>
+        <button id="add-item-btn" class="add-item-btn">Add</button>
       </div>
     </div>
 
   </div>
 
   <script>
-    // Checklist with localStorage persistence
+    // Checklist
     const STORAGE_KEY = 'fab-asia-2026-checklist';
-    const items = document.querySelectorAll('.check-item');
+    const listEl = document.getElementById('checklist-items');
     const progressFill = document.getElementById('progress-fill');
     const progressText = document.getElementById('progress-text');
 
+    const TAG_CONFIG = {
+      flight: { cls: 'tag-flight', label: 'Flight' },
+      hotel:  { cls: 'tag-hotel',  label: 'Hotel'  },
+      event:  { cls: 'tag-event',  label: 'Event'  },
+      misc:   { cls: 'tag-misc',   label: 'Misc'   },
+    };
+
     function loadState() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-      catch { return {}; }
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (!raw) return { checked: {}, deleted: [], custom: [] };
+        if ('checked' in raw || 'deleted' in raw || 'custom' in raw)
+          return { checked: raw.checked||{}, deleted: raw.deleted||[], custom: raw.custom||[] };
+        return { checked: raw, deleted: [], custom: [] };
+      } catch { return { checked: {}, deleted: [], custom: [] }; }
     }
 
-    function saveState(state) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
-
-    function updateProgress() {
-      const total = items.length;
-      const done = document.querySelectorAll('.check-item.done').length;
-      progressFill.style.width = Math.round((done / total) * 100) + '%';
-      progressText.textContent = done + ' / ' + total + ' done';
-    }
+    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 
     const state = loadState();
-    items.forEach(item => {
-      if (state[item.dataset.id]) item.classList.add('done');
-      item.addEventListener('click', () => {
-        item.classList.toggle('done');
-        state[item.dataset.id] = item.classList.contains('done');
-        saveState(state);
+
+    function updateProgress() {
+      const all = listEl.querySelectorAll('.check-item');
+      const done = listEl.querySelectorAll('.check-item.done').length;
+      progressFill.style.width = all.length ? Math.round((done / all.length) * 100) + '%' : '0%';
+      progressText.textContent = done + ' / ' + all.length + ' done';
+    }
+
+    function wireItem(el) {
+      el.addEventListener('click', e => {
+        if (e.target.closest('.delete-btn')) return;
+        el.classList.toggle('done');
+        state.checked[el.dataset.id] = el.classList.contains('done');
+        saveState();
         updateProgress();
       });
+      el.querySelector('.delete-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        const id = el.dataset.id;
+        if (id.startsWith('custom-')) {
+          state.custom = state.custom.filter(c => c.id !== id);
+        } else {
+          if (!state.deleted.includes(id)) state.deleted.push(id);
+        }
+        delete state.checked[id];
+        saveState();
+        el.remove();
+        updateProgress();
+      });
+    }
+
+    listEl.querySelectorAll('.check-item').forEach(item => {
+      if (state.deleted.includes(item.dataset.id)) { item.remove(); return; }
+      if (state.checked[item.dataset.id]) item.classList.add('done');
+      wireItem(item);
     });
 
+    function renderCustom(c) {
+      const cfg = TAG_CONFIG[c.tag] || TAG_CONFIG.misc;
+      const el = document.createElement('div');
+      el.className = 'check-item' + (state.checked[c.id] ? ' done' : '');
+      el.dataset.id = c.id;
+      el.innerHTML = `<div class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-label"></div><div class="check-tag ${cfg.cls}">${cfg.label}</div><button class="delete-btn" title="Remove">×</button>`;
+      el.querySelector('.check-label').textContent = c.label;
+      listEl.appendChild(el);
+      wireItem(el);
+    }
+
+    state.custom.forEach(renderCustom);
     updateProgress();
+
+    document.getElementById('add-item-btn').addEventListener('click', () => {
+      const labelEl = document.getElementById('new-item-label');
+      const tagEl = document.getElementById('new-item-tag');
+      const label = labelEl.value.trim();
+      if (!label) { labelEl.focus(); return; }
+      const c = { id: 'custom-' + Date.now(), label, tag: tagEl.value };
+      state.custom.push(c);
+      saveState();
+      renderCustom(c);
+      updateProgress();
+      labelEl.value = '';
+      labelEl.focus();
+    });
+
+    document.getElementById('new-item-label').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('add-item-btn').click();
+    });
 
     // Event countdowns
     (function() {
