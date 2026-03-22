@@ -8,29 +8,31 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #05080f;
-      --surface: #0c1120;
-      --surface2: #111827;
-      --border: #1e2d45;
-      --border2: #243348;
-      --accent: #f97316;
-      --accent-bg: rgba(249,115,22,0.08);
-      --accent-border: rgba(249,115,22,0.28);
-      --text: #e2e8f0;
-      --muted: #64748b;
-      --muted2: #8898aa;
-      --t1: #0ea5e9;
-      --t1-bg: rgba(14,165,233,0.08);
-      --t1-border: rgba(14,165,233,0.25);
+      --bg: #0a0a0c;
+      --surface: #111114;
+      --surface2: #18181d;
+      --border: #222228;
+      --border2: #2e2e36;
+      --accent: #6c5ce7;
+      --accent-bg: rgba(108,92,231,0.08);
+      --accent-border: rgba(108,92,231,0.28);
+      --accent-dim: rgba(108,92,231,0.15);
+      --text: #e2e2ea;
+      --muted: #6b6b7e;
+      --muted2: #9494a8;
+      --muted-2: #4a4a5a;
+      --t1: #6c5ce7;
+      --t1-bg: rgba(108,92,231,0.08);
+      --t1-border: rgba(108,92,231,0.25);
       --t2: #22c55e;
       --t2-bg: rgba(34,197,94,0.08);
       --t2-border: rgba(34,197,94,0.25);
       --t3: #f59e0b;
       --t3-bg: rgba(245,158,11,0.08);
       --t3-border: rgba(245,158,11,0.25);
-      --t4: #a855f7;
-      --t4-bg: rgba(168,85,247,0.08);
-      --t4-border: rgba(168,85,247,0.25);
+      --t4: #e879f9;
+      --t4-bg: rgba(232,121,249,0.08);
+      --t4-border: rgba(232,121,249,0.25);
     }
 
     html { scroll-behavior: smooth; }
@@ -38,7 +40,8 @@
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
       line-height: 1.6;
     }
 
@@ -47,7 +50,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(5,8,15,0.88);
+      background: rgba(10,10,12,0.88);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 0 1.5rem;
@@ -80,7 +83,7 @@
     /* ── PAGE HEADER ── */
     .page-header {
       padding: 2.5rem 1.5rem 2rem;
-      background: linear-gradient(180deg, rgba(249,115,22,0.05) 0%, transparent 100%);
+      background: linear-gradient(180deg, rgba(108,92,231,0.05) 0%, transparent 100%);
       border-bottom: 1px solid var(--border);
     }
     .page-header-inner {
@@ -289,7 +292,7 @@
       padding: 0.65rem 1rem;
       transition: background 0.15s;
     }
-    .date-btn:hover { background: rgba(249,115,22,0.06); }
+    .date-btn:hover { background: rgba(108,92,231,0.06); }
     .date-label {
       font-size: 0.72rem;
       font-weight: 800;
@@ -395,7 +398,7 @@
 
     /* ── SUMMARY ── */
     .summary-card {
-      background: linear-gradient(135deg, rgba(249,115,22,0.06) 0%, rgba(249,115,22,0.02) 100%);
+      background: linear-gradient(135deg, rgba(108,92,231,0.06) 0%, rgba(108,92,231,0.02) 100%);
       border: 1px solid var(--accent-border);
       border-radius: 12px;
       padding: 1.1rem 1.4rem;
@@ -448,6 +451,21 @@
       .format-card-header { padding: 0.9rem 1.1rem; }
       .date-content { padding: 0.75rem 0.9rem; }
     }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 1.75rem 2rem;
+      font-size: 0.78rem;
+      color: var(--muted-2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
   </style>
 </head>
 <body>
@@ -459,6 +477,11 @@
   </nav>
 
   <div id="page-content"></div>
+
+  <footer>
+    <span>Built with Claude</span>
+    <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
+  </footer>
 
   <script src="preps.js"></script>
   <script>
