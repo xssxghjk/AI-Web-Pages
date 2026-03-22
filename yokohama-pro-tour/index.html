@@ -308,8 +308,11 @@
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       .nav-links { display: none; }
-      .event-row { flex-wrap: wrap; gap: 0.4rem; }
-      .event-row-date { min-width: unset; }
+      .event-row { flex-wrap: wrap; row-gap: 0.2rem; column-gap: 0.5rem; }
+      .event-row-date { min-width: unset; flex-basis: 100%; display: flex; align-items: center; gap: 0.5rem; }
+      .event-countdown { order: 2; }
+      .event-row-badge { order: 3; }
+      .event-row-main  { flex-basis: 100%; order: 4; }
     }
   </style>
 </head>
@@ -328,7 +331,7 @@
 
   <header class="hero">
     <h1>FAB Asia Tour 2026</h1>
-    <p>Frankfurt → Shanghai → Japan → Frankfurt · Mar 27 – Apr 13</p>
+    <p>Frankfurt → Shanghai → Japan → Frankfurt · Mar 26 – Apr 14</p>
   </header>
 
   <div class="main">
@@ -360,13 +363,13 @@
       <div class="timeline">
 
         <div class="tl-item tl-fly">
-          <div class="tl-day">Fri Mar 27</div>
+          <div class="tl-day">Thu Mar 26</div>
           <h3>Fly Frankfurt → Shanghai ✈️</h3>
-          <p>FRA → PVG. Arrive Shanghai Pudong Saturday morning.</p>
+          <p>FRA → PVG. Arrive Shanghai Pudong Friday morning.</p>
         </div>
 
         <div class="tl-item">
-          <div class="tl-day">Sat Mar 28 – Tue Apr 2</div>
+          <div class="tl-day">Fri Mar 27 – Tue Apr 2</div>
           <h3>Shanghai</h3>
           <p>Free days for exploration and tournament prep.</p>
         </div>
@@ -396,7 +399,7 @@
         </div>
 
         <div class="tl-item tl-fly">
-          <div class="tl-day">Mon Apr 13</div>
+          <div class="tl-day">Tue Apr 14</div>
           <h3>Fly Japan → Frankfurt ✈️</h3>
           <p>NRT → FRA. Early check-out, head to Narita Airport.</p>
         </div>
@@ -423,7 +426,7 @@
           <div class="check-box">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <div class="check-label">Book Leg 1: FRA → PVG (Fri, Mar 27)</div>
+          <div class="check-label">Book Leg 1: FRA → PVG (Thu, Mar 26)</div>
           <div class="check-tag tag-flight">Flight</div>
         </div>
 
@@ -439,7 +442,7 @@
           <div class="check-box">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <div class="check-label">Book Leg 3: NRT → FRA (Mon, Apr 13)</div>
+          <div class="check-label">Book Leg 3: NRT → FRA (Tue, Apr 14)</div>
           <div class="check-tag tag-flight">Flight</div>
         </div>
 
@@ -479,7 +482,7 @@
           <div class="check-box">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <div class="check-label">Travel health insurance (China + Japan, Mar 27 – Apr 13)</div>
+          <div class="check-label">Travel health insurance (China + Japan, Mar 26 – Apr 14)</div>
           <div class="check-tag tag-misc">Misc</div>
         </div>
 
