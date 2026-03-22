@@ -122,14 +122,24 @@
     /* ── SECTION ── */
     .section { margin-bottom: 3rem; }
 
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
     .section-title {
-      font-size: 1rem;
+      font-size: 0.68rem;
       font-weight: 700;
-      letter-spacing: -0.01em;
-      color: var(--text);
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--border);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .section-divider {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
     }
 
     /* ── EVENTS ── */
@@ -422,6 +432,9 @@
       .event-countdown { order: 2; }
       .event-row-badge { order: 3; }
       .event-row-main  { flex-basis: 100%; order: 4; }
+      .add-item-row { flex-wrap: wrap; }
+      .add-item-input { flex: 1 1 100%; min-width: 0; }
+      .add-item-select { flex: 1; }
     }
 
     /* ── FOOTER ── */
@@ -461,7 +474,7 @@
   <div class="main">
 
     <div class="section" id="events">
-      <div class="section-title">Events</div>
+      <div class="section-header"><span class="section-title">Events</span><div class="section-divider"></div></div>
       <div class="event-row">
         <div class="event-row-date">Apr 25, 2026</div>
         <div class="event-row-main">
@@ -474,7 +487,7 @@
     </div>
 
     <div class="section" id="overview">
-      <div class="section-title">Overview</div>
+      <div class="section-header"><span class="section-title">Overview</span><div class="section-divider"></div></div>
       <div class="info-row">
         <span class="info-key">Dates</span>
         <span class="info-val">Fri 24 Apr – Mon 27 Apr 2026</span>
@@ -498,7 +511,7 @@
     </div>
 
     <div class="section" id="timeline">
-      <div class="section-title">Timeline</div>
+      <div class="section-header"><span class="section-title">Timeline</span><div class="section-divider"></div></div>
       <div class="timeline">
 
         <div class="tl-item tl-drive">
@@ -529,7 +542,7 @@
     </div>
 
     <div class="section" id="checklist">
-      <div class="section-title">Booking Checklist</div>
+      <div class="section-header"><span class="section-title">Booking Checklist</span><div class="section-divider"></div></div>
 
       <div class="checklist-progress">
         <div class="progress-label">
