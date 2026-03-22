@@ -3,327 +3,335 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Web Pages — Hub</title>
+  <title>AI Web Pages</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0d0d0f;
-      --surface: #16161a;
-      --border: #2a2a35;
-      --accent: #7c6af7;
-      --accent-glow: rgba(124, 106, 247, 0.25);
-      --text: #e8e8f0;
-      --muted: #888899;
+      --bg: #0a0a0c;
+      --surface: #111114;
+      --surface-2: #18181d;
+      --border: #222228;
+      --border-hover: #3a3a48;
+      --accent: #6c5ce7;
+      --accent-dim: rgba(108, 92, 231, 0.15);
+      --text: #e2e2ea;
+      --muted: #6b6b7e;
+      --muted-2: #4a4a5a;
     }
 
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* ── Header ── */
     header {
-      padding: 2.5rem 2rem 1.5rem;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(124,106,247,0.06) 0%, transparent 100%);
+      padding: 4rem 2rem 3.5rem;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
     }
 
-    header .badge {
-      display: inline-block;
+    header .eyebrow {
       font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
+      font-weight: 600;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--accent);
-      border: 1px solid var(--accent);
-      border-radius: 999px;
-      padding: 0.25rem 0.75rem;
-      margin-bottom: 1rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
     }
 
     header h1 {
-      font-size: clamp(1.8rem, 5vw, 3rem);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-    }
-
-    header h1 span {
-      background: linear-gradient(135deg, #7c6af7 0%, #c084fc 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      color: var(--text);
     }
 
     header p {
-      margin-top: 0.75rem;
+      margin-top: 0.9rem;
       color: var(--muted);
-      font-size: 1.05rem;
-      max-width: 540px;
-      margin-inline: auto;
+      font-size: 0.975rem;
+      line-height: 1.65;
+      max-width: 480px;
     }
 
-    /* ── Main grid ── */
+    /* ── Divider ── */
+    .divider {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    .divider hr {
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Main ── */
     main {
       flex: 1;
       max-width: 1100px;
       width: 100%;
-      margin: 3rem auto;
-      padding: 0 1.5rem;
+      margin: 3rem auto 4rem;
+      padding: 0 2rem;
     }
 
     .section-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-
-    .section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
+      color: var(--muted-2);
+      margin-bottom: 1.5rem;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.25rem;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
     }
 
     /* ── Card ── */
     .card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.75rem;
+      padding: 1.75rem 2rem;
       text-decoration: none;
       color: inherit;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
-      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      gap: 0.6rem;
+      transition: background 0.15s;
       position: relative;
-      overflow: hidden;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      opacity: 0;
-      background: radial-gradient(circle at 30% 30%, var(--accent-glow), transparent 60%);
-      transition: opacity 0.3s;
     }
 
     .card:hover {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent), 0 8px 32px rgba(0,0,0,0.4);
-      transform: translateY(-2px);
+      background: var(--surface-2);
     }
 
-    .card:hover::before { opacity: 1; }
-
-    .card-emoji {
-      font-size: 2.2rem;
-      line-height: 1;
-    }
-
-    .card-tag {
+    .card-category {
       font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
+      font-weight: 600;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--accent);
-      padding: 0.2rem 0.55rem;
-      background: rgba(124,106,247,0.12);
-      border-radius: 999px;
-      width: fit-content;
     }
 
     .card h2 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      line-height: 1.3;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.35;
+      color: var(--text);
     }
 
     .card p {
-      font-size: 0.9rem;
+      font-size: 0.875rem;
       color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.65;
       flex: 1;
     }
 
-    .card-arrow {
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
       margin-top: 0.5rem;
-      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .card-link {
+      font-size: 0.8rem;
       color: var(--accent);
-      font-weight: 600;
+      font-weight: 500;
       display: flex;
       align-items: center;
       gap: 0.3rem;
     }
 
-    .card-countdowns {
-      display: flex;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-top: 0.25rem;
+    .card-link svg {
+      transition: transform 0.15s;
     }
-    .cd-pill {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
+
+    .card:hover .card-link svg {
+      transform: translateX(3px);
+    }
+
+    .countdown {
       font-size: 0.78rem;
+      color: var(--muted);
+      display: flex;
+      align-items: baseline;
+      gap: 0.3rem;
+    }
+
+    .countdown-val {
+      font-size: 0.85rem;
       font-weight: 700;
-      padding: 0.3rem 0.65rem;
-      border-radius: 999px;
-      border: 1px solid;
-    }
-    .cd-pill-calling {
-      background: rgba(245,158,11,0.1);
-      border-color: rgba(245,158,11,0.25);
-      color: #f59e0b;
-    }
-    .cd-pill-protour {
-      background: rgba(124,106,247,0.1);
-      border-color: rgba(124,106,247,0.25);
-      color: #a855f7;
-    }
-    .cd-pill .cd-days {
-      font-size: 1rem;
-      font-weight: 900;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
     }
 
     /* ── Footer ── */
     footer {
-      text-align: center;
-      padding: 1.5rem;
-      font-size: 0.8rem;
-      color: var(--muted);
+      padding: 1.75rem 2rem;
+      font-size: 0.78rem;
+      color: var(--muted-2);
       border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
-    footer a { color: var(--accent); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--text);
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="badge">AI-Generated</div>
-    <h1>AI Web Pages <span>Hub</span></h1>
-    <p>A collection of AI-crafted micro-sites. Each page below was built in a single conversation.</p>
+    <div class="eyebrow">AI Web Pages</div>
+    <h1>Personal Projects Hub</h1>
+    <p>A collection of purpose-built micro-sites covering travel, competitive gaming, and endurance training.</p>
   </header>
 
+  <div class="divider"><hr /></div>
+
   <main>
-    <div class="section-label">Published Pages</div>
+    <div class="section-label">Pages</div>
     <div class="grid">
 
       <a class="card" href="./trips/">
-        <div class="card-emoji">✈️</div>
-        <div class="card-tag">Trips</div>
+        <div class="card-category">Travel</div>
         <h2>Trips</h2>
-        <p>Full itineraries, hotel picks, booking checklists, and day-by-day plans — everything you need to join an upcoming trip or see where we've been.</p>
-        <div class="card-countdowns">
-          <div class="cd-pill cd-pill-calling">
-            <span class="cd-days" id="hub-cd-shanghai">–</span>
-            <span>days · Next Trip</span>
+        <p>Itineraries, hotel picks, booking checklists, and day-by-day plans for upcoming and past trips.</p>
+        <div class="card-meta">
+          <div class="card-link">
+            View trips
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M2.5 6h7M6.5 3l3 3-3 3"/>
+            </svg>
+          </div>
+          <div class="countdown">
+            Next trip in <span class="countdown-val" id="hub-cd-shanghai">–</span> days
           </div>
         </div>
-        <div class="card-arrow">View trips →</div>
       </a>
 
       <a class="card" href="./tcg-tournament-reports/">
-        <div class="card-emoji">⚔️</div>
-        <div class="card-tag">Tournament Reports</div>
+        <div class="card-category">Tournament Reports</div>
         <h2>FaB Tournament Reports</h2>
-        <p>Post-event analysis and round-by-round breakdowns for Flesh and Blood. Filtered by hero and event tier — RTN through Worlds.</p>
-        <div class="card-arrow">View reports →</div>
+        <p>Post-event analysis and round-by-round breakdowns for Flesh and Blood, filtered by hero and event tier.</p>
+        <div class="card-meta">
+          <div class="card-link">
+            View reports
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M2.5 6h7M6.5 3l3 3-3 3"/>
+            </svg>
+          </div>
+        </div>
       </a>
 
       <a class="card" href="./tcg-tournament-prep/">
-        <div class="card-emoji">🎯</div>
-        <div class="card-tag">Tournament Prep</div>
+        <div class="card-category">Tournament Prep</div>
         <h2>FaB Tournament Prep</h2>
-        <p>Format-by-format preparation notes, meta predictions, and hero picks for upcoming Flesh and Blood events.</p>
-        <div class="card-arrow">View preps →</div>
+        <p>Format-by-format preparation notes, meta analysis, and hero selection for upcoming Flesh and Blood events.</p>
+        <div class="card-meta">
+          <div class="card-link">
+            View prep notes
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M2.5 6h7M6.5 3l3 3-3 3"/>
+            </svg>
+          </div>
+        </div>
       </a>
 
       <a class="card" href="./marathon-training/">
-        <div class="card-emoji">🏃</div>
-        <div class="card-tag">Training Plan</div>
+        <div class="card-category">Training</div>
         <h2>Couch to Half Marathon</h2>
-        <p>20-week structured training plan starting from zero. Daily check-ins, progress tracking, km &amp; time logging, heat maps, and streak counters — all stored locally.</p>
-        <div class="card-countdowns">
-          <div class="cd-pill cd-pill-protour">
-            <span class="cd-days" id="hub-cd-race">–</span>
-            <span>days · Race Day</span>
+        <p>20-week structured training plan with daily check-ins, progress tracking, and run logging stored locally.</p>
+        <div class="card-meta">
+          <div class="card-link">
+            View plan
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M2.5 6h7M6.5 3l3 3-3 3"/>
+            </svg>
+          </div>
+          <div class="countdown" id="hub-cd-race-wrap" style="display:none;">
+            Race day in <span class="countdown-val" id="hub-cd-race">–</span> days
           </div>
         </div>
-        <div class="card-arrow">View plan →</div>
       </a>
-
-      <!-- Future pages will appear here -->
 
     </div>
   </main>
 
   <footer>
-    Built with Claude · <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank">View on GitHub</a>
+    <span>Built with Claude</span>
+    <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
   </footer>
 
   <script>
-    (function() {
+    (function () {
       function daysUntil(dateStr) {
         const target = new Date(dateStr + 'T00:00:00');
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         return Math.round((target - today) / 86400000);
       }
-      function setHubCountdown(elId, dateStr) {
-        const el = document.getElementById(elId);
-        if (!el) return;
-        const d = daysUntil(dateStr);
-        if (d > 0) el.textContent = d;
-        else if (d === 0) el.textContent = '🔴';
-        else el.textContent = '✓';
-      }
-      setHubCountdown('hub-cd-shanghai', '2026-03-27');
 
-      // Race date is dynamic: Week 20 Sunday from the user's plan start date stored in localStorage
-      (function() {
-        const el = document.getElementById('hub-cd-race');
+      // Next trip countdown
+      (function () {
+        const el = document.getElementById('hub-cd-shanghai');
         if (!el) return;
+        const d = daysUntil('2026-03-27');
+        if (d > 0) el.textContent = d;
+        else if (d === 0) el.textContent = 'Today';
+        else el.closest('.countdown').textContent = 'Trip in progress';
+      })();
+
+      // Race day countdown (only if plan has started)
+      (function () {
+        const wrap = document.getElementById('hub-cd-race-wrap');
+        const el = document.getElementById('hub-cd-race');
+        if (!wrap || !el) return;
         try {
           const raw = localStorage.getItem('c2hm_v1');
-          if (!raw) return; // plan not started yet — leave default '–'
+          if (!raw) return;
           const data = JSON.parse(raw);
           if (!data.planStart) return;
-          // Replicate marathon app logic: find Sunday of planStart's week, then add 19 weeks
           const start = new Date(data.planStart + 'T00:00:00');
           const week1Sun = new Date(start.getTime() - start.getDay() * 86400000);
           week1Sun.setHours(0, 0, 0, 0);
           const raceDate = new Date(week1Sun.getTime() + 19 * 7 * 86400000);
-          const raceDateStr = raceDate.toISOString().slice(0, 10);
-          const d = daysUntil(raceDateStr);
-          if (d > 0) el.textContent = d;
-          else if (d === 0) el.textContent = '🔴';
-          else el.textContent = '✓';
-        } catch(e) {}
+          const d = daysUntil(raceDate.toISOString().slice(0, 10));
+          if (d > 0) {
+            el.textContent = d;
+            wrap.style.display = 'flex';
+          } else if (d === 0) {
+            el.textContent = 'Today';
+            wrap.style.display = 'flex';
+          }
+        } catch (e) {}
       })();
     })();
   </script>
