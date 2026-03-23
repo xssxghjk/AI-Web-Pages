@@ -23,6 +23,20 @@ const TRIPS = [
   // ── PASTE YOUR NEXT TRIP HERE (soonest/newest first) ──────────────────────
 
   {
+    id: 'hamburg-calling-2026',
+    title: 'Hamburg – The Calling 2026',
+    destination: 'Hamburg, Germany',
+    region: 'Europe',
+    status: 'upcoming',
+    startDate: '2026-01-01',
+    endDate: '2026-01-01',
+    displayDates: 'Dates TBC',
+    description: 'Trip to Hamburg for The Calling 2026 World Tour stop. Classic Constructed Calling ($20,000 USD) and Living Legend Battle Hardened ($2,000 USD) at MesseHalle Hamburg-Schnelsen.',
+    link: '../hamburg-calling-2026/',
+    tags: ['FaB', 'Tournament', 'Europe'],
+  },
+
+  {
     id: 'prague-omens-2026',
     title: 'Prague – Omens World Premiere',
     destination: 'Prague, Czech Republic',
