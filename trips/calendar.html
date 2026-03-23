@@ -480,6 +480,7 @@
       const viewport = document.getElementById('cal-viewport');
       const oldGrid  = document.getElementById('cal-grid');
       const w = viewport.offsetWidth;
+      const oldH = viewport.offsetHeight;
 
       const newGrid = document.createElement('div');
       newGrid.innerHTML = html;
@@ -488,13 +489,18 @@
         transform: `translateX(${direction > 0 ? w : -w}px)`,
       });
       viewport.appendChild(newGrid);
+      const newH = newGrid.offsetHeight;
 
-      // Force reflow so transition fires
+      // Lock current height then force reflow before starting transitions
+      viewport.style.height = `${oldH}px`;
       newGrid.getBoundingClientRect();
 
-      const transition = 'transform 0.32s cubic-bezier(0.25,0.46,0.45,0.94)';
+      const easing = 'cubic-bezier(0.25,0.46,0.45,0.94)';
+      const transition = `transform 0.32s ${easing}`;
+      viewport.style.transition = `height 0.32s ${easing}`;
       oldGrid.style.transition = transition;
       newGrid.style.transition = transition;
+      viewport.style.height    = `${newH}px`;
       oldGrid.style.transform  = `translateX(${direction > 0 ? -w : w}px)`;
       newGrid.style.transform  = 'translateX(0)';
 
@@ -503,6 +509,8 @@
         newGrid.id = 'cal-grid';
         oldGrid.remove();
         newGrid.style.cssText = '';
+        viewport.style.transition = '';
+        viewport.style.height = '';
         animating = false;
       }, { once: true });
     }
@@ -560,6 +568,7 @@
         updateLegend(tripsThisMonth);
 
         const w = viewport.offsetWidth;
+        const oldH = viewport.offsetHeight;
         const newGrid = document.createElement('div');
         newGrid.innerHTML = html;
         Object.assign(newGrid.style, {
@@ -567,11 +576,17 @@
           transform: `translateX(${direction > 0 ? w : -w}px)`,
         });
         viewport.appendChild(newGrid);
+        const newH = newGrid.offsetHeight;
+
+        viewport.style.height = `${oldH}px`;
         newGrid.getBoundingClientRect();
 
-        const transition = 'transform 0.28s cubic-bezier(0.25,0.46,0.45,0.94)';
+        const easing = 'cubic-bezier(0.25,0.46,0.45,0.94)';
+        const transition = `transform 0.28s ${easing}`;
+        viewport.style.transition = `height 0.28s ${easing}`;
         grid.style.transition = transition;
         newGrid.style.transition = transition;
+        viewport.style.height   = `${newH}px`;
         grid.style.transform    = `translateX(${direction > 0 ? -w : w}px)`;
         newGrid.style.transform = 'translateX(0)';
 
@@ -580,6 +595,8 @@
           newGrid.id = 'cal-grid';
           grid.remove();
           newGrid.style.cssText = '';
+          viewport.style.transition = '';
+          viewport.style.height = '';
           animating = false;
         }, { once: true });
       } else {
