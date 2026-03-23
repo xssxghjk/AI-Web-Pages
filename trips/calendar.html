@@ -277,6 +277,56 @@
       .cal-month-label { font-size: 0.9rem; }
     }
 
+    /* ── FAB EVENT POPUP ── */
+    .fab-popup {
+      position: fixed;
+      z-index: 500;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 0.8rem 0.85rem;
+      min-width: 210px;
+      max-width: 270px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .fab-popup-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.15rem;
+    }
+    .fab-popup-dates {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 0.65rem;
+    }
+    .fab-popup-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .fab-popup-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      text-align: left;
+    }
+    .fab-popup-btn:hover { border-color: var(--muted); background: var(--border); color: var(--text); }
+    .fab-popup-btn.p-event { color: var(--fab-event); border-color: var(--fab-event-border); background: var(--fab-event-bg); }
+    .fab-popup-btn.p-event:hover { filter: brightness(1.15); }
+    .fab-popup-btn.p-prep { color: var(--accent); border-color: var(--upcoming-border); background: var(--upcoming-bg); }
+    .fab-popup-btn.p-prep:hover { filter: brightness(1.2); }
+
     /* ── FOOTER ── */
     footer {
       padding: 1.75rem 2rem;
@@ -325,6 +375,13 @@
     <span>Built with Claude</span>
     <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
   </footer>
+
+  <!-- FAB event context popup (singleton, repositioned on each open) -->
+  <div class="fab-popup" id="fab-popup" hidden>
+    <div class="fab-popup-title" id="fab-popup-title"></div>
+    <div class="fab-popup-dates" id="fab-popup-dates"></div>
+    <div class="fab-popup-actions" id="fab-popup-actions"></div>
+  </div>
 
   <script src="trips.js"></script>
   <script>
@@ -442,9 +499,14 @@
           const topPx = DAY_NUM_H + slot * (BAR_H + BAR_GAP);
           const classes = ['cal-trip-bar', `s-${esc(trip.status)}`,
             overflowLeft ? 'overflow-left' : '', overflowRight ? 'overflow-right' : ''].filter(Boolean).join(' ');
-          return `<a class="${classes}" href="${esc(trip.link)}" title="${esc(trip.title)} · ${esc(trip.displayDates)}"` +
-            ` style="--c:${colStart};--s:${span};top:${topPx}px;height:${BAR_H}px">` +
-            `<span class="bar-label">${esc(trip.title)}</span></a>`;
+          const styleAttr = `--c:${colStart};--s:${span};top:${topPx}px;height:${BAR_H}px`;
+          const titleAttr = `${esc(trip.title)} · ${esc(trip.displayDates)}`;
+          if (trip.status === 'fab-event') {
+            return `<button class="${classes}" data-event-id="${esc(trip.id)}" title="${titleAttr}"` +
+              ` style="${styleAttr}"><span class="bar-label">${esc(trip.title)}</span></button>`;
+          }
+          return `<a class="${classes}" href="${esc(trip.link)}" title="${titleAttr}"` +
+            ` style="${styleAttr}"><span class="bar-label">${esc(trip.title)}</span></a>`;
         }).join('');
 
         html += `<div class="cal-week-wrapper"><div class="cal-week-days">${daysHtml}</div>${barsHtml}</div>`;
@@ -550,6 +612,87 @@
       grid.style.transition = 'none';
       grid.style.transform = `translateX(${dx}px)`;
     }, { passive: true });
+
+    // ── FAB EVENT POPUP ──────────────────────────────────────────────────────
+    const popup      = document.getElementById('fab-popup');
+    const popupTitle = document.getElementById('fab-popup-title');
+    const popupDates = document.getElementById('fab-popup-dates');
+    const popupActions = document.getElementById('fab-popup-actions');
+
+    // Build an ID→event lookup from the global ALL_EVENTS array
+    const eventById = Object.fromEntries(ALL_EVENTS.map(e => [e.id, e]));
+
+    function openFabPopup(btn) {
+      const event = eventById[btn.dataset.eventId];
+      if (!event) return;
+
+      popupTitle.textContent = event.title;
+      popupDates.textContent = event.displayDates + (event.destination ? ' · ' + event.destination : '');
+
+      popupActions.innerHTML = '';
+
+      // Primary: link to official event page
+      const evtBtn = document.createElement('a');
+      evtBtn.className = 'fab-popup-btn p-event';
+      evtBtn.href = event.link;
+      evtBtn.target = '_blank';
+      evtBtn.rel = 'noopener';
+      evtBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Event Page';
+      popupActions.appendChild(evtBtn);
+
+      // Optional: tournament prep link
+      if (event.prepId) {
+        const prepBtn = document.createElement('a');
+        prepBtn.className = 'fab-popup-btn p-prep';
+        prepBtn.href = `../tcg-tournament-prep/detail.html?id=${encodeURIComponent(event.prepId)}`;
+        prepBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Tournament Prep';
+        popupActions.appendChild(prepBtn);
+      }
+
+      // Optional: tournament report link
+      if (event.reportId) {
+        const repBtn = document.createElement('a');
+        repBtn.className = 'fab-popup-btn';
+        repBtn.href = `../tcg-tournament-reports/detail.html?id=${encodeURIComponent(event.reportId)}`;
+        repBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M4 4h4M4 6.5h4M4 9h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Tournament Report';
+        popupActions.appendChild(repBtn);
+      }
+
+      // Position popup near the button, keeping it within viewport
+      popup.hidden = false;
+      const rect = btn.getBoundingClientRect();
+      const pw = popup.offsetWidth;
+      const ph = popup.offsetHeight;
+      const margin = 6;
+      let left = rect.left;
+      let top  = rect.bottom + margin;
+      if (left + pw > window.innerWidth - margin) left = window.innerWidth - pw - margin;
+      if (left < margin) left = margin;
+      if (top + ph > window.innerHeight - margin) top = rect.top - ph - margin;
+      popup.style.left = left + 'px';
+      popup.style.top  = top  + 'px';
+    }
+
+    function closeFabPopup() { popup.hidden = true; }
+
+    // Event delegation: clicks on FAB bars
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('button[data-event-id]');
+      if (btn) {
+        e.stopPropagation();
+        // Toggle: close if same button already open
+        if (!popup.hidden && popup._activeBtn === btn) { closeFabPopup(); popup._activeBtn = null; return; }
+        popup._activeBtn = btn;
+        openFabPopup(btn);
+        return;
+      }
+      // Click outside popup closes it
+      if (!popup.hidden && !popup.contains(e.target)) { closeFabPopup(); popup._activeBtn = null; }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { closeFabPopup(); popup._activeBtn = null; }
+    });
 
     viewport.addEventListener('touchend', e => {
       if (touchStartX === null || !dragging) { touchStartX = null; dragging = false; return; }
