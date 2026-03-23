@@ -318,163 +318,24 @@
     .trip-tile.s-past     .tile-countdown { color: var(--muted); }
     .trip-tile.s-planning .tile-countdown { color: var(--planning); }
 
-    /* ── VIEW TOGGLE ── */
-    .view-toggle-bar {
-      padding: 0.55rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      background: var(--surface);
-    }
-    .view-toggle-btn {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
+    /* ── CALENDAR LINK ── */
+    .cal-link {
+      margin-left: auto;
       font-size: 0.75rem;
       font-weight: 600;
-      padding: 0.25rem 0.7rem;
-      border-radius: 999px;
-      background: transparent;
-      border: 1px solid var(--border2);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .view-toggle-btn:hover { border-color: var(--muted2); color: var(--text); }
-    .view-toggle-btn.active {
-      background: rgba(108,92,231,0.12);
-      border-color: rgba(108,92,231,0.45);
-      color: var(--accent);
-    }
-
-    /* ── CALENDAR ── */
-    .calendar-wrapper {
-      display: none;
-    }
-    .calendar-wrapper.visible { display: block; }
-
-    .cal-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.25rem;
-      gap: 0.75rem;
-    }
-    .cal-nav-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 8px;
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.15s;
-      flex-shrink: 0;
-    }
-    .cal-nav-btn:hover { border-color: var(--muted2); color: var(--text); }
-    .cal-month-label {
-      font-size: 1rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: var(--text);
-    }
-
-    .cal-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 3px;
-    }
-    .cal-dow {
-      text-align: center;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 0.25rem 0 0.5rem;
-    }
-    .cal-day {
-      min-height: 3.2rem;
-      border-radius: 8px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 0.3rem 0.35rem 0.25rem;
-      position: relative;
-      transition: border-color 0.15s;
-    }
-    .cal-day.empty {
-      background: transparent;
-      border-color: transparent;
-    }
-    .cal-day.today {
-      border-color: var(--accent);
-    }
-    .cal-day-num {
-      font-size: 0.72rem;
-      font-weight: 700;
       color: var(--muted2);
-      line-height: 1;
-      margin-bottom: 0.25rem;
-    }
-    .cal-day.today .cal-day-num { color: var(--accent); }
-    .cal-day.has-trip { border-color: var(--border2); }
-
-    .cal-event {
-      display: block;
-      font-size: 0.6rem;
-      font-weight: 700;
-      line-height: 1.25;
-      border-radius: 4px;
-      padding: 0.1rem 0.3rem;
-      margin-bottom: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
       text-decoration: none;
-      cursor: pointer;
-    }
-    .cal-event.s-upcoming  { background: var(--upcoming-bg);  color: var(--upcoming);  border: 1px solid var(--upcoming-border); }
-    .cal-event.s-ongoing   { background: var(--ongoing-bg);   color: var(--ongoing);   border: 1px solid var(--ongoing-border); }
-    .cal-event.s-past      { background: var(--past-bg);      color: var(--past);      border: 1px solid var(--past-border); }
-    .cal-event.s-planning  { background: var(--planning-bg);  color: var(--planning);  border: 1px solid var(--planning-border); }
-    .cal-event.start-day { border-radius: 4px 4px 4px 4px; }
-
-    .cal-legend {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin-top: 1rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid var(--border);
-    }
-    .cal-legend-item {
       display: flex;
       align-items: center;
-      gap: 0.35rem;
-      font-size: 0.72rem;
-      color: var(--muted2);
-    }
-    .cal-legend-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 2px;
+      gap: 0.3rem;
+      transition: color 0.15s;
       flex-shrink: 0;
     }
-    .cal-legend-dot.s-upcoming { background: var(--upcoming); }
-    .cal-legend-dot.s-ongoing  { background: var(--ongoing); }
-    .cal-legend-dot.s-past     { background: var(--past); }
-    .cal-legend-dot.s-planning { background: var(--planning); }
+    .cal-link:hover { color: var(--text); }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       .tiles-grid { grid-template-columns: 1fr; }
-      .cal-day { min-height: 2.4rem; padding: 0.2rem 0.2rem; }
-      .cal-event { font-size: 0.5rem; padding: 0.08rem 0.2rem; }
-      .cal-month-label { font-size: 0.9rem; }
     }
 
     /* ── FOOTER ── */
@@ -517,6 +378,10 @@
       <span class="filter-badge" id="filter-badge" style="display:none"></span>
     </button>
     <div class="filter-active-tags" id="filter-active-tags"></div>
+    <a class="cal-link" href="calendar.html">
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="1" y="2" width="9" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 5h9M4 1v2M7 1v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      View trip calendar
+    </a>
   </div>
   <div class="filter-panel" id="filter-panel">
     <div class="filter-group">
@@ -529,36 +394,9 @@
     </div>
   </div>
 
-  <div class="view-toggle-bar">
-    <button class="view-toggle-btn active" id="view-list-btn">
-      <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 2h9M1 5.5h9M1 9h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-      List
-    </button>
-    <button class="view-toggle-btn" id="view-cal-btn">
-      <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="1" y="2" width="9" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 5h9M4 1v2M7 1v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Calendar
-    </button>
-  </div>
-
   <main class="main">
-    <div id="list-view">
-      <div class="tiles-grid" id="trips-container"></div>
-      <div class="no-results" id="no-results" style="display:none">No trips match the selected filters.</div>
-    </div>
-
-    <div class="calendar-wrapper" id="calendar-view">
-      <div class="cal-nav">
-        <button class="cal-nav-btn" id="cal-prev">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M6.5 2L3.5 5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <span class="cal-month-label" id="cal-month-label"></span>
-        <button class="cal-nav-btn" id="cal-next">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3.5 2L6.5 5l-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-      <div class="cal-grid" id="cal-grid"></div>
-      <div class="cal-legend" id="cal-legend"></div>
-    </div>
+    <div class="tiles-grid" id="trips-container"></div>
+    <div class="no-results" id="no-results" style="display:none">No trips match the selected filters.</div>
   </main>
 
   <footer>
@@ -732,145 +570,6 @@
     }
 
     init();
-
-    /* ── VIEW TOGGLE ── */
-    const listBtn = document.getElementById('view-list-btn');
-    const calBtn  = document.getElementById('view-cal-btn');
-    const listView = document.getElementById('list-view');
-    const calView  = document.getElementById('calendar-view');
-    const filterBar = document.querySelector('.filter-toggle-bar');
-    const filterPanel = document.getElementById('filter-panel');
-
-    listBtn.addEventListener('click', () => {
-      listBtn.classList.add('active');
-      calBtn.classList.remove('active');
-      listView.style.display = '';
-      calView.classList.remove('visible');
-      filterBar.style.display = '';
-    });
-
-    calBtn.addEventListener('click', () => {
-      calBtn.classList.add('active');
-      listBtn.classList.remove('active');
-      listView.style.display = 'none';
-      calView.classList.add('visible');
-      filterBar.style.display = 'none';
-      filterPanel.classList.remove('open');
-      renderCalendar();
-    });
-
-    /* ── CALENDAR LOGIC ── */
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Find earliest trip month to start on
-    function firstTripMonth() {
-      const sorted = [...TRIPS].sort((a, b) => a.startDate.localeCompare(b.startDate));
-      if (!sorted.length) return new Date(today.getFullYear(), today.getMonth(), 1);
-      const d = new Date(sorted[0].startDate);
-      return new Date(d.getFullYear(), d.getMonth(), 1);
-    }
-
-    let calYear  = today.getFullYear();
-    let calMonth = today.getMonth();
-
-    // If no trips this month go to first trip month
-    const earliestMonth = firstTripMonth();
-    const hasTripsThisMonth = TRIPS.some(t => {
-      const s = new Date(t.startDate);
-      const e = new Date(t.endDate);
-      return (s.getFullYear() === calYear && s.getMonth() === calMonth) ||
-             (e.getFullYear() === calYear && e.getMonth() === calMonth) ||
-             (s <= new Date(calYear, calMonth, 1) && e >= new Date(calYear, calMonth + 1, 0));
-    });
-    if (!hasTripsThisMonth) {
-      calYear  = earliestMonth.getFullYear();
-      calMonth = earliestMonth.getMonth();
-    }
-
-    const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    const DOW = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-
-    function renderCalendar() {
-      const grid   = document.getElementById('cal-grid');
-      const label  = document.getElementById('cal-month-label');
-      const legend = document.getElementById('cal-legend');
-
-      label.textContent = `${MONTH_NAMES[calMonth]} ${calYear}`;
-
-      const firstDay = new Date(calYear, calMonth, 1);
-      const lastDay  = new Date(calYear, calMonth + 1, 0);
-
-      // Day-of-week offset (Monday = 0)
-      let startOffset = firstDay.getDay() - 1;
-      if (startOffset < 0) startOffset = 6;
-
-      // Build day→trips map for this month
-      const dayMap = {};
-      TRIPS.forEach(trip => {
-        const start = new Date(trip.startDate);
-        const end   = new Date(trip.endDate);
-        for (let d = new Date(calYear, calMonth, 1); d <= lastDay; d.setDate(d.getDate() + 1)) {
-          if (d >= start && d <= end) {
-            const key = d.getDate();
-            if (!dayMap[key]) dayMap[key] = [];
-            // Only add if not already there (avoid dupes from loop mutation)
-            if (!dayMap[key].find(t => t.id === trip.id)) {
-              dayMap[key].push({ ...trip, isStart: +d === +start });
-            }
-          }
-        }
-      });
-
-      let html = DOW.map(d => `<div class="cal-dow">${d}</div>`).join('');
-
-      // Empty cells before day 1
-      for (let i = 0; i < startOffset; i++) {
-        html += `<div class="cal-day empty"></div>`;
-      }
-
-      for (let day = 1; day <= lastDay.getDate(); day++) {
-        const thisDate = new Date(calYear, calMonth, day);
-        const isToday  = +thisDate === +today;
-        const trips    = dayMap[day] || [];
-        const hasTrip  = trips.length > 0;
-
-        const eventsHtml = trips.map(t => {
-          return `<a class="cal-event s-${esc(t.status)}" href="${esc(t.link)}" title="${esc(t.title)} · ${esc(t.displayDates)}">${esc(t.title)}</a>`;
-        }).join('');
-
-        html += `<div class="cal-day${isToday ? ' today' : ''}${hasTrip ? ' has-trip' : ''}">
-          <div class="cal-day-num">${day}</div>
-          ${eventsHtml}
-        </div>`;
-      }
-
-      grid.innerHTML = html;
-
-      // Legend — only statuses present this month
-      const statusesPresent = [...new Set(
-        Object.values(dayMap).flat().map(t => t.status)
-      )];
-      const STATUS_LABELS_CAL = { upcoming: 'Upcoming', ongoing: 'Ongoing', past: 'Past', planning: 'Planning' };
-      legend.innerHTML = statusesPresent.map(s =>
-        `<div class="cal-legend-item">
-          <div class="cal-legend-dot s-${esc(s)}"></div>
-          <span>${esc(STATUS_LABELS_CAL[s] || s)}</span>
-        </div>`
-      ).join('');
-    }
-
-    document.getElementById('cal-prev').addEventListener('click', () => {
-      calMonth--;
-      if (calMonth < 0) { calMonth = 11; calYear--; }
-      renderCalendar();
-    });
-
-    document.getElementById('cal-next').addEventListener('click', () => {
-      calMonth++;
-      if (calMonth > 11) { calMonth = 0; calYear++; }
-      renderCalendar();
-    });
 
   })();
   </script>
