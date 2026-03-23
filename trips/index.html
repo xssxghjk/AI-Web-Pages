@@ -836,8 +836,7 @@
         const hasTrip  = trips.length > 0;
 
         const eventsHtml = trips.map(t => {
-          const label = t.isStart ? esc(t.title) : '';
-          return `<a class="cal-event s-${esc(t.status)}" href="${esc(t.link)}" title="${esc(t.title)} · ${esc(t.displayDates)}">${label}</a>`;
+          return `<a class="cal-event s-${esc(t.status)}" href="${esc(t.link)}" title="${esc(t.title)} · ${esc(t.displayDates)}">${esc(t.title)}</a>`;
         }).join('');
 
         html += `<div class="cal-day${isToday ? ' today' : ''}${hasTrip ? ' has-trip' : ''}">
