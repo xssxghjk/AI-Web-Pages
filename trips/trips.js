@@ -29,6 +29,36 @@
 const FAB_WORLD_TOUR = [
 
   {
+    id: 'pq-darmstadt-2026-03-21',
+    title: 'Pro Quest – Darmstadt',
+    destination: 'Darmstadt, Germany',
+    region: 'Europe',
+    status: 'fab-event',
+    startDate: '2026-03-21',
+    endDate: '2026-03-21',
+    displayDates: 'Mar 21, 2026',
+    description: 'Pro Quest in Darmstadt (Classic Constructed).',
+    link: null,
+    reportId: 'pq-darmstadt-2026-03-21',
+    tags: ['FaB', 'Pro Quest'],
+  },
+
+  {
+    id: 'pq-mainz-2026-03-14',
+    title: 'Pro Quest – Mainz',
+    destination: 'Mainz, Germany',
+    region: 'Europe',
+    status: 'fab-event',
+    startDate: '2026-03-14',
+    endDate: '2026-03-14',
+    displayDates: 'Mar 14, 2026',
+    description: 'Pro Quest in Mainz (Classic Constructed).',
+    link: null,
+    reportId: 'pq-mainz-2026-03-15',
+    tags: ['FaB', 'Pro Quest'],
+  },
+
+  {
     id: 'fab-calling-akihabara-2026',
     title: 'Calling – Akihabara',
     destination: 'Tokyo, Japan',
