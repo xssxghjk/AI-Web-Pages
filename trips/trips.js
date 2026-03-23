@@ -23,6 +23,20 @@ const TRIPS = [
   // ── PASTE YOUR NEXT TRIP HERE (soonest/newest first) ──────────────────────
 
   {
+    id: 'prague-omens-2026',
+    title: 'Prague – Omens World Premiere',
+    destination: 'Prague, Czech Republic',
+    region: 'Europe',
+    status: 'upcoming',
+    startDate: '2026-05-19',
+    endDate: '2026-05-25',
+    displayDates: 'May 19 – 25, 2026',
+    description: 'Week-long trip to Prague for the Omens of the Third Age World Premiere (May 22–24) at PVA EXPO Praha. Three events across the weekend: World Premiere (Fri), The Calling (Sat), and Sunday Showdown (Sun).',
+    link: '../prague-omens-2026/',
+    tags: ['FaB', 'Tournament', 'Europe'],
+  },
+
+  {
     id: 'rotterdam-2026-04',
     title: 'Rotterdam Trip',
     destination: 'Rotterdam, Netherlands',
