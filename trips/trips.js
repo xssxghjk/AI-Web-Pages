@@ -29,6 +29,34 @@
 const FAB_WORLD_TOUR = [
 
   {
+    id: 'fab-calling-akihabara-2026',
+    title: 'Calling – Akihabara',
+    destination: 'Tokyo, Japan',
+    region: 'Asia',
+    status: 'fab-event',
+    startDate: '2026-01-09',
+    endDate: '2026-01-11',
+    displayDates: 'Jan 9–11, 2026',
+    description: 'The Calling + Battle Hardened + Super Armory in Tokyo\'s TCG hub, Akihabara.',
+    link: 'https://fabtcg.com/organised-play/',
+    tags: ['FaB', 'Calling', 'World Tour'],
+  },
+
+  {
+    id: 'fab-calling-columbus-2026',
+    title: 'Calling – Columbus',
+    destination: 'Columbus, USA',
+    region: 'Americas',
+    status: 'fab-event',
+    startDate: '2026-01-16',
+    endDate: '2026-01-18',
+    displayDates: 'Jan 16–18, 2026',
+    description: 'The Calling (Classic Constructed, $20K) at Greater Columbus Convention Center, Ohio.',
+    link: 'https://fabtcg.com/organised-play/2026/calling-columbus/',
+    tags: ['FaB', 'Calling', 'World Tour'],
+  },
+
+  {
     id: 'fab-calling-london-2026',
     title: 'Calling – London',
     destination: 'London, UK',
@@ -39,6 +67,34 @@ const FAB_WORLD_TOUR = [
     displayDates: 'Feb 6–8, 2026',
     description: 'Compendium of Rathe World Premiere & Calling (Silver Age, $20K) at ExCeL London.',
     link: 'https://fabtcg.com/organised-play/2026/world-premiere-london/',
+    tags: ['FaB', 'Calling', 'World Tour'],
+  },
+
+  {
+    id: 'fab-calling-san-diego-2026',
+    title: 'Calling – San Diego',
+    destination: 'San Diego, USA',
+    region: 'Americas',
+    status: 'fab-event',
+    startDate: '2026-02-14',
+    endDate: '2026-02-15',
+    displayDates: 'Feb 14–15, 2026',
+    description: 'The Calling (Silver Age, $20K) at San Diego Convention Center, California.',
+    link: 'https://fabtcg.com/organised-play/2026/calling-san-diego/',
+    tags: ['FaB', 'Calling', 'World Tour'],
+  },
+
+  {
+    id: 'fab-calling-montreal-2026',
+    title: 'Calling – Montréal',
+    destination: 'Montréal, Canada',
+    region: 'Americas',
+    status: 'fab-event',
+    startDate: '2026-02-27',
+    endDate: '2026-03-01',
+    displayDates: 'Feb 27–Mar 1, 2026',
+    description: 'The Calling (Classic Constructed, $20K) at Palais des congrès de Montréal.',
+    link: 'https://fabtcg.com/organised-play/2026/calling-montreal-2/',
     tags: ['FaB', 'Calling', 'World Tour'],
   },
 
@@ -71,6 +127,20 @@ const FAB_WORLD_TOUR = [
   },
 
   {
+    id: 'fab-calling-memphis-2026',
+    title: 'Calling – Memphis',
+    destination: 'Memphis, USA',
+    region: 'Americas',
+    status: 'fab-event',
+    startDate: '2026-03-20',
+    endDate: '2026-03-22',
+    displayDates: 'Mar 20–22, 2026',
+    description: 'The Calling (Classic Constructed, $20K) at Renasant Convention Center, Memphis, TN.',
+    link: 'https://fabtcg.com/organised-play/2026/calling-memphis-2/',
+    tags: ['FaB', 'Calling', 'World Tour'],
+  },
+
+  {
     id: 'fab-pro-tour-yokohama-2026',
     title: 'Pro Tour – Yokohama',
     destination: 'Yokohama, Japan',
@@ -82,6 +152,20 @@ const FAB_WORLD_TOUR = [
     description: 'Pro Tour: Yokohama ($200K, Classic Constructed & Silver Age) + Calling ($20K) at Pacifico Yokohama.',
     link: 'https://fabtcg.com/organised-play/2026/pro-tour-yokohama/',
     tags: ['FaB', 'Pro Tour', 'World Tour'],
+  },
+
+  {
+    id: 'fab-calling-shanghai-2026',
+    title: 'Calling – Shanghai',
+    destination: 'Shanghai, China',
+    region: 'Asia',
+    status: 'fab-event',
+    startDate: '2026-04-03',
+    endDate: '2026-04-05',
+    displayDates: 'Apr 3–5, 2026',
+    description: 'The Calling (Silver Age, $20K) + Showdown at The Ritz-Carlton Shanghai, Pudong.',
+    link: 'https://fabtcg.com/organised-play/2026/calling-shanghai/',
+    tags: ['FaB', 'Calling', 'World Tour'],
   },
 
   {
@@ -138,6 +222,20 @@ const FAB_WORLD_TOUR = [
     description: 'Pro Tour: Las Vegas (Classic Constructed & Set 19 Booster Draft) + Calling at Westgate Las Vegas Resort.',
     link: 'https://fabtcg.com/organised-play/2026/pro-tour-las-vegas/',
     tags: ['FaB', 'Pro Tour', 'World Tour'],
+  },
+
+  {
+    id: 'fab-calling-shinjuku-2026',
+    title: 'Calling – Shinjuku',
+    destination: 'Tokyo, Japan',
+    region: 'Asia',
+    status: 'fab-event',
+    startDate: '2026-07-10',
+    endDate: '2026-07-12',
+    displayDates: 'Jul 10–12, 2026',
+    description: 'The Calling (Classic Constructed, $20K) at Bellesalle Shinjuku Central Park, Tokyo.',
+    link: 'https://fabtcg.com/organised-play/2026/calling-shinjuku/',
+    tags: ['FaB', 'Calling', 'World Tour'],
   },
 
   {
