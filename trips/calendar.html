@@ -502,7 +502,7 @@
         oldGrid.id = '';
         newGrid.id = 'cal-grid';
         oldGrid.remove();
-        newGrid.style.transition = '';
+        newGrid.style.cssText = '';
         animating = false;
       }, { once: true });
     }
@@ -579,7 +579,7 @@
           grid.id = '';
           newGrid.id = 'cal-grid';
           grid.remove();
-          newGrid.style.transition = '';
+          newGrid.style.cssText = '';
           animating = false;
         }, { once: true });
       } else {
