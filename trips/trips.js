@@ -155,6 +155,20 @@ const FAB_WORLD_TOUR = [
   },
 
   {
+    id: 'fab-calling-rotterdam-2026',
+    title: 'Calling – Rotterdam',
+    destination: 'Rotterdam, Netherlands',
+    region: 'Europe',
+    status: 'fab-event',
+    startDate: '2026-04-24',
+    endDate: '2026-04-26',
+    displayDates: 'Apr 24–26, 2026',
+    description: 'The Calling (Classic Constructed, $20K) + Silver Age Showdown at Rotterdam Ahoy.',
+    link: 'https://fabtcg.com/organised-play/2026/calling-rotterdam/',
+    tags: ['FaB', 'Calling', 'World Tour'],
+  },
+
+  {
     id: 'fab-calling-shanghai-2026',
     title: 'Calling – Shanghai',
     destination: 'Shanghai, China',
