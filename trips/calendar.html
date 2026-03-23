@@ -203,16 +203,21 @@
       padding: 0 0.3rem;
       font-size: 0.6rem;
       font-weight: 700;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
       text-decoration: none;
       display: flex;
       align-items: center;
+      justify-content: center;
       cursor: pointer;
       transition: filter 0.15s;
+      overflow: hidden;
     }
     .cal-trip-bar:hover { filter: brightness(1.15); }
+    .cal-trip-bar .bar-label {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     /* Square off the end that flows into another week row */
     .cal-trip-bar.overflow-left  { border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none; }
@@ -452,7 +457,7 @@
           ].filter(Boolean).join(' ');
           return `<a class="${classes}" href="${esc(trip.link)}" title="${esc(trip.title)} · ${esc(trip.displayDates)}"` +
             ` style="--c:${colStart};--s:${span};top:${topPx}px;height:${BAR_H}px">` +
-            `${esc(trip.title)}</a>`;
+            `<span class="bar-label">${esc(trip.title)}</span></a>`;
         }).join('');
 
         html += `<div class="cal-week-wrapper"><div class="cal-week-days">${daysHtml}</div>${barsHtml}</div>`;
