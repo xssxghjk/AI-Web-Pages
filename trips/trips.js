@@ -315,3 +315,6 @@ const TRIPS = [
   },
 
 ];
+
+// Combined array used by calendar.html (includes both trips and FaB World Tour info events)
+const ALL_EVENTS = [...TRIPS, ...FAB_WORLD_TOUR];
