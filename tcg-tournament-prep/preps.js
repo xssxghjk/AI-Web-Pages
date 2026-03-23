@@ -1,5 +1,26 @@
 const PREPS = [
   {
+    id: 'german-nationals-2026',
+    event: 'German Nationals 2026',
+    eventType: 'Nationals',
+    tier: 4,
+    date: '2026-04-06',
+    displayDate: '03–06.04.26',
+    formats: [
+      {
+        id: 'cc',
+        name: 'Classic Constructed',
+        abbr: 'CC',
+        hero: 'Mario',
+        summary: [],
+        heroReasons: [],
+        predictedMeta: [],
+        notes: [],
+      },
+    ],
+  },
+
+  {
     id: 'pro-tour-yokohama-2026',
     event: 'Pro Tour Yokohama',
     eventType: 'PT',
