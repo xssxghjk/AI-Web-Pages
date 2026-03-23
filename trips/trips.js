@@ -151,6 +151,7 @@ const FAB_WORLD_TOUR = [
     displayDates: 'Apr 9–12, 2026',
     description: 'Pro Tour: Yokohama ($200K, Classic Constructed & Silver Age) + Calling ($20K) at Pacifico Yokohama.',
     link: 'https://fabtcg.com/organised-play/2026/pro-tour-yokohama/',
+    prepId: 'pro-tour-yokohama-2026',
     tags: ['FaB', 'Pro Tour', 'World Tour'],
   },
 
@@ -221,6 +222,7 @@ const FAB_WORLD_TOUR = [
     displayDates: 'Jul 4–5, 2026',
     description: 'German National Championship at Event Center Kaue, Gelsenkirchen.',
     link: 'https://fabtcg.com/organised-play/2026/national-championship-2026-germany/',
+    prepId: 'german-nationals-2026',
     tags: ['FaB', 'Nationals', 'World Tour'],
   },
 
