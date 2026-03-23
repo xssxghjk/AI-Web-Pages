@@ -31,6 +31,9 @@
       --planning: #14b8a6;
       --planning-bg: rgba(20,184,166,0.08);
       --planning-border: rgba(20,184,166,0.25);
+      --fab-event: #f59e0b;
+      --fab-event-bg: rgba(245,158,11,0.08);
+      --fab-event-border: rgba(245,158,11,0.25);
     }
 
     html { scroll-behavior: smooth; }
@@ -223,10 +226,11 @@
     .cal-trip-bar.overflow-left  { border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none; }
     .cal-trip-bar.overflow-right { border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: none; }
 
-    .cal-trip-bar.s-upcoming { background: var(--upcoming-bg); color: var(--upcoming); border: 1px solid var(--upcoming-border); }
-    .cal-trip-bar.s-ongoing  { background: var(--ongoing-bg);  color: var(--ongoing);  border: 1px solid var(--ongoing-border); }
-    .cal-trip-bar.s-past     { background: var(--past-bg);     color: var(--past);     border: 1px solid var(--past-border); }
-    .cal-trip-bar.s-planning { background: var(--planning-bg); color: var(--planning); border: 1px solid var(--planning-border); }
+    .cal-trip-bar.s-upcoming  { background: var(--upcoming-bg);  color: var(--upcoming);  border: 1px solid var(--upcoming-border); }
+    .cal-trip-bar.s-ongoing   { background: var(--ongoing-bg);   color: var(--ongoing);   border: 1px solid var(--ongoing-border); }
+    .cal-trip-bar.s-past      { background: var(--past-bg);      color: var(--past);      border: 1px solid var(--past-border); }
+    .cal-trip-bar.s-planning  { background: var(--planning-bg);  color: var(--planning);  border: 1px solid var(--planning-border); }
+    .cal-trip-bar.s-fab-event { background: var(--fab-event-bg); color: var(--fab-event); border: 1px solid var(--fab-event-border); }
 
     /* ── LEGEND ── */
     .cal-legend {
@@ -250,10 +254,11 @@
       border-radius: 2px;
       flex-shrink: 0;
     }
-    .cal-legend-dot.s-upcoming { background: var(--upcoming); }
-    .cal-legend-dot.s-ongoing  { background: var(--ongoing); }
-    .cal-legend-dot.s-past     { background: var(--past); }
-    .cal-legend-dot.s-planning { background: var(--planning); }
+    .cal-legend-dot.s-upcoming  { background: var(--upcoming); }
+    .cal-legend-dot.s-ongoing   { background: var(--ongoing); }
+    .cal-legend-dot.s-past      { background: var(--past); }
+    .cal-legend-dot.s-planning  { background: var(--planning); }
+    .cal-legend-dot.s-fab-event { background: var(--fab-event); }
 
     /* ── SWIPE VIEWPORT ── */
     .cal-viewport {
@@ -324,6 +329,8 @@
   <script src="trips.js"></script>
   <script>
   (function () {
+    const ALL_EVENTS = [...TRIPS, ...FAB_WORLD_TOUR];
+
     function esc(str) {
       return String(str)
         .replace(/&/g, '&amp;')
@@ -336,7 +343,7 @@
     today.setHours(0, 0, 0, 0);
 
     function firstTripMonth() {
-      const sorted = [...TRIPS].sort((a, b) => a.startDate.localeCompare(b.startDate));
+      const sorted = [...ALL_EVENTS].sort((a, b) => a.startDate.localeCompare(b.startDate));
       if (!sorted.length) return new Date(today.getFullYear(), today.getMonth(), 1);
       const d = new Date(sorted[0].startDate);
       return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -346,7 +353,7 @@
     let calMonth = today.getMonth();
 
     const earliestMonth = firstTripMonth();
-    const hasTripsThisMonth = TRIPS.some(t => {
+    const hasTripsThisMonth = ALL_EVENTS.some(t => {
       const s = new Date(t.startDate);
       const e = new Date(t.endDate);
       return (s.getFullYear() === calYear && s.getMonth() === calMonth) ||
@@ -375,7 +382,7 @@
       let startOffset = firstDay.getDay() - 1;
       if (startOffset < 0) startOffset = 6;
 
-      const tripsThisMonth = TRIPS.filter(trip => {
+      const tripsThisMonth = ALL_EVENTS.filter(trip => {
         const s = new Date(trip.startDate);
         const e = new Date(trip.endDate);
         return s <= lastDay && e >= firstDay;
@@ -450,7 +457,7 @@
 
     function updateLegend(tripsThisMonth) {
       const legend = document.getElementById('cal-legend');
-      const STATUS_LABELS = { upcoming: 'Upcoming', ongoing: 'Ongoing', past: 'Past', planning: 'Planning' };
+      const STATUS_LABELS = { upcoming: 'Upcoming', ongoing: 'Ongoing', past: 'Past', planning: 'Planning', 'fab-event': 'FaB World Tour' };
       const statusesPresent = [...new Set(tripsThisMonth.map(t => t.status))];
       legend.innerHTML = statusesPresent.map(s =>
         `<div class="cal-legend-item"><div class="cal-legend-dot s-${esc(s)}"></div><span>${esc(STATUS_LABELS[s] || s)}</span></div>`
