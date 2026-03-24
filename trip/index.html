@@ -481,12 +481,10 @@
   }
 
   function checkItemHTML(id, label, tag) {
-    const cfg = TAG_CONFIG[tag] || TAG_CONFIG.misc;
     return `
-      <div class="check-item" data-id="${esc(id)}">
+      <div class="check-item" data-id="${esc(id)}" data-tag="${esc(tag || 'misc')}">
         <div class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="check-label"></div>
-        <div class="check-tag ${cfg.cls}">${cfg.label}</div>
       </div>`;
   }
 
@@ -539,12 +537,6 @@
         <div class="checklist" id="checklist-items">${renderChecklist()}</div>
         <div class="add-item-row">
           <input type="text" id="new-item-label" class="add-item-input" placeholder="Add a checklist item…" />
-          <select id="new-item-tag" class="add-item-select">
-            <option value="misc">Misc</option>
-            <option value="event">Event</option>
-            <option value="hotel">Hotel</option>
-            <option value="travel">Travel</option>
-          </select>
           <button id="add-item-btn" class="add-item-btn">Add</button>
         </div>
       </div>
@@ -559,12 +551,6 @@
       <div class="item-ctx-title" id="item-ctx-title"></div>
       <div class="item-ctx-edit" id="item-ctx-edit">
         <input class="item-ctx-input" id="item-ctx-input" type="text" />
-        <select class="item-ctx-select" id="item-ctx-select">
-          <option value="misc">Misc</option>
-          <option value="event">Event</option>
-          <option value="hotel">Hotel</option>
-          <option value="travel">Travel</option>
-        </select>
         <div class="item-ctx-edit-btns">
           <button class="item-ctx-btn item-ctx-btn-save" id="item-ctx-save">Save</button>
           <button class="item-ctx-btn" id="item-ctx-cancel">Cancel</button>
@@ -621,16 +607,16 @@
   }
 
   function wireItem(el) {
+    el.querySelector('.check-box').addEventListener('click', e => {
+      e.stopPropagation();
+      el.classList.toggle('done');
+      state.checked[el.dataset.id] = el.classList.contains('done');
+      saveState();
+      updateProgress();
+    });
     el.addEventListener('click', e => {
       e.stopPropagation();
-      if (e.target.closest('.check-box')) {
-        el.classList.toggle('done');
-        state.checked[el.dataset.id] = el.classList.contains('done');
-        saveState();
-        updateProgress();
-      } else {
-        openItemCtx(el);
-      }
+      openItemCtx(el);
     });
   }
 
@@ -641,11 +627,11 @@
   });
 
   function renderCustom(c) {
-    const cfg = TAG_CONFIG[c.tag] || TAG_CONFIG.misc;
     const el  = document.createElement('div');
     el.className   = 'check-item' + (state.checked[c.id] ? ' done' : '');
     el.dataset.id  = c.id;
-    el.innerHTML   = `<div class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-label"></div><div class="check-tag ${cfg.cls}">${cfg.label}</div>`;
+    el.dataset.tag = c.tag || 'misc';
+    el.innerHTML   = `<div class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-label"></div>`;
     el.querySelector('.check-label').textContent = c.label;
     listEl.appendChild(el);
     wireItem(el);
@@ -656,10 +642,9 @@
 
   document.getElementById('add-item-btn').addEventListener('click', () => {
     const labelEl = document.getElementById('new-item-label');
-    const tagEl   = document.getElementById('new-item-tag');
     const label   = labelEl.value.trim();
     if (!label) { labelEl.focus(); return; }
-    const c = { id: 'custom-' + Date.now(), label, tag: tagEl.value };
+    const c = { id: 'custom-' + Date.now(), label, tag: 'misc' };
     state.custom.push(c);
     saveState();
     renderCustom(c);
@@ -679,7 +664,6 @@
   const itemCtxActions = document.getElementById('item-ctx-actions');
   const itemCtxEdit   = document.getElementById('item-ctx-edit');
   const itemCtxInput  = document.getElementById('item-ctx-input');
-  const itemCtxSelect = document.getElementById('item-ctx-select');
   let activeCtxItem   = null;
 
   function openItemCtx(el) {
@@ -717,11 +701,7 @@
 
   document.getElementById('item-ctx-do-edit').addEventListener('click', () => {
     if (!activeCtxItem) return;
-    itemCtxInput.value = activeCtxItem.querySelector('.check-label').textContent;
-    const tagClasses = activeCtxItem.querySelector('.check-tag').classList;
-    let tagKey = 'misc';
-    for (const k of Object.keys(TAG_CONFIG)) { if (tagClasses.contains(TAG_CONFIG[k].cls)) { tagKey = k; break; } }
-    itemCtxSelect.value          = tagKey;
+    itemCtxInput.value           = activeCtxItem.querySelector('.check-label').textContent;
     itemCtxActions.style.display = 'none';
     itemCtxEdit.style.display    = 'flex';
     itemCtxInput.focus();
@@ -732,16 +712,11 @@
     if (!activeCtxItem) return;
     const newLabel = itemCtxInput.value.trim();
     if (!newLabel) { itemCtxInput.focus(); return; }
-    const newTag = itemCtxSelect.value;
-    const cfg    = TAG_CONFIG[newTag] || TAG_CONFIG.misc;
     activeCtxItem.querySelector('.check-label').textContent = newLabel;
-    const tagEl = activeCtxItem.querySelector('.check-tag');
-    tagEl.className   = `check-tag ${cfg.cls}`;
-    tagEl.textContent = cfg.label;
     const elId = activeCtxItem.dataset.id;
     if (elId.startsWith('custom-')) {
       const c = state.custom.find(c => c.id === elId);
-      if (c) { c.label = newLabel; c.tag = newTag; }
+      if (c) { c.label = newLabel; }
       saveState();
     }
     closeItemCtx();
