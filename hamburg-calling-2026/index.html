@@ -353,22 +353,88 @@
       transition: width 0.4s ease;
     }
 
-    /* ── DELETE BUTTON ── */
-    .delete-btn {
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 1rem;
-      line-height: 1;
-      padding: 0.15rem 0.35rem;
-      border-radius: 4px;
+    /* ── ITEM CONTEXT MENU ── */
+    .item-ctx {
+      position: fixed;
+      z-index: 500;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 0.8rem 0.85rem;
+      min-width: 200px;
+      max-width: 260px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3);
+      visibility: hidden;
       opacity: 0;
-      transition: opacity 0.15s, color 0.15s;
-      flex-shrink: 0;
+      transform: scale(0.88) translateY(-6px);
+      transform-origin: top left;
+      pointer-events: none;
+      transition: opacity 0.16s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1), visibility 0s linear 0.2s;
     }
-    .check-item:hover .delete-btn { opacity: 1; }
-    .delete-btn:hover { color: var(--red); opacity: 1; }
+    .item-ctx.open {
+      visibility: visible;
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+      transition: opacity 0.16s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1), visibility 0s linear 0s;
+    }
+    .item-ctx-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.55rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 230px;
+    }
+    .item-ctx-actions { display: flex; gap: 0.3rem; }
+    .item-ctx-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text);
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .item-ctx-btn:hover { border-color: var(--muted); background: var(--border); }
+    .item-ctx-btn-delete { color: var(--red); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.08); }
+    .item-ctx-btn-delete:hover { border-color: var(--red); background: rgba(239,68,68,0.15); }
+    .item-ctx-edit { display: none; flex-direction: column; gap: 0.4rem; margin-bottom: 0.4rem; }
+    .item-ctx-input {
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 0.45rem 0.6rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.82rem;
+      outline: none;
+      width: 100%;
+    }
+    .item-ctx-input:focus { border-color: var(--accent); }
+    .item-ctx-select {
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 0.35rem 0.5rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.78rem;
+      outline: none;
+      color-scheme: dark;
+      width: 100%;
+    }
+    .item-ctx-edit-btns { display: flex; gap: 0.3rem; }
+    .item-ctx-btn-save { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .item-ctx-btn-save:hover { opacity: 0.85; border-color: var(--accent); background: var(--accent); }
 
     /* ── ADD ITEM ── */
     .add-item-row {
@@ -575,7 +641,6 @@
           </div>
           <div class="check-label">Register for The Calling: Hamburg – 75€</div>
           <div class="check-tag tag-event">Event</div>
-          <button class="delete-btn" title="Remove">×</button>
         </div>
 
         <div class="check-item" data-id="reg-bh">
@@ -584,7 +649,6 @@
           </div>
           <div class="check-label">Register for Battle Hardened: Hamburg – 60€</div>
           <div class="check-tag tag-event">Event</div>
-          <button class="delete-btn" title="Remove">×</button>
         </div>
 
         <div class="check-item" data-id="book-accommodation">
@@ -593,7 +657,6 @@
           </div>
           <div class="check-label">Book accommodation in Hamburg</div>
           <div class="check-tag tag-hotel">Hotel</div>
-          <button class="delete-btn" title="Remove">×</button>
         </div>
 
         <div class="check-item" data-id="plan-travel">
@@ -602,7 +665,6 @@
           </div>
           <div class="check-label">Plan travel to/from Hamburg (~5h drive from Karlsruhe)</div>
           <div class="check-tag tag-travel">Travel</div>
-          <button class="delete-btn" title="Remove">×</button>
         </div>
 
       </div>
@@ -661,26 +723,14 @@
     }
 
     function wireItem(el) {
-      el.addEventListener('click', e => {
-        if (e.target.closest('.delete-btn')) return;
+      el.querySelector('.check-box').addEventListener('click', e => {
+        e.stopPropagation();
         el.classList.toggle('done');
         state.checked[el.dataset.id] = el.classList.contains('done');
         saveState();
         updateProgress();
       });
-      el.querySelector('.delete-btn').addEventListener('click', e => {
-        e.stopPropagation();
-        const id = el.dataset.id;
-        if (id.startsWith('custom-')) {
-          state.custom = state.custom.filter(c => c.id !== id);
-        } else {
-          if (!state.deleted.includes(id)) state.deleted.push(id);
-        }
-        delete state.checked[id];
-        saveState();
-        el.remove();
-        updateProgress();
-      });
+      el.addEventListener('click', () => openItemCtx(el));
     }
 
     listEl.querySelectorAll('.check-item').forEach(item => {
@@ -694,7 +744,7 @@
       const el = document.createElement('div');
       el.className = 'check-item' + (state.checked[c.id] ? ' done' : '');
       el.dataset.id = c.id;
-      el.innerHTML = `<div class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-label"></div><div class="check-tag ${cfg.cls}">${cfg.label}</div><button class="delete-btn" title="Remove">×</button>`;
+      el.innerHTML = `<div class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-label"></div><div class="check-tag ${cfg.cls}">${cfg.label}</div>`;
       el.querySelector('.check-label').textContent = c.label;
       listEl.appendChild(el);
       wireItem(el);
@@ -720,6 +770,100 @@
     document.getElementById('new-item-label').addEventListener('keydown', e => {
       if (e.key === 'Enter') document.getElementById('add-item-btn').click();
     });
+
+    // Item context menu
+    const itemCtx = document.getElementById('item-ctx');
+    const itemCtxTitle = document.getElementById('item-ctx-title');
+    const itemCtxActions = document.getElementById('item-ctx-actions');
+    const itemCtxEdit = document.getElementById('item-ctx-edit');
+    const itemCtxInput = document.getElementById('item-ctx-input');
+    const itemCtxSelect = document.getElementById('item-ctx-select');
+    let activeCtxItem = null;
+
+    function openItemCtx(el) {
+      if (itemCtx.classList.contains('open') && activeCtxItem === el) { closeItemCtx(); return; }
+      activeCtxItem = el;
+      itemCtxTitle.textContent = el.querySelector('.check-label').textContent;
+      itemCtxEdit.style.display = 'none';
+      itemCtxActions.style.display = 'flex';
+      const rect = el.getBoundingClientRect();
+      const pw = itemCtx.offsetWidth || 220;
+      const ph = itemCtx.offsetHeight || 90;
+      const margin = 8;
+      let left = rect.left;
+      let top = rect.bottom + margin;
+      if (left + pw > window.innerWidth - margin) left = window.innerWidth - pw - margin;
+      if (left < margin) left = margin;
+      if (top + ph > window.innerHeight - margin) top = rect.top - ph - margin;
+      itemCtx.style.left = left + 'px';
+      itemCtx.style.top = top + 'px';
+      itemCtx.style.transformOrigin = (top < rect.top) ? 'bottom left' : 'top left';
+      itemCtx.classList.add('open');
+    }
+
+    function closeItemCtx() { itemCtx.classList.remove('open'); activeCtxItem = null; }
+
+    document.getElementById('item-ctx-do-edit').addEventListener('click', () => {
+      if (!activeCtxItem) return;
+      itemCtxInput.value = activeCtxItem.querySelector('.check-label').textContent;
+      const tagClasses = activeCtxItem.querySelector('.check-tag').classList;
+      let tagKey = 'misc';
+      for (const k of Object.keys(TAG_CONFIG)) { if (tagClasses.contains(TAG_CONFIG[k].cls)) { tagKey = k; break; } }
+      itemCtxSelect.value = tagKey;
+      itemCtxActions.style.display = 'none';
+      itemCtxEdit.style.display = 'flex';
+      itemCtxInput.focus();
+      itemCtxInput.select();
+    });
+
+    function saveEdit() {
+      if (!activeCtxItem) return;
+      const newLabel = itemCtxInput.value.trim();
+      if (!newLabel) { itemCtxInput.focus(); return; }
+      const newTag = itemCtxSelect.value;
+      const cfg = TAG_CONFIG[newTag] || TAG_CONFIG.misc;
+      activeCtxItem.querySelector('.check-label').textContent = newLabel;
+      const tagEl = activeCtxItem.querySelector('.check-tag');
+      tagEl.className = `check-tag ${cfg.cls}`;
+      tagEl.textContent = cfg.label;
+      const id = activeCtxItem.dataset.id;
+      if (id.startsWith('custom-')) {
+        const c = state.custom.find(c => c.id === id);
+        if (c) { c.label = newLabel; c.tag = newTag; }
+        saveState();
+      }
+      closeItemCtx();
+    }
+
+    document.getElementById('item-ctx-save').addEventListener('click', saveEdit);
+    document.getElementById('item-ctx-input').addEventListener('keydown', e => { if (e.key === 'Enter') saveEdit(); });
+
+    document.getElementById('item-ctx-cancel').addEventListener('click', () => {
+      itemCtxEdit.style.display = 'none';
+      itemCtxActions.style.display = 'flex';
+    });
+
+    document.getElementById('item-ctx-do-delete').addEventListener('click', () => {
+      if (!activeCtxItem) return;
+      const el = activeCtxItem;
+      const id = el.dataset.id;
+      if (id.startsWith('custom-')) {
+        state.custom = state.custom.filter(c => c.id !== id);
+      } else {
+        if (!state.deleted.includes(id)) state.deleted.push(id);
+      }
+      delete state.checked[id];
+      saveState();
+      closeItemCtx();
+      el.remove();
+      updateProgress();
+    });
+
+    document.addEventListener('click', e => {
+      if (itemCtx.classList.contains('open') && !itemCtx.contains(e.target) && !e.target.closest('.check-item')) closeItemCtx();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeItemCtx(); });
+    window.addEventListener('scroll', () => { if (itemCtx.classList.contains('open')) closeItemCtx(); }, { passive: true });
 
     // Event countdowns — update dates below once confirmed
     // (function() {
@@ -748,5 +892,30 @@
     // })();
   </script>
 
+  <div class="item-ctx" id="item-ctx">
+    <div class="item-ctx-title" id="item-ctx-title"></div>
+    <div class="item-ctx-edit" id="item-ctx-edit">
+      <input class="item-ctx-input" id="item-ctx-input" type="text" />
+      <select class="item-ctx-select" id="item-ctx-select">
+        <option value="misc">Misc</option>
+        <option value="event">Event</option>
+        <option value="hotel">Hotel</option>
+      </select>
+      <div class="item-ctx-edit-btns">
+        <button class="item-ctx-btn item-ctx-btn-save" id="item-ctx-save">Save</button>
+        <button class="item-ctx-btn" id="item-ctx-cancel">Cancel</button>
+      </div>
+    </div>
+    <div class="item-ctx-actions" id="item-ctx-actions">
+      <button class="item-ctx-btn" id="item-ctx-do-edit">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2L4 10H2v-2L8.5 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        Edit
+      </button>
+      <button class="item-ctx-btn item-ctx-btn-delete" id="item-ctx-do-delete">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M5 3V2h2v1M4.5 5v4.5M7.5 5v4.5M3 3l.5 7h5L9 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Delete
+      </button>
+    </div>
+  </div>
 </body>
 </html>
