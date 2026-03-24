@@ -1,0 +1,166 @@
+/**
+ * Trip Page Data
+ *
+ * Add a new trip by adding a key to TRIP_PAGES below.
+ *
+ * Badge types  : 'calling' | 'bh' | 'premiere' | 'showdown'
+ * Timeline types: null | 'drive' | 'calling' | 'bh' | 'premiere' | 'showdown' | 'event'
+ * Tag types    : 'event' | 'hotel' | 'travel' | 'misc'
+ *
+ * countdown    : null (TBC) or { date: 'YYYY-MM-DD', type: <badge type> }
+ * overview note: optional second line shown below the value
+ */
+
+const TRIP_PAGES = {
+
+  'rotterdam-2026': {
+    title:      'Rotterdam – Apr 2026',
+    navTitle:   'Rotterdam – Apr 2026',
+    heroText:   'Karlsruhe → Rotterdam → Karlsruhe · Apr 24 – 27',
+    storageKey: 'rotterdam-2026-checklist',
+
+    events: [
+      { date: 'Apr 25, 2026', name: 'Calling: Rotterdam', venue: 'Rotterdam, Netherlands',
+        badge: 'calling', countdown: { date: '2026-04-25', type: 'calling' } },
+    ],
+
+    overview: [
+      { key: 'Dates',         value: 'Fri 24 Apr – Mon 27 Apr 2026' },
+      { key: 'Duration',      value: '3 nights / 4 days' },
+      { key: 'Destination',   value: 'Rotterdam, Netherlands' },
+      { key: 'Travel',        value: 'Car from the Karlsruhe area' },
+      { key: 'Accommodation', value: 'Airbnb · Fri 24 Apr – Mon 27 Apr' },
+    ],
+
+    timeline: [
+      { day: 'Fri Apr 24',    type: 'drive',   title: 'Drive to Rotterdam 🚗',      desc: 'Karlsruhe → Rotterdam. Check in to Airbnb.' },
+      { day: 'Sat Apr 25 ⭐', type: 'calling', title: 'Calling: Rotterdam',          desc: 'Full day Swiss rounds. Rotterdam, Netherlands.' },
+      { day: 'Sun Apr 26',    type: null,       title: 'Rotterdam',                   desc: 'Free day. Explore the city.' },
+      { day: 'Mon Apr 27',    type: 'drive',   title: 'Drive back to Karlsruhe 🚗', desc: 'Check out of Airbnb and drive home.' },
+    ],
+
+    checklist: [
+      { id: 'reg-rotterdam',   label: 'Register for Calling: Rotterdam',               tag: 'event' },
+      { id: 'confirm-airbnb', label: 'Confirm Airbnb extra night (Sun → Mon Apr 27)', tag: 'hotel' },
+      { id: 'confirm-car',    label: 'Confirm car ride & departure time (Fri Apr 24)', tag: 'misc'  },
+    ],
+  },
+
+  'hamburg-2026': {
+    title:      'The Calling: Hamburg – August 2026',
+    navTitle:   'The Calling: Hamburg',
+    heroText:   'Hamburg · Aug 21 – 24, 2026',
+    storageKey: 'hamburg-2026-checklist',
+
+    events: [
+      { date: 'Fri–Sun Aug 21–23, 2026', name: 'The Calling: Hamburg',     venue: 'Hamburg · Classic Constructed · $20,000 USD prize pool',
+        badge: 'calling', countdown: { date: '2026-08-21', type: 'calling' } },
+      { date: 'Sun Aug 23, 2026',         name: 'Battle Hardened: Hamburg', venue: 'Hamburg · Living Legend · $2,000 USD prize pool',
+        badge: 'bh',      countdown: { date: '2026-08-23', type: 'bh'      } },
+    ],
+
+    overview: [
+      { key: 'Dates',         value: 'Fri 21 Aug – Mon 24 Aug 2026' },
+      { key: 'Duration',      value: '3 nights / 4 days' },
+      { key: 'Destination',   value: 'Hamburg, Germany' },
+      { key: 'Travel',        value: 'TBC' },
+      { key: 'Accommodation', value: 'TBC · Fri 21 Aug – Mon 24 Aug (3 nights)' },
+      { key: 'Venue',         value: 'TBC · Hamburg' },
+    ],
+
+    timeline: [
+      { day: 'Fri Aug 21',    type: 'drive',   title: 'Travel to Hamburg',                              desc: 'Depart and travel to Hamburg. Check in to accommodation. The Calling begins.' },
+      { day: 'Sat Aug 22 ⭐', type: 'calling', title: 'The Calling: Hamburg – Day 2',                   desc: 'Classic Constructed. Full day of Swiss rounds. $20,000 USD prize pool.' },
+      { day: 'Sun Aug 23 ⭐', type: 'calling', title: 'The Calling: Hamburg – Day 3 + Battle Hardened', desc: 'Calling concludes. Battle Hardened: Living Legend also runs today. $2,000 USD prize pool.' },
+      { day: 'Mon Aug 24',    type: 'drive',   title: 'Travel home',                                    desc: 'Check out and travel home.' },
+    ],
+
+    checklist: [
+      { id: 'reg-calling',        label: 'Register for The Calling: Hamburg (Aug 21–23) – Classic Constructed', tag: 'event'  },
+      { id: 'reg-bh',             label: 'Register for Battle Hardened: Hamburg (Sun Aug 23) – Living Legend',  tag: 'event'  },
+      { id: 'book-accommodation', label: 'Book accommodation in Hamburg (Fri Aug 21 – Mon Aug 24, 3 nights)',    tag: 'hotel'  },
+      { id: 'book-travel',        label: 'Book travel to/from Hamburg',                                          tag: 'travel' },
+    ],
+  },
+
+  'hamburg-calling-2026': {
+    title:      'Hamburg – The Calling 2026',
+    navTitle:   'Hamburg – The Calling 2026',
+    heroText:   'Karlsruhe → Hamburg → Karlsruhe · Dates TBC',
+    storageKey: 'hamburg-calling-2026-checklist',
+
+    events: [
+      { date: 'TBC', name: 'The Calling: Hamburg',     venue: 'MesseHalle Hamburg-Schnelsen · Classic Constructed · 75€ · $20,000 USD prize pool · 500 cap',
+        badge: 'calling', countdown: null },
+      { date: 'TBC', name: 'Battle Hardened: Hamburg', venue: 'MesseHalle Hamburg-Schnelsen · Living Legend · 60€ · $2,000 USD prize pool · 128 cap',
+        badge: 'bh',      countdown: null },
+    ],
+
+    overview: [
+      { key: 'Dates',         value: 'TBC' },
+      { key: 'Duration',      value: 'TBC' },
+      { key: 'Destination',   value: 'Hamburg, Germany' },
+      { key: 'Travel',        value: 'TBC', note: '~500 km from Karlsruhe, ~5h drive' },
+      { key: 'Accommodation', value: 'TBC' },
+      { key: 'Venue',         value: 'MesseHalle Hamburg-Schnelsen, Modering 1a, 22457 Hamburg' },
+    ],
+
+    timeline: [
+      { day: 'Day 1 – Travel',      type: 'drive',   title: 'Drive to Hamburg',                           desc: 'Depart Karlsruhe. ~5h drive. Check in to accommodation.' },
+      { day: 'Day 2 ⭐',            type: 'calling', title: 'The Calling: Hamburg – Day 1',               desc: 'Classic Constructed. Swiss rounds, best-of-one. MesseHalle Hamburg-Schnelsen. 9:00 AM.' },
+      { day: 'Day 3 ⭐',            type: 'calling', title: 'The Calling: Hamburg – Day 2 / Battle Hardened', desc: 'Day 2 cut for Calling finalists. Battle Hardened (Living Legend) for Day 1 knockouts. 9:00 AM.' },
+      { day: 'Day 4 – Travel home', type: 'drive',   title: 'Drive back to Karlsruhe',                    desc: 'Check out and return home.' },
+    ],
+
+    checklist: [
+      { id: 'reg-calling',        label: 'Register for The Calling: Hamburg – 75€',               tag: 'event'  },
+      { id: 'reg-bh',             label: 'Register for Battle Hardened: Hamburg – 60€',           tag: 'event'  },
+      { id: 'book-accommodation', label: 'Book accommodation in Hamburg',                          tag: 'hotel'  },
+      { id: 'plan-travel',        label: 'Plan travel to/from Hamburg (~5h drive from Karlsruhe)', tag: 'travel' },
+    ],
+  },
+
+  'prague-omens-2026': {
+    title:      'Prague – Omens World Premiere – May 2026',
+    navTitle:   'Prague – Omens World Premiere',
+    heroText:   'Karlsruhe → Prague → Karlsruhe · May 19 – 25, 2026',
+    storageKey: 'prague-omens-2026-checklist',
+
+    events: [
+      { date: 'Fri May 22, 2026', name: 'World Premiere: Omens of the Third Age', venue: 'PVA EXPO PRAHA · Sealed Deck · 10:00 AM · 80€ · 1,200 cap',
+        badge: 'premiere', countdown: { date: '2026-05-22', type: 'premiere' } },
+      { date: 'Sat May 23, 2026', name: 'The Calling: Prague',                    venue: 'PVA EXPO PRAHA · Sealed Deck · $20,000 USD prize pool',
+        badge: 'calling',  countdown: { date: '2026-05-23', type: 'calling'  } },
+      { date: 'Sun May 24, 2026', name: 'Sunday Showdown: Prague',                venue: 'PVA EXPO PRAHA · Silver Age · 9:00 AM · 60€ · 736 cap · $5,000 USD prize pool',
+        badge: 'showdown', countdown: { date: '2026-05-24', type: 'showdown' } },
+    ],
+
+    overview: [
+      { key: 'Dates',         value: 'Tue 19 May – Mon 25 May 2026' },
+      { key: 'Duration',      value: '6 nights / 7 days' },
+      { key: 'Destination',   value: 'Prague, Czech Republic' },
+      { key: 'Travel',        value: 'TBC' },
+      { key: 'Accommodation', value: 'TBC · Tue 19 May – Mon 25 May (6 nights)' },
+      { key: 'Venue',         value: 'PVA EXPO PRAHA, Prague' },
+    ],
+
+    timeline: [
+      { day: 'Tue May 19',    type: 'drive',    title: 'Travel to Prague',                        desc: 'Depart Karlsruhe. Check in to accommodation.' },
+      { day: 'Wed May 20',    type: null,        title: 'Prague',                                  desc: 'Free day. Explore the city.' },
+      { day: 'Thu May 21',    type: null,        title: 'Prague',                                  desc: 'Free day. Prep for the weekend.' },
+      { day: 'Fri May 22 ⭐', type: 'premiere', title: 'World Premiere – Omens of the Third Age', desc: 'Sealed Deck. 10:00 AM. PVA EXPO PRAHA. First chance to play with the new set.' },
+      { day: 'Sat May 23 ⭐', type: 'calling',  title: 'The Calling: Prague',                     desc: 'Sealed Deck. Full day Swiss rounds. $20,000 USD prize pool. PVA EXPO PRAHA.' },
+      { day: 'Sun May 24 ⭐', type: 'showdown', title: 'Sunday Showdown: Prague',                 desc: 'Silver Age. 9:00 AM. $5,000 USD prize pool. PVA EXPO PRAHA.' },
+      { day: 'Mon May 25',    type: 'drive',    title: 'Travel home',                              desc: 'Check out and return to Karlsruhe.' },
+    ],
+
+    checklist: [
+      { id: 'reg-premiere',       label: 'Register for World Premiere (Fri May 22) – 80€',                    tag: 'event'  },
+      { id: 'reg-calling',        label: 'Register for The Calling: Prague (Sat May 23)',                       tag: 'event'  },
+      { id: 'reg-showdown',       label: 'Register for Sunday Showdown (Sun May 24) – 60€',                    tag: 'event'  },
+      { id: 'book-accommodation', label: 'Book accommodation in Prague (Tue May 19 – Mon May 25, 6 nights)',    tag: 'hotel'  },
+      { id: 'book-travel',        label: 'Book travel to/from Prague',                                          tag: 'travel' },
+    ],
+  },
+
+};
