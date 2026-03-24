@@ -3,8 +3,8 @@
  *
  * Add a new trip by adding a key to TRIP_PAGES below.
  *
- * Badge types  : 'calling' | 'bh' | 'premiere' | 'showdown'
- * Timeline types: null | 'drive' | 'calling' | 'bh' | 'premiere' | 'showdown' | 'event'
+ * Badge types  : 'calling' | 'bh' | 'premiere' | 'showdown' | 'protour'
+ * Timeline types: null | 'drive' | 'fly' | 'calling' | 'bh' | 'premiere' | 'showdown' | 'protour' | 'event'
  * Tag types    : 'event' | 'hotel' | 'travel' | 'misc'
  *
  * countdown    : null (TBC) or { date: 'YYYY-MM-DD', type: <badge type> }
@@ -12,6 +12,49 @@
  */
 
 const TRIP_PAGES = {
+
+  'fab-asia-tour-2026': {
+    title:      'FAB Asia Tour 2026',
+    navTitle:   'FAB Asia Tour 2026',
+    heroText:   'Frankfurt → Shanghai → Japan → Frankfurt · Mar 26 – Apr 14',
+    storageKey: 'fab-asia-2026-checklist',
+
+    events: [
+      { date: 'Apr 3–5, 2026',  name: 'Calling: Shanghai', venue: 'Ritz-Carlton Shanghai Pudong, 8 Pudong Avenue',
+        badge: 'calling', countdown: { date: '2026-04-03', type: 'calling' } },
+      { date: 'Apr 9–12, 2026', name: 'Pro Tour: Yokohama', venue: 'Yokohama',
+        badge: 'protour', countdown: { date: '2026-04-09', type: 'protour' } },
+    ],
+
+    overview: [
+      { key: 'Dates',         value: 'Thu 26 Mar – Tue 14 Apr 2026' },
+      { key: 'Duration',      value: '19 days' },
+      { key: 'Destination',   value: 'Shanghai & Yokohama' },
+      { key: 'Travel',        value: 'FRA → PVG → NRT → FRA' },
+      { key: 'Accommodation', value: 'Shanghai hotel (Mar 28 – Apr 6) · Tokyo/Yokohama hotel (Apr 6 – 13)' },
+    ],
+
+    timeline: [
+      { day: 'Thu Mar 26',          type: 'fly',     title: 'Fly Frankfurt → Shanghai ✈️',  desc: 'FRA → PVG. Arrive Shanghai Pudong Friday morning.' },
+      { day: 'Fri Mar 27 – Tue Apr 2', type: null,   title: 'Shanghai',                      desc: 'Free days for exploration and tournament prep.' },
+      { day: 'Fri Apr 3 – Sun Apr 5 ⭐', type: 'calling', title: 'Calling: Shanghai',        desc: 'Ritz-Carlton Shanghai Pudong. Friday–Saturday Swiss rounds, Sunday top cut.' },
+      { day: 'Sun Apr 6',           type: 'fly',     title: 'Fly Shanghai → Tokyo ✈️',      desc: 'PVG → NRT, ~3h. Check into Tokyo/Yokohama hotel.' },
+      { day: 'Mon Apr 7 – Wed Apr 8', type: null,    title: 'Tokyo / Yokohama',              desc: 'Recovery, deck review, and exploration.' },
+      { day: 'Thu Apr 9 – Sun Apr 12 ⭐⭐', type: 'protour', title: 'Pro Tour: Yokohama',   desc: 'Thursday–Friday Swiss rounds, Saturday top cut, Sunday finals.' },
+      { day: 'Tue Apr 14',          type: 'fly',     title: 'Fly Japan → Frankfurt ✈️',     desc: 'NRT → FRA. Early check-out, head to Narita Airport.' },
+    ],
+
+    checklist: [
+      { id: 'leg1',          label: 'Book Leg 1: FRA → PVG (Thu, Mar 26)',                         tag: 'travel' },
+      { id: 'leg2',          label: 'Book Leg 2: PVG → NRT (Sun, Apr 6)',                          tag: 'travel' },
+      { id: 'leg3',          label: 'Book Leg 3: NRT → FRA (Tue, Apr 14)',                         tag: 'travel' },
+      { id: 'hotel-shanghai', label: 'Book hotel Shanghai (Mar 28 – Apr 6, near Pudong/Bund)',     tag: 'hotel'  },
+      { id: 'hotel-tokyo',   label: 'Book hotel Tokyo/Yokohama (Apr 6–13)',                        tag: 'hotel'  },
+      { id: 'reg-shanghai',  label: 'Register for Calling: Shanghai',                              tag: 'event'  },
+      { id: 'reg-yokohama',  label: 'Register for Pro Tour: Yokohama',                             tag: 'event'  },
+      { id: 'insurance',     label: 'Travel health insurance (China + Japan, Mar 26 – Apr 14)',    tag: 'misc'   },
+    ],
+  },
 
   'rotterdam-2026': {
     title:      'Rotterdam – Apr 2026',
