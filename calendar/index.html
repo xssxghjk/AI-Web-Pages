@@ -979,7 +979,7 @@
       const iDoc = iframeModalFrame.contentDocument;
       if (!iDoc) return;
       const style = iDoc.createElement('style');
-      style.textContent = 'header.hero { display: none !important; }';
+      style.textContent = 'nav { display: none !important; }';
       iDoc.head.appendChild(style);
     }
 
