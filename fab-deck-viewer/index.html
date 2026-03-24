@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FaB Deck Viewer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #0a0a0c;
+      --surface:    #111114;
+      --surface-2:  #18181d;
+      --border:     #222228;
+      --border-2:   #2e2e36;
+      --accent:     #6c5ce7;
+      --accent-dim: rgba(108, 92, 231, 0.15);
+      --text:       #e2e2ea;
+      --muted:      #6b6b7e;
+      --muted-2:    #4a4a5a;
+      --red-c:      #ef4444;
+      --yellow-c:   #f59e0b;
+      --blue-c:     #60a5fa;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      height: 52px;
+      background: rgba(10,10,12,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 2rem; gap: 0.75rem;
+    }
+    .nav-back { font-size: 0.82rem; color: var(--muted); text-decoration: none; }
+    .nav-back:hover { color: var(--text); }
+    .nav-sep  { color: var(--muted-2); }
+    .nav-title { font-size: 0.88rem; font-weight: 700; }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 2rem 2rem 1.75rem;
+      text-align: center;
+      background: linear-gradient(180deg, var(--accent-dim) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero h1 { font-size: clamp(1.3rem, 3vw, 1.9rem); font-weight: 800; letter-spacing: -0.02em; }
+    .hero p  { margin-top: 0.5rem; color: var(--muted); font-size: 0.875rem; line-height: 1.65; }
+
+    /* ── Layout ── */
+    main {
+      max-width: 1000px;
+      margin: 2rem auto 4rem;
+      padding: 0 2rem;
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+
+    /* ── Section ── */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .section-header {
+      padding: 0.85rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent);
+    }
+    .section-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+
+    /* ── Textarea ── */
+    textarea {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem; line-height: 1.7;
+      padding: 0.85rem 1rem;
+      resize: vertical; outline: none;
+      transition: border-color 0.15s;
+    }
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: var(--muted-2); }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    button {
+      font-family: inherit; font-size: 0.875rem; font-weight: 600;
+      padding: 0.6rem 1.25rem; border-radius: 8px; border: none;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+    }
+    button:active { transform: scale(0.97); }
+    .btn-primary  { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #7c6cf0; }
+    .btn-secondary {
+      background: var(--surface-2); color: var(--text);
+      border: 1px solid var(--border-2);
+    }
+    .btn-secondary:hover { background: var(--border); }
+    button:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
+
+    /* ── Status / Error ── */
+    .status-row {
+      display: none; align-items: center; gap: 0.6rem;
+      font-size: 0.82rem; color: var(--muted);
+    }
+    .spinner {
+      width: 16px; height: 16px; flex-shrink: 0;
+      border: 2px solid var(--border-2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .err {
+      display: none; font-size: 0.82rem; color: #ef4444;
+      padding: 0.5rem 0.75rem;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 6px;
+    }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center;
+      padding: 0.85rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.82rem; color: var(--muted);
+    }
+    .sb-item { display: flex; align-items: center; gap: 0.4rem; }
+    .sb-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sb-val  { font-weight: 700; color: var(--text); }
+
+    /* ── Group header ── */
+    .group-head {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .group-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── Card grid ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .card-entry { position: relative; }
+
+    /* Standard card aspect ratio 63×88 mm */
+    .card-frame {
+      position: relative;
+      width: 100%; padding-top: 139.7%;
+      border-radius: 8px; overflow: hidden;
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      transition: box-shadow 0.15s;
+    }
+    .card-entry:hover .card-frame {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    }
+    .card-frame img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 7px;
+      transition: transform 0.15s;
+    }
+    .card-entry:hover .card-frame img { transform: scale(1.03); }
+
+    /* Placeholder when image fails or not found */
+    .card-placeholder {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 0.5rem; gap: 0.35rem;
+      color: var(--muted); font-size: 0.65rem;
+      text-align: center; line-height: 1.35;
+    }
+    .card-placeholder svg { opacity: 0.3; }
+
+    /* Qty badge top-left */
+    .qty-badge {
+      position: absolute; top: 5px; left: 5px; z-index: 3;
+      background: rgba(0,0,0,0.72); color: #fff;
+      font-size: 0.65rem; font-weight: 700;
+      padding: 1px 5px; border-radius: 999px;
+      backdrop-filter: blur(4px); letter-spacing: 0.02em;
+    }
+
+    /* Pitch dot bottom-right */
+    .pitch-dot {
+      position: absolute; bottom: 5px; right: 5px; z-index: 3;
+      width: 18px; height: 18px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 800;
+      backdrop-filter: blur(4px);
+    }
+    .pitch-dot.red    { background: var(--red-c);    color: #fff; }
+    .pitch-dot.yellow { background: var(--yellow-c); color: #000; }
+    .pitch-dot.blue   { background: var(--blue-c);   color: #fff; }
+
+    /* Card name */
+    .card-name {
+      margin-top: 0.35rem;
+      font-size: 0.65rem; font-weight: 600; color: var(--muted);
+      text-align: center; line-height: 1.3;
+      overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 1.75rem 2rem; font-size: 0.78rem; color: var(--muted-2);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    /* ── Mobile ── */
+    @media (max-width: 600px) {
+      nav  { padding: 0 1.25rem; }
+      .hero { padding: 1.5rem 1.25rem 1.25rem; }
+      main { padding: 0 1rem; margin: 1.25rem auto 3rem; }
+      .section-body { padding: 1.1rem; }
+      .card-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-back" href="../">← Hub</a>
+  <span class="nav-sep">|</span>
+  <span class="nav-title">FaB Deck Viewer</span>
+</nav>
+
+<header class="hero">
+  <h1>FaB Deck Viewer</h1>
+  <p>Paste a decklist and see every card as an image, pulled from the official card database.</p>
+</header>
+
+<main>
+
+  <div class="section">
+    <div class="section-header">Decklist</div>
+    <div class="section-body">
+
+      <textarea id="decklist" rows="12" placeholder="Paste your decklist here, one card per line:
+
+3x Pummel (red)
+3x Plunder Run (blue)
+1x Briar, Warden of Thorns
+
+Supported formats:
+  3x Card Name (red)    — with pitch color
+  3 Card Name (1)       — with pitch number
+  Card Name             — no color, shows first printing"></textarea>
+
+      <div class="btn-row">
+        <button class="btn-primary"   id="btn-view">View Deck</button>
+        <button class="btn-secondary" id="btn-clear">Clear</button>
+      </div>
+
+      <div class="status-row" id="status-row">
+        <div class="spinner"></div>
+        <span id="status-msg">Loading card database…</span>
+      </div>
+
+      <div class="err" id="err"></div>
+
+    </div>
+  </div>
+
+  <div id="deck-out" style="display:none;">
+    <div class="stats-bar" id="stats-bar"></div>
+    <div id="card-groups"></div>
+  </div>
+
+</main>
+
+<footer>
+  <span>Built with Claude</span>
+  <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  const DB_URL = 'https://raw.githubusercontent.com/the-fab-cube/flesh-and-blood-cards/develop/json/english/card.json';
+
+  // Cached lookup: "name_color" → entry, "name" → entry (first match)
+  let db = null;
+
+  /* ── Parser ───────────────────────────────────────────────────────── */
+  function parseDecklist(raw) {
+    const out = [];
+    for (const line of raw.split('\n')) {
+      // Strip and skip comments / section headers
+      let s = line.trim();
+      if (!s || s[0] === '/' || s[0] === '#' || s[0] === '[') continue;
+      s = s.split('//')[0].trim();
+      if (!s) continue;
+
+      let qty = 1, name = s, hint = null;
+
+      // Quantity: "3x …" or "3 …"
+      const qm = s.match(/^(\d+)x?\s+(.+)$/i);
+      if (qm) { qty = Math.max(1, +qm[1] || 1); name = qm[2].trim(); }
+
+      // Pitch hint: "(red)" / "(blue)" / "(yellow)" / "(1)" / "(2)" / "(3)"
+      const hm = name.match(/^(.+?)\s*\((\d+|red|yellow|blue)\)\s*$/i);
+      if (hm) {
+        name = hm[1].trim();
+        const h = hm[2].toLowerCase();
+        hint = (h === '1' || h === 'red')    ? 'red'
+             : (h === '2' || h === 'yellow') ? 'yellow'
+             : (h === '3' || h === 'blue')   ? 'blue'
+             : null;
+      }
+
+      if (name) out.push({ qty, name, hint });
+    }
+    return out;
+  }
+
+  /* ── Card database ────────────────────────────────────────────────── */
+  async function ensureDb() {
+    if (db) return;
+
+    setStatus('Fetching card database (~20 MB, cached after first load)…');
+    const resp = await fetch(DB_URL);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status} fetching card database`);
+
+    setStatus('Parsing card data…');
+    const cards = await resp.json();
+
+    setStatus('Indexing cards…');
+    db = new Map();
+
+    for (const card of cards) {
+      const imgUrl = card.printings && card.printings.length
+        ? (card.printings[0].image_url || null)
+        : null;
+
+      const entry = {
+        name:   card.name,
+        pitch:  card.pitch  || null,
+        color:  (card.color || '').toLowerCase(),
+        imgUrl,
+      };
+
+      const nameLow = card.name.toLowerCase();
+      if (entry.color) db.set(`${nameLow}_${entry.color}`, entry);
+      if (!db.has(nameLow)) db.set(nameLow, entry);
+    }
+  }
+
+  function lookup(name, hint) {
+    const n = name.toLowerCase();
+    if (hint && db.has(`${n}_${hint}`)) return db.get(`${n}_${hint}`);
+    return db.get(n) || null;
+  }
+
+  /* ── UI helpers ───────────────────────────────────────────────────── */
+  function setStatus(msg) {
+    const row = document.getElementById('status-row');
+    row.style.display = 'flex';
+    document.getElementById('status-msg').textContent = msg;
+  }
+  function hideStatus() { document.getElementById('status-row').style.display = 'none'; }
+
+  function showErr(msg) {
+    const el = document.getElementById('err');
+    el.textContent = msg;
+    el.style.display = '';
+  }
+  function hideErr() { document.getElementById('err').style.display = 'none'; }
+
+  /* ── Rendering ────────────────────────────────────────────────────── */
+  const GROUPS = [
+    { key: 'red',    label: 'Red — Pitch 1', color: '#ef4444' },
+    { key: 'yellow', label: 'Yellow — Pitch 2', color: '#f59e0b' },
+    { key: 'blue',   label: 'Blue — Pitch 3',   color: '#60a5fa' },
+    { key: 'other',  label: 'Other',             color: '#6b6b7e' },
+  ];
+
+  function renderDeck(pairs) {
+    // Assign each pair to a group
+    const buckets = {};
+    GROUPS.forEach(g => { buckets[g.key] = []; });
+
+    let totalCards = 0;
+    const counts = { red: 0, yellow: 0, blue: 0, other: 0 };
+
+    for (const p of pairs) {
+      totalCards += p.entry.qty;
+      const key = p.card ? (p.card.color || 'other') : 'other';
+      const bucket = buckets[key] || buckets.other;
+      bucket.push(p);
+      counts[key] = (counts[key] || 0) + p.entry.qty;
+    }
+
+    // Stats bar
+    const sb = document.getElementById('stats-bar');
+    sb.innerHTML =
+      `<div class="sb-item">Total <span class="sb-val" style="margin-left:.3rem">${totalCards}</span>&nbsp;cards</div>` +
+      GROUPS
+        .filter(g => counts[g.key] > 0)
+        .map(g => `<div class="sb-item">
+          <div class="sb-dot" style="background:${g.color}"></div>
+          <span class="sb-val">${counts[g.key]}</span>&nbsp;${g.key}
+        </div>`)
+        .join('');
+
+    // Card groups
+    const groupsEl = document.getElementById('card-groups');
+    groupsEl.innerHTML = '';
+
+    for (const g of GROUPS) {
+      if (!buckets[g.key] || buckets[g.key].length === 0) continue;
+
+      const section = document.createElement('div');
+      section.style.marginBottom = '2rem';
+
+      const head = document.createElement('div');
+      head.className = 'group-head';
+      head.innerHTML = `<span style="color:${g.color}">${g.label}</span>`;
+      section.appendChild(head);
+
+      const grid = document.createElement('div');
+      grid.className = 'card-grid';
+      buckets[g.key].forEach(p => grid.appendChild(makeCard(p.entry, p.card)));
+      section.appendChild(grid);
+      groupsEl.appendChild(section);
+    }
+
+    document.getElementById('deck-out').style.display = '';
+  }
+
+  function makeCard(entry, card) {
+    const wrap = document.createElement('div');
+    wrap.className = 'card-entry';
+
+    const frame = document.createElement('div');
+    frame.className = 'card-frame';
+
+    if (card && card.imgUrl) {
+      const img = new Image();
+      img.alt = entry.name;
+      img.loading = 'lazy';
+      img.src = card.imgUrl;
+      img.addEventListener('error', function () {
+        this.remove();
+        placeholder.style.display = 'flex';
+      });
+      frame.appendChild(img);
+    }
+
+    // Placeholder
+    const placeholder = document.createElement('div');
+    placeholder.className = 'card-placeholder';
+    placeholder.style.display = (card && card.imgUrl) ? 'none' : 'flex';
+    placeholder.innerHTML = `
+      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M3 9h18M9 21V9"/>
+      </svg>
+      <span>${entry.name}</span>
+    `;
+    frame.appendChild(placeholder);
+
+    // Quantity badge
+    if (entry.qty > 1) {
+      const qb = document.createElement('div');
+      qb.className = 'qty-badge';
+      qb.textContent = `×${entry.qty}`;
+      frame.appendChild(qb);
+    }
+
+    // Pitch dot
+    if (card && card.pitch) {
+      const pd = document.createElement('div');
+      pd.className = `pitch-dot ${card.color || ''}`;
+      pd.textContent = card.pitch;
+      frame.appendChild(pd);
+    }
+
+    wrap.appendChild(frame);
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'card-name';
+    nameEl.title = entry.name;
+    nameEl.textContent = entry.name;
+    wrap.appendChild(nameEl);
+
+    return wrap;
+  }
+
+  /* ── Handlers ─────────────────────────────────────────────────────── */
+  document.getElementById('btn-view').addEventListener('click', async function () {
+    hideErr();
+    const raw = document.getElementById('decklist').value.trim();
+    if (!raw) { showErr('Paste a decklist first.'); return; }
+
+    const entries = parseDecklist(raw);
+    if (!entries.length) { showErr('No card entries found. Check the format.'); return; }
+
+    const btn = this;
+    btn.disabled = true;
+
+    try {
+      await ensureDb();
+      setStatus('Looking up cards…');
+      const pairs = entries.map(e => ({ entry: e, card: lookup(e.name, e.hint) }));
+      hideStatus();
+      renderDeck(pairs);
+
+      const missing = pairs.filter(p => !p.card).map(p => p.entry.name);
+      if (missing.length) {
+        showErr(`Not found in database: ${missing.join(', ')}`);
+      }
+    } catch (e) {
+      hideStatus();
+      showErr(e.message);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    document.getElementById('decklist').value = '';
+    document.getElementById('deck-out').style.display = 'none';
+    hideStatus();
+    hideErr();
+  });
+
+})();
+</script>
+
+</body>
+</html>
