@@ -615,14 +615,16 @@
   }
 
   function wireItem(el) {
-    el.querySelector('.check-box').addEventListener('click', e => {
-      e.stopPropagation();
-      el.classList.toggle('done');
-      state.checked[el.dataset.id] = el.classList.contains('done');
-      saveState();
-      updateProgress();
+    el.addEventListener('click', e => {
+      if (e.target.closest('.check-box')) {
+        el.classList.toggle('done');
+        state.checked[el.dataset.id] = el.classList.contains('done');
+        saveState();
+        updateProgress();
+      } else {
+        openItemCtx(el);
+      }
     });
-    el.addEventListener('click', () => openItemCtx(el));
   }
 
   listEl.querySelectorAll('.check-item').forEach(item => {
