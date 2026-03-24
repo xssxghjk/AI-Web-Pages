@@ -797,6 +797,11 @@
       }
     });
 
+    // Close context popup when the page scrolls (it's fixed-position so it drifts from its button)
+    window.addEventListener('scroll', () => {
+      if (popup.classList.contains('open')) { closeFabPopup(); popup._activeBtn = null; }
+    }, { passive: true });
+
     // ── IFRAME MODAL ──────────────────────────────────────────────────────
     const iframeModal      = document.getElementById('iframe-modal');
     const iframeModalTitle = document.getElementById('iframe-modal-title');
@@ -820,6 +825,55 @@
     }
 
     iframeModalClose.addEventListener('click', closeIframeModal);
+
+    // Swipe-down to close modal
+    let modalTouchStartY = null;
+    let modalTouchStartX = null;
+    let modalDragging = false;
+    const MODAL_THRESHOLD = 0.22; // fraction of screen height
+
+    iframeModal.addEventListener('touchstart', e => {
+      // Only start tracking on the bar (header area) to avoid interfering with iframe scroll
+      if (!e.target.closest('.iframe-modal-bar')) return;
+      modalTouchStartY = e.touches[0].clientY;
+      modalTouchStartX = e.touches[0].clientX;
+      modalDragging = false;
+      iframeModal.style.transition = 'none';
+    }, { passive: true });
+
+    iframeModal.addEventListener('touchmove', e => {
+      if (modalTouchStartY === null) return;
+      const dy = e.touches[0].clientY - modalTouchStartY;
+      const dx = e.touches[0].clientX - modalTouchStartX;
+      if (!modalDragging && Math.abs(dx) > Math.abs(dy)) { modalTouchStartY = null; return; } // horizontal swipe, ignore
+      if (!modalDragging && Math.abs(dy) > 6) modalDragging = true;
+      if (!modalDragging) return;
+      const clampedDy = Math.max(0, dy); // only allow downward drag
+      iframeModal.style.transform = `translateY(${clampedDy}px)`;
+    }, { passive: true });
+
+    iframeModal.addEventListener('touchend', e => {
+      if (modalTouchStartY === null) return;
+      const dy = e.changedTouches[0].clientY - modalTouchStartY;
+      modalTouchStartY = null;
+      modalDragging = false;
+      if (dy > window.innerHeight * MODAL_THRESHOLD) {
+        // Animate downward from current drag position then clean up
+        iframeModal.style.transition = 'transform 0.32s cubic-bezier(0.32,0.72,0,1)';
+        iframeModal.style.transform = 'translateY(100%)';
+        document.body.style.overflow = '';
+        setTimeout(() => {
+          iframeModal.classList.remove('open');
+          iframeModal.style.transform = '';
+          iframeModal.style.transition = '';
+          iframeModalFrame.src = '';
+        }, 340);
+      } else {
+        // Snap back open
+        iframeModal.style.transition = '';
+        iframeModal.style.transform = 'translateY(0)';
+      }
+    }, { passive: true });
 
     // Intercept trip bar link clicks (non-fab-event bars)
     document.addEventListener('click', e => {
