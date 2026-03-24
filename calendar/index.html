@@ -826,39 +826,16 @@
 
     iframeModalClose.addEventListener('click', closeIframeModal);
 
-    // Swipe-down to close modal
-    let modalTouchStartY = null;
-    let modalTouchStartX = null;
-    let modalDragging = false;
-    const MODAL_THRESHOLD = 0.22; // fraction of screen height
+    // ── SWIPE-DOWN TO CLOSE MODAL ─────────────────────────────────────────
+    const MODAL_DISMISS_THRESHOLD = 0.22;
 
-    iframeModal.addEventListener('touchstart', e => {
-      // Only start tracking on the bar (header area) to avoid interfering with iframe scroll
-      if (!e.target.closest('.iframe-modal-bar')) return;
-      modalTouchStartY = e.touches[0].clientY;
-      modalTouchStartX = e.touches[0].clientX;
-      modalDragging = false;
+    function applyModalDrag(dy) {
       iframeModal.style.transition = 'none';
-    }, { passive: true });
+      iframeModal.style.transform = `translateY(${Math.max(0, dy)}px)`;
+    }
 
-    iframeModal.addEventListener('touchmove', e => {
-      if (modalTouchStartY === null) return;
-      const dy = e.touches[0].clientY - modalTouchStartY;
-      const dx = e.touches[0].clientX - modalTouchStartX;
-      if (!modalDragging && Math.abs(dx) > Math.abs(dy)) { modalTouchStartY = null; return; } // horizontal swipe, ignore
-      if (!modalDragging && Math.abs(dy) > 6) modalDragging = true;
-      if (!modalDragging) return;
-      const clampedDy = Math.max(0, dy); // only allow downward drag
-      iframeModal.style.transform = `translateY(${clampedDy}px)`;
-    }, { passive: true });
-
-    iframeModal.addEventListener('touchend', e => {
-      if (modalTouchStartY === null) return;
-      const dy = e.changedTouches[0].clientY - modalTouchStartY;
-      modalTouchStartY = null;
-      modalDragging = false;
-      if (dy > window.innerHeight * MODAL_THRESHOLD) {
-        // Animate downward from current drag position then clean up
+    function finishModalDrag(dy) {
+      if (dy > window.innerHeight * MODAL_DISMISS_THRESHOLD) {
         iframeModal.style.transition = 'transform 0.32s cubic-bezier(0.32,0.72,0,1)';
         iframeModal.style.transform = 'translateY(100%)';
         document.body.style.overflow = '';
@@ -869,11 +846,67 @@
           iframeModalFrame.src = '';
         }, 340);
       } else {
-        // Snap back open
-        iframeModal.style.transition = '';
+        iframeModal.style.transition = 'transform 0.3s cubic-bezier(0.32,0.72,0,1)';
         iframeModal.style.transform = 'translateY(0)';
+        setTimeout(() => { iframeModal.style.transition = ''; iframeModal.style.transform = ''; }, 320);
       }
-    }, { passive: true });
+    }
+
+    // Bar swipe: always works regardless of iframe scroll position
+    {
+      let startY = null, startX = null, dragging = false;
+      iframeModal.addEventListener('touchstart', e => {
+        if (!e.target.closest('.iframe-modal-bar')) return;
+        startY = e.touches[0].clientY; startX = e.touches[0].clientX; dragging = false;
+      }, { passive: true });
+      iframeModal.addEventListener('touchmove', e => {
+        if (startY === null) return;
+        const dy = e.touches[0].clientY - startY;
+        const dx = e.touches[0].clientX - startX;
+        if (!dragging && Math.abs(dx) > Math.abs(dy)) { startY = null; return; }
+        if (!dragging && Math.abs(dy) > 6) dragging = true;
+        if (dragging) applyModalDrag(dy);
+      }, { passive: true });
+      iframeModal.addEventListener('touchend', e => {
+        if (startY === null || !dragging) { startY = null; dragging = false; return; }
+        const dy = e.changedTouches[0].clientY - startY;
+        startY = null; dragging = false;
+        finishModalDrag(dy);
+      }, { passive: true });
+    }
+
+    // Iframe content swipe: activates when the iframe page is scrolled to the top
+    function setupIframeDismissGesture() {
+      const iDoc = iframeModalFrame.contentDocument;
+      if (!iDoc) return;
+      const iWin = iframeModalFrame.contentWindow;
+      let startY = null, dragging = false;
+
+      iDoc.addEventListener('touchstart', e => {
+        // Only begin tracking if page is already at top
+        startY = (iWin.scrollY === 0) ? e.touches[0].clientY : null;
+        dragging = false;
+      }, { passive: true });
+
+      iDoc.addEventListener('touchmove', e => {
+        if (startY === null) return;
+        if (iWin.scrollY > 0) { startY = null; return; } // scrolled away from top during move
+        const dy = e.touches[0].clientY - startY;
+        if (!dragging && dy > 6) dragging = true;
+        if (!dragging || dy <= 0) return;
+        applyModalDrag(dy);
+        e.preventDefault(); // block iframe from scrolling upward (rubber-band)
+      }, { passive: false });
+
+      iDoc.addEventListener('touchend', e => {
+        if (startY === null || !dragging) { startY = null; dragging = false; return; }
+        const dy = e.changedTouches[0].clientY - startY;
+        startY = null; dragging = false;
+        finishModalDrag(dy);
+      }, { passive: true });
+    }
+
+    iframeModalFrame.addEventListener('load', setupIframeDismissGesture);
 
     // Intercept trip bar link clicks (non-fab-event bars)
     document.addEventListener('click', e => {
