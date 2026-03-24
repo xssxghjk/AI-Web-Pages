@@ -397,10 +397,16 @@
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    // Parse ISO date strings (YYYY-MM-DD) as local midnight to avoid UTC timezone shift
+    function localDate(iso) {
+      const [y, m, d] = iso.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+
     function firstTripMonth() {
       const sorted = [...ALL_EVENTS].sort((a, b) => a.startDate.localeCompare(b.startDate));
       if (!sorted.length) return new Date(today.getFullYear(), today.getMonth(), 1);
-      const d = new Date(sorted[0].startDate);
+      const d = localDate(sorted[0].startDate);
       return new Date(d.getFullYear(), d.getMonth(), 1);
     }
 
@@ -409,8 +415,8 @@
 
     const earliestMonth = firstTripMonth();
     const hasTripsThisMonth = ALL_EVENTS.some(t => {
-      const s = new Date(t.startDate);
-      const e = new Date(t.endDate);
+      const s = localDate(t.startDate);
+      const e = localDate(t.endDate);
       return (s.getFullYear() === calYear && s.getMonth() === calMonth) ||
              (e.getFullYear() === calYear && e.getMonth() === calMonth) ||
              (s <= new Date(calYear, calMonth, 1) && e >= new Date(calYear, calMonth + 1, 0));
@@ -438,8 +444,8 @@
       if (startOffset < 0) startOffset = 6;
 
       const tripsThisMonth = ALL_EVENTS.filter(trip => {
-        const s = new Date(trip.startDate);
-        const e = new Date(trip.endDate);
+        const s = localDate(trip.startDate);
+        const e = localDate(trip.endDate);
         return s <= lastDay && e >= firstDay;
       });
 
@@ -456,8 +462,8 @@
 
         const weekBars = [];
         tripsThisMonth.forEach(trip => {
-          const tripStart = new Date(trip.startDate);
-          const tripEnd   = new Date(trip.endDate);
+          const tripStart = localDate(trip.startDate);
+          const tripEnd   = localDate(trip.endDate);
           let colStart = -1, colEnd = -1;
           for (let col = 0; col < 7; col++) {
             const d = weekDates[col];
