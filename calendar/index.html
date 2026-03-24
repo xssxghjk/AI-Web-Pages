@@ -277,6 +277,27 @@
       .cal-month-label { font-size: 0.9rem; }
     }
 
+    /* ── TWO-MONTH DESKTOP LAYOUT ── */
+    .cal-panel-label {
+      display: none; /* shown only on desktop */
+    }
+    @media (min-width: 768px) {
+      .main { max-width: 1200px; }
+      .cal-two-month-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+      .cal-panel-label {
+        display: block;
+        font-size: 0.92rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--text);
+        margin-bottom: 0.6rem;
+      }
+    }
+
     /* ── FAB EVENT POPUP ── */
     .fab-popup {
       position: fixed;
@@ -622,9 +643,37 @@
       legend.innerHTML = items.join('');
     }
 
+    function isDesktop() { return window.innerWidth >= 768; }
+
+    function nextMonthOf(year, month) {
+      return month === 11 ? { year: year + 1, month: 0 } : { year, month: month + 1 };
+    }
+
+    function buildCurrentContent() {
+      if (isDesktop()) {
+        const nxt = nextMonthOf(calYear, calMonth);
+        const { html: h1, tripsThisMonth: t1 } = buildGridHTML(calYear, calMonth);
+        const { html: h2, tripsThisMonth: t2 } = buildGridHTML(nxt.year, nxt.month);
+        const p1 = `<div class="cal-month-panel"><div class="cal-panel-label">${MONTH_NAMES[calMonth]} ${calYear}</div>${h1}</div>`;
+        const p2 = `<div class="cal-month-panel"><div class="cal-panel-label">${MONTH_NAMES[nxt.month]} ${nxt.year}</div>${h2}</div>`;
+        return { html: `<div class="cal-two-month-layout">${p1}${p2}</div>`, tripsThisMonth: [...t1, ...t2] };
+      }
+      return buildGridHTML(calYear, calMonth);
+    }
+
+    function currentLabel() {
+      if (isDesktop()) {
+        const nxt = nextMonthOf(calYear, calMonth);
+        return calYear === nxt.year
+          ? `${MONTH_NAMES[calMonth]} \u2013 ${MONTH_NAMES[nxt.month]} ${calYear}`
+          : `${MONTH_NAMES[calMonth]} ${calYear} \u2013 ${MONTH_NAMES[nxt.month]} ${nxt.year}`;
+      }
+      return `${MONTH_NAMES[calMonth]} ${calYear}`;
+    }
+
     function renderCalendar() {
-      document.getElementById('cal-month-label').textContent = `${MONTH_NAMES[calMonth]} ${calYear}`;
-      const { html, tripsThisMonth } = buildGridHTML(calYear, calMonth);
+      document.getElementById('cal-month-label').textContent = currentLabel();
+      const { html, tripsThisMonth } = buildCurrentContent();
       document.getElementById('cal-grid').innerHTML = html;
       updateLegend(tripsThisMonth);
     }
@@ -638,8 +687,8 @@
       if (calMonth > 11) { calMonth = 0; calYear++; }
       if (calMonth < 0)  { calMonth = 11; calYear--; }
 
-      document.getElementById('cal-month-label').textContent = `${MONTH_NAMES[calMonth]} ${calYear}`;
-      const { html, tripsThisMonth } = buildGridHTML(calYear, calMonth);
+      document.getElementById('cal-month-label').textContent = currentLabel();
+      const { html, tripsThisMonth } = buildCurrentContent();
       updateLegend(tripsThisMonth);
 
       const viewport = document.getElementById('cal-viewport');
