@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FaB Pitch Simulator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0a0a0c;
+      --surface:      #111114;
+      --surface-2:    #18181d;
+      --border:       #222228;
+      --border-2:     #2e2e36;
+      --accent:       #6c5ce7;
+      --accent-dim:   rgba(108, 92, 231, 0.15);
+      --text:         #e2e2ea;
+      --muted:        #6b6b7e;
+      --muted-2:      #4a4a5a;
+      --red-c:        #ef4444;
+      --red-bg:       rgba(239,68,68,0.10);
+      --yellow-c:     #f59e0b;
+      --yellow-bg:    rgba(245,158,11,0.10);
+      --blue-c:       #60a5fa;
+      --blue-bg:      rgba(96,165,250,0.10);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      height: 52px;
+      background: rgba(10,10,12,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 2rem; gap: 0.75rem;
+    }
+    .nav-back { font-size: 0.82rem; color: var(--muted); text-decoration: none; }
+    .nav-back:hover { color: var(--text); }
+    .nav-sep { color: var(--muted-2); }
+    .nav-title { font-size: 0.88rem; font-weight: 700; }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 2rem 2rem 1.75rem;
+      text-align: center;
+      background: linear-gradient(180deg, var(--accent-dim) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero h1 { font-size: clamp(1.3rem, 3vw, 1.9rem); font-weight: 800; letter-spacing: -0.02em; }
+    .hero p  { margin-top: 0.5rem; color: var(--muted); font-size: 0.875rem; line-height: 1.65; }
+
+    /* ── Layout ── */
+    main {
+      max-width: 860px;
+      margin: 2rem auto 4rem;
+      padding: 0 2rem;
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+
+    /* ── Section ── */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .section-header {
+      padding: 0.85rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent);
+    }
+    .section-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+
+    /* ── Inputs ── */
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr) auto;
+      gap: 1rem;
+      align-items: end;
+    }
+    .inp-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .inp-label {
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .inp-label.red    { color: var(--red-c); }
+    .inp-label.yellow { color: var(--yellow-c); }
+    .inp-label.blue   { color: var(--blue-c); }
+    .inp-label.neutral{ color: var(--muted); }
+    .inp-sublabel { font-size: 0.65rem; color: var(--muted); margin-top: -0.15rem; }
+
+    input[type=number] {
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem; font-weight: 600;
+      padding: 0.5rem 0.75rem;
+      width: 100%; outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type=number]:focus { border-color: var(--accent); }
+
+    /* ── Deck summary ── */
+    .deck-summary {
+      padding: 0.75rem 1rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      border-radius: 8px;
+      font-size: 0.82rem; color: var(--muted);
+      display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center;
+    }
+    .ds-item { display: flex; gap: 0.35rem; align-items: baseline; }
+    .ds-val { font-weight: 700; color: var(--text); font-size: 0.92rem; }
+
+    .pitch-bar {
+      height: 6px; border-radius: 999px;
+      overflow: hidden; background: var(--border);
+      display: flex;
+    }
+    .pb-seg { height: 100%; transition: width 0.25s; }
+    .pb-seg.red    { background: var(--red-c); }
+    .pb-seg.yellow { background: var(--yellow-c); }
+    .pb-seg.blue   { background: var(--blue-c); }
+
+    /* ── Error ── */
+    .err {
+      display: none;
+      color: #ef4444; font-size: 0.82rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 6px;
+    }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    button {
+      font-family: inherit; font-size: 0.875rem; font-weight: 600;
+      padding: 0.6rem 1.25rem; border-radius: 8px; border: none;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+    }
+    button:active { transform: scale(0.97); }
+    .btn-primary  { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #7c6cf0; }
+    .btn-secondary {
+      background: var(--surface-2); color: var(--text);
+      border: 1px solid var(--border-2);
+    }
+    .btn-secondary:hover { background: var(--border); }
+    button:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
+
+    /* ── Hand cards ── */
+    .hand-display {
+      display: flex; gap: 0.75rem; flex-wrap: wrap;
+      align-items: flex-end; min-height: 72px;
+    }
+    .card-chip {
+      width: 58px; height: 74px; border-radius: 8px; border: 1px solid;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 0.15rem;
+      font-size: 1.5rem; font-weight: 800;
+      transition: transform 0.15s;
+    }
+    .card-chip:hover { transform: translateY(-3px); }
+    .card-chip .chip-sub { font-size: 0.55rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; }
+    .card-chip.red    { background: var(--red-bg);    border-color: var(--red-c);    color: var(--red-c); }
+    .card-chip.yellow { background: var(--yellow-bg); border-color: var(--yellow-c); color: var(--yellow-c); }
+    .card-chip.blue   { background: var(--blue-bg);   border-color: var(--blue-c);   color: var(--blue-c); }
+    .hand-total {
+      margin-left: auto;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 0.2rem;
+    }
+    .ht-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .ht-val   { font-size: 2.25rem; font-weight: 800; line-height: 1; }
+    .ht-sub   { font-size: 0.72rem; color: var(--muted); }
+    .hand-empty { color: var(--muted); font-size: 0.875rem; align-self: center; }
+
+    /* ── Turns list ── */
+    .turns-list {
+      display: none; flex-direction: column; gap: 0.4rem;
+      max-height: 340px; overflow-y: auto;
+    }
+    .turn-row {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.55rem 0.75rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border-2); border-radius: 8px;
+    }
+    .turn-num {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted); min-width: 38px;
+    }
+    .turn-cards { display: flex; gap: 3px; flex: 1; flex-wrap: wrap; }
+    .mini-chip {
+      width: 22px; height: 28px; border-radius: 4px; border: 1px solid;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 800;
+    }
+    .mini-chip.red    { background: var(--red-bg);    border-color: var(--red-c);    color: var(--red-c); }
+    .mini-chip.yellow { background: var(--yellow-bg); border-color: var(--yellow-c); color: var(--yellow-c); }
+    .mini-chip.blue   { background: var(--blue-bg);   border-color: var(--blue-c);   color: var(--blue-c); }
+    .turn-pitch { font-size: 0.85rem; font-weight: 700; min-width: 48px; text-align: right; }
+    .turn-pitch-muted { font-size: 0.68rem; color: var(--muted); font-weight: 400; }
+
+    /* ── Monte Carlo stats ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 0.75rem;
+    }
+    .stat-box {
+      background: var(--surface-2); border: 1px solid var(--border-2);
+      border-radius: 10px; padding: 0.85rem 1rem;
+      display: flex; flex-direction: column; gap: 0.25rem;
+    }
+    .stat-box-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .stat-box-val   { font-size: 1.4rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .stat-box-sub   { font-size: 0.7rem; color: var(--muted); }
+
+    /* ── Histogram ── */
+    .histogram-wrap { display: flex; flex-direction: column; gap: 0.5rem; }
+    .histogram-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .histogram {
+      display: flex; align-items: flex-end; gap: 3px;
+      height: 80px;
+    }
+    .h-col { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+    .h-bar {
+      width: 100%; background: var(--accent); border-radius: 3px 3px 0 0;
+      min-height: 2px; transition: height 0.25s;
+    }
+    .h-lbl { font-size: 0.58rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+    /* ── Threshold table ── */
+    .thresh-table { display: flex; flex-direction: column; gap: 0.35rem; }
+    .thresh-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.4rem 0.75rem;
+      background: var(--surface-2); border: 1px solid var(--border-2);
+      border-radius: 6px; font-size: 0.82rem;
+    }
+    .thresh-row .tr-key { color: var(--muted); }
+    .thresh-row .tr-val { font-weight: 700; }
+
+    /* ── Footer ── */
+    footer {
+      padding: 1.75rem 2rem; font-size: 0.78rem; color: var(--muted-2);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    /* ── Mobile ── */
+    @media (max-width: 600px) {
+      nav { padding: 0 1.25rem; }
+      .hero { padding: 1.5rem 1.25rem 1.25rem; }
+      main { padding: 0 1rem; margin: 1.25rem auto 3rem; }
+      .config-grid { grid-template-columns: repeat(3, 1fr); }
+      .config-grid .inp-group:last-child { grid-column: span 3; max-width: 160px; }
+      .section-body { padding: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-back" href="../">← Hub</a>
+  <span class="nav-sep">|</span>
+  <span class="nav-title">FaB Pitch Simulator</span>
+</nav>
+
+<header class="hero">
+  <h1>FaB Pitch Simulator</h1>
+  <p>Configure your deck's pitch distribution and simulate hands, turns, and resource generation.</p>
+</header>
+
+<main>
+
+  <!-- ── Deck Config ── -->
+  <div class="section">
+    <div class="section-header">Deck Configuration</div>
+    <div class="section-body">
+
+      <div class="config-grid">
+        <div class="inp-group">
+          <div class="inp-label red">Red</div>
+          <div class="inp-sublabel">pitch 1</div>
+          <input type="number" id="inp-red" min="0" max="200" value="20" />
+        </div>
+        <div class="inp-group">
+          <div class="inp-label yellow">Yellow</div>
+          <div class="inp-sublabel">pitch 2</div>
+          <input type="number" id="inp-yellow" min="0" max="200" value="20" />
+        </div>
+        <div class="inp-group">
+          <div class="inp-label blue">Blue</div>
+          <div class="inp-sublabel">pitch 3</div>
+          <input type="number" id="inp-blue" min="0" max="200" value="20" />
+        </div>
+        <div class="inp-group">
+          <div class="inp-label neutral">Hand</div>
+          <div class="inp-sublabel">cards drawn</div>
+          <input type="number" id="inp-hand" min="1" max="10" value="4" />
+        </div>
+      </div>
+
+      <div class="pitch-bar">
+        <div class="pb-seg red"    id="pb-red"    style="width:33.3%"></div>
+        <div class="pb-seg yellow" id="pb-yellow" style="width:33.3%"></div>
+        <div class="pb-seg blue"   id="pb-blue"   style="width:33.4%"></div>
+      </div>
+
+      <div class="deck-summary">
+        <div class="ds-item">Total <span class="ds-val" id="ds-total">60</span> cards</div>
+        <div class="ds-item">Avg pitch <span class="ds-val" id="ds-avg">2.00</span></div>
+        <div class="ds-item">Expected/hand <span class="ds-val" id="ds-exp">8.00</span></div>
+      </div>
+
+      <div class="err" id="cfg-err"></div>
+    </div>
+  </div>
+
+  <!-- ── Single Hand ── -->
+  <div class="section">
+    <div class="section-header">Draw a Hand</div>
+    <div class="section-body">
+      <div class="btn-row">
+        <button class="btn-primary"   id="btn-draw">Draw Hand</button>
+        <button class="btn-secondary" id="btn-draw-clear">Clear</button>
+      </div>
+      <div class="hand-display" id="hand-display">
+        <span class="hand-empty">Draw a hand to see your cards.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Turn Simulation ── -->
+  <div class="section">
+    <div class="section-header">Turn-by-Turn Simulation</div>
+    <div class="section-body">
+      <p style="font-size:0.82rem;color:var(--muted);line-height:1.6;">
+        Shuffles your deck and deals <span id="turns-hand-note">4</span> cards per turn until the deck runs out, showing pitch resources per turn.
+      </p>
+      <div class="btn-row">
+        <button class="btn-primary"   id="btn-turns">Run Simulation</button>
+        <button class="btn-secondary" id="btn-turns-clear">Clear</button>
+      </div>
+      <div class="turns-list" id="turns-list"></div>
+    </div>
+  </div>
+
+  <!-- ── Monte Carlo ── -->
+  <div class="section">
+    <div class="section-header">Monte Carlo Statistics</div>
+    <div class="section-body">
+      <p style="font-size:0.82rem;color:var(--muted);line-height:1.6;">
+        Simulates 10,000 random hands and shows the pitch distribution, averages, and probability of hitting resource thresholds.
+      </p>
+      <div class="btn-row">
+        <button class="btn-primary"   id="btn-monte">Run 10,000 Simulations</button>
+        <button class="btn-secondary" id="btn-monte-clear">Clear</button>
+      </div>
+
+      <div id="monte-out" style="display:none;display:none;">
+        <div class="stats-grid" id="stats-grid" style="margin-bottom:1.25rem;"></div>
+        <div class="histogram-wrap">
+          <div class="histogram-label">Pitch Distribution</div>
+          <div class="histogram" id="histogram"></div>
+        </div>
+        <div style="margin-top:1.25rem;">
+          <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem;">Probability of Pitching ≥ N Resources</div>
+          <div class="thresh-table" id="thresh-table"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span>Built with Claude</span>
+  <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Utils ─────────────────────────────────────────────────────────── */
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v | 0)); }
+
+  function getConfig() {
+    const red    = clamp(+document.getElementById('inp-red').value    || 0, 0, 200);
+    const yellow = clamp(+document.getElementById('inp-yellow').value || 0, 0, 200);
+    const blue   = clamp(+document.getElementById('inp-blue').value   || 0, 0, 200);
+    const hand   = clamp(+document.getElementById('inp-hand').value   || 4, 1,  10);
+    return { red, yellow, blue, hand, total: red + yellow + blue };
+  }
+
+  function buildDeck(cfg) {
+    const deck = new Array(cfg.total);
+    let i = 0;
+    for (let k = 0; k < cfg.red;    k++) deck[i++] = 1;
+    for (let k = 0; k < cfg.yellow; k++) deck[i++] = 2;
+    for (let k = 0; k < cfg.blue;   k++) deck[i++] = 3;
+    return deck;
+  }
+
+  // Fisher-Yates in-place shuffle
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = (Math.random() * (i + 1)) | 0;
+      const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  function pitchClass(v) { return v === 1 ? 'red' : v === 2 ? 'yellow' : 'blue'; }
+  function pitchName(v)  { return v === 1 ? 'Red' : v === 2 ? 'Yellow' : 'Blue'; }
+
+  function validate(cfg) {
+    if (cfg.total === 0) return 'Deck has no cards. Add at least one card.';
+    if (cfg.hand > cfg.total) return `Hand size (${cfg.hand}) exceeds deck size (${cfg.total}).`;
+    return null;
+  }
+
+  /* ── Config summary ─────────────────────────────────────────────────── */
+  function updateSummary() {
+    const cfg = getConfig();
+    const err = validate(cfg);
+    const errEl = document.getElementById('cfg-err');
+    if (err) { errEl.textContent = err; errEl.style.display = ''; }
+    else      { errEl.style.display = 'none'; }
+
+    document.getElementById('ds-total').textContent = cfg.total;
+    if (cfg.total > 0) {
+      const avg = (cfg.red * 1 + cfg.yellow * 2 + cfg.blue * 3) / cfg.total;
+      document.getElementById('ds-avg').textContent = avg.toFixed(2);
+      document.getElementById('ds-exp').textContent = (avg * cfg.hand).toFixed(2);
+    } else {
+      document.getElementById('ds-avg').textContent = '–';
+      document.getElementById('ds-exp').textContent = '–';
+    }
+
+    ['red','yellow','blue'].forEach(c => {
+      const w = cfg.total > 0 ? (cfg[c] / cfg.total * 100).toFixed(2) : 0;
+      document.getElementById('pb-' + c).style.width = w + '%';
+    });
+
+    document.getElementById('turns-hand-note').textContent = cfg.hand;
+  }
+
+  ['inp-red','inp-yellow','inp-blue','inp-hand'].forEach(id =>
+    document.getElementById(id).addEventListener('input', updateSummary)
+  );
+
+  /* ── Draw Hand ──────────────────────────────────────────────────────── */
+  document.getElementById('btn-draw').addEventListener('click', function () {
+    const cfg = getConfig();
+    if (validate(cfg)) { updateSummary(); return; }
+
+    const deck = shuffle(buildDeck(cfg));
+    const hand = deck.slice(0, cfg.hand);
+    const total = hand.reduce((s, v) => s + v, 0);
+    const avg   = (total / hand.length).toFixed(1);
+
+    const el = document.getElementById('hand-display');
+    el.innerHTML = '';
+    hand.forEach(v => {
+      const chip = document.createElement('div');
+      chip.className = 'card-chip ' + pitchClass(v);
+      chip.innerHTML = `<span>${v}</span><span class="chip-sub">${pitchName(v)}</span>`;
+      el.appendChild(chip);
+    });
+
+    const tot = document.createElement('div');
+    tot.className = 'hand-total';
+    tot.innerHTML = `
+      <div class="ht-label">Pitch Total</div>
+      <div class="ht-val">${total}</div>
+      <div class="ht-sub">avg ${avg}/card</div>
+    `;
+    el.appendChild(tot);
+  });
+
+  document.getElementById('btn-draw-clear').addEventListener('click', function () {
+    document.getElementById('hand-display').innerHTML =
+      '<span class="hand-empty">Draw a hand to see your cards.</span>';
+  });
+
+  /* ── Turn Simulation ────────────────────────────────────────────────── */
+  document.getElementById('btn-turns').addEventListener('click', function () {
+    const cfg = getConfig();
+    if (validate(cfg)) { updateSummary(); return; }
+
+    const deck = shuffle(buildDeck(cfg));
+    const list = document.getElementById('turns-list');
+    list.innerHTML = '';
+
+    const MAX_TURNS = 200; // hard cap — prevents hang on huge decks
+    let idx = 0, turnNum = 0;
+
+    while (idx < deck.length && turnNum < MAX_TURNS) {
+      const end  = Math.min(idx + cfg.hand, deck.length);
+      const hand = deck.slice(idx, end);
+      idx = end;
+      turnNum++;
+
+      const pitch = hand.reduce((s, v) => s + v, 0);
+      const row   = document.createElement('div');
+      row.className = 'turn-row';
+
+      const chips = hand.map(v =>
+        `<div class="mini-chip ${pitchClass(v)}">${v}</div>`
+      ).join('');
+
+      row.innerHTML = `
+        <div class="turn-num">T${turnNum}</div>
+        <div class="turn-cards">${chips}</div>
+        <div class="turn-pitch">${pitch} <span class="turn-pitch-muted">res</span></div>
+      `;
+      list.appendChild(row);
+    }
+
+    list.style.display = 'flex';
+  });
+
+  document.getElementById('btn-turns-clear').addEventListener('click', function () {
+    const list = document.getElementById('turns-list');
+    list.innerHTML = '';
+    list.style.display = 'none';
+  });
+
+  /* ── Monte Carlo ────────────────────────────────────────────────────── */
+  document.getElementById('btn-monte').addEventListener('click', function () {
+    const cfg = getConfig();
+    if (validate(cfg)) { updateSummary(); return; }
+
+    const SIMS = 10000;
+    const baseDeck = buildDeck(cfg);
+    const results  = new Int32Array(SIMS);
+
+    for (let s = 0; s < SIMS; s++) {
+      const deck = shuffle(baseDeck.slice());
+      let pitch = 0;
+      for (let i = 0; i < cfg.hand; i++) pitch += deck[i];
+      results[s] = pitch;
+    }
+
+    // ── Statistics ──
+    let sum = 0;
+    for (let i = 0; i < SIMS; i++) sum += results[i];
+    const mean = sum / SIMS;
+
+    const sorted = Array.from(results).sort((a, b) => a - b);
+    const median = sorted[(SIMS / 2) | 0];
+    const minV   = sorted[0];
+    const maxV   = sorted[SIMS - 1];
+
+    let variance = 0;
+    for (let i = 0; i < SIMS; i++) variance += (results[i] - mean) ** 2;
+    const stddev = Math.sqrt(variance / SIMS);
+
+    // ── Frequency map ──
+    const freq = {};
+    for (let i = 0; i < SIMS; i++) {
+      const v = results[i];
+      freq[v] = (freq[v] || 0) + 1;
+    }
+    const keys    = Object.keys(freq).map(Number).sort((a, b) => a - b);
+    const maxFreq = Math.max(...Object.values(freq));
+
+    // ── Render stats ──
+    document.getElementById('stats-grid').innerHTML = [
+      { label: 'Mean',    val: mean.toFixed(2), sub: 'avg pitch/hand' },
+      { label: 'Median',  val: median,           sub: 'middle value'   },
+      { label: 'Std Dev', val: stddev.toFixed(2),sub: 'spread'         },
+      { label: 'Min',     val: minV,             sub: 'worst hand'     },
+      { label: 'Max',     val: maxV,             sub: 'best hand'      },
+    ].map(s => `
+      <div class="stat-box">
+        <div class="stat-box-label">${s.label}</div>
+        <div class="stat-box-val">${s.val}</div>
+        <div class="stat-box-sub">${s.sub}</div>
+      </div>
+    `).join('');
+
+    // ── Histogram ──
+    const hist = document.getElementById('histogram');
+    hist.innerHTML = '';
+    keys.forEach(k => {
+      const h = ((freq[k] || 0) / maxFreq * 100).toFixed(1);
+      const col = document.createElement('div');
+      col.className = 'h-col';
+      col.innerHTML = `
+        <div class="h-bar" style="height:${h}%"></div>
+        <div class="h-lbl">${k}</div>
+      `;
+      hist.appendChild(col);
+    });
+
+    // ── Thresholds ──
+    const base = cfg.hand; // minimum possible (all reds)
+    const candidates = new Set([base, base + 1, base + 2, base + 3, cfg.hand * 2, cfg.hand * 3]);
+    const thresholds = Array.from(candidates).filter(t => t >= minV && t <= maxV).sort((a,b) => a-b);
+
+    const tbl = document.getElementById('thresh-table');
+    tbl.innerHTML = '';
+    thresholds.forEach(t => {
+      let count = 0;
+      for (let i = 0; i < SIMS; i++) if (results[i] >= t) count++;
+      const pct = (count / SIMS * 100).toFixed(1);
+      const row = document.createElement('div');
+      row.className = 'thresh-row';
+      row.innerHTML = `<span class="tr-key">≥ ${t} resources</span><span class="tr-val">${pct}%</span>`;
+      tbl.appendChild(row);
+    });
+
+    const out = document.getElementById('monte-out');
+    out.style.display = 'flex';
+    out.style.flexDirection = 'column';
+    out.style.gap = '0';
+  });
+
+  document.getElementById('btn-monte-clear').addEventListener('click', function () {
+    document.getElementById('monte-out').style.display = 'none';
+  });
+
+  /* ── Init ── */
+  updateSummary();
+})();
+</script>
+
+</body>
+</html>
