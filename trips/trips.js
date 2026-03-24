@@ -314,7 +314,7 @@ const TRIPS = [
     endDate: '2026-08-24',
     displayDates: 'Aug 21 – 24, 2026',
     description: 'Long weekend in Hamburg for The Calling (Classic Constructed, $20,000 USD) and Battle Hardened (Living Legend, $2,000 USD). Travelling Friday, events run Fri–Sun, home Monday.',
-    link: '../hamburg-2026/',
+    link: '../trip/?id=hamburg-2026',
     tags: ['FaB', 'Tournament', 'Europe'],
   },
 
@@ -328,7 +328,7 @@ const TRIPS = [
     endDate: '2026-05-25',
     displayDates: 'May 19 – 25, 2026',
     description: 'Week-long trip to Prague for the Omens of the Third Age World Premiere (May 22–24) at PVA EXPO Praha. Three events across the weekend: World Premiere (Fri), The Calling (Sat), and Sunday Showdown (Sun).',
-    link: '../prague-omens-2026/',
+    link: '../trip/?id=prague-omens-2026',
     tags: ['FaB', 'Tournament', 'Europe'],
   },
 
@@ -342,7 +342,7 @@ const TRIPS = [
     endDate: '2026-04-27',
     displayDates: 'Apr 24 – 27, 2026',
     description: 'Long weekend in Rotterdam. Travelling by car from the Karlsruhe area on Friday 24th. Staying at an Airbnb Friday through Monday – most others check out Sunday, so the extra night (Sun → Mon) is still to be confirmed.',
-    link: '../rotterdam-2026/',
+    link: '../trip/?id=rotterdam-2026',
     tags: ['Leisure', 'Europe', 'FaB'],
   },
 
