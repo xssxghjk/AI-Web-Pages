@@ -288,6 +288,20 @@
       min-width: 210px;
       max-width: 270px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3);
+      /* animation */
+      visibility: hidden;
+      opacity: 0;
+      transform: scale(0.88) translateY(-6px);
+      transform-origin: top left;
+      pointer-events: none;
+      transition: opacity 0.16s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1), visibility 0s linear 0.2s;
+    }
+    .fab-popup.open {
+      visibility: visible;
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+      transition: opacity 0.16s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1), visibility 0s linear 0s;
     }
     .fab-popup-title {
       font-size: 0.82rem;
@@ -335,8 +349,16 @@
       background: var(--bg);
       display: flex;
       flex-direction: column;
+      /* slide-up animation */
+      transform: translateY(100%);
+      visibility: hidden;
+      transition: transform 0.42s cubic-bezier(0.32,0.72,0,1), visibility 0s linear 0.42s;
     }
-    .iframe-modal-overlay.hidden { display: none; }
+    .iframe-modal-overlay.open {
+      transform: translateY(0);
+      visibility: visible;
+      transition: transform 0.42s cubic-bezier(0.32,0.72,0,1), visibility 0s linear 0s;
+    }
     .iframe-modal-bar {
       display: flex;
       align-items: center;
@@ -444,7 +466,7 @@
   </div>
 
   <!-- FAB event context popup (singleton, repositioned on each open) -->
-  <div class="fab-popup" id="fab-popup" hidden>
+  <div class="fab-popup" id="fab-popup">
     <div class="fab-popup-title" id="fab-popup-title"></div>
     <div class="fab-popup-dates" id="fab-popup-dates"></div>
     <div class="fab-popup-actions" id="fab-popup-actions"></div>
@@ -732,7 +754,6 @@
       }
 
       // Position popup near the button, keeping it within viewport
-      popup.hidden = false;
       const rect = btn.getBoundingClientRect();
       const pw = popup.offsetWidth;
       const ph = popup.offsetHeight;
@@ -744,9 +765,12 @@
       if (top + ph > window.innerHeight - margin) top = rect.top - ph - margin;
       popup.style.left = left + 'px';
       popup.style.top  = top  + 'px';
+      // set transform-origin based on which side popup is anchored
+      popup.style.transformOrigin = (top > rect.bottom) ? 'top left' : 'bottom left';
+      popup.classList.add('open');
     }
 
-    function closeFabPopup() { popup.hidden = true; }
+    function closeFabPopup() { popup.classList.remove('open'); }
 
     // Event delegation: clicks on FAB bars
     document.addEventListener('click', e => {
@@ -754,18 +778,18 @@
       if (btn) {
         e.stopPropagation();
         // Toggle: close if same button already open
-        if (!popup.hidden && popup._activeBtn === btn) { closeFabPopup(); popup._activeBtn = null; return; }
+        if (popup.classList.contains('open') && popup._activeBtn === btn) { closeFabPopup(); popup._activeBtn = null; return; }
         popup._activeBtn = btn;
         openFabPopup(btn);
         return;
       }
       // Click outside popup closes it
-      if (!popup.hidden && !popup.contains(e.target)) { closeFabPopup(); popup._activeBtn = null; }
+      if (popup.classList.contains('open') && !popup.contains(e.target)) { closeFabPopup(); popup._activeBtn = null; }
     });
 
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
-        if (!iframeModal.classList.contains('hidden')) { closeIframeModal(); return; }
+        if (iframeModal.classList.contains('open')) { closeIframeModal(); return; }
         closeFabPopup(); popup._activeBtn = null;
       }
     });
@@ -781,14 +805,15 @@
       popup._activeBtn = null;
       iframeModalTitle.textContent = title || '';
       iframeModalFrame.src = url;
-      iframeModal.classList.remove('hidden');
+      iframeModal.classList.add('open');
       document.body.style.overflow = 'hidden';
     }
 
     function closeIframeModal() {
-      iframeModal.classList.add('hidden');
-      iframeModalFrame.src = '';
+      iframeModal.classList.remove('open');
       document.body.style.overflow = '';
+      // clear src after slide-out finishes so the iframe doesn't flash on re-open
+      setTimeout(() => { iframeModalFrame.src = ''; }, 450);
     }
 
     iframeModalClose.addEventListener('click', closeIframeModal);
