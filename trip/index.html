@@ -326,6 +326,8 @@
     .item-ctx-edit-btns { display: flex; gap: 0.3rem; }
     .item-ctx-btn-save { background: var(--accent); color: #fff; border-color: var(--accent); }
     .item-ctx-btn-save:hover { opacity: 0.85; border-color: var(--accent); background: var(--accent); }
+    .item-ctx-btn-check { color: var(--green); border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.08); }
+    .item-ctx-btn-check:hover { border-color: var(--green); background: rgba(34,197,94,0.15); }
 
     /* ── ADD ITEM ── */
     .add-item-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; align-items: center; }
@@ -569,6 +571,10 @@
         </div>
       </div>
       <div class="item-ctx-actions" id="item-ctx-actions">
+        <button class="item-ctx-btn item-ctx-btn-check" id="item-ctx-do-check">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="item-ctx-check-label">Check</span>
+        </button>
         <button class="item-ctx-btn" id="item-ctx-do-edit">
           <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2L4 10H2v-2L8.5 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
           Edit
@@ -616,6 +622,7 @@
 
   function wireItem(el) {
     el.addEventListener('click', e => {
+      e.stopPropagation();
       if (e.target.closest('.check-box')) {
         el.classList.toggle('done');
         state.checked[el.dataset.id] = el.classList.contains('done');
@@ -681,6 +688,7 @@
     itemCtxTitle.textContent     = el.querySelector('.check-label').textContent;
     itemCtxEdit.style.display    = 'none';
     itemCtxActions.style.display = 'flex';
+    document.getElementById('item-ctx-check-label').textContent = el.classList.contains('done') ? 'Uncheck' : 'Check';
     const rect   = el.getBoundingClientRect();
     const pw     = itemCtx.offsetWidth || 220;
     const ph     = itemCtx.offsetHeight || 90;
@@ -697,6 +705,15 @@
   }
 
   function closeItemCtx() { itemCtx.classList.remove('open'); activeCtxItem = null; }
+
+  document.getElementById('item-ctx-do-check').addEventListener('click', () => {
+    if (!activeCtxItem) return;
+    activeCtxItem.classList.toggle('done');
+    state.checked[activeCtxItem.dataset.id] = activeCtxItem.classList.contains('done');
+    saveState();
+    updateProgress();
+    closeItemCtx();
+  });
 
   document.getElementById('item-ctx-do-edit').addEventListener('click', () => {
     if (!activeCtxItem) return;
@@ -755,7 +772,7 @@
   });
 
   document.addEventListener('click', e => {
-    if (itemCtx.classList.contains('open') && !itemCtx.contains(e.target) && !e.target.closest('.check-item')) closeItemCtx();
+    if (itemCtx.classList.contains('open') && !itemCtx.contains(e.target)) closeItemCtx();
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeItemCtx(); });
   window.addEventListener('scroll', () => { if (itemCtx.classList.contains('open')) closeItemCtx(); }, { passive: true });
