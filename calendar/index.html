@@ -612,11 +612,14 @@
 
     function updateLegend(tripsThisMonth) {
       const legend = document.getElementById('cal-legend');
-      const STATUS_LABELS = { upcoming: 'Upcoming', ongoing: 'Ongoing', past: 'Past', planning: 'Planning', 'fab-event': 'FaB World Tour' };
       const statusesPresent = [...new Set(tripsThisMonth.map(t => t.status))];
-      legend.innerHTML = statusesPresent.map(s =>
-        `<div class="cal-legend-item"><div class="cal-legend-dot s-${esc(s)}"></div><span>${esc(STATUS_LABELS[s] || s)}</span></div>`
-      ).join('');
+      const hasFabEvent = statusesPresent.includes('fab-event');
+      const tripStatuses = ['upcoming', 'ongoing', 'planning', 'past'];
+      const tripStatus = tripStatuses.find(s => statusesPresent.includes(s));
+      const items = [];
+      if (tripStatus) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-${esc(tripStatus)}"></div><span>Trips</span></div>`);
+      if (hasFabEvent) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-fab-event"></div><span>Fab Events</span></div>`);
+      legend.innerHTML = items.join('');
     }
 
     function renderCalendar() {
