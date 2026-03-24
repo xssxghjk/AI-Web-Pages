@@ -327,6 +327,61 @@
     .fab-popup-btn.p-prep { color: var(--accent); border-color: var(--upcoming-border); background: var(--upcoming-bg); }
     .fab-popup-btn.p-prep:hover { filter: brightness(1.2); }
 
+    /* ── IFRAME MODAL ── */
+    .iframe-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 600;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+    }
+    .iframe-modal-overlay.hidden { display: none; }
+    .iframe-modal-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0 1rem;
+      height: 48px;
+      background: rgba(10,10,12,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .iframe-modal-back {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color 0.15s;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .iframe-modal-back:hover { border-color: var(--muted); }
+    .iframe-modal-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted2);
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .iframe-modal-frame {
+      flex: 1;
+      border: none;
+      width: 100%;
+      display: block;
+      background: var(--bg);
+    }
+
     /* ── FOOTER ── */
     footer {
       padding: 1.75rem 2rem;
@@ -375,6 +430,18 @@
     <span>Built with Claude</span>
     <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
   </footer>
+
+  <!-- Iframe modal: opens internal pages without leaving the calendar -->
+  <div class="iframe-modal-overlay hidden" id="iframe-modal">
+    <div class="iframe-modal-bar">
+      <button class="iframe-modal-back" id="iframe-modal-close">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M6.5 2L3.5 5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to Calendar
+      </button>
+      <span class="iframe-modal-title" id="iframe-modal-title"></span>
+    </div>
+    <iframe class="iframe-modal-frame" id="iframe-modal-frame" src="" title=""></iframe>
+  </div>
 
   <!-- FAB event context popup (singleton, repositioned on each open) -->
   <div class="fab-popup" id="fab-popup" hidden>
@@ -699,7 +766,53 @@
     });
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { closeFabPopup(); popup._activeBtn = null; }
+      if (e.key === 'Escape') {
+        if (!iframeModal.classList.contains('hidden')) { closeIframeModal(); return; }
+        closeFabPopup(); popup._activeBtn = null;
+      }
+    });
+
+    // ── IFRAME MODAL ──────────────────────────────────────────────────────
+    const iframeModal      = document.getElementById('iframe-modal');
+    const iframeModalTitle = document.getElementById('iframe-modal-title');
+    const iframeModalClose = document.getElementById('iframe-modal-close');
+    const iframeModalFrame = document.getElementById('iframe-modal-frame');
+
+    function openIframeModal(url, title) {
+      closeFabPopup();
+      popup._activeBtn = null;
+      iframeModalTitle.textContent = title || '';
+      iframeModalFrame.src = url;
+      iframeModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeIframeModal() {
+      iframeModal.classList.add('hidden');
+      iframeModalFrame.src = '';
+      document.body.style.overflow = '';
+    }
+
+    iframeModalClose.addEventListener('click', closeIframeModal);
+
+    // Intercept trip bar link clicks (non-fab-event bars)
+    document.addEventListener('click', e => {
+      const bar = e.target.closest('a.cal-trip-bar');
+      if (bar && bar.href) {
+        e.preventDefault();
+        const title = bar.querySelector('.bar-label')?.textContent || bar.title || '';
+        openIframeModal(bar.href, title);
+      }
+    });
+
+    // Intercept FAB popup internal links (prep / report — not external event page)
+    popupActions.addEventListener('click', e => {
+      const btn = e.target.closest('a.fab-popup-btn');
+      if (btn && btn.href && btn.target !== '_blank') {
+        e.preventDefault();
+        const title = btn.textContent.trim().replace(/^\W+/, '').trim();
+        openIframeModal(btn.href, title);
+      }
     });
 
     viewport.addEventListener('touchend', e => {
