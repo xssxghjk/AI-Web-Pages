@@ -975,7 +975,18 @@
       }, { passive: true });
     }
 
-    iframeModalFrame.addEventListener('load', setupIframeDismissGesture);
+    function hideIframeHeader() {
+      const iDoc = iframeModalFrame.contentDocument;
+      if (!iDoc) return;
+      const style = iDoc.createElement('style');
+      style.textContent = 'header.hero { display: none !important; }';
+      iDoc.head.appendChild(style);
+    }
+
+    iframeModalFrame.addEventListener('load', () => {
+      setupIframeDismissGesture();
+      hideIframeHeader();
+    });
 
     // Intercept FAB popup internal links (prep / report — not external event page)
     popupActions.addEventListener('click', e => {
