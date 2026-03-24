@@ -361,6 +361,14 @@
     .fab-popup-btn.p-event:hover { filter: brightness(1.15); }
     .fab-popup-btn.p-prep { color: var(--accent); border-color: var(--upcoming-border); background: var(--upcoming-bg); }
     .fab-popup-btn.p-prep:hover { filter: brightness(1.2); }
+    .fab-popup-btn.p-upcoming { color: var(--upcoming); border-color: var(--upcoming-border); background: var(--upcoming-bg); }
+    .fab-popup-btn.p-upcoming:hover { filter: brightness(1.15); }
+    .fab-popup-btn.p-ongoing  { color: var(--ongoing);  border-color: var(--ongoing-border);  background: var(--ongoing-bg);  }
+    .fab-popup-btn.p-ongoing:hover  { filter: brightness(1.15); }
+    .fab-popup-btn.p-past     { color: var(--past);     border-color: var(--past-border);     background: var(--past-bg);     }
+    .fab-popup-btn.p-past:hover     { filter: brightness(1.15); }
+    .fab-popup-btn.p-planning { color: var(--planning); border-color: var(--planning-border); background: var(--planning-bg); }
+    .fab-popup-btn.p-planning:hover { filter: brightness(1.15); }
 
     /* ── IFRAME MODAL ── */
     .iframe-modal-overlay {
@@ -621,7 +629,7 @@
             return `<button class="${classes}" data-event-id="${esc(trip.id)}" title="${titleAttr}"` +
               ` style="${styleAttr}"><span class="bar-label">${esc(trip.title)}</span></button>`;
           }
-          return `<a class="${classes}" href="${esc(trip.link)}" title="${titleAttr}"` +
+          return `<a class="${classes}" href="${esc(trip.link)}" data-event-id="${esc(trip.id)}" title="${titleAttr}"` +
             ` style="${styleAttr}"><span class="bar-label">${esc(trip.title)}</span></a>`;
         }).join('');
 
@@ -778,31 +786,42 @@
 
       popupActions.innerHTML = '';
 
-      // Primary: link to official event page (only if available)
-      if (event.link) {
-        const evtBtn = document.createElement('a');
-        evtBtn.className = 'fab-popup-btn p-event';
-        evtBtn.href = event.link;
-        evtBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Event Page';
-        popupActions.appendChild(evtBtn);
-      }
+      if (event.status === 'fab-event') {
+        // Primary: link to official event page (only if available)
+        if (event.link) {
+          const evtBtn = document.createElement('a');
+          evtBtn.className = 'fab-popup-btn p-event';
+          evtBtn.href = event.link;
+          evtBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Event Page';
+          popupActions.appendChild(evtBtn);
+        }
 
-      // Optional: tournament prep link
-      if (event.prepId) {
-        const prepBtn = document.createElement('a');
-        prepBtn.className = 'fab-popup-btn p-prep';
-        prepBtn.href = `../tcg-tournament-prep/detail.html?id=${encodeURIComponent(event.prepId)}`;
-        prepBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Tournament Prep';
-        popupActions.appendChild(prepBtn);
-      }
+        // Optional: tournament prep link
+        if (event.prepId) {
+          const prepBtn = document.createElement('a');
+          prepBtn.className = 'fab-popup-btn p-prep';
+          prepBtn.href = `../tcg-tournament-prep/detail.html?id=${encodeURIComponent(event.prepId)}`;
+          prepBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Tournament Prep';
+          popupActions.appendChild(prepBtn);
+        }
 
-      // Optional: tournament report link
-      if (event.reportId) {
-        const repBtn = document.createElement('a');
-        repBtn.className = 'fab-popup-btn';
-        repBtn.href = `../tcg-tournament-reports/detail.html?id=${encodeURIComponent(event.reportId)}`;
-        repBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M4 4h4M4 6.5h4M4 9h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Tournament Report';
-        popupActions.appendChild(repBtn);
+        // Optional: tournament report link
+        if (event.reportId) {
+          const repBtn = document.createElement('a');
+          repBtn.className = 'fab-popup-btn';
+          repBtn.href = `../tcg-tournament-reports/detail.html?id=${encodeURIComponent(event.reportId)}`;
+          repBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M4 4h4M4 6.5h4M4 9h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Tournament Report';
+          popupActions.appendChild(repBtn);
+        }
+      } else {
+        // Regular trip: open the trip page in the iframe modal
+        if (event.link) {
+          const tripBtn = document.createElement('button');
+          tripBtn.className = `fab-popup-btn p-${esc(event.status)}`;
+          tripBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> View Trip';
+          tripBtn.addEventListener('click', () => openIframeModal(event.link, event.title));
+          popupActions.appendChild(tripBtn);
+        }
       }
 
       // Position popup near the button, keeping it within viewport
@@ -824,15 +843,16 @@
 
     function closeFabPopup() { popup.classList.remove('open'); }
 
-    // Event delegation: clicks on FAB bars
+    // Event delegation: clicks on any calendar bar (FAB events and regular trips)
     document.addEventListener('click', e => {
-      const btn = e.target.closest('button[data-event-id]');
-      if (btn) {
+      const trigger = e.target.closest('[data-event-id].cal-trip-bar');
+      if (trigger) {
         e.stopPropagation();
-        // Toggle: close if same button already open
-        if (popup.classList.contains('open') && popup._activeBtn === btn) { closeFabPopup(); popup._activeBtn = null; return; }
-        popup._activeBtn = btn;
-        openFabPopup(btn);
+        if (trigger.tagName === 'A') e.preventDefault();
+        // Toggle: close if same bar already open
+        if (popup.classList.contains('open') && popup._activeBtn === trigger) { closeFabPopup(); popup._activeBtn = null; return; }
+        popup._activeBtn = trigger;
+        openFabPopup(trigger);
         return;
       }
       // Click outside popup closes it
@@ -956,16 +976,6 @@
     }
 
     iframeModalFrame.addEventListener('load', setupIframeDismissGesture);
-
-    // Intercept trip bar link clicks (non-fab-event bars)
-    document.addEventListener('click', e => {
-      const bar = e.target.closest('a.cal-trip-bar');
-      if (bar && bar.href) {
-        e.preventDefault();
-        const title = bar.querySelector('.bar-label')?.textContent || bar.title || '';
-        openIframeModal(bar.href, title);
-      }
-    });
 
     // Intercept FAB popup internal links (prep / report — not external event page)
     popupActions.addEventListener('click', e => {
