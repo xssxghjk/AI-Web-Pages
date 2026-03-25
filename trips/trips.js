@@ -305,6 +305,20 @@ const TRIPS = [
   // ── PASTE YOUR NEXT TRIP HERE (soonest/newest first) ──────────────────────
 
   {
+    id: 'german-nationals-2026',
+    title: 'DE Nationals Weekend',
+    destination: 'Gelsenkirchen, Germany',
+    region: 'Europe',
+    status: 'upcoming',
+    startDate: '2026-07-03',
+    endDate: '2026-07-06',
+    displayDates: 'Jul 3 – 6, 2026',
+    description: 'Weekend trip to Gelsenkirchen for the German National Championship (Jul 4–5) at Event Center Kaue. Travelling Friday, events run Saturday–Sunday, home Monday.',
+    link: '../trip/?id=german-nationals-2026',
+    tags: ['FaB', 'Tournament', 'Europe'],
+  },
+
+  {
     id: 'hamburg-2026',
     title: 'The Calling: Hamburg',
     destination: 'Hamburg, Germany',
