@@ -226,6 +226,29 @@
       overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
     }
 
+    /* ── Saved Decks ── */
+    .saved-decks-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .saved-deck-row {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.55rem 0.75rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      border-radius: 8px;
+    }
+    .saved-deck-name {
+      flex: 1; font-size: 0.85rem; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .saved-deck-date { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+    .btn-ghost {
+      background: none; color: var(--muted); border: none;
+      font-size: 0.78rem; font-weight: 600; padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+    }
+    .btn-ghost:hover { background: var(--border); color: var(--text); }
+    .btn-ghost.del:hover { background: rgba(239,68,68,0.12); color: #ef4444; }
+    .empty-state { font-size: 0.82rem; color: var(--muted); text-align: center; padding: 0.5rem 0; }
+
     /* ── Footer ── */
     footer {
       padding: 1.75rem 2rem; font-size: 0.78rem; color: var(--muted-2);
@@ -284,6 +307,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
       <div class="btn-row">
         <button class="btn-primary"   id="btn-view">View Deck</button>
+        <button class="btn-secondary" id="btn-save">Save Deck</button>
         <button class="btn-secondary" id="btn-clear">Clear</button>
       </div>
 
@@ -294,6 +318,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
       <div class="err" id="err"></div>
 
+    </div>
+  </div>
+
+  <div class="section" id="saved-section">
+    <div class="section-header">Saved Decks</div>
+    <div class="section-body">
+      <div class="saved-decks-list" id="saved-decks-list">
+        <div class="empty-state" id="saved-empty">No saved decks yet.</div>
+      </div>
     </div>
   </div>
 
@@ -570,6 +603,93 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     hideStatus();
     hideErr();
   });
+
+  /* ── Saved Decks (localStorage) ──────────────────────────────────── */
+  const STORAGE_KEY = 'fab_saved_decks_v1';
+
+  function loadDecks() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { return []; }
+  }
+
+  function saveDecks(decks) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(decks));
+  }
+
+  function renderSavedDecks() {
+    const decks = loadDecks();
+    const list = document.getElementById('saved-decks-list');
+    const empty = document.getElementById('saved-empty');
+
+    // Remove existing rows (keep the empty state node)
+    Array.from(list.querySelectorAll('.saved-deck-row')).forEach(el => el.remove());
+
+    if (decks.length === 0) {
+      empty.style.display = '';
+      return;
+    }
+    empty.style.display = 'none';
+
+    decks.forEach(function (deck) {
+      const row = document.createElement('div');
+      row.className = 'saved-deck-row';
+
+      const name = document.createElement('div');
+      name.className = 'saved-deck-name';
+      name.title = deck.name;
+      name.textContent = deck.name;
+
+      const date = document.createElement('div');
+      date.className = 'saved-deck-date';
+      date.textContent = new Date(deck.savedAt).toLocaleDateString();
+
+      const loadBtn = document.createElement('button');
+      loadBtn.className = 'btn-ghost';
+      loadBtn.textContent = 'Load';
+      loadBtn.addEventListener('click', function () {
+        document.getElementById('decklist').value = deck.decklist;
+        document.getElementById('deck-out').style.display = 'none';
+        hideErr();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn-ghost del';
+      delBtn.textContent = 'Delete';
+      delBtn.addEventListener('click', function () {
+        const all = loadDecks().filter(d => d.id !== deck.id);
+        saveDecks(all);
+        renderSavedDecks();
+      });
+
+      row.appendChild(name);
+      row.appendChild(date);
+      row.appendChild(loadBtn);
+      row.appendChild(delBtn);
+      list.appendChild(row);
+    });
+  }
+
+  document.getElementById('btn-save').addEventListener('click', function () {
+    const raw = document.getElementById('decklist').value.trim();
+    if (!raw) { showErr('Paste a decklist first.'); return; }
+
+    const name = prompt('Name this deck:');
+    if (!name || !name.trim()) return;
+
+    const decks = loadDecks();
+    decks.unshift({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+      name: name.trim(),
+      decklist: raw,
+      savedAt: new Date().toISOString(),
+    });
+    saveDecks(decks);
+    renderSavedDecks();
+  });
+
+  // Initial render
+  renderSavedDecks();
 
 })();
 </script>
