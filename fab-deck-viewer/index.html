@@ -346,7 +346,10 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 (function () {
   'use strict';
 
-  const DB_URL = 'https://raw.githubusercontent.com/the-fab-cube/flesh-and-blood-cards/develop/json/english/card.json';
+  // Using the omens-of-the-third-age branch which includes newer sets
+  // (PEN = Compendium of Rathe, ANQ = Antiquity Pack, OMN = Omens of the Third Age)
+  // that are not yet merged into develop.
+  const DB_URL = 'https://raw.githubusercontent.com/the-fab-cube/flesh-and-blood-cards/omens-of-the-third-age/json/english/card.json';
 
   // Cached lookup: "name_color" → entry, "name" → entry (first match)
   let db = null;
