@@ -265,16 +265,22 @@
     <div class="section-header">Decklist</div>
     <div class="section-body">
 
-      <textarea id="decklist" rows="12" placeholder="Paste your decklist here, one card per line:
+      <textarea id="decklist" rows="12" placeholder="Paste a FaBrary export or any decklist here.
 
-3x Pummel (red)
-3x Plunder Run (blue)
-1x Briar, Warden of Thorns
+Example (FaBrary export format):
+  Hero: Briar
+  Format: Silver Age
 
-Supported formats:
-  3x Card Name (red)    — with pitch color
-  3 Card Name (1)       — with pitch number
-  Card Name             — no color, shows first printing"></textarea>
+  Arena cards
+  1x Nebula Blade
+  1x Helm of Might and Magic
+
+  Deck cards
+  2x Arcane Seeds // Life (red)
+  2x Entwine Lightning (red)
+  1x Come to Fight (blue)
+
+Header lines, section labels, and footers are ignored automatically."></textarea>
 
       <div class="btn-row">
         <button class="btn-primary"   id="btn-view">View Deck</button>
@@ -316,19 +322,22 @@ Supported formats:
   function parseDecklist(raw) {
     const out = [];
     for (const line of raw.split('\n')) {
-      // Strip and skip comments / section headers
-      let s = line.trim();
-      if (!s || s[0] === '/' || s[0] === '#' || s[0] === '[') continue;
-      s = s.split('//')[0].trim();
-      if (!s) continue;
+      const s = line.trim();
+      // Card lines must start with a digit — skips headers, section labels,
+      // footers, URLs, "Name:", "Hero:", "Arena cards", etc.
+      if (!s || !/^\d/.test(s)) continue;
 
       let qty = 1, name = s, hint = null;
 
       // Quantity: "3x …" or "3 …"
       const qm = s.match(/^(\d+)x?\s+(.+)$/i);
-      if (qm) { qty = Math.max(1, +qm[1] || 1); name = qm[2].trim(); }
+      if (!qm) continue;
+      qty = Math.max(1, +qm[1] || 1);
+      name = qm[2].trim();
 
-      // Pitch hint: "(red)" / "(blue)" / "(yellow)" / "(1)" / "(2)" / "(3)"
+      // Pitch hint at end of line: "(red)" / "(blue)" / "(yellow)" / "(1)" / "(2)" / "(3)"
+      // NOTE: card names may contain " // " (double-faced cards like "Arcane Seeds // Life")
+      // so we match the hint only at the very end of the string.
       const hm = name.match(/^(.+?)\s*\((\d+|red|yellow|blue)\)\s*$/i);
       if (hm) {
         name = hm[1].trim();
@@ -379,7 +388,14 @@ Supported formats:
   function lookup(name, hint) {
     const n = name.toLowerCase();
     if (hint && db.has(`${n}_${hint}`)) return db.get(`${n}_${hint}`);
-    return db.get(n) || null;
+    if (db.has(n)) return db.get(n);
+    // Fallback for double-faced cards: "Arcane Seeds // Life" → try "Arcane Seeds"
+    const front = n.split(' // ')[0].trim();
+    if (front !== n) {
+      if (hint && db.has(`${front}_${hint}`)) return db.get(`${front}_${hint}`);
+      if (db.has(front)) return db.get(front);
+    }
+    return null;
   }
 
   /* ── UI helpers ───────────────────────────────────────────────────── */
