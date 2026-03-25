@@ -89,6 +89,40 @@ const TRIP_PAGES = {
     ],
   },
 
+  'german-nationals-2026': {
+    title:      'German Nationals – July 2026',
+    navTitle:   'DE Nationals 2026',
+    heroText:   'Gelsenkirchen · Jul 3 – 6, 2026',
+    storageKey: 'german-nationals-2026-checklist',
+
+    events: [
+      { date: 'Sat–Sun Jul 4–5, 2026', name: 'German National Championship', venue: 'Event Center Kaue, Gelsenkirchen · Classic Constructed',
+        badge: 'calling', countdown: { date: '2026-07-04', type: 'calling' } },
+    ],
+
+    overview: [
+      { key: 'Dates',         value: 'Fri 3 Jul – Mon 6 Jul 2026' },
+      { key: 'Duration',      value: '3 nights / 4 days' },
+      { key: 'Destination',   value: 'Gelsenkirchen, Germany' },
+      { key: 'Travel',        value: 'TBC' },
+      { key: 'Accommodation', value: 'TBC · Fri 3 Jul – Mon 6 Jul (3 nights)' },
+      { key: 'Venue',         value: 'Event Center Kaue, Gelsenkirchen' },
+    ],
+
+    timeline: [
+      { day: 'Fri Jul 3',     type: 'drive',   title: 'Travel to Gelsenkirchen',          desc: 'Depart and travel to Gelsenkirchen. Check in to accommodation.' },
+      { day: 'Sat Jul 4 ⭐',  type: 'event',   title: 'DE Nationals – Day 1',             desc: 'German National Championship. Classic Constructed Swiss rounds. Event Center Kaue.' },
+      { day: 'Sun Jul 5 ⭐',  type: 'event',   title: 'DE Nationals – Day 2',             desc: 'German National Championship continues. Top cut and finals.' },
+      { day: 'Mon Jul 6',     type: 'drive',   title: 'Travel home',                      desc: 'Check out and return home.' },
+    ],
+
+    checklist: [
+      { id: 'reg-nationals',      label: 'Register for German National Championship (Jul 4–5)', tag: 'event'  },
+      { id: 'book-accommodation', label: 'Book accommodation in Gelsenkirchen (Fri Jul 3 – Mon Jul 6, 3 nights)', tag: 'hotel'  },
+      { id: 'book-travel',        label: 'Book travel to/from Gelsenkirchen',                   tag: 'travel' },
+    ],
+  },
+
   'hamburg-2026': {
     title:      'The Calling: Hamburg – August 2026',
     navTitle:   'The Calling: Hamburg',
