@@ -4,7 +4,7 @@ Each task is one prompt. Complete them in order.
 
 ---
 
-## Task 1 — Page shell
+## ✅ Task 1 — Page shell
 
 Create `fab-card-memory/index.html` as a self-contained page consistent with the site's dark theme (same CSS variables, Inter font, sticky nav, footer). Include the four state sections (`#screen-setup`, `#screen-memorize`, `#screen-recall`, `#screen-result`) as empty `<div>`s. Only the setup section is visible by default; the rest are hidden via CSS. Add a JS `STATE` variable and a `showScreen(name)` helper that swaps visibility. No other logic yet.
 
