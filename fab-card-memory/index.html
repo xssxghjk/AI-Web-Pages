@@ -282,6 +282,7 @@
       currentScreen: 'setup',
       selectedDeck: null,
       cardDb: null,
+      sequence: [],
     };
 
     function showScreen(name) {
@@ -295,6 +296,31 @@
       }
     }
 
+    /* ── Decklist parsing ── */
+    function parseDecklist(raw) {
+      const out = [];
+      for (const line of raw.split('\n')) {
+        const s = line.trim();
+        if (!s || !/^\d/.test(s)) continue;
+        const qm = s.match(/^(\d+)x?\s+(.+)$/i);
+        if (!qm) continue;
+        const qty = Math.max(1, +qm[1] || 1);
+        let name = qm[2].trim();
+        let hint = null;
+        const hm = name.match(/^(.+?)\s*\((\d+|red|yellow|blue)\)\s*$/i);
+        if (hm) {
+          name = hm[1].trim();
+          const h = hm[2].toLowerCase();
+          hint = (h === '1' || h === 'red')    ? 'red'
+               : (h === '2' || h === 'yellow') ? 'yellow'
+               : (h === '3' || h === 'blue')   ? 'blue'
+               : null;
+        }
+        if (name) out.push({ qty, name, hint });
+      }
+      return out;
+    }
+
     /* ── Setup Screen ── */
     function loadSavedDecks() {
       try {
@@ -306,11 +332,10 @@
     }
 
     function countWeightedCards(deck) {
-      if (!deck || !Array.isArray(deck.cards)) return 0;
-      return deck.cards.reduce(function (sum, entry) {
-        const pitch = entry.pitch || 0;
-        const multiplier = pitch === 3 ? 3 : pitch === 2 ? 2 : 1;
-        return sum + (entry.quantity || 1) * multiplier;
+      if (!deck || !deck.decklist) return 0;
+      return parseDecklist(deck.decklist).reduce(function (sum, entry) {
+        const multiplier = entry.hint === 'blue' ? 3 : entry.hint === 'yellow' ? 2 : 1;
+        return sum + entry.qty * multiplier;
       }, 0);
     }
 
@@ -399,6 +424,48 @@
       });
     }
 
+    /* ── Weighted sampling ── */
+    function buildSequence(deck, cardDb, n) {
+      // Build lookup: "name_color" and "name" → card object
+      const cardMap = new Map();
+      for (const card of cardDb) {
+        const imgUrl = card.printings && card.printings.length
+          ? (card.printings[0].image_url || null)
+          : null;
+        const obj = {
+          id:        (card.unique_id || card.name + '_' + (card.pitch || '0')),
+          name:      card.name,
+          image_url: imgUrl,
+          pitch:     card.pitch || null,
+        };
+        const nameLow = card.name.toLowerCase();
+        const colorKey = (card.color || '').toLowerCase();
+        if (colorKey) cardMap.set(nameLow + '_' + colorKey, obj);
+        if (!cardMap.has(nameLow)) cardMap.set(nameLow, obj);
+      }
+
+      // Expand each deck entry into the weighted list
+      const weighted = [];
+      for (const entry of parseDecklist(deck.decklist)) {
+        const nameLow = entry.name.toLowerCase();
+        const card = (entry.hint && cardMap.get(nameLow + '_' + entry.hint))
+                  || cardMap.get(nameLow)
+                  || null;
+        if (!card) continue;
+        const multiplier = entry.hint === 'blue' ? 3 : entry.hint === 'yellow' ? 2 : 1;
+        const weight = entry.qty * multiplier;
+        for (let i = 0; i < weight; i++) weighted.push(card);
+      }
+
+      // Fisher-Yates shuffle
+      for (let i = weighted.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = weighted[i]; weighted[i] = weighted[j]; weighted[j] = tmp;
+      }
+
+      return weighted.slice(0, n);
+    }
+
     async function fetchCardDb() {
       const CACHE_KEY = 'fab_card_db';
       const cached = sessionStorage.getItem(CACHE_KEY);
@@ -429,7 +496,10 @@
       }
       try {
         STATE.cardDb = await fetchCardDb();
-        console.log('Card DB loaded, entries:', STATE.cardDb.length, STATE.selectedDeck);
+        const countEl = document.getElementById('card-count');
+        const n = parseInt(countEl ? countEl.value : '10', 10) || 10;
+        STATE.sequence = buildSequence(STATE.selectedDeck, STATE.cardDb, n);
+        console.log('Sequence built:', STATE.sequence.length, 'cards');
         // memorize phase will be wired up in later tasks
         showScreen('memorize');
       } catch (err) {
