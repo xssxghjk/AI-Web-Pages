@@ -45,7 +45,7 @@ Call this from `startGame()` and store the result as the current sequence.
 
 ---
 
-## Task 6 — Memorization Phase
+## ✅ Task 6 — Memorization Phase
 
 Populate `#screen-memorize` and implement the phase:
 - Show one card at a time: large centered card image + card name below it.
