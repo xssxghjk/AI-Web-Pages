@@ -10,7 +10,7 @@ Create `fab-card-memory/index.html` as a self-contained page consistent with the
 
 ---
 
-## Task 2 — Hub link
+## ✅ Task 2 — Hub link
 
 Add a link card for the Card Memory Game to `index.html`, grouped alongside the existing FaB Deck Viewer entry.
 
