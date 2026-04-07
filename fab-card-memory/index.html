@@ -797,10 +797,14 @@
     }
 
     /* ── Weighted sampling ── */
+    const EXCLUDED_CARD_TYPES = ['Equipment', 'Hero', 'Token', 'Landmark', 'Environment'];
+
     function buildSequence(deck, cardDb, n) {
       // Build lookup: "name_color" and "name" → card object
       const cardMap = new Map();
       for (const card of cardDb) {
+        const cardTypes = card.types || [];
+        if (cardTypes.some(function (t) { return EXCLUDED_CARD_TYPES.includes(t); })) continue;
         const imgUrl = card.printings && card.printings.length
           ? (card.printings[0].image_url || null)
           : null;
