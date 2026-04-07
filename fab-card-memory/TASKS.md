@@ -70,7 +70,7 @@ Use CSS `@keyframes` only: `correctPulse`, `incorrectShake`, `slotFill`.
 
 ---
 
-## Task 8 — Result Screen *(completes the basic game)*
+## ✅ Task 8 — Result Screen *(completes the basic game)*
 
 Populate `#screen-result` and implement `showResult()`:
 - Large score display: `7 / 10`.
