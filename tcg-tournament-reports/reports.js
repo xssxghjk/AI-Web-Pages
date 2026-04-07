@@ -25,6 +25,146 @@ const REPORTS = [
   // ── PASTE YOUR NEXT REPORT HERE (newest first) ────────────────────────────
 
   {
+    id: 'calling-shanghai-2026',
+    hero: 'Briar',
+    date: '2026-04-05',
+    displayDate: '03–05.04.26',
+    event: 'Calling Shanghai',
+    eventType: 'Calling',
+    format: 'Sage',
+    generalNotes: [
+      'Pummel is a common discard target for Kayo — do not over-play around it; watch for windup vs pummel reads',
+      'Scepter has no value vs arcane barrier builds — check opponent\'s expected list before committing',
+      'Valda matchup: never let them resolve polarity for free; sigil of suffering is key',
+      'Triple blade beckoner provides strong life buffer vs aggressive matchups like Dash',
+      'If hand completely bricks, filter with scepter rather than passing',
+      'Fatigue angle vs Valda requires careful resource tracking — know how much damage is left in deck',
+    ],
+    rounds: [
+      {
+        number: 1,
+        opponent: 'Kayo',
+        result: 'win',
+        notes: [
+          'Close race — opponent had strong early hands but was a newer player',
+          'Played around pummel but he discarded windup instead and gained AP with boots (learned this was not a legal play post-game)',
+          'Edged out the win through experience advantage',
+        ],
+      },
+      {
+        number: 2,
+        opponent: 'Valda',
+        result: 'win',
+        notes: [
+          'Very close — killed him exactly at 0 before fatiguing',
+          'Opponent bricked and lost tempo to polarity',
+          'Never gave him tempo after he drew pummel and arsenaled it',
+        ],
+      },
+      {
+        number: 3,
+        opponent: 'Valda',
+        result: 'loss',
+        notes: [
+          'Fatigued out',
+          'He resolved polarity for 4',
+          'Same pummel situation as R2 — he took the extra damage to resolve it',
+          'Drew sigil of suffering perfectly but it was not enough',
+        ],
+      },
+      {
+        number: 4,
+        opponent: 'Florian',
+        result: 'win',
+        notes: [
+          'Unga bunga — once the attack stack got big enough just attacked with 4 cards until he died',
+        ],
+      },
+      {
+        number: 5,
+        opponent: 'Valda',
+        result: 'loss',
+        notes: [
+          'Not close — tried scepter hoping he would not bring arcane barrier',
+          'He had arcane barrier and polaritied twice to go to 28',
+        ],
+      },
+      {
+        number: 6,
+        opponent: 'Florian',
+        result: 'win',
+        notes: [
+          'Hybrid Florian with a midrange switchboard',
+          'Gave him tempo early, then attacked until he died',
+          'He did not do too much',
+        ],
+      },
+      {
+        number: 7,
+        opponent: 'Valda',
+        result: 'win',
+        notes: [
+          'Good early game with strong attacks and sigil of suffering',
+          'Closed with an electrify turn for 4 cards 18 damage — he had no equipment left to block out',
+        ],
+      },
+      {
+        number: 8,
+        opponent: 'Dash',
+        result: 'win',
+        order: 'first',
+        notes: [
+          'Won the die roll',
+          'Opponent blocked a lot',
+          'Extra life from triple blade beckoner made it easy to close out',
+        ],
+      },
+      {
+        number: 9,
+        opponent: 'Kayo',
+        result: 'loss',
+        order: 'second',
+        notes: [
+          'Lost the die roll — had to play second',
+          'He played AB1 so no scepter value',
+          'Pretty good turns from opponent early; came back slowly but turns were not great (turn 1: 3 cards 7 damage)',
+          'End-game: needed 4 blocking cards, 1 of 2 sigil of sufferings, or a 4-block to win — did not find it',
+        ],
+      },
+      {
+        number: 10,
+        opponent: 'Valda',
+        result: 'win',
+        notes: [
+          'Won the die roll; he rolled badly',
+          'No scary plays from Valda and the fatigue angle was not close',
+        ],
+      },
+      {
+        number: 11,
+        opponent: 'Ira',
+        result: 'win',
+        notes: [
+          'Weird game — was incredibly far ahead',
+          'Opponent started trying to fatigue — not realistic with so many 2-blocks',
+          'Learning: if hand completely bricks, filter with scepter rather than passing',
+        ],
+      },
+      {
+        number: 12,
+        opponent: 'Valda',
+        result: 'loss',
+        notes: [
+          'Not close — got beaten up badly',
+          'He went first and had a good setup',
+          'From there it was 10 into 10 into 10 — no way back in',
+        ],
+      },
+    ],
+    summary: '7–5 at Calling Shanghai with Briar (Silver Age). Three losses to Valda (polarity pressure and arcane barrier shutting out scepter) and one each to Kayo (lost die roll, weak turns) and Ira. Report is light on detail — zero time between rounds.',
+  },
+
+  {
     id: 'pq-darmstadt-2026-03-21',
     hero: 'Mario',
     date: '2026-03-21',
