@@ -34,7 +34,7 @@ Implement `fetchCardDb()`: fetch the card JSON from `https://raw.githubuserconte
 
 ---
 
-## Task 5 — Weighted sampling
+## ✅ Task 5 — Weighted sampling
 
 Implement `buildSequence(deck, cardDb, n)`:
 - For each card entry in the deck, compute `weight = quantity × pitchMultiplier` (blue pitch 3 → ×3, yellow pitch 2 → ×2, red/none → ×1).
