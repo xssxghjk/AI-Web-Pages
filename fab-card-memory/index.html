@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FaB Card Memory Game</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0a0a0c;
+      --surface:      #111114;
+      --surface-2:    #18181d;
+      --border:       #222228;
+      --border-2:     #2e2e36;
+      --accent:       #6c5ce7;
+      --accent-dim:   rgba(108, 92, 231, 0.15);
+      --text:         #e2e2ea;
+      --muted:        #6b6b7e;
+      --muted-2:      #4a4a5a;
+      --green:        #22c55e;
+      --red:          #ef4444;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0 2rem;
+      background: rgba(10, 10, 12, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-back {
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .nav-back:hover {
+      color: var(--text);
+    }
+
+    .nav-sep {
+      color: var(--border-2);
+      font-size: 0.9rem;
+    }
+
+    .nav-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 1.5rem 1.5rem 1.25rem;
+      text-align: center;
+      background: linear-gradient(180deg, var(--accent-dim) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero h1 {
+      font-size: clamp(1.3rem, 3vw, 1.9rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .hero p {
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* ── Screens ── */
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 1.75rem 2rem;
+      font-size: 0.78rem;
+      color: var(--muted-2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--text);
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 600px) {
+      nav {
+        padding: 0 1.25rem;
+      }
+
+      main {
+        padding: 1.25rem;
+      }
+
+      footer {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-back" href="../">← Hub</a>
+    <span class="nav-sep">|</span>
+    <span class="nav-title">Card Memory Game</span>
+  </nav>
+
+  <header class="hero">
+    <h1>FaB Card Memory Game</h1>
+    <p>Test your deck knowledge — memorize the sequence, then recall it.</p>
+  </header>
+
+  <main>
+    <div id="screen-setup" class="screen active"></div>
+    <div id="screen-memorize" class="screen"></div>
+    <div id="screen-recall" class="screen"></div>
+    <div id="screen-result" class="screen"></div>
+  </main>
+
+  <footer>
+    <span>Built with Claude</span>
+    <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
+  </footer>
+
+  <script>
+    const STATE = {
+      currentScreen: 'setup',
+    };
+
+    function showScreen(name) {
+      document.querySelectorAll('.screen').forEach(function (el) {
+        el.classList.remove('active');
+      });
+      const target = document.getElementById('screen-' + name);
+      if (target) {
+        target.classList.add('active');
+        STATE.currentScreen = name;
+      }
+    }
+  </script>
+
+</body>
+</html>
