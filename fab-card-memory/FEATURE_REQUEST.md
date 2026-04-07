@@ -96,9 +96,21 @@ Shown after all N positions have been evaluated.
 
 ### Sampling Logic
 ```
-Expand deck into a weighted list (3× copies = 3 entries), shuffle it,
+Base weight per card entry = card quantity in deck (e.g. 3 copies = weight 3)
+
+Apply pitch multiplier on top:
+  Blue  (pitch 3) → × 3
+  Yellow (pitch 2) → × 2
+  Red   (pitch 1) → × 1
+  Non-pitch cards  → × 1
+
+Final weight = quantity × pitch multiplier
+
+Expand deck into a weighted list using these final weights, shuffle it,
 take the first N entries as the sequence.
 ```
+
+**Rationale:** Blue cards pitch for 3 and are played most often as resources; yellow for 2; red for 1. The 3-2-1 ratio mirrors their in-game pitch value, biasing the memory test toward the decisions that matter most during a game.
 
 ### State Machine
 The app moves through four explicit states managed in JS:
