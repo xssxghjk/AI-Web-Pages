@@ -26,7 +26,7 @@ const REPORTS = [
 
   {
     id: 'ruika-shanghai-2026-04-03',
-    hero: 'Slippy',
+    hero: 'Mario',
     date: '2026-04-03',
     displayDate: '03.04.26',
     event: 'RUIKA Event Shanghai',
