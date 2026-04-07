@@ -251,6 +251,18 @@
       left: 0;
       color: var(--muted);
     }
+    .notes-list li.section-header {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      padding-left: 0;
+      margin-top: 0.75rem;
+    }
+    .notes-list li.section-header::before {
+      content: '';
+    }
 
     /* ── ROUNDS ── */
     .rounds-section {}
@@ -581,6 +593,22 @@
             </div>`
         : '';
 
+      const spectatorCount = r.spectatorNotes ? r.spectatorNotes.filter(n => !n.startsWith('> ')).length : 0;
+      const spectatorNotesHtml = r.spectatorNotes && r.spectatorNotes.length
+        ? `<div class="general-notes">
+              <div class="general-notes-header">
+                <span class="rounds-title">Spectator Notes</span>
+                <div class="rounds-header-line"></div>
+                <span class="count-pill">${spectatorCount}</span>
+              </div>
+              <ul class="notes-list">${r.spectatorNotes.map(n =>
+                n.startsWith('> ')
+                  ? `<li class="section-header">${esc(n.slice(2))}</li>`
+                  : `<li>${esc(n)}</li>`
+              ).join('')}</ul>
+            </div>`
+        : '';
+
       return `
         <header class="page-header tier-${tier}">
           <div class="page-header-inner">
@@ -621,6 +649,7 @@
             </div>
             <div class="rounds-list">${roundsHtml}</div>
             ${generalNotesHtml}
+            ${spectatorNotesHtml}
           </section>
 
         </div>`;

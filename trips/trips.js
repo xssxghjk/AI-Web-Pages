@@ -200,6 +200,21 @@ const FAB_WORLD_TOUR = [
   },
 
   {
+    id: 'ruika-shanghai-2026-04-03',
+    title: 'RUIKA Event – Shanghai',
+    destination: 'Shanghai, China',
+    region: 'Asia',
+    status: 'fab-event',
+    startDate: '2026-04-03',
+    endDate: '2026-04-03',
+    displayDates: 'Apr 3, 2026',
+    description: 'Small local tournament in Shanghai on the Friday before Calling Shanghai.',
+    link: null,
+    reportId: 'ruika-shanghai-2026-04-03',
+    tags: ['FaB', 'RTN'],
+  },
+
+  {
     id: 'fab-calling-shanghai-2026',
     title: 'Calling – Shanghai',
     destination: 'Shanghai, China',
