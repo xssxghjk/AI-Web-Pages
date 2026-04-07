@@ -231,6 +231,80 @@
       cursor: not-allowed;
     }
 
+    /* ── Memorize Screen ── */
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(18px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0)    scale(1);    }
+    }
+
+    .memorize-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .memorize-progress {
+      position: fixed;
+      top: 64px;
+      right: 1.5rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.7rem;
+      z-index: 50;
+    }
+
+    .memorize-card-anim {
+      animation: fadeSlideIn 0.35s ease both;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .memorize-card-img {
+      width: min(280px, 72vw);
+      border-radius: 10px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+      display: block;
+    }
+
+    .memorize-card-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      text-align: center;
+    }
+
+    .memorize-hint {
+      margin-top: 1.5rem;
+      font-size: 0.78rem;
+      color: var(--muted-2);
+    }
+
+    .ready-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(10, 10, 12, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      animation: fadeSlideIn 0.25s ease both;
+    }
+
     /* ── Mobile ── */
     @media (max-width: 600px) {
       nav {
@@ -499,9 +573,9 @@
         const countEl = document.getElementById('card-count');
         const n = parseInt(countEl ? countEl.value : '10', 10) || 10;
         STATE.sequence = buildSequence(STATE.selectedDeck, STATE.cardDb, n);
-        console.log('Sequence built:', STATE.sequence.length, 'cards');
-        // memorize phase will be wired up in later tasks
+        STATE.memorizeIndex = 0;
         showScreen('memorize');
+        renderMemorizeScreen();
       } catch (err) {
         console.error(err);
         if (startBtn) {
@@ -510,6 +584,72 @@
         }
         alert('Could not load card database. Check your connection and try again.');
       }
+    }
+
+    /* ── Memorize Phase ── */
+    function renderMemorizeScreen() {
+      const el = document.getElementById('screen-memorize');
+      el.innerHTML =
+        '<div class="memorize-wrap" id="memorize-wrap">' +
+          '<div class="memorize-card-anim" id="memorize-card-anim"></div>' +
+          '<p class="memorize-hint">Tap / click to advance</p>' +
+        '</div>' +
+        '<div class="memorize-progress" id="memorize-progress"></div>';
+
+      showMemorizeCard(0);
+
+      document.getElementById('memorize-wrap').addEventListener('click', function () {
+        const next = STATE.memorizeIndex + 1;
+        if (next < STATE.sequence.length) {
+          STATE.memorizeIndex = next;
+          showMemorizeCard(next);
+        } else {
+          showGetReady();
+        }
+      });
+    }
+
+    function showMemorizeCard(index) {
+      const card = STATE.sequence[index];
+      const total = STATE.sequence.length;
+
+      const progressEl = document.getElementById('memorize-progress');
+      if (progressEl) progressEl.textContent = 'Card ' + (index + 1) + ' / ' + total;
+
+      const animEl = document.getElementById('memorize-card-anim');
+      if (!animEl) return;
+
+      // Re-trigger animation by replacing the element
+      const fresh = animEl.cloneNode(false);
+      if (card.image_url) {
+        const img = document.createElement('img');
+        img.className = 'memorize-card-img';
+        img.src = card.image_url;
+        img.alt = card.name;
+        fresh.appendChild(img);
+      }
+      const nameEl = document.createElement('div');
+      nameEl.className = 'memorize-card-name';
+      nameEl.textContent = card.name;
+      fresh.appendChild(nameEl);
+
+      animEl.replaceWith(fresh);
+    }
+
+    function showGetReady() {
+      const overlay = document.createElement('div');
+      overlay.className = 'ready-overlay';
+      overlay.textContent = 'Get ready…';
+      document.body.appendChild(overlay);
+      setTimeout(function () {
+        overlay.remove();
+        startRecall();
+      }, 1000);
+    }
+
+    function startRecall() {
+      showScreen('recall');
+      // Recall phase implemented in next task
     }
 
     renderSetupScreen();
