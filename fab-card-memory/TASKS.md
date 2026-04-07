@@ -28,7 +28,7 @@ Clicking Start calls `startGame()` (stub for now).
 
 ---
 
-## Task 4 — Card data fetch
+## ✅ Task 4 — Card data fetch
 
 Implement `fetchCardDb()`: fetch the card JSON from `https://raw.githubusercontent.com/the-fab-cube/flesh-and-blood-cards/omens-of-the-third-age/json/english/card.json`, cache the result in `sessionStorage` under the key `fab_card_db`, and return it. Call this when the Start button is clicked (before entering the memorize phase) so the data is ready.
 
