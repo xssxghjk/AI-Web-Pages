@@ -636,10 +636,10 @@
 
         <div class="main">
 
-          <aside class="sidebar">
+          ${r.summary ? `<aside class="sidebar">
             <div class="sidebar-label">Summary</div>
             <p class="summary-text">${esc(r.summary)}</p>
-          </aside>
+          </aside>` : ''}
 
           <section class="rounds-section">
             <div class="rounds-header">
