@@ -16,7 +16,7 @@ Add a link card for the Card Memory Game to `index.html`, grouped alongside the 
 
 ---
 
-## Task 3 — Setup Screen
+## ✅ Task 3 — Setup Screen
 
 Populate `#screen-setup` with:
 - A dropdown (`#deck-select`) populated from `localStorage` key `fab_saved_decks_v1`. Each `<option>` shows the deck name and saved date.

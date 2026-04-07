@@ -131,6 +131,106 @@
       color: var(--text);
     }
 
+    /* ── Setup Screen ── */
+    .setup-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 480px;
+      margin: 2rem auto;
+    }
+
+    .setup-card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.45rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-group select,
+    .form-group input[type="number"] {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      border-radius: 7px;
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: inherit;
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-group select:focus,
+    .form-group input[type="number"]:focus {
+      border-color: var(--accent);
+    }
+
+    .form-group select option {
+      background: var(--surface-2);
+    }
+
+    .no-decks-msg {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.6;
+      padding: 0.75rem 1rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+    }
+
+    .no-decks-msg a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .no-decks-msg a:hover {
+      text-decoration: underline;
+    }
+
+    .btn-start {
+      width: 100%;
+      padding: 0.7rem 1.25rem;
+      margin-top: 0.5rem;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: inherit;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn-start:hover:not(:disabled) {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    .btn-start:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
     /* ── Mobile ── */
     @media (max-width: 600px) {
       nav {
@@ -143,6 +243,11 @@
 
       footer {
         padding: 1.25rem;
+      }
+
+      .setup-card {
+        padding: 1.25rem;
+        margin: 1rem auto;
       }
     }
   </style>
@@ -175,6 +280,7 @@
   <script>
     const STATE = {
       currentScreen: 'setup',
+      selectedDeck: null,
     };
 
     function showScreen(name) {
@@ -187,6 +293,117 @@
         STATE.currentScreen = name;
       }
     }
+
+    /* ── Setup Screen ── */
+    function loadSavedDecks() {
+      try {
+        const raw = localStorage.getItem('fab_saved_decks_v1');
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function countWeightedCards(deck) {
+      if (!deck || !Array.isArray(deck.cards)) return 0;
+      return deck.cards.reduce(function (sum, entry) {
+        const pitch = entry.pitch || 0;
+        const multiplier = pitch === 3 ? 3 : pitch === 2 ? 2 : 1;
+        return sum + (entry.quantity || 1) * multiplier;
+      }, 0);
+    }
+
+    function renderSetupScreen(opts) {
+      opts = opts || {};
+      const setupEl = document.getElementById('screen-setup');
+      const decks = loadSavedDecks();
+
+      if (decks.length === 0) {
+        setupEl.innerHTML =
+          '<div class="setup-card">' +
+            '<h2>New Game</h2>' +
+            '<div class="no-decks-msg">' +
+              'No saved decks found. ' +
+              '<a href="../fab-deck-viewer/">Build a deck in the Deck Viewer</a> ' +
+              'and save it to get started.' +
+            '</div>' +
+          '</div>';
+        return;
+      }
+
+      const optionsHtml = decks.map(function (deck, i) {
+        const date = deck.savedAt ? new Date(deck.savedAt).toLocaleDateString() : '';
+        const label = deck.name + (date ? ' — ' + date : '');
+        return '<option value="' + i + '">' + label + '</option>';
+      }).join('');
+
+      const preselect = (typeof opts.deckIndex === 'number') ? opts.deckIndex : -1;
+      const precount  = opts.cardCount || 10;
+
+      setupEl.innerHTML =
+        '<div class="setup-card">' +
+          '<h2>New Game</h2>' +
+          '<div class="form-group">' +
+            '<label for="deck-select">Deck</label>' +
+            '<select id="deck-select">' +
+              '<option value="">— choose a deck —</option>' +
+              optionsHtml +
+            '</select>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label for="card-count">Number of cards</label>' +
+            '<input id="card-count" type="number" min="1" value="' + precount + '" placeholder="10" />' +
+          '</div>' +
+          '<button id="btn-start" class="btn-start" disabled>Start</button>' +
+        '</div>';
+
+      const selectEl  = document.getElementById('deck-select');
+      const countEl   = document.getElementById('card-count');
+      const startBtn  = document.getElementById('btn-start');
+
+      function updateMaxAndValidate() {
+        const idx = parseInt(selectEl.value, 10);
+        if (!isNaN(idx) && decks[idx]) {
+          STATE.selectedDeck = decks[idx];
+          const maxCards = countWeightedCards(decks[idx]);
+          countEl.max = maxCards || 1;
+          if (countEl.value === '' || parseInt(countEl.value, 10) > maxCards) {
+            countEl.value = Math.min(10, maxCards);
+          }
+        } else {
+          STATE.selectedDeck = null;
+        }
+        validate();
+      }
+
+      function validate() {
+        const idx   = parseInt(selectEl.value, 10);
+        const count = parseInt(countEl.value, 10);
+        const max   = parseInt(countEl.max, 10) || Infinity;
+        startBtn.disabled = isNaN(idx) || !decks[idx] || isNaN(count) || count < 1 || count > max;
+      }
+
+      if (preselect >= 0 && preselect < decks.length) {
+        selectEl.value = preselect;
+        updateMaxAndValidate();
+        countEl.value = precount;
+        validate();
+      }
+
+      selectEl.addEventListener('change', updateMaxAndValidate);
+      countEl.addEventListener('input', validate);
+
+      startBtn.addEventListener('click', function () {
+        startGame();
+      });
+    }
+
+    function startGame() {
+      // stub — implemented in later tasks
+      console.log('startGame called', STATE.selectedDeck);
+    }
+
+    renderSetupScreen();
   </script>
 
 </body>
