@@ -56,7 +56,7 @@ Populate `#screen-memorize` and implement the phase:
 
 ---
 
-## Task 7 — Recall Phase
+## ✅ Task 7 — Recall Phase
 
 Populate `#screen-recall` and implement the phase:
 - **Target slot row** at the top — N numbered slots. Filled slots show the card image with a green ✓ or red ✗ badge.
