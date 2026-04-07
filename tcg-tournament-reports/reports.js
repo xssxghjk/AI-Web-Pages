@@ -32,14 +32,6 @@ const REPORTS = [
     event: 'RUIKA Event Shanghai',
     eventType: 'RTN',
     format: 'CC',
-    generalNotes: [
-      'Keeping a flick for when they no longer have Figments of Protection is important to pop an angel (vs Prism)',
-      'May be right to play Stalker\'s Step for a guaranteed Kode Flick early against passive opponents',
-      'Against Dawnblade stalling lines: consider going full aggro with no d-reacts rather than playing slower',
-      'Against Viktor midrange: watch for CnC back with 4 mights — do not over-commit to Codex lines on a contested turn',
-      'Against Mario going first: blocking decisions are critical; letting pressure through to maintain tempo may be correct',
-      'Against Dio: finding LNW is essential — without it Codexes are weak and item-heavy builds punish heavily',
-    ],
     rounds: [
       {
         number: 1,
@@ -176,7 +168,6 @@ const REPORTS = [
       'Arthur arsenals Scar and passes. Viktor bricks — 4-card Hammer. Life: Viktor 20 – Mario 5',
       'Arthur plays Cut from the Same Cloth, reveals Iron Grip and Test of Strength; Cheli for 10, block 8, wins clash with Golden Son, takes 9. Rolls Funnel Web',
     ],
-    summary: '4–4 at the RUIKA warm-up event in Shanghai (Friday before Calling Shanghai) with Slippy. Wins against two inexperienced opponents (Prism, RKO), a stalling Dawnblade, and a bye. Losses to Mario twice (bad blocking decisions, unlucky rolls), Viktor midrange, and Dio (could not find LNW).',
   },
 
   {
@@ -187,14 +178,6 @@ const REPORTS = [
     event: 'Calling Shanghai',
     eventType: 'Calling',
     format: 'Sage',
-    generalNotes: [
-      'Pummel is a common discard target for Kayo — do not over-play around it; watch for windup vs pummel reads',
-      'Scepter has no value vs arcane barrier builds — check opponent\'s expected list before committing',
-      'Valda matchup: never let them resolve polarity for free; sigil of suffering is key',
-      'Triple blade beckoner provides strong life buffer vs aggressive matchups like Dash',
-      'If hand completely bricks, filter with scepter rather than passing',
-      'Fatigue angle vs Valda requires careful resource tracking — know how much damage is left in deck',
-    ],
     rounds: [
       {
         number: 1,
@@ -316,7 +299,6 @@ const REPORTS = [
         ],
       },
     ],
-    summary: '8–4 at Calling Shanghai with Briar (Silver Age). Three losses to Valda (polarity pressure and arcane barrier shutting out scepter) and one each to Kayo (lost die roll, weak turns) and Ira. Report is light on detail — zero time between rounds.',
   },
 
   {
