@@ -281,6 +281,7 @@
     const STATE = {
       currentScreen: 'setup',
       selectedDeck: null,
+      cardDb: null,
     };
 
     function showScreen(name) {
@@ -398,9 +399,47 @@
       });
     }
 
-    function startGame() {
-      // stub — implemented in later tasks
-      console.log('startGame called', STATE.selectedDeck);
+    async function fetchCardDb() {
+      const CACHE_KEY = 'fab_card_db';
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        try {
+          return JSON.parse(cached);
+        } catch (e) {
+          sessionStorage.removeItem(CACHE_KEY);
+        }
+      }
+      const url = 'https://raw.githubusercontent.com/the-fab-cube/flesh-and-blood-cards/omens-of-the-third-age/json/english/card.json';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to fetch card database: ' + res.status);
+      const data = await res.json();
+      try {
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      } catch (e) {
+        // sessionStorage quota exceeded — proceed without caching
+      }
+      return data;
+    }
+
+    async function startGame() {
+      const startBtn = document.getElementById('btn-start');
+      if (startBtn) {
+        startBtn.disabled = true;
+        startBtn.textContent = 'Loading…';
+      }
+      try {
+        STATE.cardDb = await fetchCardDb();
+        console.log('Card DB loaded, entries:', STATE.cardDb.length, STATE.selectedDeck);
+        // memorize phase will be wired up in later tasks
+        showScreen('memorize');
+      } catch (err) {
+        console.error(err);
+        if (startBtn) {
+          startBtn.disabled = false;
+          startBtn.textContent = 'Start';
+        }
+        alert('Could not load card database. Check your connection and try again.');
+      }
     }
 
     renderSetupScreen();
