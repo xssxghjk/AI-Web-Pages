@@ -161,7 +161,7 @@ const REPORTS = [
         ],
       },
     ],
-    summary: '7–5 at Calling Shanghai with Briar (Silver Age). Three losses to Valda (polarity pressure and arcane barrier shutting out scepter) and one each to Kayo (lost die roll, weak turns) and Ira. Report is light on detail — zero time between rounds.',
+    summary: '8–4 at Calling Shanghai with Briar (Silver Age). Three losses to Valda (polarity pressure and arcane barrier shutting out scepter) and one each to Kayo (lost die roll, weak turns) and Ira. Report is light on detail — zero time between rounds.',
   },
 
   {
