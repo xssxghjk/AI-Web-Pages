@@ -210,6 +210,7 @@ const FAB_WORLD_TOUR = [
     displayDates: 'Apr 3–5, 2026',
     description: 'The Calling (Silver Age, $20K) + Showdown at The Ritz-Carlton Shanghai, Pudong.',
     link: 'https://fabtcg.com/organised-play/2026/calling-shanghai/',
+    reportId: 'calling-shanghai-2026',
     tags: ['FaB', 'Calling', 'World Tour'],
   },
 
