@@ -332,7 +332,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   <div id="deck-out" style="display:none;">
     <div class="stats-bar" id="stats-bar"></div>
-    <div id="card-groups"></div>
+    <div id="card-groups" style="margin-top:1.5rem;"></div>
   </div>
 
 </main>
@@ -451,10 +451,10 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   /* ── Rendering ────────────────────────────────────────────────────── */
   const GROUPS = [
+    { key: 'other',  label: 'Arena',             color: '#6b6b7e' },
     { key: 'red',    label: 'Red — Pitch 1', color: '#ef4444' },
     { key: 'yellow', label: 'Yellow — Pitch 2', color: '#f59e0b' },
     { key: 'blue',   label: 'Blue — Pitch 3',   color: '#60a5fa' },
-    { key: 'other',  label: 'Other',             color: '#6b6b7e' },
   ];
 
   function renderDeck(pairs) {
@@ -481,7 +481,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         .filter(g => counts[g.key] > 0)
         .map(g => `<div class="sb-item">
           <div class="sb-dot" style="background:${g.color}"></div>
-          <span class="sb-val">${counts[g.key]}</span>&nbsp;${g.key}
+          <span class="sb-val">${counts[g.key]}</span>&nbsp;${g.key === 'other' ? 'arena' : g.key}
         </div>`)
         .join('');
 
@@ -648,12 +648,13 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
       const loadBtn = document.createElement('button');
       loadBtn.className = 'btn-ghost';
-      loadBtn.textContent = 'Load';
+      loadBtn.textContent = 'View';
       loadBtn.addEventListener('click', function () {
         document.getElementById('decklist').value = deck.decklist;
         document.getElementById('deck-out').style.display = 'none';
         hideErr();
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById('btn-view').click();
       });
 
       const delBtn = document.createElement('button');
