@@ -25,8 +25,8 @@ const PREPS = [
     event: 'Pro Tour Yokohama',
     eventType: 'PT',
     tier: 4,
-    date: '2026-04-07',
-    displayDate: '07.04.26',
+    date: '2026-04-08',
+    displayDate: '08.04.26',
     formats: [
       {
         id: 'sage',
@@ -171,16 +171,22 @@ const PREPS = [
         abbr: 'CC',
         hero: 'Mario',
         summary: [
-          'Hyper Inflation is not worth running — cut it.',
-          'Frailty Trap remains strong and relevant in several matchups.',
-          'vs Victor (defensive): seeing Death Touch early is critical; always play around Iron Grip; stick to a consistent 60-card build even in fatigue games.',
-          'Codex of Inertia is valuable for resetting board states; Spreading Plague can be clutch in the endgame.',
-          'Stealth Attack can be bricky — be cautious with it. Deck damage is a real win condition as long as they can\'t represent multiple Remembrances.',
+          'Jakob shell is very strong — yellows and blues support the endgame naturally without a dedicated plan. Whittles act as true-damage-generating Cheliceras; transform to Kiss of Death in reactions and flick for extra true damage.',
+          'Running both a stealth and non-stealth package depending on the matchup; 3 Incisions feel right.',
+          'Big, wide-open meta — need to be ready for everything. Key heroes to tech against: Oscilio, Mario mirror, possibly Gravy.',
+          'Against Gravy: either give full tempo or play big chained-disruption hands. Clear allies, play the value game, find angles to force blocks — the person who blocks gets fatigued. D-reacts in arsenal are very good. Always hide info on on-hits to make blocking hard. Play a lot of blocking cards. Be careful with Codex — handing them a Conqueror of the High Seas can be very bad.',
+          'Against Oscilio: draw order matters a lot. Constant decision point between disrupting and keeping Mark for Cheli early. Use Amulet before GIAF resolves. Be mindful of Wobble, Cloud Cover, and Sigil of Solace. Headpiece for disruption is also really good.',
+          'Frailty Trap remains strong in several matchups. Stealth Attack can be bricky — be cautious with it.',
         ],
         heroReasons: [
           'Big wide meta, solid numbers, good disruption',
         ],
-        predictedMeta: [],
+        predictedMeta: [
+          { matchup: 'Oscilio', share: '—', note: 'Key tech target' },
+          { matchup: 'Mario', share: '—', note: 'Key tech target; mirror practice needed' },
+          { matchup: 'Gravy', share: '—', note: 'Possible tech target' },
+          { matchup: 'Everything else', share: '—', note: 'Big wide open meta — need to be ready for anything' },
+        ],
         notes: [
           {
             date: '18.03.26',
@@ -189,7 +195,7 @@ const PREPS = [
                 heading: 'General',
                 entries: [
                   'Hyper Inflation is just bad.',
-                  'Frailty trap still feels really strong in some matchups.',
+                  'Frailty Trap still feels really strong in some matchups.',
                 ],
               },
               {
@@ -199,9 +205,76 @@ const PREPS = [
                   'Always play around Iron Grip if you can.',
                   'Even if fatigue, we should play consistent 60.',
                   'Stealth Attack can be very bricky.',
-                  'Deck damage is real as long as they don\'t represent multiple remembrances.',
+                  'Deck damage is real as long as they don\'t represent multiple Remembrances.',
                   'Codex of Inertia is good for resetting the board state.',
                   'Spreading Plague can be very clutch in the endgame.',
+                ],
+              },
+            ],
+          },
+          {
+            date: '25.03.26',
+            sections: [
+              {
+                heading: 'Gravy Bones',
+                entries: [
+                  'Be as disruptive as possible. Play defense reactions. Play small disruptive hands while blocking efficiently.',
+                  'If they give us space, present more damage to get them into lethal range where we can cheat out the win.',
+                  'Pilfer the Tomb is pretty good here.',
+                ],
+              },
+              {
+                heading: 'Vynnset',
+                entries: [
+                  'Play all blues and defense reactions.',
+                  'Unsure how much disruption we want — most of it banishes cards from hand, but she shouldn\'t have that many Runegate cards in hand so it could still be useful.',
+                  'Check average statistics and consult others on the correct sideboard plan.',
+                ],
+              },
+            ],
+          },
+          {
+            date: '01.04.26',
+            sections: [
+              {
+                heading: null,
+                entries: [
+                  'The Jakob shell is so good. No need for a dedicated endgame plan — yellows and blues are already doing what we want.',
+                  'Whittles are true-damage-generating Cheliceras. Can transform them to Kiss of Death in reactions and flick for extra true damage.',
+                  'Everything left in the deck should support this endgame plan.',
+                  '"Infinite" supply of Mark as long as we have a Relentless Pursuit.',
+                  'The rest is the standard Mario pile. Like having a stealth and a non-stealth package depending on the matchup — huge fan of 3 Incisions.',
+                  'Now it\'s time to find the correct gameplan and sideboard into every hero.',
+                ],
+              },
+            ],
+          },
+          {
+            date: '07.04.26',
+            sections: [
+              {
+                heading: 'Gravy',
+                entries: [
+                  'Either give him full tempo or play big hands against him (chained disruption, etc.).',
+                  'Clear allies, play the value game, find an angle to force blocks — the person who blocks gets fatigued.',
+                  'Always hide info when threatening on-hits to not make blocking easy.',
+                  'D-reacts in arsenal are really good. Play a lot of blocking cards.',
+                  'Codex can be very awkward — giving them a Conqueror of the High Seas can be very bad.',
+                ],
+              },
+            ],
+          },
+          {
+            date: '08.04.26',
+            sections: [
+              {
+                heading: 'Oscilio',
+                entries: [
+                  'Draw order matters a lot.',
+                  'Many decision points: disrupt or keep Mark for Cheli early.',
+                  'Use Amulet before GIAF resolves.',
+                  'Be mindful of Wobble, Cloud Cover, and Sigil of Solace.',
+                  'Headpiece for disruption is also really good.',
                 ],
               },
             ],
