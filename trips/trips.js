@@ -187,6 +187,21 @@ const FAB_WORLD_TOUR = [
   },
 
   {
+    id: 'fab-showdown-yokohama-2026-04-13',
+    title: 'Showdown – Yokohama',
+    destination: 'Yokohama, Japan',
+    region: 'Asia',
+    status: 'fab-event',
+    startDate: '2026-04-13',
+    endDate: '2026-04-13',
+    displayDates: 'Apr 13, 2026',
+    description: 'Sunday Showdown (Classic Constructed) at Pacifico Yokohama, following Pro Tour weekend.',
+    link: 'https://fabtcg.com/organised-play/2026/pro-tour-yokohama/',
+    reportId: 'showdown-yokohama-2026-04-13',
+    tags: ['FaB', 'Showdown', 'World Tour'],
+  },
+
+  {
     id: 'fab-calling-rotterdam-2026',
     title: 'Calling – Rotterdam',
     destination: 'Rotterdam, Netherlands',

@@ -25,6 +25,78 @@ const REPORTS = [
   // ── PASTE YOUR NEXT REPORT HERE (newest first) ────────────────────────────
 
   {
+    id: 'showdown-yokohama-2026-04-13',
+    hero: 'Briar',
+    date: '2026-04-13',
+    displayDate: '13.04.26',
+    event: 'Showdown Yokohama',
+    eventType: 'Showdown',
+    format: 'CC',
+    summary: '3–3 drop. Three losses to Ira — two of them incredibly close. Main takeaways: cut a d-react, bring Star Fall vs Ira.',
+    generalNotes: [
+      '4 d-reacts is 1 too many',
+      'Play Star Fall vs Ira',
+      'Always bring sword into Ira',
+    ],
+    rounds: [
+      {
+        number: 1,
+        opponent: 'Kayo',
+        result: 'loss',
+        notes: [
+          'Really close game — lost exactly at 0 to Red Wild Ride + Claw + Bear Fangs',
+          'Kayo drew close to perfect; don\'t think I could have played better',
+        ],
+      },
+      {
+        number: 2,
+        opponent: 'Ira',
+        result: 'win',
+        notes: [
+          'New player, non-game',
+        ],
+      },
+      {
+        number: 3,
+        opponent: 'Ira',
+        result: 'loss',
+        notes: [
+          'Incredibly close — got opponent to 1 life',
+          'Win if I have a read on his polarity in arsenal; did not and played Sigil of Suffering instead',
+          'From there opponent had 2 Reinforce the Lines on breakpoints and I fatigued out due to scepter',
+        ],
+      },
+      {
+        number: 4,
+        opponent: 'Briar',
+        result: 'win',
+        notes: [
+          'Opponent on a weird Nebula Lightning list',
+          'My deck bricked hard but his deck did not function either',
+          'Photon Rush performed well',
+        ],
+      },
+      {
+        number: 5,
+        opponent: 'Ira',
+        result: 'loss',
+        notes: [
+          'Non-game — drew 3 attacks into 4 attacks (2 block) into 4 NAAs; could not play',
+        ],
+      },
+      {
+        number: 6,
+        opponent: 'Ira',
+        result: 'win',
+        notes: [
+          'Turn 0 Malefic Violation into brick into good hand',
+          'Opponent had 0 blues turn 0; from there it was effectively won',
+        ],
+      },
+    ],
+  },
+
+  {
     id: 'pt-yokohama-2026',
     hero: 'Mario / Briar',
     date: '2026-04-09',
