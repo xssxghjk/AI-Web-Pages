@@ -6,6 +6,8 @@
 
 ## Tournament Reports
 
+When writing the `summary` field for a tournament report, **do not include any numbers** — no digits, no written-out numbers (e.g. avoid "three losses", "two misplays", "4–2"). Describe results qualitatively instead: use terms like "strong run", "positive record", "mixed finish", "dropped with an even record", "several losses", "wall of d-reacts", etc.
+
 When adding a new tournament report, always link it to the calendar:
 
 1. Add the report entry to `tcg-tournament-reports/reports.js` (newest first).

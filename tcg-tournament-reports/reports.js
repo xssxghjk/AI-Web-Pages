@@ -32,7 +32,7 @@ const REPORTS = [
     event: 'Showdown Yokohama',
     eventType: 'Showdown',
     format: 'CC',
-    summary: '3–3 drop. Three losses to Ira — two of them incredibly close. Main takeaways: cut a d-react, bring Star Fall vs Ira.',
+    summary: 'Dropped with an even record. Multiple losses to Ira — most of them incredibly close. Main takeaways: cut a d-react, bring Star Fall vs Ira.',
     generalNotes: [
       '4 d-reacts is 1 too many',
       'Play Star Fall vs Ira',
@@ -252,7 +252,7 @@ const REPORTS = [
         ],
       },
     ],
-    summary: '8–7 at Pro Tour Yokohama (4–5 CC with Mario, 4–2 Sage with Briar). CC had a rough second half with three close Viktor losses. Sage was clean — four wins in six rounds. Main learning: don\'t play others\' decks — own every card and every decision.',
+    summary: 'Mixed finish at Pro Tour Yokohama — slightly negative in CC with Mario, positive in Sage with Briar. CC had a rough second half with several close Viktor losses. Sage was clean across the day. Main learning: don\'t play others\' decks — own every card and every decision.',
   },
 
   {
@@ -654,7 +654,7 @@ const REPORTS = [
         ],
       },
     ],
-    summary: '4–1 Swiss, Top 4. Lost to Ira in Swiss (misplays, wrong gameplan — played fatigue into midrange) and Gravy in T4 (4 d-reacts denied everything, all 3 Blood in the Waters blocked for 6).',
+    summary: 'Strong Swiss run, fell in the semis. Lost to Ira in Swiss (misplays, wrong gameplan — played fatigue into midrange) and Gravy in the semis (wall of d-reacts denied everything, every Blood in the Waters blocked for maximum value).',
   },
 
   {
@@ -765,7 +765,7 @@ const REPORTS = [
         ],
       },
     ],
-    summary: '5–2 at PQ Mainz. Lost to Verdance (bricked d-reacts + TutM in a winning game, went to time) and Ira (two misplays — shouldve won).',
+    summary: 'Strong run at PQ Mainz. Lost to Verdance (bricked d-reacts + TutM in a winning game, went to time) and Ira (misplays — should have won).',
   },
 
   {
@@ -864,7 +864,7 @@ const REPORTS = [
         ],
       },
     ],
-    summary: '4–2 at RTN Hagen with Slippy. Lost to Florian (dead hand — 2 codex with only reactions, no stealth attack until T3) and Verdance (8 value down T0, no agency).',
+    summary: 'Positive record at RTN Hagen with Slippy. Lost to Florian (dead hand — double-codex with only reactions, no stealth attack until turn three) and Verdance (heavy value deficit from turn zero, no agency).',
   },
 
 ];
