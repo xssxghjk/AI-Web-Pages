@@ -25,6 +25,164 @@ const REPORTS = [
   // ── PASTE YOUR NEXT REPORT HERE (newest first) ────────────────────────────
 
   {
+    id: 'pt-yokohama-2026',
+    hero: 'Mario / Briar',
+    date: '2026-04-09',
+    displayDate: '09–12.04.26',
+    event: 'Pro Tour Yokohama',
+    eventType: 'PT',
+    format: 'CC / Sage',
+    generalNotes: [
+      'Don\'t play others\' decks — take responsibility for every card in the deck and every play in the game',
+    ],
+    rounds: [
+      {
+        number: 1,
+        opponent: 'Mario',
+        result: 'win',
+        notes: [
+          '[CC] Drew better; had d-reacts in a crucial spot against on-hit',
+          'Insane inertia value — not much agency for opponent',
+        ],
+      },
+      {
+        number: 2,
+        opponent: 'Cindra',
+        result: 'loss',
+        notes: [
+          '[CC] Opponent went second; did not draw much disruption',
+          'Game was close — at one point blocked out instead of Savour Bloodshed',
+          'Weird blocking decisions with shelter in a turn',
+          'Might have been winnable with better decisions',
+        ],
+      },
+      {
+        number: 3,
+        opponent: 'Oscilio',
+        result: 'win',
+        notes: [
+          '[CC] Opponent\'s plan never came together',
+          'Was at 20+ life when he died',
+        ],
+      },
+      {
+        number: 4,
+        opponent: 'Mario',
+        result: 'loss',
+        notes: [
+          '[CC] Opponent had an insane early game with power cards after chelicera was denied',
+          'Lost from there — no way back in',
+        ],
+      },
+      {
+        number: 5,
+        opponent: 'Mario',
+        result: 'win',
+        notes: [
+          '[CC] Round 4 inverted — had an insane early game and won at 20+',
+        ],
+      },
+      {
+        number: 6,
+        opponent: 'Oldhim',
+        result: 'loss',
+        notes: [
+          '[Sage] Unwinnable — not close, not much to say',
+        ],
+      },
+      {
+        number: 7,
+        opponent: 'Kayo',
+        result: 'win',
+        notes: [
+          '[Sage] Close game — drew all d-reacts early, making it sketchy',
+          'Opponent had some very efficient turns',
+          'The 6 value from blade beckoners won the game',
+        ],
+      },
+      {
+        number: 8,
+        opponent: 'Valda',
+        result: 'win',
+        notes: [
+          '[Sage] D-reacts came in clutch; got to play around pummel with rootbound',
+          'Had to give opponent full tempo and hope they dealt less than 7',
+          'Opponent hammered — from there, closed it out with a sigil of suffering',
+        ],
+      },
+      {
+        number: 9,
+        opponent: 'Ira',
+        result: 'win',
+        notes: [
+          '[Sage] Not close despite opponent seeing polarity and double wax for 5+5+4 value',
+          'Opponent drew too many defensive cards and gave tempo',
+          'Drew enough NAAs to punish; had 4 NAAs left (fatigue angle existed but never close)',
+        ],
+      },
+      {
+        number: 10,
+        opponent: 'Oldhim',
+        result: 'loss',
+        notes: [
+          '[Sage]',
+        ],
+      },
+      {
+        number: 11,
+        opponent: 'Kayo',
+        result: 'win',
+        notes: [
+          '[Sage] Turn 0 highroll: malefic + arcane seeds',
+          'From there, opponent needed their own highroll to come back — never happened',
+          'Bricked in the end but Kayo doesn\'t block so it didn\'t matter',
+        ],
+      },
+      {
+        number: 12,
+        opponent: 'Viktor',
+        result: 'loss',
+        notes: [
+          '[Sage] Not really close — opponent drew all clash cards early in the right order',
+          'Tried to give tempo for a comeback but he had e-strike both times',
+          'Not much agency, but played well',
+        ],
+      },
+      {
+        number: 13,
+        opponent: 'Mario',
+        result: 'win',
+        notes: [
+          '[Sage] Very close, very swingy — ended up in a 1 vs 1 life situation',
+          'Got rewarded for keeping tunic',
+          'D-reacts were really clutch',
+        ],
+      },
+      {
+        number: 14,
+        opponent: 'Viktor',
+        result: 'loss',
+        notes: [
+          '[Sage] Very close game',
+          'Underestimated how fast he cycled through his deck',
+          'He reached his pitch-stacked pummel for the win',
+        ],
+      },
+      {
+        number: 15,
+        opponent: 'Viktor',
+        result: 'loss',
+        notes: [
+          '[Sage] Very close — got him to 1 but he had a crucial d-react',
+          'He double estate into 14 might',
+          'Could not kill in time; died after giving tempo to survive the turn',
+        ],
+      },
+    ],
+    summary: '8–7 at Pro Tour Yokohama (3–2 CC with Mario, 5–5 Sage with Briar). CC was solid — losses to strong early games. Sage had multiple clutch d-react wins but fell short in three tight Viktor games. Main learning: don\'t play others\' decks — own every card and every decision.',
+  },
+
+  {
     id: 'ruika-shanghai-2026-04-03',
     hero: 'Mario',
     date: '2026-04-03',
