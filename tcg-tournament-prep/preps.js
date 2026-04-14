@@ -93,14 +93,23 @@ const PREPS = [
         summary: [
           'Hyper Inflation is not worth running — cut it.',
           'Frailty Trap remains strong and relevant in several matchups.',
-          'vs Victor (defensive): seeing Death Touch early is critical; always play around Iron Grip; stick to a consistent 60-card build even in fatigue games.',
-          'Codex of Inertia is valuable for resetting board states; Spreading Plague can be clutch in the endgame.',
-          'Stealth Attack can be bricky — be cautious with it. Deck damage is a real win condition as long as they can\'t represent multiple Remembrances.',
+          'Jakob shell is excellent — Whittles act as true-damage Cheliceras; transform to Kiss of Death in reactions for extra true damage. No need for a dedicated endgame plan.',
+          'Relentless Pursuit provides an infinite Mark supply in the endgame.',
+          '3x Incisions recommended; run both a stealth and non-stealth package and adapt to the matchup.',
+          'vs Victor (defensive): seeing Death Touch early is critical; always play around Iron Grip; stick to a consistent 60-card build even in fatigue games. Codex of Inertia resets board state; Spreading Plague is clutch in the endgame.',
+          'vs Gravy: be maximally disruptive OR play big hands (chained disruption etc.); clear allies, play the value game, force blocks — the blocking player gets fatigued. Defense reactions in arsenal are very good. Codex is risky; giving them Conqueror of the High Seas can be very bad.',
+          'vs Oscilio: draw order is critical; key early decision between disruption and keeping Mark for Chelicera; use Amulet before GIAF resolves; watch for Wobble, Cloud Cover, Sigil of Solace; headpiece is strong for disruption.',
+          'vs Vynnset: play all available blues and defense reactions; disruption may still be useful despite banishing from hand since they rarely have many Runegate cards in hand.',
         ],
         heroReasons: [
           'Big wide meta, solid numbers, good disruption',
         ],
-        predictedMeta: [],
+        predictedMeta: [
+          { matchup: 'Mario', share: '–', note: 'Tech target — mirror matchup' },
+          { matchup: 'Oscilio', share: '–', note: 'Tech target' },
+          { matchup: 'Gravy', share: '–', note: 'Potential tech target' },
+          { matchup: 'Everything else', share: '–', note: 'Big wide open meta — need to be ready for anything' },
+        ],
         notes: [
           {
             date: '18.03.26',
@@ -122,6 +131,75 @@ const PREPS = [
                   'Deck damage is real as long as they don\'t represent multiple remembrances.',
                   'Codex of Inertia is good for resetting the board state.',
                   'Spreading Plague can be very clutch in the endgame.',
+                ],
+              },
+            ],
+          },
+          {
+            date: '25.03.26',
+            sections: [
+              {
+                heading: 'Gravy Bones',
+                entries: [
+                  'Being as disruptive as possible is the priority.',
+                  'Play defense reactions and small disruptive hands while blocking efficiently.',
+                  'If they give us space, present more to push them into lethal range where we can cheat out the win.',
+                  'Pilfer the Tomb is pretty good.',
+                ],
+              },
+              {
+                heading: 'Vynnset',
+                entries: [
+                  'Play all blues we can and defense reactions.',
+                  'Unsure how much disruption we want — most of it banishes cards from hand.',
+                  'That said, they shouldn\'t have that many Runegate cards in hand, so disruption could still be useful.',
+                  'Check average statistics and get input from others on their boarding approach.',
+                ],
+              },
+            ],
+          },
+          {
+            date: '01.04.26',
+            sections: [
+              {
+                heading: null,
+                entries: [
+                  'The Jakob shell is so good. No need for a dedicated endgame plan — the yellows and blues are doing what we want.',
+                  'Whittles are true-damage-generating Cheliceras. We can transform them to Kiss of Death in reactions and flick that for extra true damage.',
+                  'Everything left in the deck should support the endgame plan. And we have an "infinite" supply of Mark as long as we have a Relentless Pursuit.',
+                  'The rest is the standard Mario pile. Liking a stealth and a non-stealth package depending on the matchup, and a huge fan of 3 Incisions.',
+                  'Next up: find the correct gameplan and sideboard into every hero.',
+                ],
+              },
+            ],
+          },
+          {
+            date: '07.04.26',
+            sections: [
+              {
+                heading: 'Mario (General / vs Gravy)',
+                entries: [
+                  'Learned a lot about Mario. Against Gravy it\'s important to either give him full tempo OR play big hands (chained disruption, etc.).',
+                  'Clear allies, play the value game, and try to find an angle to force blocks — the player who blocks gets fatigued.',
+                  'Always hide information when threatening on-hits to avoid making blocking easy.',
+                  'Defense reactions in arsenal are really good.',
+                  'Play a lot of blocking cards.',
+                  'Codex can be very awkward — giving them a Conqueror of the High Seas can be very bad.',
+                ],
+              },
+            ],
+          },
+          {
+            date: '08.04.26',
+            sections: [
+              {
+                heading: 'Oscilio',
+                entries: [
+                  'Draw order matters a lot.',
+                  'Many decision points: disrupt vs. keep Mark for Chelicera early.',
+                  'Use Amulet before GIAF resolves.',
+                  'Be mindful of Wobble, Cloud Cover, and Sigil of Solace.',
+                  'Headpiece for disruption is also really good.',
                 ],
               },
             ],
