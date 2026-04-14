@@ -25,10 +25,10 @@ const REPORTS = [
   // ── PASTE YOUR NEXT REPORT HERE (newest first) ────────────────────────────
 
   {
-    id: 'showdown-yokohama-2026-04-13',
+    id: 'showdown-yokohama-2026-04-12',
     hero: 'Briar',
-    date: '2026-04-13',
-    displayDate: '13.04.26',
+    date: '2026-04-12',
+    displayDate: '12.04.26',
     event: 'Showdown Yokohama',
     eventType: 'Showdown',
     format: 'CC',
