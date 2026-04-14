@@ -182,6 +182,7 @@ const FAB_WORLD_TOUR = [
     description: 'Pro Tour: Yokohama ($200K, Classic Constructed & Silver Age) + Calling ($20K) at Pacifico Yokohama.',
     link: 'https://fabtcg.com/organised-play/2026/pro-tour-yokohama/',
     prepId: 'pro-tour-yokohama-2026',
+    reportId: 'pt-yokohama-2026',
     tags: ['FaB', 'Pro Tour', 'World Tour'],
   },
 
