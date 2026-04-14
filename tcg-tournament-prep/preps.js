@@ -22,6 +22,7 @@ const PREPS = [
 
   {
     id: 'pro-tour-yokohama-2026',
+    reportId: 'pt-yokohama-2026',
     event: 'Pro Tour Yokohama',
     eventType: 'PT',
     tier: 4,

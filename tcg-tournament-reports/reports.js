@@ -98,6 +98,7 @@ const REPORTS = [
 
   {
     id: 'pt-yokohama-2026',
+    prepId: 'pro-tour-yokohama-2026',
     hero: 'Mario / Briar',
     date: '2026-04-09',
     displayDate: '09–12.04.26',
@@ -215,7 +216,7 @@ const REPORTS = [
         opponent: 'Viktor',
         result: 'loss',
         notes: [
-          '[Sage] Not really close — opponent drew all clash cards early in the right order',
+          '[CC] Not really close — opponent drew all clash cards early in the right order',
           'Tried to give tempo for a comeback but he had e-strike both times',
           'Not much agency, but played well',
         ],
@@ -225,7 +226,7 @@ const REPORTS = [
         opponent: 'Mario',
         result: 'win',
         notes: [
-          '[Sage] Very close, very swingy — ended up in a 1 vs 1 life situation',
+          '[CC] Very close, very swingy — ended up in a 1 vs 1 life situation',
           'Got rewarded for keeping tunic',
           'D-reacts were really clutch',
         ],
@@ -235,7 +236,7 @@ const REPORTS = [
         opponent: 'Viktor',
         result: 'loss',
         notes: [
-          '[Sage] Very close game',
+          '[CC] Very close game',
           'Underestimated how fast he cycled through his deck',
           'He reached his pitch-stacked pummel for the win',
         ],
@@ -245,13 +246,13 @@ const REPORTS = [
         opponent: 'Viktor',
         result: 'loss',
         notes: [
-          '[Sage] Very close — got him to 1 but he had a crucial d-react',
+          '[CC] Very close — got him to 1 but he had a crucial d-react',
           'He double estate into 14 might',
           'Could not kill in time; died after giving tempo to survive the turn',
         ],
       },
     ],
-    summary: '8–7 at Pro Tour Yokohama (3–2 CC with Mario, 5–5 Sage with Briar). CC was solid — losses to strong early games. Sage had multiple clutch d-react wins but fell short in three tight Viktor games. Main learning: don\'t play others\' decks — own every card and every decision.',
+    summary: '8–7 at Pro Tour Yokohama (4–5 CC with Mario, 4–2 Sage with Briar). CC had a rough second half with three close Viktor losses. Sage was clean — four wins in six rounds. Main learning: don\'t play others\' decks — own every card and every decision.',
   },
 
   {

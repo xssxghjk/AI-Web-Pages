@@ -133,6 +133,29 @@
       font-size: 0.85rem;
       color: var(--muted);
     }
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+    .header-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.3rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid var(--border2);
+      color: var(--muted2);
+      background: rgba(255,255,255,0.03);
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .header-link-btn:hover { border-color: var(--accent); color: var(--accent); }
 
     /* ── MAIN ── */
     .main {
@@ -616,6 +639,15 @@
         `<span class="format-chip">${esc(f.abbr)} · ${esc(f.hero)}</span>`
       ).join('');
 
+      const reportLinkHtml = p.reportId
+        ? `<div class="header-links">
+             <a class="header-link-btn" href="../tcg-tournament-reports/detail.html?id=${encodeURIComponent(p.reportId)}">
+               <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M4 4h4M4 6.5h4M4 9h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+               Tournament Report
+             </a>
+           </div>`
+        : '';
+
       const tabsHtml = p.formats.length > 1
         ? `<div class="format-tabs">
              ${p.formats.map((f, i) =>
@@ -639,6 +671,7 @@
             </div>
             <h1 class="prep-title">${esc(p.event)}</h1>
             <div class="prep-date">${esc(p.displayDate)}</div>
+            ${reportLinkHtml}
           </div>
         </header>
 

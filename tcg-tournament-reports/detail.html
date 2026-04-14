@@ -175,6 +175,31 @@
     .rr-sep  { color: var(--muted); }
     .meta-winrate { color: var(--muted2); }
 
+    .header-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+    .header-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.3rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid var(--border2);
+      color: var(--muted2);
+      background: var(--surface2);
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .header-link-btn:hover { border-color: var(--accent); color: var(--accent); }
+
 
     /* ── MAIN LAYOUT ── */
     .main {
@@ -582,6 +607,15 @@
         ? `<span class="format-badge">${esc(r.format)}</span>`
         : '';
 
+      const prepLinkHtml = r.prepId
+        ? `<div class="header-links">
+             <a class="header-link-btn" href="../tcg-tournament-prep/detail.html?id=${encodeURIComponent(r.prepId)}">
+               <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+               Tournament Prep
+             </a>
+           </div>`
+        : '';
+
       const generalNotesHtml = r.generalNotes && r.generalNotes.length
         ? `<div class="general-notes">
               <div class="general-notes-header">
@@ -630,6 +664,7 @@
                 <span class="meta-sep">·</span>
                 <span class="meta-winrate">${winRate}%</span>
               </div>
+              ${prepLinkHtml}
             </div>
           </div>
         </header>
