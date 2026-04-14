@@ -34,25 +34,29 @@ const PREPS = [
         abbr: 'Sage',
         hero: 'Briar',
         summary: [
-          'Still searching for the optimal list — Nebular Blade + blues is smooth, Electrify is high-variance but hard to cut given its impact when drawn early.',
-          'Oldhim is a near-auto-loss; sideboard solutions (Emissary, tall arcane) remain unsolved. Regular guardians are doable via deck damage threats.',
-          'Ira matchup is roughly 50/50 going first, more favourable going second — card conversion consistency is the key issue.',
-          'Updated list runs Fry + more elemental pumps for smoother hands, noticeably improving the Ira matchup and giving the option to block or take tempo on any hand.',
-          'Core aggro pattern: block efficiently to preserve life → leverage that life lead to take tempo (go close to 1) → threaten lethal without being forced to block with 2–3 cards. Life is the main tempo resource.',
+          'Pivoted from Nebular Blade aggro to a Redline list (Scepter) — the aggro list could not convert tempo into wins consistently. The Redline list is smooth and good into most of the field.',
+          'Oldhim remains a near-auto-loss; accepted the loss instead of burning sideboard slots trying to fix it. Into Oldhim, target deck damage: maximise weapon swings after non-attack actions and Crown of Dichotomy value, hope the Hammer clashes twice.',
+          'Kayo and Ira matchups are very good with Redline — no adjustments needed.',
+          'Valda is hard; the answer is blocking with breakpoints, attacking at breakpoints, and leaning on d-reacts. Rootbound Carapace is likely necessary.',
+          'Enigma: play 1 Sigil of Suffering — get it out of the deck early. Endgame: hope leaked damage plus the 1-of evergreen closes it out.',
+          'Against Kano the matchup is hard; auto-loss to Oldhim. Otherwise favoured or roughly even into the rest of the field.',
+          'Sideboard spectrum of 3 swappable cards ranging from all-defensive to all-offensive. Swiftstrike Bracers come in vs Oldhim and Florian (exactly 12 equips). vs Scurv: always bring Starfall + Resource Chest.',
         ],
         heroReasons: [
           'Solid numbers',
-          'Good matchups into aggro decks',
-          'New list is also good into IYs and Kano',
-          'Loses to Guardian and auto loss against Slop Oldhim',
+          'Good matchups into aggro decks (Kayo, Ira)',
+          'Redline list still good into Iyslander and Kano',
+          'Loses to Guardian; auto-loss against Oldhim (accepted)',
         ],
         predictedMeta: [
-          { matchup: 'Kayo', share: '~25%', note: 'A lot, but not as much as people think' },
+          { matchup: 'Kayo', share: '~15%', note: 'A lot, but not as much as people think' },
           { matchup: 'Ira', share: '~15%', note: 'Safe, solid pick' },
-          { matchup: 'Guardians (Valda / Flavo / Oldhim)', share: '~25%', note: '' },
-          { matchup: 'Kano', share: '~10%', note: '' },
-          { matchup: 'Misc aggro', share: '~20%', note: '' },
-          { matchup: 'Misc midrange / defensive (Enigma, ...)', share: '~5%', note: '' },
+          { matchup: 'Oldhim / Tera', share: '~5%', note: '' },
+          { matchup: 'Valda', share: '~15%', note: '' },
+          { matchup: 'Kano', share: '~5%', note: '' },
+          { matchup: 'Misc aggro', share: '~25%', note: '' },
+          { matchup: 'Florian', share: '~5%', note: '' },
+          { matchup: 'Rest', share: '~15%', note: '' },
         ],
         notes: [
           {
@@ -64,8 +68,8 @@ const PREPS = [
                   'Still trying to find the right list. Nebular blade feels really good with the blues. Electrify mainboard is a little suspicious, but if you draw it early it just wins games so it\'s hard to remove overall. The malefics also don\'t feel too great.',
                   'The Oldhim matchup feels really doomed, it\'s so hard to get through.',
                   '"Normal" guardians are doable but not favoured, we can actually threaten by deck damage now.',
-                  'Going first into Ira feels 50/50ish, second is a lot more favoured. The main issue is that we need to convert some cards defensively since we aren\'t as consistent as we used to be. This leads to a midrange game where kodachi endgame beats anything we have...',
-                  'Maybe it\'s time for fry...',
+                  'Going first into Ira feels 50/50ish, second is a lot more favoured. The main issue is that we need to convert some cards defensively since we aren\'t as consistent as we used to be. This leads to a midrange game where Kodachi endgame beats anything we have...',
+                  'Maybe it\'s time for Fry...',
                 ],
               },
             ],
@@ -76,9 +80,75 @@ const PREPS = [
               {
                 heading: null,
                 entries: [
-                  'Tried cards like fry that are underrated but makes it possible to say "no-blocks" more often. This also allowed us to add more elemental pumps. The deck feels really smooth now, this should definitely improve the Ira matchup and gives us the choice to block or take tempo with any hand.',
-                  'The play pattern into aggro is blocking efficiently when we can to preserve life, using that life lead to take tempo (usually going close to 1) so we can threaten lethal without ever being forced to block with 2-3 blocks. Since our hands convert a lot better now this works more consistently. We need to be very aware of when and how strong we present lethal. 1 turn value game into full on aggro is what it feels like, life is a resource we leverage to gain tempo.',
+                  'Tried cards like Fry that are underrated but make it possible to say "no-blocks" more often. This also allowed us to add more elemental pumps. The deck feels really smooth now — should definitely improve the Ira matchup and gives us the choice to block or take tempo with any hand.',
+                  'The play pattern into aggro is blocking efficiently when we can to preserve life, using that life lead to take tempo (usually going close to 1) so we can threaten lethal without ever being forced to block with 2–3 blocks. Since our hands convert a lot better now this works more consistently. We need to be very aware of when and how strong we present lethal. 1-turn value game into full aggro is what it feels like — life is a resource we leverage to gain tempo.',
                   'Still not sure about the 2 sideboard slots we want into Oldhim... Emissary feels fine but the matchup is too bad for "fine" to work. Maybe just go with tall arcane damage...',
+                ],
+              },
+            ],
+          },
+          {
+            date: '25.03.26',
+            sections: [
+              {
+                heading: null,
+                entries: [
+                  'Pretty close to the final list. 1x Electrify is very game-winning — feels really good. 5 blues seems to be the sweet spot.',
+                  'The deck is good into pretty much everything except Oldhim. Instead of trying to fix that matchup, just accept the loss.',
+                  'Sideboard slots: 2 extra yellow Arcane Polarities for Iyslander, Kano and Vynnset; AB3 and Spellvoid 1 to cover both wizard and runeblade setups; 1 blue evergreen for the final deck-damage push (fatiguing Valda / Flavo can work).',
+                  'Face Adversity is no longer necessary since we only run 2 Blade Beckoners.',
+                  '2x Second Strike still feels too clunky. Replaced 1x Emissary of the Tides — that card is a really good role-player and glue piece.',
+                  'Favoured into pretty much everything except guardians (slightly unfavoured) with an auto-loss into Oldhim — very acceptable given the meta prediction.',
+                ],
+              },
+            ],
+          },
+          {
+            date: '26.03.26',
+            sections: [
+              {
+                heading: null,
+                entries: [
+                  'Against Enigma it\'s fine to play 1x Sigil of Suffering — just key to get it out of the deck. Endgame plan: hope we leaked enough damage so the 1-of evergreen seals the deal.',
+                ],
+              },
+            ],
+          },
+          {
+            date: '27.03.26',
+            sections: [
+              {
+                heading: null,
+                entries: [
+                  'Against Oldhim we should go for deck damage. The matchup is so doomed anyway — might as well hope his Hammer loses the clash twice. That\'s better than having no win condition.',
+                  'Maximise weapon swings any time we play a non-attack action, and maximise Crown of Dichotomy value.',
+                ],
+              },
+            ],
+          },
+          {
+            date: '01.04.26',
+            sections: [
+              {
+                heading: null,
+                entries: [
+                  'The Nebula Blade aggro list consistently loses into everything — cannot convert the tempo gained when outvaluing the opponent. Pivoted to a Redline list like the one played in London. With Scepter it\'s still good into aggro decks; Ira should be favoured with blade.',
+                  'Giving up the wizard matchup in favour of coverage into Florian, Oldhim aggro, and Ira — covering pretty much everything else.',
+                  '37-card mainboard with a 3-card switchboard "spectrum" ranging from all-defensive to all-offensive.',
+                  'Swiftstrike Bracers come in vs Oldhim and Florian — exactly 12 equips.',
+                  'Against Scurv: always bring Starfall + Resource Chest.',
+                ],
+              },
+            ],
+          },
+          {
+            date: '07.04.26',
+            sections: [
+              {
+                heading: null,
+                entries: [
+                  'Valda is hard. Valda is good. The answer seems to be blocking with breakpoints and attacking at breakpoints. D-reacts are really good. Rootbound Carapace is probably necessary.',
+                  'Redline is really good. No need to adjust for Kayo and Ira — matchups are great. Auto-loss to Oldhim; hard into Kano.',
                 ],
               },
             ],
