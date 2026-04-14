@@ -105,6 +105,7 @@ const REPORTS = [
     event: 'Pro Tour Yokohama',
     eventType: 'PT',
     format: 'CC / Sage',
+    day1End: 8,
     generalNotes: [
       'Don\'t play others\' decks — take responsibility for every card in the deck and every play in the game',
     ],
