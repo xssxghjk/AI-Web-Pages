@@ -500,8 +500,10 @@
 
   // ── Build page ───────────────────────────────────────────────────────────
 
+  const inIframe = window.self !== window.top;
+
   document.body.innerHTML = `
-    <nav>
+    ${inIframe ? '' : `<nav>
       <a class="nav-back" href="../trips/">← All Trips</a>
       <span class="nav-sep">|</span>
       <span class="nav-title">${esc(trip.navTitle)}</span>
@@ -511,7 +513,7 @@
         <li><a href="#timeline">Timeline</a></li>
         <li><a href="#checklist">Checklist</a></li>
       </ul>
-    </nav>
+    </nav>`}
 
     <header class="hero">
       <h1>${esc(trip.title)}</h1>
