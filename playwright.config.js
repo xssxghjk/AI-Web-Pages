@@ -1,4 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
+import { existsSync } from 'fs';
+
+const CUSTOM_CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const launchOptions = {
+  args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  ...(existsSync(CUSTOM_CHROME) ? { executablePath: CUSTOM_CHROME } : {}),
+};
 
 export default defineConfig({
   testDir: './e2e',
@@ -11,20 +18,14 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        launchOptions: {
-          executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        },
+        launchOptions,
       },
     },
     {
       name: 'mobile-chrome',
       use: {
         ...devices['Pixel 5'],
-        launchOptions: {
-          executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        },
+        launchOptions,
       },
     },
   ],
