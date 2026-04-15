@@ -56,7 +56,8 @@ test.describe('mobile navigation', () => {
     await page.goto('/calendar/');
     await page.locator('#hamburger-btn').click();
     await expect(page.locator('#mobile-nav-drawer')).toHaveClass(/open/);
-    await page.locator('#mobile-nav-overlay').click();
+    // Click in the right portion of the overlay, outside the drawer (drawer is 260px wide)
+    await page.locator('#mobile-nav-overlay').click({ position: { x: 350, y: 400 } });
     await expect(page.locator('#mobile-nav-drawer')).not.toHaveClass(/open/);
   });
 
