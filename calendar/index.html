@@ -60,17 +60,13 @@
       align-items: center;
       gap: 1rem;
     }
-    .nav-back {
+    .nav-brand {
       font-size: 0.82rem;
-      color: var(--muted);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      transition: color 0.2s;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
       flex-shrink: 0;
     }
-    .nav-back:hover { color: var(--text); }
     .nav-title {
       font-size: 0.88rem;
       font-weight: 700;
@@ -452,8 +448,8 @@
 </head>
 <body>
 
-  <nav>
-    <a class="nav-back" href="../">← Hub</a>
+  <nav id="site-nav">
+    <span class="nav-brand">AI Web Pages</span>
     <span class="nav-sep">|</span>
     <span class="nav-title">Trip Calendar</span>
   </nav>
@@ -503,6 +499,11 @@
 
   <script src="../trips/trips.js"></script>
   <script>
+  // Hide nav when loaded inside an iframe (e.g. the index SPA frame)
+  if (window.self !== window.top) {
+    document.getElementById('site-nav').style.display = 'none';
+  }
+
   (function () {
     function esc(str) {
       return String(str)
