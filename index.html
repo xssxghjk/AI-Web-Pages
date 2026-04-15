@@ -500,6 +500,44 @@
         font-size: 1.75rem;
       }
     }
+
+    /* ══════════════════════════
+       ACTIVE NAV STATE
+    ══════════════════════════ */
+    .nav-item.active {
+      color: var(--text);
+      background: var(--accent-dim);
+      border-left-color: var(--accent);
+    }
+
+    /* ══════════════════════════
+       SPA CONTENT FRAME
+    ══════════════════════════ */
+    #home-view {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    #content-frame {
+      flex: 1;
+      border: none;
+      width: 100%;
+      height: calc(100vh - var(--topbar-h));
+      display: none;
+      background: var(--bg);
+    }
+
+    /* Lock body scroll when iframe is active */
+    body.spa-frame {
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    body.spa-frame #layout {
+      height: 100vh;
+      overflow: hidden;
+    }
   </style>
 </head>
 <body>
@@ -578,6 +616,7 @@
       <span class="topbar-label">AI Web Pages</span>
     </header>
 
+    <div id="home-view">
     <main>
       <!-- Hero -->
       <section class="hero">
@@ -718,72 +757,161 @@
       <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
     </footer>
 
+    </div><!-- #home-view -->
+
+    <iframe id="content-frame" title="Page content"></iframe>
+
   </div>
 
   <script>
     (function () {
       const body = document.body;
       const overlay = document.getElementById('sidebar-overlay');
+      const homeView = document.getElementById('home-view');
+      const contentFrame = document.getElementById('content-frame');
 
-      // On mobile start with sidebar closed
+      // ── Sidebar toggle ──
       if (window.innerWidth <= 768) {
         body.classList.add('sidebar-closed');
       }
-
-      function toggleSidebar() {
+      document.getElementById('sidebar-toggle').addEventListener('click', function () {
         body.classList.toggle('sidebar-closed');
-      }
-
-      document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+      });
       overlay.addEventListener('click', function () {
         body.classList.add('sidebar-closed');
       });
 
-      // Countdowns
+      // ── SPA Routing ──
+      // Base path: directory where index.html lives (e.g. '/AI-Web-Pages/' or '/')
+      const basePath = location.pathname.replace(/[^/]*$/, '');
+
+      const SUB_PAGES = [
+        'trips/',
+        'calendar/',
+        'tcg-tournament-reports/',
+        'tcg-tournament-prep/',
+        'fab-deck-viewer/',
+        'fab-card-memory/',
+        'marathon-training/',
+      ];
+
+      // Returns 'trips/' etc. if the absolute path is a sub-page, else null
+      function getSubPage(absPath) {
+        const rel = absPath.slice(basePath.length);
+        for (var i = 0; i < SUB_PAGES.length; i++) {
+          if (rel === SUB_PAGES[i] || rel.startsWith(SUB_PAGES[i])) {
+            return SUB_PAGES[i];
+          }
+        }
+        return null;
+      }
+
+      function updateActiveNav(subPage) {
+        document.querySelectorAll('.nav-item').forEach(function (el) {
+          var href = el.getAttribute('href').replace(/^\.\//, '');
+          el.classList.toggle('active', !!subPage && href === subPage);
+        });
+      }
+
+      function showHome(addToHistory) {
+        body.classList.remove('spa-frame');
+        homeView.style.display = '';
+        contentFrame.style.display = 'none';
+        if (addToHistory) history.pushState({ spa: '' }, '', basePath);
+        document.title = 'AI Web Pages';
+        updateActiveNav(null);
+      }
+
+      function showPage(subPage, addToHistory) {
+        var url = basePath + subPage;
+        homeView.style.display = 'none';
+        contentFrame.style.display = 'block';
+        body.classList.add('spa-frame');
+        if (contentFrame.getAttribute('data-src') !== url) {
+          contentFrame.src = url;
+          contentFrame.setAttribute('data-src', url);
+        }
+        if (addToHistory) history.pushState({ spa: subPage }, '', url);
+        updateActiveNav(subPage);
+      }
+
+      function navigate(absPath, addToHistory) {
+        var subPage = getSubPage(absPath);
+        if (subPage) {
+          showPage(subPage, addToHistory);
+        } else {
+          showHome(addToHistory);
+        }
+      }
+
+      // Intercept sidebar nav and home-page card clicks
+      document.querySelectorAll('.nav-item, .card[href]').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+          e.preventDefault();
+          var href = new URL(this.getAttribute('href'), location.href).pathname;
+          navigate(href, true);
+          if (window.innerWidth <= 768) {
+            body.classList.add('sidebar-closed');
+          }
+        });
+      });
+
+      // Browser back / forward
+      window.addEventListener('popstate', function () {
+        navigate(location.pathname, false);
+      });
+
+      // Sync parent URL when iframe navigates internally (e.g. sub-page "Back" button)
+      contentFrame.addEventListener('load', function () {
+        try {
+          var iPath = contentFrame.contentWindow.location.pathname;
+          var subPage = getSubPage(iPath);
+          if (!subPage) {
+            showHome(true);
+          } else if (iPath !== location.pathname) {
+            history.replaceState({ spa: subPage }, '', iPath);
+            updateActiveNav(subPage);
+          }
+          contentFrame.setAttribute('data-src', iPath);
+        } catch (e) {}
+      });
+
+      // Restore state on initial load
+      navigate(location.pathname, false);
+
+      // ── Countdowns ──
       function daysUntil(dateStr) {
-        const target = new Date(dateStr + 'T00:00:00');
-        const today = new Date();
+        var target = new Date(dateStr + 'T00:00:00');
+        var today = new Date();
         today.setHours(0, 0, 0, 0);
         return Math.round((target - today) / 86400000);
       }
 
-      // Next trip
       (function () {
-        const pill = document.getElementById('stat-trip');
-        const val  = document.getElementById('hub-cd-trip');
+        var pill = document.getElementById('stat-trip');
+        var val  = document.getElementById('hub-cd-trip');
         if (!pill || !val) return;
-        const d = daysUntil('2026-03-27');
-        if (d > 0) {
-          val.textContent = d;
-          pill.style.display = 'flex';
-        } else if (d === 0) {
-          val.textContent = 'Today';
-          pill.style.display = 'flex';
-        }
+        var d = daysUntil('2026-03-27');
+        if (d > 0) { val.textContent = d; pill.style.display = 'flex'; }
+        else if (d === 0) { val.textContent = 'Today'; pill.style.display = 'flex'; }
       })();
 
-      // Race day (only if training plan has started)
       (function () {
-        const pill = document.getElementById('stat-race');
-        const val  = document.getElementById('hub-cd-race');
+        var pill = document.getElementById('stat-race');
+        var val  = document.getElementById('hub-cd-race');
         if (!pill || !val) return;
         try {
-          const raw = localStorage.getItem('c2hm_v1');
+          var raw = localStorage.getItem('c2hm_v1');
           if (!raw) return;
-          const data = JSON.parse(raw);
+          var data = JSON.parse(raw);
           if (!data.planStart) return;
-          const start = new Date(data.planStart + 'T00:00:00');
-          const week1Sun = new Date(start.getTime() - start.getDay() * 86400000);
+          var start = new Date(data.planStart + 'T00:00:00');
+          var week1Sun = new Date(start.getTime() - start.getDay() * 86400000);
           week1Sun.setHours(0, 0, 0, 0);
-          const raceDate = new Date(week1Sun.getTime() + 19 * 7 * 86400000);
-          const d = daysUntil(raceDate.toISOString().slice(0, 10));
-          if (d > 0) {
-            val.textContent = d;
-            pill.style.display = 'flex';
-          } else if (d === 0) {
-            val.textContent = 'Today';
-            pill.style.display = 'flex';
-          }
+          var raceDate = new Date(week1Sun.getTime() + 19 * 7 * 86400000);
+          var d = daysUntil(raceDate.toISOString().slice(0, 10));
+          if (d > 0) { val.textContent = d; pill.style.display = 'flex'; }
+          else if (d === 0) { val.textContent = 'Today'; pill.style.display = 'flex'; }
         } catch (e) {}
       })();
     })();
