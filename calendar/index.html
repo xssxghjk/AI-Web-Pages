@@ -46,126 +46,51 @@
       line-height: 1.6;
     }
 
-    /* ── NAV ── */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,10,12,0.88);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem;
-      height: 52px;
+    /* ── LAYOUT ── */
+    .app-layout {
       display: flex;
-      align-items: center;
-      gap: 1rem;
+      min-height: 100vh;
     }
-    .nav-burger {
+    .page-content {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      gap: 4px;
-      width: 32px;
-      height: 32px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 6px;
-      flex-shrink: 0;
-      transition: background 0.15s;
-    }
-    .nav-burger:hover { background: var(--surface2); }
-    .nav-burger span {
-      display: block;
-      width: 18px;
-      height: 2px;
-      background: var(--muted2);
-      border-radius: 2px;
-      transition: background 0.15s;
-    }
-    .nav-burger:hover span { background: var(--text); }
-    .nav-brand {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.01em;
-      flex-shrink: 0;
-    }
-    .nav-sep { color: var(--border2); }
-    .nav-title {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      min-width: 0;
     }
 
-    /* ── DRAWER ── */
-    .drawer-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.55);
-      z-index: 200;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s;
-    }
-    .drawer-overlay.open {
-      opacity: 1;
-      pointer-events: all;
-    }
-    .drawer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 260px;
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
       background: var(--surface);
       border-right: 1px solid var(--border2);
-      z-index: 201;
       display: flex;
       flex-direction: column;
-      transform: translateX(-100%);
-      transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
     }
-    .drawer.open { transform: translateX(0); }
-    .drawer-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .sidebar-header {
       padding: 0 1rem;
       height: 52px;
+      display: flex;
+      align-items: center;
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
-    .drawer-brand {
+    .sidebar-brand {
       font-size: 0.82rem;
       font-weight: 700;
       color: var(--text);
       letter-spacing: -0.01em;
     }
-    .drawer-close {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--muted2);
-      border-radius: 6px;
-      transition: color 0.15s, background 0.15s;
-    }
-    .drawer-close:hover { color: var(--text); background: var(--surface2); }
-    .drawer-nav {
+    .sidebar-nav {
       padding: 0.75rem 0.5rem;
       overflow-y: auto;
       flex: 1;
     }
-    .drawer-section {
+    .sidebar-section {
       font-size: 0.65rem;
       font-weight: 700;
       letter-spacing: 0.08em;
@@ -173,7 +98,7 @@
       color: var(--muted);
       padding: 0.5rem 0.75rem 0.25rem;
     }
-    .drawer-link {
+    .sidebar-link {
       display: flex;
       align-items: center;
       gap: 0.6rem;
@@ -185,9 +110,13 @@
       font-weight: 500;
       transition: color 0.15s, background 0.15s;
     }
-    .drawer-link:hover { color: var(--text); background: var(--surface2); }
-    .drawer-link.active { color: var(--accent); background: var(--accent-dim); }
-    .drawer-link svg { flex-shrink: 0; opacity: 0.7; }
+    .sidebar-link:hover { color: var(--text); background: var(--surface2); }
+    .sidebar-link.active { color: var(--accent); background: var(--accent-dim); }
+    .sidebar-link svg { flex-shrink: 0; opacity: 0.7; }
+
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+    }
 
     /* ── HERO ── */
     .hero {
@@ -560,60 +489,49 @@
 </head>
 <body>
 
-  <div class="drawer-overlay" id="drawer-overlay"></div>
-  <div class="drawer" id="drawer">
-    <div class="drawer-header">
-      <span class="drawer-brand">AI Web Pages</span>
-      <button class="drawer-close" id="drawer-close" aria-label="Close menu">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
-      </button>
+  <div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-brand">AI Web Pages</span>
     </div>
-    <nav class="drawer-nav">
-      <div class="drawer-section">Pages</div>
-      <a class="drawer-link active" href="./">
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Pages</div>
+      <a class="sidebar-link active" href="./">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2.5" width="11" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M1.5 5.5h11M4.5 1v3M9.5 1v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Calendar
       </a>
-      <a class="drawer-link" href="../trips/">
+      <a class="sidebar-link" href="../trips/">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5C4.515 1.5 2.5 3.515 2.5 6c0 3.5 4.5 6.5 4.5 6.5s4.5-3 4.5-6.5c0-2.485-2.015-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="6" r="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
         Trips
       </a>
-      <a class="drawer-link" href="../tcg-tournament-reports/">
+      <a class="sidebar-link" href="../tcg-tournament-reports/">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 2.5h9a1 1 0 011 1v7a1 1 0 01-1 1h-9a1 1 0 01-1-1v-7a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 6h5M4.5 8.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Tournament Reports
       </a>
-      <a class="drawer-link" href="../tcg-tournament-prep/">
+      <a class="sidebar-link" href="../tcg-tournament-prep/">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l1.5 3 3.5.5-2.5 2.5.5 3.5L7 9.5 4 11l.5-3.5L2 5l3.5-.5L7 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
         Tournament Prep
       </a>
-      <div class="drawer-section" style="margin-top:0.5rem">Tools</div>
-      <a class="drawer-link" href="../fab-deck-viewer/">
+      <div class="sidebar-section" style="margin-top:0.5rem">Tools</div>
+      <a class="sidebar-link" href="../fab-deck-viewer/">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Deck Viewer
       </a>
-      <a class="drawer-link" href="../fab-card-memory/">
+      <a class="sidebar-link" href="../fab-card-memory/">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="1.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="10" width="4.5" height="3" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="7.5" y="10" width="4.5" height="3" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Card Memory
       </a>
-      <a class="drawer-link" href="../fab-pitch-simulator/">
+      <a class="sidebar-link" href="../fab-pitch-simulator/">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 12L6.5 2l2 5 2-2.5L12 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Pitch Simulator
       </a>
-      <a class="drawer-link" href="../marathon-training/">
+      <a class="sidebar-link" href="../marathon-training/">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="3" r="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 12.5l1.5-4 1.5 2 1.5-2 1.5 4M7 5.5v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Marathon Training
       </a>
     </nav>
-  </div>
-
-  <nav>
-    <button class="nav-burger" id="nav-burger" aria-label="Open menu">
-      <span></span><span></span><span></span>
-    </button>
-    <span class="nav-brand">AI Web Pages</span>
-    <span class="nav-sep">|</span>
-    <span class="nav-title">Trip Calendar</span>
-  </nav>
+  </aside>
+  <div class="page-content">
 
   <header class="hero">
     <h1>Trip Calendar</h1>
@@ -639,6 +557,9 @@
     <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
   </footer>
 
+  </div><!-- /.page-content -->
+  </div><!-- /.app-layout -->
+
   <!-- Iframe modal: opens internal pages without leaving the calendar -->
   <div class="iframe-modal-overlay hidden" id="iframe-modal">
     <div class="iframe-modal-bar">
@@ -660,32 +581,6 @@
 
   <script src="../trips/trips.js"></script>
   <script>
-  // ── Drawer ──────────────────────────────────────────────────────────────────
-  (function () {
-    const burger = document.getElementById('nav-burger');
-    const drawer = document.getElementById('drawer');
-    const overlay = document.getElementById('drawer-overlay');
-    const closeBtn = document.getElementById('drawer-close');
-
-    function openDrawer() {
-      drawer.classList.add('open');
-      overlay.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeDrawer() {
-      drawer.classList.remove('open');
-      overlay.classList.remove('open');
-      document.body.style.overflow = '';
-    }
-
-    burger.addEventListener('click', openDrawer);
-    closeBtn.addEventListener('click', closeDrawer);
-    overlay.addEventListener('click', closeDrawer);
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeDrawer();
-    });
-  }());
-
   (function () {
     function esc(str) {
       return String(str)
