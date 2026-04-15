@@ -1,5 +1,15 @@
 # Project Instructions
 
+## Before Every Push
+
+Always run the full test suite and fix any failures before pushing:
+
+```bash
+npm test
+```
+
+This runs all Playwright e2e tests across both desktop (`chromium`) and mobile (`mobile-chrome`) projects. All tests must pass before a push is made.
+
 ## Tool Usage
 
 **Never use the Agent tool (subagents).** Do all work directly using the available tools (Read, Edit, Write, Bash, Grep, Glob, etc.). Do not delegate tasks to subagents under any circumstances.

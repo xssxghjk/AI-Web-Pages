@@ -10,7 +10,10 @@ test('calendar page loads', async ({ page }) => {
   await page.goto('/calendar/');
   await expect(page).toHaveTitle(/Trip Calendar/);
   await expect(page.locator('h1')).toContainText('Trip Calendar');
-  await expect(page.locator('nav').first()).toBeVisible();
+  // Navigation is accessible via sidebar (desktop) or hamburger button (mobile)
+  const sidebarVisible = await page.locator('.sidebar').isVisible();
+  const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();
+  expect(sidebarVisible || hamburgerVisible).toBe(true);
 });
 
 test('tournament reports page loads', async ({ page }) => {
