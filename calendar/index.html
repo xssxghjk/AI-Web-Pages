@@ -76,6 +76,23 @@
       text-overflow: ellipsis;
     }
     .nav-sep { color: var(--border2); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.1rem;
+      list-style: none;
+      margin-left: auto;
+    }
+    .nav-links a {
+      font-size: 0.8rem;
+      color: var(--muted2);
+      text-decoration: none;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+    .nav-links a:hover { color: var(--text); background: var(--surface2); }
 
     /* ── HERO ── */
     .hero {
@@ -448,10 +465,15 @@
 </head>
 <body>
 
-  <nav id="site-nav">
+  <nav>
     <span class="nav-brand">AI Web Pages</span>
     <span class="nav-sep">|</span>
     <span class="nav-title">Trip Calendar</span>
+    <ul class="nav-links">
+      <li><a href="trips/">Trips</a></li>
+      <li><a href="tcg-tournament-reports/">Reports</a></li>
+      <li><a href="tcg-tournament-prep/">Prep</a></li>
+    </ul>
   </nav>
 
   <header class="hero">
@@ -499,11 +521,6 @@
 
   <script src="../trips/trips.js"></script>
   <script>
-  // Hide nav when loaded inside an iframe (e.g. the index SPA frame)
-  if (window.self !== window.top) {
-    document.getElementById('site-nav').style.display = 'none';
-  }
-
   (function () {
     function esc(str) {
       return String(str)
