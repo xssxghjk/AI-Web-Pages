@@ -425,6 +425,58 @@
     white-space: pre-wrap;
   }
 
+  /* Week Progress Tab */
+  .wp-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .wp-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 4px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: background 0.15s;
+  }
+  .wp-day[onclick]:hover { background: rgba(108,92,231,0.08); }
+  .wp-day-today {
+    border-color: var(--accent);
+    background: rgba(108,92,231,0.1);
+  }
+  .wp-day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text2); }
+  .wp-day-icon { font-size: 16px; }
+  .wp-day-label { font-size: 10px; text-align: center; color: var(--text2); line-height: 1.3; }
+  .wp-day-date { font-size: 10px; color: var(--muted-2); }
+  .wp-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    border: 2px solid transparent;
+  }
+  .wp-done { background: rgba(81,207,102,0.25); border-color: var(--success); color: var(--success); }
+  .wp-skipped { background: rgba(255,107,107,0.2); border-color: var(--danger); color: var(--danger); }
+  .wp-modified { background: rgba(255,212,59,0.2); border-color: var(--warning); color: var(--warning); }
+  .wp-today { background: rgba(108,92,231,0.2); border-color: var(--accent); color: var(--accent); }
+  .wp-missed { background: rgba(255,107,107,0.08); border-color: rgba(255,107,107,0.3); color: var(--danger); opacity: 0.6; }
+  .wp-rest { background: var(--surface2); border-color: var(--border); color: var(--text2); font-size: 10px; opacity: 0.5; }
+  .wp-future { background: var(--surface2); border-color: var(--border); color: var(--text2); opacity: 0.4; }
+  .wp-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+  .wp-legend-item { font-size: 11px; color: var(--text2); display: flex; align-items: center; gap: 5px; }
+  @media (max-width: 480px) {
+    .wp-dot { width: 28px; height: 28px; font-size: 13px; }
+    .wp-day-icon { font-size: 14px; }
+    .wp-day-label { font-size: 9px; }
+  }
+
   .hidden { display: none !important; }
 
   /* Week grid scroll wrapper */
@@ -686,7 +738,7 @@
 
 <nav class="nav-tabs" id="navTabs">
   <div class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Dashboard</div>
-  <div class="nav-tab" data-tab="calendar" onclick="switchTab('calendar')">📅 Full Calendar</div>
+  <div class="nav-tab" data-tab="calendar" onclick="switchTab('calendar')">📅 This Week</div>
   <div class="nav-tab" data-tab="heatmap" onclick="switchTab('heatmap')">🔥 Activity</div>
   <div class="nav-tab" data-tab="progress" onclick="switchTab('progress')">📈 Progress</div>
 </nav>
@@ -757,10 +809,10 @@
   <!-- CALENDAR TAB -->
   <div id="tab-calendar" class="hidden">
     <div class="section-header">
-      <div class="section-title">Full Training Calendar</div>
-      <div class="section-sub">All 20 weeks — click any day to log it</div>
+      <div class="section-title">Week Progress</div>
+      <div class="section-sub" id="calendarSub">Current training week</div>
     </div>
-    <div id="fullCalendar"></div>
+    <div id="weekProgress"></div>
   </div>
 
   <!-- HEATMAP TAB -->
@@ -1535,29 +1587,93 @@ function renderWeekGrid(container, weekNum, compact) {
   container.innerHTML = html;
 }
 
-function renderFullCalendar() {
-  const cal = document.getElementById('fullCalendar');
-  let html = '';
-  for (let w = 1; w <= 20; w++) {
-    const phase = getPhase(w);
-    const pct = getWeekCompletion(w);
-    const weekStart = getDateForWeekDay(w, 1); // Monday
-    const weekEnd = getDateForWeekDay(w, 6); // Saturday
-    html += `
-      <div class="week-section">
-        <div class="week-header">
-          <div class="week-title">Week ${w} — ${formatDate(weekStart)} to ${formatDate(weekEnd)}</div>
-          <span class="phase-badge ${phase.cls}">${phase.name}</span>
-          <span class="week-completion">${pct}% done</span>
-        </div>
-        <div id="calWeek${w}"></div>
+function renderWeekProgress() {
+  const t = today();
+  const wd = getWeekDayForDate(t);
+  const container = document.getElementById('weekProgress');
+
+  if (!wd) {
+    container.innerHTML = '<div class="card"><div class="card-title">No active training week</div></div>';
+    return;
+  }
+
+  const { weekNum } = wd;
+  const phase = getPhase(weekNum);
+  const pct = getWeekCompletion(weekNum);
+  const weekStart = getDateForWeekDay(weekNum, 1);
+  const weekEnd = getDateForWeekDay(weekNum, 6);
+
+  document.getElementById('calendarSub').textContent =
+    `Week ${weekNum} of 20 — ${formatDate(weekStart)} to ${formatDate(weekEnd)}`;
+
+  let dotsHtml = '';
+  for (let d = 0; d < 7; d++) {
+    const workout = PLAN[weekNum - 1][d];
+    const date = getDateForWeekDay(weekNum, d);
+    const dateStr = dateKey(date);
+    const dd = getDayData(dateStr);
+    const isToday = dateStr === dateKey(t);
+    const isPast = date < t;
+    const isRest = workout.type === 'rest';
+
+    let dotCls = 'wp-dot';
+    let label = '';
+    if (isRest) {
+      dotCls += ' wp-rest';
+      label = 'Rest';
+    } else if (dd?.status === 'completed') {
+      dotCls += ' wp-done';
+      label = '✓';
+    } else if (dd?.status === 'skipped') {
+      dotCls += ' wp-skipped';
+      label = '✕';
+    } else if (dd?.status === 'modified') {
+      dotCls += ' wp-modified';
+      label = '~';
+    } else if (isToday) {
+      dotCls += ' wp-today';
+      label = '·';
+    } else if (isPast) {
+      dotCls += ' wp-missed';
+      label = '!';
+    } else {
+      dotCls += ' wp-future';
+      label = '·';
+    }
+
+    const clickHandler = isRest ? '' : `onclick="openDayModal(${weekNum}, ${d})"`;
+    const typeIcon = { run: '🏃', strength: '💪', cross: '🚴', rest: '😴', race: '🏅' }[workout.type] || '📋';
+
+    dotsHtml += `
+      <div class="wp-day ${isToday ? 'wp-day-today' : ''}" ${clickHandler} style="${isRest ? '' : 'cursor:pointer'}">
+        <div class="wp-day-name">${DOW[d]}</div>
+        <div class="${dotCls}">${label}</div>
+        <div class="wp-day-icon">${typeIcon}</div>
+        <div class="wp-day-label wt-${workout.type}">${workout.short}</div>
+        <div class="wp-day-date">${formatDate(date)}</div>
       </div>
     `;
   }
-  cal.innerHTML = html;
-  for (let w = 1; w <= 20; w++) {
-    renderWeekGrid(document.getElementById(`calWeek${w}`), w, false);
-  }
+
+  container.innerHTML = `
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="phase-badge ${phase.cls}">${phase.name}</span>
+          <span style="font-size:13px;color:var(--text2);">Week ${weekNum}</span>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:${pct === 100 ? 'var(--success)' : 'var(--text2)'};">${pct}% complete</span>
+      </div>
+      <div class="wp-grid">${dotsHtml}</div>
+      <div class="wp-legend">
+        <span class="wp-legend-item"><span class="wp-dot wp-done" style="width:12px;height:12px;font-size:0;display:inline-block;"></span> Done</span>
+        <span class="wp-legend-item"><span class="wp-dot wp-today" style="width:12px;height:12px;font-size:0;display:inline-block;"></span> Today</span>
+        <span class="wp-legend-item"><span class="wp-dot wp-skipped" style="width:12px;height:12px;font-size:0;display:inline-block;"></span> Skipped</span>
+        <span class="wp-legend-item"><span class="wp-dot wp-modified" style="width:12px;height:12px;font-size:0;display:inline-block;"></span> Modified</span>
+        <span class="wp-legend-item"><span class="wp-dot wp-rest" style="width:12px;height:12px;font-size:0;display:inline-block;"></span> Rest</span>
+      </div>
+    </div>
+  `;
 }
 
 function renderHeatmap() {
@@ -1727,7 +1843,7 @@ function renderTab(tab) {
     renderToday();
     renderThisWeek();
   } else if (tab === 'calendar') {
-    renderFullCalendar();
+    renderWeekProgress();
   } else if (tab === 'heatmap') {
     renderHeatmap();
   } else if (tab === 'progress') {
