@@ -119,20 +119,15 @@ test.describe('mobile navigation', () => {
     await expect(page).toHaveURL(/\/marathon-training\//);
   });
 
-  test('calendar main has same side padding as card views on mobile', async ({ page }) => {
+  test('calendar main uses minimal side padding on mobile to maximise grid width', async ({ page }) => {
     await page.goto('/calendar/');
     const calPadding = await page.locator('.main').evaluate(el => {
       const style = window.getComputedStyle(el);
-      return { left: style.paddingLeft, right: style.paddingRight };
+      return { left: parseFloat(style.paddingLeft), right: parseFloat(style.paddingRight) };
     });
 
-    await page.goto('/trips/');
-    const tripsPadding = await page.locator('.main').evaluate(el => {
-      const style = window.getComputedStyle(el);
-      return { left: style.paddingLeft, right: style.paddingRight };
-    });
-
-    expect(calPadding.left).toBe(tripsPadding.left);
-    expect(calPadding.right).toBe(tripsPadding.right);
+    // Calendar should use ≤ 4 px side padding on mobile so the grid fills the screen.
+    expect(calPadding.left).toBeLessThanOrEqual(4);
+    expect(calPadding.right).toBeLessThanOrEqual(4);
   });
 });
