@@ -117,4 +117,21 @@ test.describe('mobile navigation', () => {
     await page.locator('#mobile-nav-drawer').getByRole('link', { name: 'Marathon Training' }).click();
     await expect(page).toHaveURL(/\/marathon-training\//);
   });
+
+  test('calendar main has same side padding as card views on mobile', async ({ page }) => {
+    await page.goto('/calendar/');
+    const calPadding = await page.locator('.main').evaluate(el => {
+      const style = window.getComputedStyle(el);
+      return { left: style.paddingLeft, right: style.paddingRight };
+    });
+
+    await page.goto('/trips/');
+    const tripsPadding = await page.locator('.main').evaluate(el => {
+      const style = window.getComputedStyle(el);
+      return { left: style.paddingLeft, right: style.paddingRight };
+    });
+
+    expect(calPadding.left).toBe(tripsPadding.left);
+    expect(calPadding.right).toBe(tripsPadding.right);
+  });
 });
