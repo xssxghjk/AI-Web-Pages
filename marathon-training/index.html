@@ -435,16 +435,27 @@
 
   .hidden { display: none !important; }
 
+  /* Week grid scroll wrapper */
+  .week-grid-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 0 -4px;
+    padding: 0 4px;
+  }
+  .week-grid-scroll::-webkit-scrollbar { display: none; }
+
   /* Responsive */
   @media (max-width: 640px) {
-    .week-grid { grid-template-columns: repeat(7, 1fr); gap: 3px; }
-    .day-cell { padding: 5px 3px; min-height: 65px; }
-    .day-name { font-size: 9px; }
-    .day-date { font-size: 10px; }
-    .day-workout-short { font-size: 9px; }
+    .week-grid { grid-template-columns: repeat(7, 72px); gap: 5px; min-width: max-content; }
+    .day-cell { padding: 8px 5px; min-height: 80px; }
+    .day-name { font-size: 10px; }
+    .day-date { font-size: 11px; }
+    .day-workout-short { font-size: 10px; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
     .main { padding: 12px; }
     .modal-actions { grid-template-columns: 1fr; }
+    .card { margin-bottom: 20px; }
   }
 
   /* Workout type colors */
@@ -1402,7 +1413,7 @@ function renderThisWeek() {
 
 function renderWeekGrid(container, weekNum, compact) {
   const t = today();
-  let html = '<div class="week-grid">';
+  let html = '<div class="week-grid-scroll"><div class="week-grid">';
   for (let d = 0; d < 7; d++) {
     const workout = PLAN[weekNum-1][d];
     const date = getDateForWeekDay(weekNum, d);
@@ -1431,7 +1442,7 @@ function renderWeekGrid(container, weekNum, compact) {
       </div>
     `;
   }
-  html += '</div>';
+  html += '</div></div>';
   container.innerHTML = html;
 }
 
