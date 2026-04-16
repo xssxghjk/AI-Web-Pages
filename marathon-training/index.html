@@ -555,6 +555,77 @@
   .btn-start:hover { opacity: 0.88; }
   .start-note { margin-top: 14px; font-size: 12px; color: var(--text2); }
 
+  /* ── INTERVAL TIMER ── */
+  .timer-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.96);
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .timer-card {
+    background: var(--surface);
+    border: 2px solid var(--run);
+    border-radius: 24px;
+    padding: 40px 32px 32px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    transition: border-color 0.4s ease, background 0.4s ease;
+  }
+  .timer-card.phase-walk { border-color: var(--accent2); background: rgba(78,205,196,0.05); }
+  .timer-card.phase-done { border-color: var(--success); background: rgba(81,207,102,0.08); }
+  .timer-phase-label {
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: var(--run);
+    margin-bottom: 16px;
+    transition: color 0.4s;
+  }
+  .timer-card.phase-walk .timer-phase-label { color: var(--accent2); }
+  .timer-card.phase-done .timer-phase-label { color: var(--success); font-size: 18px; letter-spacing: 1px; }
+  .timer-time {
+    font-size: 88px;
+    font-weight: 900;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -4px;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .timer-rep-label {
+    font-size: 15px;
+    color: var(--text2);
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .timer-progress-track {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .timer-progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--run);
+    width: 0%;
+    transition: width 1s linear, background 0.4s;
+  }
+  .timer-card.phase-walk .timer-progress-fill { background: var(--accent2); }
+  .timer-card.phase-done .timer-progress-fill { background: var(--success); }
+  .timer-controls { display: flex; gap: 10px; justify-content: center; }
+  .timer-summary { font-size: 12px; color: var(--text2); margin-bottom: 24px; line-height: 1.6; }
+  @media (max-width: 480px) {
+    .timer-time { font-size: 72px; letter-spacing: -3px; }
+    .timer-card { padding: 32px 20px 24px; }
+  }
+
   /* ── FOOTER ── */
   .app-footer {
     padding: 1.75rem 2rem;
@@ -788,6 +859,23 @@
     <div class="modal-footer" style="margin-top:12px;">
       <button class="btn btn-ghost" onclick="document.getElementById('exportModal').classList.add('hidden')">Close</button>
       <button class="btn btn-primary" onclick="copyExport()">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- Interval Timer -->
+<div id="timerModal" class="timer-overlay hidden">
+  <div class="timer-card" id="timerCard">
+    <div class="timer-phase-label" id="timerPhaseLabel">RUN</div>
+    <div class="timer-time" id="timerTime">0:00</div>
+    <div class="timer-rep-label" id="timerRepLabel"></div>
+    <div class="timer-progress-track">
+      <div class="timer-progress-fill" id="timerProgressFill"></div>
+    </div>
+    <div class="timer-summary" id="timerSummary"></div>
+    <div class="timer-controls">
+      <button class="btn btn-ghost" id="btnTimerPause" onclick="toggleTimerPause()">⏸ Pause</button>
+      <button class="btn btn-danger" onclick="closeTimerModal()">✕ Stop</button>
     </div>
   </div>
 </div>
@@ -1142,10 +1230,15 @@ function openDayModal(weekNum, dayOfWeek) {
 
   document.getElementById('modalTitle').textContent = `${DOW[dayOfWeek]}, ${formatDate(date)}`;
   document.getElementById('modalSubtitle').textContent = `Week ${weekNum} — ${getPhase(weekNum).name}`;
+  const modalIntervals = workout.type === 'run' ? parseIntervals(workout.desc) : null;
+  const modalTimerBtn = modalIntervals
+    ? `<div style="margin-top:10px;"><button onclick="closeModal();openTimerForWorkout(${modalIntervals.runDuration},${modalIntervals.walkDuration},${modalIntervals.reps})" style="background:rgba(81,207,102,0.12);border:1px solid var(--success);color:var(--success);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">⏱ Start Interval Timer</button></div>`
+    : '';
   document.getElementById('modalWorkout').innerHTML = `
     <span class="tag tag-${workout.type}">${workout.type}</span>
     <strong style="margin-left:6px">${workout.short}</strong>
     <div style="margin-top:6px;color:var(--text2);font-size:12px;">${workout.desc}</div>
+    ${modalTimerBtn}
   `;
 
   document.getElementById('modalTime').value = existing?.time || '';
@@ -1362,6 +1455,10 @@ function renderToday() {
   }
 
   const typeIcon = { run:'🏃', strength:'💪', cross:'🚴', race:'🏅' }[workout.type] || '📋';
+  const intervals = workout.type === 'run' ? parseIntervals(workout.desc) : null;
+  const timerBtnHtml = intervals
+    ? `<button class="btn-checkin" onclick="openTimerForWorkout(${intervals.runDuration},${intervals.walkDuration},${intervals.reps})" style="width:100%;margin-bottom:10px;border-color:var(--success);color:var(--success);background:rgba(81,207,102,0.08);">⏱ Interval Timer · ${fmtDur(intervals.runDuration)} run / ${fmtDur(intervals.walkDuration)} walk × ${intervals.reps}</button>`
+    : '';
 
   sec.innerHTML = `
     <div class="today-card">
@@ -1372,6 +1469,7 @@ function renderToday() {
       </div>
       <div class="today-workout-desc">${workout.desc}</div>
       ${statusHtml}
+      ${timerBtnHtml}
       <div class="checkin-buttons">
         <button class="btn-checkin ${dd?.status === 'completed' ? 'active-completed' : ''}" onclick="quickCheckin('completed')">✅ Completed</button>
         <button class="btn-checkin ${dd?.status === 'skipped' ? 'active-skipped' : ''}" onclick="quickCheckin('skipped')">⏭️ Skipped</button>
@@ -1746,6 +1844,144 @@ function confirmReset() {
       render();
     }
   }
+}
+
+// ============================================================
+// INTERVAL TIMER
+// ============================================================
+function parseIntervals(desc) {
+  const m = desc.match(/(\d+)\s*(min|sec)\s+run\s*\/\s*(\d+)\s*(min|sec)\s+walk[^]*?repeat\s+(\d+)\s+times/i);
+  if (!m) return null;
+  return {
+    runDuration: parseInt(m[1]) * (m[2].toLowerCase() === 'min' ? 60 : 1),
+    walkDuration: parseInt(m[3]) * (m[4].toLowerCase() === 'min' ? 60 : 1),
+    reps: parseInt(m[5]),
+  };
+}
+
+function fmtDur(secs) {
+  return secs % 60 === 0 ? `${secs / 60}min` : `${secs}sec`;
+}
+
+let timerInterval = null;
+let timerState = null;
+let wakeLock = null;
+
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+  } catch(e) {}
+}
+
+function releaseWakeLock() {
+  if (wakeLock) { try { wakeLock.release(); } catch(e) {} wakeLock = null; }
+}
+
+function openTimerForWorkout(runSec, walkSec, reps) {
+  timerState = {
+    phase: 'run', rep: 1, totalReps: reps,
+    timeLeft: runSec, runDuration: runSec, walkDuration: walkSec, paused: false,
+  };
+  document.getElementById('timerSummary').textContent =
+    `${fmtDur(runSec)} run / ${fmtDur(walkSec)} walk × ${reps} reps`;
+  document.getElementById('btnTimerPause').textContent = '⏸ Pause';
+  document.getElementById('btnTimerPause').disabled = false;
+  document.getElementById('timerModal').classList.remove('hidden');
+  updateTimerDisplay();
+  requestWakeLock();
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(timerTick, 1000);
+  playBeep('run');
+}
+
+function timerTick() {
+  if (!timerState || timerState.paused) return;
+  timerState.timeLeft--;
+
+  if (timerState.timeLeft === 3) playBeep('warn');
+
+  if (timerState.timeLeft <= 0) {
+    if (timerState.phase === 'run') {
+      timerState.phase = 'walk';
+      timerState.timeLeft = timerState.walkDuration;
+      playBeep('walk');
+    } else {
+      if (timerState.rep >= timerState.totalReps) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        timerState.phase = 'done';
+        timerState.timeLeft = 0;
+        playBeep('done');
+        releaseWakeLock();
+      } else {
+        timerState.rep++;
+        timerState.phase = 'run';
+        timerState.timeLeft = timerState.runDuration;
+        playBeep('run');
+      }
+    }
+  }
+
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const s = timerState;
+  const card = document.getElementById('timerCard');
+
+  if (s.phase === 'done') {
+    card.className = 'timer-card phase-done';
+    document.getElementById('timerPhaseLabel').textContent = '🎉 Workout Complete!';
+    document.getElementById('timerTime').textContent = 'Done!';
+    document.getElementById('timerRepLabel').textContent = `${s.totalReps} reps completed`;
+    document.getElementById('timerProgressFill').style.width = '100%';
+    document.getElementById('btnTimerPause').disabled = true;
+    return;
+  }
+
+  card.className = `timer-card phase-${s.phase}`;
+  document.getElementById('timerPhaseLabel').textContent = s.phase === 'run' ? '🏃 RUN' : '🚶 WALK';
+  const mins = Math.floor(s.timeLeft / 60);
+  const secs = s.timeLeft % 60;
+  document.getElementById('timerTime').textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+  document.getElementById('timerRepLabel').textContent = `Rep ${s.rep} of ${s.totalReps}`;
+  document.getElementById('btnTimerPause').disabled = false;
+  const totalPhase = s.phase === 'run' ? s.runDuration : s.walkDuration;
+  document.getElementById('timerProgressFill').style.width =
+    ((totalPhase - s.timeLeft) / totalPhase * 100) + '%';
+}
+
+function toggleTimerPause() {
+  if (!timerState) return;
+  timerState.paused = !timerState.paused;
+  document.getElementById('btnTimerPause').textContent = timerState.paused ? '▶ Resume' : '⏸ Pause';
+}
+
+function closeTimerModal() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  timerState = null;
+  releaseWakeLock();
+  document.getElementById('timerModal').classList.add('hidden');
+}
+
+function playBeep(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const tone = (freq, t0, dur, vol = 0.35) => {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.frequency.value = freq; osc.type = 'sine';
+      g.gain.setValueAtTime(vol, t0);
+      g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+      osc.start(t0); osc.stop(t0 + dur + 0.05);
+    };
+    const t = ctx.currentTime;
+    if (type === 'run')  { tone(880, t, 0.12); tone(1100, t + 0.15, 0.18); }
+    else if (type === 'walk') { tone(440, t, 0.4); }
+    else if (type === 'warn') { tone(660, t, 0.07, 0.15); tone(660, t + 0.12, 0.07, 0.15); tone(660, t + 0.24, 0.07, 0.15); }
+    else if (type === 'done') { tone(660, t, 0.15); tone(880, t + 0.2, 0.15); tone(1100, t + 0.4, 0.35); }
+  } catch(e) {}
 }
 
 // ============================================================
