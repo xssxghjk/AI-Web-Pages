@@ -35,6 +35,9 @@
       --fab-event: #f59e0b;
       --fab-event-bg: rgba(245,158,11,0.08);
       --fab-event-border: rgba(245,158,11,0.25);
+      --workout: #f97316;
+      --workout-bg: rgba(249,115,22,0.08);
+      --workout-border: rgba(249,115,22,0.25);
     }
 
     html { scroll-behavior: smooth; }
@@ -198,6 +201,7 @@
     .cal-trip-bar.s-past      { background: var(--past-bg);      color: var(--past);      border: 1px solid var(--past-border); }
     .cal-trip-bar.s-planning  { background: var(--planning-bg);  color: var(--planning);  border: 1px solid var(--planning-border); }
     .cal-trip-bar.s-fab-event { background: var(--fab-event-bg); color: var(--fab-event); border: 1px solid var(--fab-event-border); }
+    .cal-trip-bar.s-workout   { background: var(--workout-bg);   color: var(--workout);   border: 1px solid var(--workout-border); }
 
     /* ── LEGEND ── */
     .cal-legend {
@@ -226,6 +230,7 @@
     .cal-legend-dot.s-past      { background: var(--past); }
     .cal-legend-dot.s-planning  { background: var(--planning); }
     .cal-legend-dot.s-fab-event { background: var(--fab-event); }
+    .cal-legend-dot.s-workout   { background: var(--workout); }
 
     /* ── SWIPE VIEWPORT ── */
     .cal-viewport {
@@ -337,6 +342,8 @@
     .fab-popup-btn.p-past:hover     { filter: brightness(1.15); }
     .fab-popup-btn.p-planning { color: var(--planning); border-color: var(--planning-border); background: var(--planning-bg); }
     .fab-popup-btn.p-planning:hover { filter: brightness(1.15); }
+    .fab-popup-btn.p-workout  { color: var(--workout);  border-color: var(--workout-border);  background: var(--workout-bg);  }
+    .fab-popup-btn.p-workout:hover  { filter: brightness(1.15); }
 
     /* ── IFRAME MODAL ── */
     .iframe-modal-overlay {
@@ -465,6 +472,49 @@
   </div>
 
   <script src="../trips/trips.js"></script>
+  <script>
+  // Inject marathon training weeks from localStorage into ALL_EVENTS
+  (function () {
+    try {
+      const raw = localStorage.getItem('c2hm_v1');
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (!data.planStart) return;
+
+      const start = new Date(data.planStart + 'T00:00:00');
+      const week1Sun = new Date(start.getTime() - start.getDay() * 86400000);
+      week1Sun.setHours(0, 0, 0, 0);
+
+      const PHASES = ['Foundation','Foundation','Foundation','Foundation','Foundation',
+        'Base Building','Base Building','Base Building','Base Building','Base Building',
+        'Endurance','Endurance','Endurance','Endurance','Endurance','Endurance','Endurance',
+        'Taper','Taper','Taper'];
+
+      function iso(d) { return d.toISOString().slice(0, 10); }
+      function fmt(d) { return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+
+      for (let w = 1; w <= 20; w++) {
+        const sunMs = week1Sun.getTime() + (w - 1) * 7 * 86400000;
+        const sun = new Date(sunMs);
+        const sat = new Date(sunMs + 6 * 86400000);
+        ALL_EVENTS.push({
+          id: 'workout-week-' + w,
+          title: 'Training Wk ' + w,
+          destination: 'Marathon Training · ' + PHASES[w - 1],
+          region: null,
+          status: 'workout',
+          workoutWeek: w,
+          startDate: iso(sun),
+          endDate: iso(sat),
+          displayDates: fmt(sun) + ' \u2013 ' + fmt(sat),
+          description: 'Week ' + w + '/20 \u00b7 ' + PHASES[w - 1] + ' phase',
+          link: '../marathon-training/',
+          tags: ['Training'],
+        });
+      }
+    } catch (e) {}
+  })();
+  </script>
   <script>
   (function () {
     function esc(str) {
@@ -606,11 +656,13 @@
       const legend = document.getElementById('cal-legend');
       const statusesPresent = [...new Set(tripsThisMonth.map(t => t.status))];
       const hasFabEvent = statusesPresent.includes('fab-event');
+      const hasWorkout = statusesPresent.includes('workout');
       const tripStatuses = ['upcoming', 'ongoing', 'planning', 'past'];
       const tripStatus = tripStatuses.find(s => statusesPresent.includes(s));
       const items = [];
       if (tripStatus) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-${esc(tripStatus)}"></div><span>Trips</span></div>`);
       if (hasFabEvent) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-fab-event"></div><span>Fab Events</span></div>`);
+      if (hasWorkout) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-workout"></div><span>Training</span></div>`);
       legend.innerHTML = items.join('');
     }
 
@@ -777,11 +829,12 @@
           popupActions.appendChild(repBtn);
         }
       } else {
-        // Regular trip: open the trip page in the iframe modal
+        // Regular trip / workout: open the page in the iframe modal
         if (event.link) {
           const tripBtn = document.createElement('button');
           tripBtn.className = `fab-popup-btn p-${esc(event.status)}`;
-          tripBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> View Trip';
+          const btnLabel = event.status === 'workout' ? 'View Training' : 'View Trip';
+          tripBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> ' + btnLabel;
           tripBtn.addEventListener('click', () => openIframeModal(event.link, event.title));
           popupActions.appendChild(tripBtn);
         }
