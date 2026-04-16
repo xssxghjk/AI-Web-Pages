@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trip Calendar</title>
+  <script src="../nav.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -44,79 +45,6 @@
       font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
       -webkit-font-smoothing: antialiased;
       line-height: 1.6;
-    }
-
-    /* ── LAYOUT ── */
-    .app-layout {
-      display: flex;
-      min-height: 100vh;
-    }
-    .page-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
-    /* ── SIDEBAR ── */
-    .sidebar {
-      width: 220px;
-      flex-shrink: 0;
-      background: var(--surface);
-      border-right: 1px solid var(--border2);
-      display: flex;
-      flex-direction: column;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow-y: auto;
-    }
-    .sidebar-header {
-      padding: 0 1rem;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .sidebar-brand {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.01em;
-    }
-    .sidebar-nav {
-      padding: 0.75rem 0.5rem;
-      overflow-y: auto;
-      flex: 1;
-    }
-    .sidebar-section {
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 0.5rem 0.75rem 0.25rem;
-    }
-    .sidebar-link {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 0.55rem 0.75rem;
-      border-radius: 8px;
-      text-decoration: none;
-      color: var(--muted2);
-      font-size: 0.88rem;
-      font-weight: 500;
-      transition: color 0.15s, background 0.15s;
-    }
-    .sidebar-link:hover { color: var(--text); background: var(--surface2); }
-    .sidebar-link.active { color: var(--accent); background: var(--accent-dim); }
-    .sidebar-link svg { flex-shrink: 0; opacity: 0.7; }
-
-    @media (max-width: 700px) {
-      .sidebar { display: none; }
-      .main { margin-left: 0; margin-right: 0; }
     }
 
     /* ── HERO ── */
@@ -473,110 +401,6 @@
       background: var(--bg);
     }
 
-    /* ── MOBILE NAV HEADER ── */
-    .mobile-header {
-      display: none;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0 1rem;
-      height: 52px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border2);
-      flex-shrink: 0;
-    }
-    @media (max-width: 700px) {
-      .mobile-header { display: flex; }
-    }
-    .hamburger-btn {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 5px;
-      width: 36px;
-      height: 36px;
-      border: none;
-      background: none;
-      cursor: pointer;
-      padding: 6px;
-      border-radius: 8px;
-      transition: background 0.15s;
-      flex-shrink: 0;
-    }
-    .hamburger-btn:hover { background: var(--surface2); }
-    .hamburger-btn .hb-bar {
-      display: block;
-      width: 18px;
-      height: 2px;
-      background: var(--muted2);
-      border-radius: 2px;
-      transition: background 0.15s;
-    }
-    .hamburger-btn:hover .hb-bar { background: var(--text); }
-    .mobile-brand {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.01em;
-    }
-
-    /* ── MOBILE NAV DRAWER ── */
-    .mobile-nav-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 800;
-      background: rgba(0,0,0,0.55);
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.25s ease, visibility 0s linear 0.25s;
-    }
-    .mobile-nav-overlay.open {
-      opacity: 1;
-      visibility: visible;
-      transition: opacity 0.25s ease, visibility 0s linear 0s;
-    }
-    .mobile-nav-drawer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 260px;
-      max-width: 85vw;
-      z-index: 900;
-      background: var(--surface);
-      border-right: 1px solid var(--border2);
-      display: flex;
-      flex-direction: column;
-      transform: translateX(-100%);
-      transition: transform 0.28s cubic-bezier(0.32,0.72,0,1);
-      overflow-y: auto;
-    }
-    .mobile-nav-drawer.open {
-      transform: translateX(0);
-    }
-    .mobile-nav-drawer-header {
-      padding: 0 1rem;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .mobile-nav-close {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: none;
-      cursor: pointer;
-      border-radius: 8px;
-      color: var(--muted2);
-      transition: background 0.15s, color 0.15s;
-    }
-    .mobile-nav-close:hover { background: var(--surface2); color: var(--text); }
-
     /* ── FOOTER ── */
     footer {
       padding: 1.75rem 2rem;
@@ -595,64 +419,6 @@
   </style>
 </head>
 <body>
-
-  <div class="app-layout">
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <span class="sidebar-brand">AI Web Pages</span>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="sidebar-section">Pages</div>
-      <a class="sidebar-link active" href="./">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2.5" width="11" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M1.5 5.5h11M4.5 1v3M9.5 1v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        Calendar
-      </a>
-      <a class="sidebar-link" href="../trips/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5C4.515 1.5 2.5 3.515 2.5 6c0 3.5 4.5 6.5 4.5 6.5s4.5-3 4.5-6.5c0-2.485-2.015-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="6" r="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
-        Trips
-      </a>
-      <a class="sidebar-link" href="../tcg-tournament-reports/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 2.5h9a1 1 0 011 1v7a1 1 0 01-1 1h-9a1 1 0 01-1-1v-7a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 6h5M4.5 8.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        Tournament Reports
-      </a>
-      <a class="sidebar-link" href="../tcg-tournament-prep/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l1.5 3 3.5.5-2.5 2.5.5 3.5L7 9.5 4 11l.5-3.5L2 5l3.5-.5L7 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
-        Tournament Prep
-      </a>
-      <div class="sidebar-section" style="margin-top:0.5rem">Tools</div>
-      <a class="sidebar-link" href="../fab-deck-viewer/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        Deck Viewer
-      </a>
-      <a class="sidebar-link" href="../fab-card-memory/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="1.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="10" width="4.5" height="3" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="7.5" y="10" width="4.5" height="3" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
-        Card Memory
-      </a>
-      <a class="sidebar-link" href="../fab-pitch-simulator/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 12L6.5 2l2 5 2-2.5L12 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Pitch Simulator
-      </a>
-      <a class="sidebar-link" href="../marathon-training/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="3" r="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 12.5l1.5-4 1.5 2 1.5-2 1.5 4M7 5.5v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Marathon Training
-      </a>
-      <div class="sidebar-section" style="margin-top:0.5rem">Meta</div>
-      <a class="sidebar-link" href="../project-stats/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="7.5" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="5.5" y="4.5" width="3" height="8" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1.5" width="3" height="11" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
-        Project Stats
-      </a>
-    </nav>
-  </aside>
-  <div class="page-content">
-
-  <div class="mobile-header">
-    <button class="hamburger-btn" id="hamburger-btn" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-nav-drawer">
-      <span class="hb-bar"></span>
-      <span class="hb-bar"></span>
-      <span class="hb-bar"></span>
-    </button>
-    <span class="mobile-brand">AI Web Pages</span>
-  </div>
 
   <header class="hero">
     <h1>Trip Calendar</h1>
@@ -678,61 +444,6 @@
     <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
   </footer>
   <script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='\xb7 v'+v.version}).catch(()=>{});</script>
-
-  </div><!-- /.page-content -->
-  </div><!-- /.app-layout -->
-
-  <!-- Mobile nav overlay + drawer -->
-  <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
-  <nav class="mobile-nav-drawer" id="mobile-nav-drawer" aria-label="Navigation menu">
-    <div class="mobile-nav-drawer-header">
-      <span class="sidebar-brand">AI Web Pages</span>
-      <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Close navigation">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      </button>
-    </div>
-    <div class="sidebar-nav">
-      <div class="sidebar-section">Pages</div>
-      <a class="sidebar-link active" href="./">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2.5" width="11" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M1.5 5.5h11M4.5 1v3M9.5 1v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        Calendar
-      </a>
-      <a class="sidebar-link" href="../trips/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5C4.515 1.5 2.5 3.515 2.5 6c0 3.5 4.5 6.5 4.5 6.5s4.5-3 4.5-6.5c0-2.485-2.015-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="6" r="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
-        Trips
-      </a>
-      <a class="sidebar-link" href="../tcg-tournament-reports/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 2.5h9a1 1 0 011 1v7a1 1 0 01-1 1h-9a1 1 0 01-1-1v-7a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 6h5M4.5 8.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        Tournament Reports
-      </a>
-      <a class="sidebar-link" href="../tcg-tournament-prep/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l1.5 3 3.5.5-2.5 2.5.5 3.5L7 9.5 4 11l.5-3.5L2 5l3.5-.5L7 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
-        Tournament Prep
-      </a>
-      <div class="sidebar-section" style="margin-top:0.5rem">Tools</div>
-      <a class="sidebar-link" href="../fab-deck-viewer/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        Deck Viewer
-      </a>
-      <a class="sidebar-link" href="../fab-card-memory/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="1.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="10" width="4.5" height="3" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="7.5" y="10" width="4.5" height="3" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
-        Card Memory
-      </a>
-      <a class="sidebar-link" href="../fab-pitch-simulator/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 12L6.5 2l2 5 2-2.5L12 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Pitch Simulator
-      </a>
-      <a class="sidebar-link" href="../marathon-training/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="3" r="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 12.5l1.5-4 1.5 2 1.5-2 1.5 4M7 5.5v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Marathon Training
-      </a>
-      <div class="sidebar-section" style="margin-top:0.5rem">Meta</div>
-      <a class="sidebar-link" href="../project-stats/">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="7.5" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="5.5" y="4.5" width="3" height="8" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1.5" width="3" height="11" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
-        Project Stats
-      </a>
-    </div>
-  </nav>
 
   <!-- Iframe modal: opens internal pages without leaving the calendar -->
   <div class="iframe-modal-overlay hidden" id="iframe-modal">
@@ -1227,17 +938,8 @@
       }, { passive: true });
     }
 
-    function hideIframeHeader() {
-      const iDoc = iframeModalFrame.contentDocument;
-      if (!iDoc) return;
-      const style = iDoc.createElement('style');
-      style.textContent = 'nav { display: none !important; }';
-      iDoc.head.appendChild(style);
-    }
-
     iframeModalFrame.addEventListener('load', () => {
       setupIframeDismissGesture();
-      hideIframeHeader();
     });
 
     // Intercept FAB popup internal links (prep / report — not external event page)
@@ -1312,34 +1014,6 @@
     }, { passive: true });
   })();
 
-  // ── MOBILE NAV ──
-  (function () {
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const overlay = document.getElementById('mobile-nav-overlay');
-    const drawer = document.getElementById('mobile-nav-drawer');
-    const closeBtn = document.getElementById('mobile-nav-close');
-
-    function openNav() {
-      drawer.classList.add('open');
-      overlay.classList.add('open');
-      hamburgerBtn.setAttribute('aria-expanded', 'true');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeNav() {
-      drawer.classList.remove('open');
-      overlay.classList.remove('open');
-      hamburgerBtn.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
-    }
-
-    hamburgerBtn.addEventListener('click', openNav);
-    closeBtn.addEventListener('click', closeNav);
-    overlay.addEventListener('click', closeNav);
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeNav();
-    });
-  })();
   </script>
 
 </body>

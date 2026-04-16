@@ -30,7 +30,9 @@ test('trips page loads', async ({ page }) => {
 test('fab deck viewer page loads', async ({ page }) => {
   await page.goto('/fab-deck-viewer/');
   await expect(page).toHaveTitle(/Deck Viewer/);
-  await expect(page.locator('nav')).toBeVisible();
+  const sidebarVisible = await page.locator('.sidebar').isVisible();
+  const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();
+  expect(sidebarVisible || hamburgerVisible).toBe(true);
 });
 
 test('fab pitch simulator page loads', async ({ page }) => {
