@@ -181,6 +181,86 @@
       animation-delay: 0.15s;
     }
 
+    /* ── TIMELINE ── */
+    .timeline-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 1.4rem 1.4rem 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .timeline-header {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .timeline-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .timeline-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .timeline-wrap {
+      position: relative;
+    }
+
+    .timeline-bars {
+      display: flex;
+      align-items: flex-end;
+      height: 72px;
+      gap: 2px;
+    }
+
+    .timeline-bar {
+      flex: 1;
+      min-width: 0;
+      background: #22c55e;
+      border-radius: 2px 2px 0 0;
+      min-height: 2px;
+      opacity: 0.6;
+      transition: opacity 0.15s;
+      cursor: default;
+      position: relative;
+    }
+    .timeline-bar:hover { opacity: 1; }
+    .timeline-bar.zero {
+      background: var(--border2);
+      opacity: 0.5;
+    }
+
+    .timeline-months {
+      position: relative;
+      height: 18px;
+      margin-top: 5px;
+    }
+
+    .timeline-month-label {
+      position: absolute;
+      font-size: 0.62rem;
+      color: var(--muted);
+      transform: translateX(-50%);
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    .timeline-loading {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
     /* ── FOOTER NOTE ── */
     .fetch-note {
       text-align: center;
@@ -283,21 +363,6 @@
         <div class="stat-sub" id="stat-tests-sub">loading…</div>
       </div>
 
-      <!-- Contributors -->
-      <div class="stat-card loading" id="stat-contributors" style="--card-accent:#e879f9">
-        <div class="stat-icon">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <circle cx="7" cy="6" r="2.5" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M2 15c0-3 2.24-5 5-5s5 2 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M13 8c1.1 0 2 .9 2 2s-.9 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-            <path d="M13 14c1.5.2 2.8.9 3 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="stat-value" id="stat-contributors-val">—</div>
-        <div class="stat-label">Contributors</div>
-        <div class="stat-sub" id="stat-contributors-sub">loading…</div>
-      </div>
-
       <!-- Project Age -->
       <div class="stat-card loading" id="stat-age" style="--card-accent:#fb923c">
         <div class="stat-icon">
@@ -313,6 +378,20 @@
 
     </div>
 
+    <!-- Commit Timeline -->
+    <div class="timeline-card">
+      <div class="timeline-header">
+        <span class="timeline-title">Commit Activity</span>
+        <span class="timeline-sub">last 52 weeks</span>
+      </div>
+      <div class="timeline-wrap">
+        <div class="timeline-bars" id="timeline-bars">
+          <div class="timeline-loading" id="timeline-loading">Loading commit history…</div>
+        </div>
+        <div class="timeline-months" id="timeline-months"></div>
+      </div>
+    </div>
+
     <p class="fetch-note" id="fetch-note">Fetching live data from GitHub…</p>
   </main>
 
@@ -324,19 +403,19 @@
 
   <script>
   (function () {
-    const REPO    = 'xssxghjk/ai-web-pages';
-    const GH_API  = 'https://api.github.com/repos/' + REPO;
-    const GH_RAW  = 'https://raw.githubusercontent.com/' + REPO;
+    const REPO   = 'xssxghjk/ai-web-pages';
+    const GH_API = 'https://api.github.com/repos/' + REPO;
+    const GH_RAW = 'https://raw.githubusercontent.com/' + REPO;
 
     function setText(id, text) {
-      const el = document.getElementById(id);
+      var el = document.getElementById(id);
       if (el) el.textContent = text;
     }
 
     function setCard(valId, subId, cardId, value, sub) {
       setText(valId, value);
       setText(subId, sub);
-      const card = document.getElementById(cardId);
+      var card = document.getElementById(cardId);
       if (card) card.classList.remove('loading');
     }
 
@@ -346,29 +425,68 @@
 
     async function safeFetch(url, asText) {
       try {
-        const r = await fetch(url);
+        var r = await fetch(url);
         if (!r.ok) return null;
         return asText ? r.text() : r.json();
-      } catch { return null; }
+      } catch (e) { return null; }
+    }
+
+    // For stats endpoints that GitHub may return 202 while computing — retry with backoff.
+    async function safeStatsFetch(url) {
+      var delays = [1500, 2000, 3000];
+      for (var i = 0; i <= delays.length; i++) {
+        try {
+          var r = await fetch(url);
+          if (r.status === 202) {
+            if (i < delays.length) {
+              await new Promise(function (res) { setTimeout(res, delays[i]); });
+              continue;
+            }
+            return null;
+          }
+          if (!r.ok) return null;
+          return r.json();
+        } catch (e) { return null; }
+      }
+      return null;
+    }
+
+    // Get total commit count via Link header (reliable, no 202).
+    async function getCommitCount(branch) {
+      try {
+        var r = await fetch(GH_API + '/commits?per_page=1&sha=' + branch);
+        if (!r.ok) return null;
+        var link = r.headers.get('Link') || '';
+        var m = link.match(/[?&]page=(\d+)>;\s*rel="last"/);
+        if (m) return parseInt(m[1], 10);
+        // Only 1 page — count actual items
+        var data = await r.json();
+        return Array.isArray(data) ? data.length : null;
+      } catch (e) { return null; }
     }
 
     async function loadStats() {
       // Round 1 — parallel
-      const [repo, prData, contribs, version] = await Promise.all([
+      var round1 = await Promise.all([
         safeFetch(GH_API),
         safeFetch('https://api.github.com/search/issues?q=repo:' + REPO + '+is:pr&per_page=1'),
-        safeFetch(GH_API + '/stats/contributors'),
-        safeFetch('../version.json'),
       ]);
+      var repo   = round1[0];
+      var prData = round1[1];
 
-      const branch = (repo && repo.default_branch) || 'main';
+      var branch = (repo && repo.default_branch) || 'main';
 
       // Round 2 — parallel (needs branch from round 1)
-      const [tree, spec1, spec2] = await Promise.all([
+      var round2 = await Promise.all([
+        getCommitCount(branch),
         safeFetch(GH_API + '/git/trees/' + branch + '?recursive=1'),
         safeFetch(GH_RAW + '/' + branch + '/e2e/navigation.spec.js', true),
         safeFetch(GH_RAW + '/' + branch + '/e2e/mobile-navigation.spec.js', true),
       ]);
+      var commitCount = round2[0];
+      var tree        = round2[1];
+      var spec1       = round2[2];
+      var spec2       = round2[3];
 
       // ── Pull Requests ────────────────────────────────────────
       if (prData && typeof prData.total_count === 'number') {
@@ -378,22 +496,17 @@
         setError('stat-prs-val', 'stat-prs-sub', 'stat-prs');
       }
 
-      // ── Commits + Contributors ───────────────────────────────
-      // stats/contributors returns 202 while GitHub computes it — handle gracefully
-      if (Array.isArray(contribs) && contribs.length > 0) {
-        const totalCommits = contribs.reduce(function (sum, c) { return sum + (c.total || 0); }, 0);
+      // ── Commits ──────────────────────────────────────────────
+      if (typeof commitCount === 'number') {
         setCard('stat-commits-val', 'stat-commits-sub', 'stat-commits',
-          totalCommits.toLocaleString(), 'across all contributors');
-        setCard('stat-contributors-val', 'stat-contributors-sub', 'stat-contributors',
-          String(contribs.length), contribs.length === 1 ? 'contributor' : 'contributors');
+          commitCount.toLocaleString(), 'commits on ' + branch);
       } else {
         setError('stat-commits-val', 'stat-commits-sub', 'stat-commits');
-        setError('stat-contributors-val', 'stat-contributors-sub', 'stat-contributors');
       }
 
       // ── Pages ────────────────────────────────────────────────
       if (tree && Array.isArray(tree.tree)) {
-        const pages = tree.tree.filter(function (f) {
+        var pages = tree.tree.filter(function (f) {
           return f.type === 'blob' &&
             f.path.endsWith('.html') &&
             f.path !== '404.html' &&
@@ -438,13 +551,58 @@
         setError('stat-age-val', 'stat-age-sub', 'stat-age');
       }
 
-      // ── Timestamp ────────────────────────────────────────────
       setText('fetch-note', 'Live data · fetched ' + new Date().toLocaleTimeString());
+    }
+
+    async function loadTimeline() {
+      var activity = await safeStatsFetch(GH_API + '/stats/commit_activity');
+      var barsEl   = document.getElementById('timeline-bars');
+      var monthsEl = document.getElementById('timeline-months');
+
+      if (!Array.isArray(activity) || activity.length === 0) {
+        setText('timeline-loading', 'Timeline unavailable');
+        return;
+      }
+
+      // Clear loading placeholder
+      barsEl.innerHTML = '';
+
+      var maxTotal = Math.max.apply(null, activity.map(function (w) { return w.total; }));
+      if (maxTotal === 0) maxTotal = 1;
+
+      var monthsSeen = {};
+
+      activity.forEach(function (week, i) {
+        // Bar
+        var bar = document.createElement('div');
+        bar.className = 'timeline-bar' + (week.total === 0 ? ' zero' : '');
+        var heightPx = week.total === 0 ? 2 : Math.max(3, Math.round((week.total / maxTotal) * 72));
+        bar.style.height = heightPx + 'px';
+        var d = new Date(week.week * 1000);
+        var dateStr = d.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+        bar.title = dateStr + ': ' + week.total + (week.total === 1 ? ' commit' : ' commits');
+        barsEl.appendChild(bar);
+
+        // Month label (first week of each month)
+        var monthKey = d.getFullYear() + '-' + d.getMonth();
+        if (!monthsSeen[monthKey]) {
+          monthsSeen[monthKey] = true;
+          var label = document.createElement('span');
+          label.className = 'timeline-month-label';
+          label.textContent = d.toLocaleDateString('en', { month: 'short' });
+          // Position as percentage of 52 weeks
+          label.style.left = ((i / 52) * 100) + '%';
+          monthsEl.appendChild(label);
+        }
+      });
     }
 
     loadStats().catch(function () {
       setText('fetch-note', 'Could not reach GitHub API');
     });
+
+    // Timeline loads independently — may take retries for 202
+    loadTimeline();
   })();
   </script>
 
