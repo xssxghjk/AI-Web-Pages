@@ -130,4 +130,15 @@ test.describe('mobile navigation', () => {
     expect(calPadding.left).toBeLessThanOrEqual(4);
     expect(calPadding.right).toBeLessThanOrEqual(4);
   });
+
+  test('calendar .main fills the full viewport width on mobile', async ({ page }) => {
+    await page.goto('/calendar/');
+    const { mainWidth, vpWidth } = await page.evaluate(() => ({
+      mainWidth: document.querySelector('.main').getBoundingClientRect().width,
+      vpWidth: window.innerWidth,
+    }));
+
+    // .main must span the full viewport; the only gap should be the 4px×2 padding (≤8px total)
+    expect(mainWidth).toBeGreaterThanOrEqual(vpWidth - 8);
+  });
 });
