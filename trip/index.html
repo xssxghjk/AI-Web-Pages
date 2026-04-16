@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trip</title>
+  <script src="../nav.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -39,54 +40,6 @@
 
     a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ── NAV ── */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,10,12,0.88);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .nav-back {
-      font-size: 0.82rem;
-      color: var(--muted);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      transition: color 0.2s;
-      flex-shrink: 0;
-    }
-    .nav-back:hover { color: var(--text); }
-
-    .nav-links {
-      display: flex;
-      gap: 0.25rem;
-      list-style: none;
-      margin-left: auto;
-    }
-    .nav-links a {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--muted);
-      padding: 0.3rem 0.65rem;
-      border-radius: 6px;
-      white-space: nowrap;
-      transition: background 0.15s, color 0.15s;
-      text-decoration: none;
-    }
-    .nav-links a:hover { background: var(--surface); color: var(--text); }
-
-    .nav-sep { color: var(--border2); }
-    .nav-title { font-size: 0.88rem; font-weight: 700; color: var(--text); }
 
     /* ── HERO ── */
     .hero {
@@ -378,7 +331,6 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
-      .nav-links { display: none; }
       .event-row { flex-wrap: wrap; row-gap: 0.2rem; column-gap: 0.5rem; }
       .event-row-date { min-width: unset; flex-basis: 100%; display: flex; align-items: center; gap: 0.5rem; }
       .event-countdown { order: 2; }
@@ -500,20 +452,7 @@
 
   // ── Build page ───────────────────────────────────────────────────────────
 
-  const inIframe = window.self !== window.top;
-
   document.body.innerHTML = `
-    ${inIframe ? '' : `<nav>
-      <a class="nav-back" href="../trips/">← All Trips</a>
-      <span class="nav-sep">|</span>
-      <span class="nav-title">${esc(trip.navTitle)}</span>
-      <ul class="nav-links">
-        <li><a href="#events">Events</a></li>
-        <li><a href="#overview">Overview</a></li>
-        <li><a href="#timeline">Timeline</a></li>
-        <li><a href="#checklist">Checklist</a></li>
-      </ul>
-    </nav>`}
 
     <header class="hero">
       <h1>${esc(trip.title)}</h1>

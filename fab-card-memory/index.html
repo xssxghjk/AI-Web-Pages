@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pitch Stack Memorization</title>
+  <script src="../nav.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -30,44 +31,6 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-    }
-
-    /* ── Nav ── */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0 2rem;
-      background: rgba(10, 10, 12, 0.88);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-back {
-      font-size: 0.82rem;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.15s;
-    }
-
-    .nav-back:hover {
-      color: var(--text);
-    }
-
-    .nav-sep {
-      color: var(--border-2);
-      font-size: 0.9rem;
-    }
-
-    .nav-title {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--text);
     }
 
     /* ── Hero ── */
@@ -625,12 +588,6 @@
   </style>
 </head>
 <body>
-
-  <nav>
-    <a class="nav-back" href="../">← Home</a>
-    <span class="nav-sep">|</span>
-    <span class="nav-title">Pitch Stack Memorization</span>
-  </nav>
 
   <header class="hero">
     <h1>Pitch Stack Memorization</h1>

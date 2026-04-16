@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trips</title>
+  <script src="../nav.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -42,41 +43,6 @@
       -webkit-font-smoothing: antialiased;
       line-height: 1.6;
     }
-
-    /* ── NAV ── */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,10,12,0.88);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .nav-back {
-      font-size: 0.82rem;
-      color: var(--muted);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      transition: color 0.2s;
-      flex-shrink: 0;
-    }
-    .nav-back:hover { color: var(--text); }
-    .nav-title {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .nav-sep { color: var(--border2); }
 
     /* ── HERO ── */
     .hero {
@@ -356,12 +322,6 @@
   </style>
 </head>
 <body>
-
-  <nav>
-    <a class="nav-back" href="../">← Home</a>
-    <span class="nav-sep">|</span>
-    <span class="nav-title">Trips</span>
-  </nav>
 
   <header class="hero">
     <h1>Trips</h1>

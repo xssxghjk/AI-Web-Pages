@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Couch to Half Marathon — 20-Week Plan</title>
+<script src="../nav.js"></script>
 <style>
   :root {
     --bg: #0a0a0c;
@@ -70,16 +71,7 @@
     white-space: nowrap;
   }
   .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-  .nav-back-hub {
-    font-size: 0.75rem;
-    color: var(--text2);
-    text-decoration: none;
-    white-space: nowrap;
-    flex-shrink: 0;
-    transition: color 0.15s;
-  }
-  .nav-back-hub:hover { color: var(--text); }
-  .btn {
+.btn {
     padding: 7px 14px;
     border-radius: 8px;
     border: none;
@@ -584,7 +576,6 @@
 
 <header class="app-header">
   <div class="header-inner">
-    <a class="nav-back-hub" href="../">← Home</a>
     <div class="app-title">🏃 Couch to <span>Half Marathon</span></div>
     <div id="countdownBadge" class="countdown-badge">Loading...</div>
     <div class="header-actions" id="headerActions">
