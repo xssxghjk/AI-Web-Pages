@@ -14,6 +14,18 @@ This runs all Playwright e2e tests across both desktop (`chromium`) and mobile (
 
 **Never use the Agent tool (subagents).** Do all work directly using the available tools (Read, Edit, Write, Bash, Grep, Glob, etc.). Do not delegate tasks to subagents under any circumstances.
 
+## Versioning
+
+The project version is stored in `version.json` as `{ "version": "MAJOR.MINOR.PATCH" }` and displayed in the footer of every page.
+
+Follow semantic versioning rules when bumping the version:
+
+- **MAJOR** — a new page is added (e.g. a new tool, section, or standalone page added to the sidebar)
+- **MINOR** — a new feature is added to an existing page (e.g. new UI component, new data source, new interaction)
+- **PATCH** — a bug fix or minor correction to existing functionality
+
+When committing a change, always update `version.json` to reflect the correct bump before pushing. The footer script in every HTML page reads `v.version` from this file.
+
 ## Tournament Reports
 
 When writing the `summary` field for a tournament report, **do not include any numbers** — no digits, no written-out numbers (e.g. avoid "three losses", "two misplays", "4–2"). Describe results qualitatively instead: use terms like "strong run", "positive record", "mixed finish", "dropped with an even record", "several losses", "wall of d-reacts", etc.
