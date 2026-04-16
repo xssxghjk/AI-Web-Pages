@@ -401,26 +401,6 @@
       } catch (e) { return null; }
     }
 
-    // For stats endpoints that GitHub may return 202 while computing — retry with backoff.
-    async function safeStatsFetch(url) {
-      var delays = [1500, 2000, 3000];
-      for (var i = 0; i <= delays.length; i++) {
-        try {
-          var r = await fetch(url);
-          if (r.status === 202) {
-            if (i < delays.length) {
-              await new Promise(function (res) { setTimeout(res, delays[i]); });
-              continue;
-            }
-            return null;
-          }
-          if (!r.ok) return null;
-          return r.json();
-        } catch (e) { return null; }
-      }
-      return null;
-    }
-
     // Get total commit count via Link header (reliable, no 202).
     async function getCommitCount(branch) {
       try {
@@ -536,42 +516,71 @@
     }
 
     async function loadTimeline() {
-      var activity = await safeStatsFetch(GH_API + '/stats/commit_activity');
       var barsEl   = document.getElementById('timeline-bars');
       var monthsEl = document.getElementById('timeline-months');
 
-      if (!Array.isArray(activity) || activity.length === 0) {
+      // Fetch commits from the last 52 weeks using the reliable /commits endpoint.
+      // The stats/commit_activity endpoint returns 202 while GitHub computes stats and
+      // often never settles for less-active repos, so we build the chart ourselves.
+      var since = new Date(Date.now() - 52 * 7 * 86400 * 1000).toISOString();
+      var commits = [];
+      for (var pg = 1; pg <= 5; pg++) {
+        var chunk = await safeFetch(GH_API + '/commits?per_page=100&since=' + since + '&page=' + pg);
+        if (!Array.isArray(chunk) || chunk.length === 0) break;
+        commits = commits.concat(chunk);
+        if (chunk.length < 100) break;
+      }
+
+      if (commits.length === 0) {
         setText('timeline-loading', 'Timeline unavailable');
         return;
       }
 
-      // Clear loading placeholder
-      barsEl.innerHTML = '';
+      // Build 52 weekly buckets aligned to the current Sunday
+      var now = new Date();
+      var anchor = new Date(now);
+      anchor.setDate(now.getDate() - now.getDay());
+      anchor.setHours(0, 0, 0, 0);
 
-      var maxTotal = Math.max.apply(null, activity.map(function (w) { return w.total; }));
-      if (maxTotal === 0) maxTotal = 1;
+      var weeks = [];
+      for (var w = 51; w >= 0; w--) {
+        weeks.push({ start: new Date(anchor.getTime() - w * 7 * 86400000), count: 0 });
+      }
+
+      commits.forEach(function (c) {
+        var ds = (c.commit.author && c.commit.author.date) ||
+                 (c.commit.committer && c.commit.committer.date);
+        if (!ds) return;
+        var d = new Date(ds);
+        var sun = new Date(d.getTime() - d.getDay() * 86400000);
+        sun.setHours(0, 0, 0, 0);
+        var ts = sun.getTime();
+        for (var j = 0; j < weeks.length; j++) {
+          if (weeks[j].start.getTime() === ts) { weeks[j].count++; break; }
+        }
+      });
+
+      // Clear loading placeholder and render bars
+      barsEl.innerHTML = '';
+      var maxCount = Math.max.apply(null, weeks.map(function (w) { return w.count; }));
+      if (maxCount === 0) maxCount = 1;
 
       var monthsSeen = {};
-
-      activity.forEach(function (week, i) {
-        // Bar
+      weeks.forEach(function (week, i) {
         var bar = document.createElement('div');
-        bar.className = 'timeline-bar' + (week.total === 0 ? ' zero' : '');
-        var heightPx = week.total === 0 ? 2 : Math.max(3, Math.round((week.total / maxTotal) * 72));
+        bar.className = 'timeline-bar' + (week.count === 0 ? ' zero' : '');
+        var heightPx = week.count === 0 ? 2 : Math.max(3, Math.round((week.count / maxCount) * 72));
         bar.style.height = heightPx + 'px';
-        var d = new Date(week.week * 1000);
-        var dateStr = d.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
-        bar.title = dateStr + ': ' + week.total + (week.total === 1 ? ' commit' : ' commits');
+        var dateStr = week.start.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+        bar.title = dateStr + ': ' + week.count + (week.count === 1 ? ' commit' : ' commits');
         barsEl.appendChild(bar);
 
-        // Month label (first week of each month)
-        var monthKey = d.getFullYear() + '-' + d.getMonth();
+        var monthKey = week.start.getFullYear() + '-' + week.start.getMonth();
         if (!monthsSeen[monthKey]) {
           monthsSeen[monthKey] = true;
           var label = document.createElement('span');
           label.className = 'timeline-month-label';
-          label.textContent = d.toLocaleDateString('en', { month: 'short' });
-          // Position as percentage of 52 weeks
+          label.textContent = week.start.toLocaleDateString('en', { month: 'short' });
           label.style.left = ((i / 52) * 100) + '%';
           monthsEl.appendChild(label);
         }
@@ -582,7 +591,6 @@
       setText('fetch-note', 'Could not reach GitHub API');
     });
 
-    // Timeline loads independently — may take retries for 202
     loadTimeline();
   })();
   </script>
