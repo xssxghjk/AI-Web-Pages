@@ -74,3 +74,9 @@ test('yokohama pro tour page loads', async ({ page }) => {
   await expect(page).toHaveTitle(/.+/);
   await expect(page.locator('body')).not.toBeEmpty();
 });
+
+test('project stats page loads', async ({ page }) => {
+  await page.goto('/project-stats/');
+  await expect(page).toHaveTitle(/Project Stats/);
+  await expect(page.locator('h1')).toContainText('Project Stats');
+});

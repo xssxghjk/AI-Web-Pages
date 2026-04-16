@@ -42,6 +42,7 @@ test.describe('mobile navigation', () => {
     await expect(drawer.getByRole('link', { name: 'Card Memory' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Pitch Simulator' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Marathon Training' })).toBeVisible();
+    await expect(drawer.getByRole('link', { name: 'Project Stats' })).toBeVisible();
   });
 
   test('close button closes the nav drawer', async ({ page }) => {
