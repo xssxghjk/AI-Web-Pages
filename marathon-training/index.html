@@ -1139,7 +1139,7 @@ function setDayData(dateStr, obj) {
 let modalDate = null;
 let modalStatus = null;
 
-function openDayModal(weekNum, dayOfWeek) {
+function openDayModal(weekNum, dayOfWeek, preselectedStatus) {
   const workout = PLAN[weekNum-1][dayOfWeek];
   if (workout.type === 'rest') return;
 
@@ -1147,7 +1147,7 @@ function openDayModal(weekNum, dayOfWeek) {
   modalDate = dateKey(date);
 
   const existing = getDayData(modalDate);
-  modalStatus = existing ? existing.status : null;
+  modalStatus = preselectedStatus !== undefined ? preselectedStatus : (existing ? existing.status : null);
 
   document.getElementById('modalTitle').textContent = `${DOW[dayOfWeek]}, ${formatDate(date)}`;
   document.getElementById('modalSubtitle').textContent = `Week ${weekNum} — ${getPhase(weekNum).name}`;
@@ -1393,14 +1393,9 @@ function renderToday() {
 
 function quickCheckin(status) {
   const t = today();
-  const dateStr = dateKey(t);
-  const existing = getDayData(dateStr);
-  if (existing?.status === status) {
-    setDayData(dateStr, existing.time || existing.notes ? { ...existing, status: null } : null);
-  } else {
-    setDayData(dateStr, { ...(existing || {}), status });
-  }
-  render();
+  const wd = getWeekDayForDate(t);
+  if (!wd) return;
+  openDayModal(wd.weekNum, wd.dayOfWeek, status);
 }
 
 function renderThisWeek() {
