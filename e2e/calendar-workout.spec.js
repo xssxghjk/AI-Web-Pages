@@ -9,7 +9,7 @@ const PAST_WORKOUT_DATE = '2026-04-08';
 test.describe('workout status logic', () => {
   test('today is never marked missed', async ({ page }) => {
     await page.addInitScript((planStart) => {
-      localStorage.setItem('c2hm_v1', JSON.stringify({ planStart, days: {} }));
+      localStorage.setItem('c2hm_v1', JSON.stringify({ planStart, days: {}, version: 1 }));
     }, PLAN_START);
 
     await page.goto('/calendar/');
@@ -27,7 +27,7 @@ test.describe('workout status logic', () => {
 
   test('today cell has no red dot', async ({ page }) => {
     await page.addInitScript((planStart) => {
-      localStorage.setItem('c2hm_v1', JSON.stringify({ planStart, days: {} }));
+      localStorage.setItem('c2hm_v1', JSON.stringify({ planStart, days: {}, version: 1 }));
     }, PLAN_START);
 
     await page.goto('/calendar/');
@@ -42,7 +42,7 @@ test.describe('workout status logic', () => {
 
   test('past workout with no entry is marked missed', async ({ page }) => {
     await page.addInitScript((planStart) => {
-      localStorage.setItem('c2hm_v1', JSON.stringify({ planStart, days: {} }));
+      localStorage.setItem('c2hm_v1', JSON.stringify({ planStart, days: {}, version: 1 }));
     }, PLAN_START);
 
     await page.goto('/calendar/');
@@ -61,6 +61,7 @@ test.describe('workout status logic', () => {
       localStorage.setItem('c2hm_v1', JSON.stringify({
         planStart,
         days: { [date]: { status: 'completed' } },
+        version: 1,
       }));
     }, { planStart: PLAN_START, date: PAST_WORKOUT_DATE });
 
@@ -76,7 +77,7 @@ test.describe('workout status logic', () => {
 
   test('iso keys are sequential with no day shift', async ({ page }) => {
     await page.addInitScript((planStart) => {
-      localStorage.setItem('c2hm_v1', JSON.stringify({ planStart, days: {} }));
+      localStorage.setItem('c2hm_v1', JSON.stringify({ planStart, days: {}, version: 1 }));
     }, PLAN_START);
 
     await page.goto('/calendar/');
@@ -97,6 +98,7 @@ test.describe('workout dot position', () => {
       localStorage.setItem('c2hm_v1', JSON.stringify({
         planStart,
         days: { [date]: { status: 'completed' } },
+        version: 1,
       }));
     }, { planStart: PLAN_START, date: PAST_WORKOUT_DATE });
 
