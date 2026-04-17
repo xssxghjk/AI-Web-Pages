@@ -1,4 +1,4 @@
-# Design Guide — AI Web Pages
+# Design Guide — xssxghjk
 
 Derived from `index.html` (the landing hub). All micro-pages must follow this guide.
 
@@ -9,16 +9,16 @@ Derived from `index.html` (the landing hub). All micro-pages must follow this gu
 ```css
 :root {
   /* ── Base ── */
-  --bg:           #0a0a0c;   /* page background */
-  --surface:      #111114;   /* card / panel background */
-  --surface-2:    #18181d;   /* hover state, nested surfaces */
-  --border:       #222228;   /* dividers, card borders */
-  --border-2:     #2e2e36;   /* secondary borders, separators */
-  --accent:       #6c5ce7;   /* primary interactive color (purple) */
-  --accent-dim:   rgba(108, 92, 231, 0.15); /* accent tint for backgrounds */
-  --text:         #e2e2ea;   /* primary text */
-  --muted:        #6b6b7e;   /* secondary text, placeholders */
-  --muted-2:      #4a4a5a;   /* footer text, disabled states */
+  --bg:           #0d0d0d;   /* page background */
+  --surface:      #171717;   /* card / panel background */
+  --surface-2:    #222222;   /* hover state, nested surfaces */
+  --border:       #2d2d2d;   /* dividers, card borders */
+  --border-2:     #3d3d3d;   /* secondary borders, separators */
+  --accent:       #3b82f6;   /* primary interactive color (blue) */
+  --accent-dim:   rgba(59, 130, 246, 0.12); /* accent tint for backgrounds */
+  --text:         #e8e8e8;   /* primary text */
+  --muted:        #737373;   /* secondary text, placeholders */
+  --muted-2:      #525252;   /* footer text, disabled states */
 
   /* ── Semantic — Status (trips) ── */
   --upcoming:        #f59e0b;
@@ -35,9 +35,9 @@ Derived from `index.html` (the landing hub). All micro-pages must follow this gu
   --planning-border: rgba(20,184,166,0.25);
 
   /* ── Semantic — Tournament Tiers ── */
-  --t1:        #6c5ce7;  /* RTN / PQ — accent */
-  --t1-bg:     rgba(108,92,231,0.08);
-  --t1-border: rgba(108,92,231,0.25);
+  --t1:        #3b82f6;  /* RTN / PQ — accent */
+  --t1-bg:     rgba(59,130,246,0.08);
+  --t1-border: rgba(59,130,246,0.25);
   --t2:        #22c55e;  /* Battleground / Showdown — green */
   --t2-bg:     rgba(34,197,94,0.08);
   --t2-border: rgba(34,197,94,0.25);
@@ -57,7 +57,7 @@ Derived from `index.html` (the landing hub). All micro-pages must follow this gu
   --green:    #22c55e;
 
   /* ── Semantic — Checklist Tags ── */
-  /* hotel  → accent  (#6c5ce7) */
+  /* hotel  → accent  (#3b82f6) */
   /* event  → amber   (#f59e0b) */
   /* flight → fuchsia (#e879f9) */
   /* misc   → muted   (#94a3b8) */
@@ -107,7 +107,7 @@ font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 </nav>
 ```
 - Height: `52px`
-- Background: `rgba(10,10,12,0.88)` + `backdrop-filter: blur(12px)`
+- Background: `rgba(13,13,13,0.88)` + `backdrop-filter: blur(12px)`
 - Border-bottom: `1px solid var(--border)`
 
 ### Hero Section (micro-pages)
@@ -149,10 +149,10 @@ font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 - Toggle bar: `--surface` bg, `0.55rem 1.5rem` padding
 - Active filter badge: pill style, `--accent` tinted background + border
 - Filter pills: `0.72rem`, `600`, pill shape, `--border-2` default border
-- Active pill: `--accent-dim` bg, `rgba(108,92,231,0.45)` border, `--accent` text
+- Active pill: `--accent-dim` bg, `rgba(59,130,246,0.45)` border, `--accent` text
 
 ### Checklist Items
-- Bg: `--surface`, border: `--border`, hover border: `rgba(108,92,231,0.35)` (accent)
+- Bg: `--surface`, border: `--border`, hover border: `rgba(59,130,246,0.35)` (accent)
 - Done: `rgba(34,197,94,0.04)` bg, `rgba(34,197,94,0.2)` border
 - Checkbox done: `--green` background
 
@@ -163,7 +163,7 @@ font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 ### Footer (all pages)
 ```html
 <footer>
-  <span>Built with Claude</span>
+  <span id="page-version" style="opacity:0.65"></span>
   <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
 </footer>
 ```
@@ -195,5 +195,5 @@ font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
 - `--gold` (used in trip detail pages for calling events) = `#f59e0b` = `--upcoming` / `--t3`
 - `--purple` (used in trip detail pages for pro tour events) = `#e879f9` = `--t4`
-- `--accent2` (lighter accent, e.g. for tag text) = `#9b8ff5` (light purple)
-- Tournament prep accent (orange `#f97316` in old version) → now uses `--accent` (`#6c5ce7`) for consistency
+- `--accent2` (lighter accent, e.g. for tag text) = `#7ba7f7` (light blue)
+- Tournament prep accent (orange `#f97316` in old version) → now uses `--accent` (`#3b82f6`) for consistency

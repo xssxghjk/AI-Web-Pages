@@ -21,34 +21,34 @@
     '.page-content{flex:1;display:flex;flex-direction:column;min-width:0}' +
 
     /* sidebar */
-    '.sidebar{width:220px;flex-shrink:0;background:#111114;border-right:1px solid #2e2e36;' +
+    '.sidebar{width:220px;flex-shrink:0;background:#171717;border-right:1px solid #3d3d3d;' +
       'display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}' +
     '.sidebar-header{padding:0 1rem;height:52px;display:flex;align-items:center;' +
-      'border-bottom:1px solid #222228;flex-shrink:0}' +
-    '.sidebar-brand{font-size:0.82rem;font-weight:700;color:#e2e2ea;letter-spacing:-0.01em}' +
+      'border-bottom:1px solid #2d2d2d;flex-shrink:0}' +
+    '.sidebar-brand{font-size:0.82rem;font-weight:700;color:#e8e8e8;letter-spacing:-0.01em}' +
     '.sidebar-nav{padding:0.75rem 0.5rem;overflow-y:auto;flex:1}' +
     '.sidebar-section{font-size:0.65rem;font-weight:700;letter-spacing:0.08em;' +
-      'text-transform:uppercase;color:#6b6b7e;padding:0.5rem 0.75rem 0.25rem}' +
+      'text-transform:uppercase;color:#737373;padding:0.5rem 0.75rem 0.25rem}' +
     '.sidebar-link{display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.75rem;' +
-      'border-radius:8px;text-decoration:none;color:#9494a8;font-size:0.88rem;font-weight:500;' +
+      'border-radius:8px;text-decoration:none;color:#9a9a9a;font-size:0.88rem;font-weight:500;' +
       'transition:color 0.15s,background 0.15s}' +
-    '.sidebar-link:hover{color:#e2e2ea;background:#18181d}' +
-    '.sidebar-link.active{color:#6c5ce7;background:rgba(108,92,231,0.15)}' +
+    '.sidebar-link:hover{color:#e8e8e8;background:#222222}' +
+    '.sidebar-link.active{color:#3b82f6;background:rgba(59,130,246,0.12)}' +
     '.sidebar-link svg{flex-shrink:0;opacity:0.7}' +
     '@media(max-width:700px){.sidebar{display:none}}' +
 
     /* mobile header */
     '.mobile-header{display:none;align-items:center;gap:0.75rem;padding:0 1rem;height:52px;' +
-      'background:#111114;border-bottom:1px solid #2e2e36;flex-shrink:0}' +
+      'background:#171717;border-bottom:1px solid #3d3d3d;flex-shrink:0}' +
     '@media(max-width:700px){.mobile-header{display:flex}}' +
     '.hamburger-btn{display:flex;flex-direction:column;justify-content:center;gap:5px;' +
       'width:36px;height:36px;border:none;background:none;cursor:pointer;padding:6px;' +
       'border-radius:8px;transition:background 0.15s;flex-shrink:0}' +
-    '.hamburger-btn:hover{background:#18181d}' +
-    '.hamburger-btn .hb-bar{display:block;width:18px;height:2px;background:#9494a8;' +
+    '.hamburger-btn:hover{background:#222222}' +
+    '.hamburger-btn .hb-bar{display:block;width:18px;height:2px;background:#9a9a9a;' +
       'border-radius:2px;transition:background 0.15s}' +
-    '.hamburger-btn:hover .hb-bar{background:#e2e2ea}' +
-    '.mobile-brand{font-size:0.82rem;font-weight:700;color:#e2e2ea;letter-spacing:-0.01em}' +
+    '.hamburger-btn:hover .hb-bar{background:#e8e8e8}' +
+    '.mobile-brand{font-size:0.82rem;font-weight:700;color:#e8e8e8;letter-spacing:-0.01em}' +
 
     /* mobile nav overlay */
     '.mobile-nav-overlay{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0.55);' +
@@ -58,17 +58,17 @@
 
     /* mobile nav drawer */
     '.mobile-nav-drawer{position:fixed;top:0;left:0;bottom:0;width:260px;max-width:85vw;' +
-      'z-index:900;background:#111114;border-right:1px solid #2e2e36;' +
+      'z-index:900;background:#171717;border-right:1px solid #3d3d3d;' +
       'display:flex;flex-direction:column;' +
       'transform:translateX(-100%);transition:transform 0.28s cubic-bezier(0.32,0.72,0,1);' +
       'overflow-y:auto}' +
     '.mobile-nav-drawer.open{transform:translateX(0)}' +
     '.mobile-nav-drawer-header{padding:0 1rem;height:52px;display:flex;align-items:center;' +
-      'justify-content:space-between;border-bottom:1px solid #222228;flex-shrink:0}' +
+      'justify-content:space-between;border-bottom:1px solid #2d2d2d;flex-shrink:0}' +
     '.mobile-nav-close{display:flex;align-items:center;justify-content:center;' +
       'width:32px;height:32px;border:none;background:none;cursor:pointer;' +
-      'border-radius:8px;color:#9494a8;transition:background 0.15s,color 0.15s}' +
-    '.mobile-nav-close:hover{background:#18181d;color:#e2e2ea}';
+      'border-radius:8px;color:#9a9a9a;transition:background 0.15s,color 0.15s}' +
+    '.mobile-nav-close:hover{background:#222222;color:#e8e8e8}';
   document.head.appendChild(style);
 
   // ── Nav structure ────────────────────────────────────────────────────────
@@ -147,7 +147,7 @@
     var sidebar = document.createElement('aside');
     sidebar.className = 'sidebar';
     sidebar.innerHTML =
-      '<div class="sidebar-header"><span class="sidebar-brand">AI Web Pages</span></div>' +
+      '<div class="sidebar-header"><span class="sidebar-brand">xssxghjk</span></div>' +
       '<nav class="sidebar-nav">' + linksHtml + '</nav>';
 
     // Mobile header strip
@@ -161,7 +161,7 @@
         '<span class="hb-bar"></span>' +
         '<span class="hb-bar"></span>' +
       '</button>' +
-      '<span class="mobile-brand">AI Web Pages</span>';
+      '<span class="mobile-brand">xssxghjk</span>';
 
     // Wrap all current body children in .app-layout > .page-content
     var appLayout   = document.createElement('div');
@@ -189,7 +189,7 @@
     drawer.setAttribute('aria-label', 'Navigation menu');
     drawer.innerHTML =
       '<div class="mobile-nav-drawer-header">' +
-        '<span class="sidebar-brand">AI Web Pages</span>' +
+        '<span class="sidebar-brand">xssxghjk</span>' +
         '<button class="mobile-nav-close" id="mobile-nav-close"' +
           ' aria-label="Close navigation">' +
           '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">' +

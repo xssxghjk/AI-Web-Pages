@@ -9,22 +9,22 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0a0a0c;
-      --surface: #111114;
-      --surface2: #18181d;
-      --border: #222228;
-      --border2: #2e2e36;
-      --accent: #6c5ce7;
-      --accent-bg: rgba(108,92,231,0.08);
-      --accent-border: rgba(108,92,231,0.28);
-      --accent-dim: rgba(108,92,231,0.15);
-      --text: #e2e2ea;
-      --muted: #6b6b7e;
-      --muted2: #9494a8;
-      --muted-2: #4a4a5a;
-      --t1: #6c5ce7;
-      --t1-bg: rgba(108,92,231,0.08);
-      --t1-border: rgba(108,92,231,0.25);
+      --bg: #0d0d0d;
+      --surface: #171717;
+      --surface2: #222222;
+      --border: #2d2d2d;
+      --border2: #3d3d3d;
+      --accent: #3b82f6;
+      --accent-bg: rgba(59,130,246,0.08);
+      --accent-border: rgba(59,130,246,0.25);
+      --accent-dim: rgba(59,130,246,0.12);
+      --text: #e8e8e8;
+      --muted: #737373;
+      --muted2: #9a9a9a;
+      --muted-2: #4d4d4d;
+      --t1: #3b82f6;
+      --t1-bg: rgba(59,130,246,0.08);
+      --t1-border: rgba(59,130,246,0.25);
       --t2: #22c55e;
       --t2-bg: rgba(34,197,94,0.08);
       --t2-border: rgba(34,197,94,0.25);
@@ -49,7 +49,7 @@
     /* ── PAGE HEADER ── */
     .page-header {
       padding: 2.5rem 1.5rem 2rem;
-      background: linear-gradient(180deg, rgba(108,92,231,0.05) 0%, transparent 100%);
+      background: linear-gradient(180deg, rgba(59,130,246,0.04) 0%, transparent 100%);
       border-bottom: 1px solid var(--border);
     }
     .page-header-inner {
@@ -281,7 +281,7 @@
       padding: 0.65rem 1rem;
       transition: background 0.15s;
     }
-    .date-btn:hover { background: rgba(108,92,231,0.06); }
+    .date-btn:hover { background: rgba(59,130,246,0.06); }
     .date-label {
       font-size: 0.72rem;
       font-weight: 800;
@@ -387,7 +387,7 @@
 
     /* ── SUMMARY ── */
     .summary-card {
-      background: linear-gradient(135deg, rgba(108,92,231,0.06) 0%, rgba(108,92,231,0.02) 100%);
+      background: linear-gradient(135deg, rgba(59,130,246,0.06) 0%, rgba(59,130,246,0.02) 100%);
       border: 1px solid var(--accent-border);
       border-radius: 12px;
       padding: 1.1rem 1.4rem;
@@ -462,10 +462,10 @@
   <div id="page-content"></div>
 
   <footer>
-    <span>Built with Claude <span id="page-version" style="opacity:0.65"></span></span>
+    <span id="page-version" style="opacity:0.65"></span>
     <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
   </footer>
-  <script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='\xb7 v'+v.version}).catch(()=>{});</script>
+  <script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='v'+v.version}).catch(()=>{});</script>
 
   <script src="preps.js"></script>
   <script>

@@ -9,20 +9,20 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0a0a0c;
-      --surface: #111114;
-      --surface2: #18181d;
-      --border: #222228;
-      --border2: #2e2e36;
-      --accent: #6c5ce7;
-      --accent-dim: rgba(108,92,231,0.15);
-      --text: #e2e2ea;
-      --muted: #6b6b7e;
-      --muted2: #9494a8;
-      --muted-2: #4a4a5a;
-      --t1: #6c5ce7;
-      --t1-bg: rgba(108,92,231,0.08);
-      --t1-border: rgba(108,92,231,0.25);
+      --bg: #0d0d0d;
+      --surface: #171717;
+      --surface2: #222222;
+      --border: #2d2d2d;
+      --border2: #3d3d3d;
+      --accent: #3b82f6;
+      --accent-dim: rgba(59,130,246,0.12);
+      --text: #e8e8e8;
+      --muted: #737373;
+      --muted2: #9a9a9a;
+      --muted-2: #4d4d4d;
+      --t1: #3b82f6;
+      --t1-bg: rgba(59,130,246,0.08);
+      --t1-border: rgba(59,130,246,0.25);
       --t2: #22c55e;
       --t2-bg: rgba(34,197,94,0.08);
       --t2-border: rgba(34,197,94,0.25);
@@ -62,7 +62,7 @@
       inset: 0;
       pointer-events: none;
     }
-    .page-header.tier-1::before { background: linear-gradient(135deg, rgba(108,92,231,0.07) 0%, transparent 55%); }
+    .page-header.tier-1::before { background: linear-gradient(135deg, rgba(59,130,246,0.06) 0%, transparent 55%); }
     .page-header.tier-2::before { background: linear-gradient(135deg, rgba(34,197,94,0.07) 0%, transparent 55%); }
     .page-header.tier-3::before { background: linear-gradient(135deg, rgba(245,158,11,0.07) 0%, transparent 55%); }
     .page-header.tier-4::before { background: linear-gradient(135deg, rgba(232,121,249,0.07) 0%, transparent 55%); }
@@ -114,9 +114,9 @@
       text-transform: uppercase;
       padding: 0.2rem 0.65rem;
       border-radius: 999px;
-      background: rgba(108,92,231,0.08);
-      border: 1px solid rgba(108,92,231,0.3);
-      color: #9b8ff5;
+      background: rgba(59,130,246,0.08);
+      border: 1px solid rgba(59,130,246,0.25);
+      color: #7ba7f7;
     }
     .report-title {
       font-size: clamp(1.3rem, 3vw, 1.9rem);
@@ -400,7 +400,7 @@
       border: 1px solid;
     }
     .round-order.first  { color: #f59e0b; background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.3); }
-    .round-order.second { color: #9b8ff5; background: rgba(108,92,231,0.08); border-color: rgba(108,92,231,0.3); }
+    .round-order.second { color: #7ba7f7; background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.25); }
 
     .round-notes {
       list-style: none;
@@ -504,10 +504,10 @@
   <div id="page-content"></div>
 
   <footer>
-    <span>Built with Claude <span id="page-version" style="opacity:0.65"></span></span>
+    <span id="page-version" style="opacity:0.65"></span>
     <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
   </footer>
-  <script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='\xb7 v'+v.version}).catch(()=>{});</script>
+  <script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='v'+v.version}).catch(()=>{});</script>
 
   <script src="reports.js"></script>
   <script>

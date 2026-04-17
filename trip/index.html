@@ -9,20 +9,20 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0a0a0c;
-      --surface: #111114;
-      --surface2: #18181d;
-      --border: #222228;
-      --border2: #2e2e36;
-      --accent: #6c5ce7;
-      --accent2: #9b8ff5;
-      --accent-dim: rgba(108,92,231,0.15);
+      --bg: #0d0d0d;
+      --surface: #171717;
+      --surface2: #222222;
+      --border: #2d2d2d;
+      --border2: #3d3d3d;
+      --accent: #3b82f6;
+      --accent2: #7ba7f7;
+      --accent-dim: rgba(59,130,246,0.12);
       --gold: #f59e0b;
       --red: #ef4444;
-      --text: #e2e2ea;
-      --muted: #6b6b7e;
-      --muted2: #9494a8;
-      --muted-2: #4a4a5a;
+      --text: #e8e8e8;
+      --muted: #737373;
+      --muted2: #9a9a9a;
+      --muted-2: #4d4d4d;
       --green: #22c55e;
       --purple: #e879f9;
       --cyan: #22d3ee;
@@ -45,7 +45,7 @@
     .hero {
       padding: 1.5rem 1.5rem 1.25rem;
       text-align: center;
-      background: linear-gradient(180deg, rgba(108,92,231,0.05) 0%, transparent 100%);
+      background: linear-gradient(180deg, rgba(59,130,246,0.04) 0%, transparent 100%);
       border-bottom: 1px solid var(--border);
     }
     .hero h1 {
@@ -171,7 +171,7 @@
       transition: border-color 0.2s, background 0.2s;
       user-select: none;
     }
-    .check-item:hover { border-color: rgba(108,92,231,0.35); }
+    .check-item:hover { border-color: rgba(59,130,246,0.3); }
     .check-item.done  { background: rgba(34,197,94,0.04); border-color: rgba(34,197,94,0.2); }
 
     .check-box {
@@ -199,7 +199,7 @@
       padding: 0.18rem 0.5rem;
       border-radius: 999px;
     }
-    .tag-hotel  { background: rgba(108,92,231,0.1);  color: var(--accent2); }
+    .tag-hotel  { background: rgba(59,130,246,0.09);  color: var(--accent2); }
     .tag-event  { background: rgba(245,158,11,0.1);  color: var(--gold); }
     .tag-travel { background: rgba(34,211,238,0.1);  color: var(--cyan); }
     .tag-misc   { background: rgba(100,116,139,0.1); color: #94a3b8; }
@@ -367,7 +367,7 @@
 
   if (!trip) {
     document.title = 'Trip not found';
-    document.body.innerHTML = '<div style="padding:3rem 2rem;color:#e2e2ea;font-family:system-ui">Trip not found. <a href="../trips/" style="color:#6c5ce7">← All Trips</a></div>';
+    document.body.innerHTML = '<div style="padding:3rem 2rem;color:#e8e8e8;font-family:system-ui">Trip not found. <a href="../trips/" style="color:#3b82f6">← All Trips</a></div>';
     return;
   }
 
@@ -490,7 +490,7 @@
     </div>
 
     <footer>
-      <span>Built with Claude <span id="page-version" style="opacity:0.65"></span></span>
+      <span id="page-version" style="opacity:0.65"></span>
       <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
     </footer>
 
@@ -719,7 +719,7 @@
 
 })();
 </script>
-<script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='\xb7 v'+v.version}).catch(()=>{});</script>
+<script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='v'+v.version}).catch(()=>{});</script>
 
 </body>
 </html>
