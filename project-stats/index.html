@@ -174,6 +174,22 @@
       color: var(--muted);
     }
 
+    .timeline-view-select {
+      margin-left: auto;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--muted2);
+      font-size: 0.72rem;
+      padding: 0.2rem 0.5rem;
+      cursor: pointer;
+      outline: none;
+    }
+    .timeline-view-select:hover, .timeline-view-select:focus {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
     .timeline-wrap {
       position: relative;
     }
@@ -331,6 +347,18 @@
         <div class="stat-sub" id="stat-age-sub">loading…</div>
       </div>
 
+      <!-- Lines of Code -->
+      <div class="stat-card loading" id="stat-loc" style="--card-accent:#8b5cf6">
+        <div class="stat-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M5 6l-3 3 3 3M13 6l3 3-3 3M10 4l-2 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="stat-loc-val">—</div>
+        <div class="stat-label">Lines of Code</div>
+        <div class="stat-sub" id="stat-loc-sub">loading…</div>
+      </div>
+
       <!-- Avg PRs / Day -->
       <div class="stat-card loading" id="stat-avg-prs" style="--card-accent:#ec4899">
         <div class="stat-icon">
@@ -352,7 +380,12 @@
     <div class="timeline-card">
       <div class="timeline-header">
         <span class="timeline-title">Commit Activity</span>
-        <span class="timeline-sub">last 52 weeks</span>
+        <span class="timeline-sub" id="timeline-period-label">last 52 weeks</span>
+        <select id="timeline-view-select" class="timeline-view-select">
+          <option value="day">By Day</option>
+          <option value="week">By Week</option>
+          <option value="month">By Month</option>
+        </select>
       </div>
       <div class="timeline-wrap">
         <div class="timeline-bars" id="timeline-bars">
@@ -420,9 +453,11 @@
       var round1 = await Promise.all([
         safeFetch(GH_API),
         safeFetch('https://api.github.com/search/issues?q=repo:' + REPO + '+is:pr&per_page=1'),
+        safeFetch(GH_API + '/languages'),
       ]);
       var repo   = round1[0];
       var prData = round1[1];
+      var langs  = round1[2];
 
       var branch = (repo && repo.default_branch) || 'main';
 
@@ -512,19 +547,40 @@
         setError('stat-avg-prs-val', 'stat-avg-prs-sub', 'stat-avg-prs');
       }
 
+      // ── Lines of Code ────────────────────────────────────────
+      if (langs && typeof langs === 'object' && Object.keys(langs).length > 0) {
+        var totalBytes = Object.values(langs).reduce(function (a, b) { return a + b; }, 0);
+        var estLines = Math.round(totalBytes / 47);
+        var locStr = estLines >= 1000
+          ? '~' + (estLines / 1000).toFixed(1) + 'k'
+          : '~' + estLines;
+        var topLang = Object.entries(langs).sort(function (a, b) { return b[1] - a[1]; })[0];
+        setCard('stat-loc-val', 'stat-loc-sub', 'stat-loc',
+          locStr, 'est. lines · ' + (topLang ? topLang[0] : ''));
+      } else {
+        setError('stat-loc-val', 'stat-loc-sub', 'stat-loc');
+      }
+
       setText('fetch-note', 'Live data · fetched ' + new Date().toLocaleTimeString());
     }
 
-    async function loadTimeline() {
-      var barsEl   = document.getElementById('timeline-bars');
-      var monthsEl = document.getElementById('timeline-months');
+    async function loadTimeline(view) {
+      var barsEl      = document.getElementById('timeline-bars');
+      var monthsEl    = document.getElementById('timeline-months');
+      var periodLabel = document.getElementById('timeline-period-label');
 
-      // Fetch commits from the last 52 weeks using the reliable /commits endpoint.
-      // The stats/commit_activity endpoint returns 202 while GitHub computes stats and
-      // often never settles for less-active repos, so we build the chart ourselves.
-      var since = new Date(Date.now() - 52 * 7 * 86400 * 1000).toISOString();
+      barsEl.innerHTML = '<div class="timeline-loading" id="timeline-loading">Loading commit history…</div>';
+      if (monthsEl) monthsEl.innerHTML = '';
+
+      var daysBack, maxPages, periodText;
+      if (view === 'day')        { daysBack = 90;  maxPages = 3;  periodText = 'last 90 days'; }
+      else if (view === 'month') { daysBack = 730; maxPages = 10; periodText = 'last 24 months'; }
+      else                       { daysBack = 364; maxPages = 5;  periodText = 'last 52 weeks'; }
+      if (periodLabel) periodLabel.textContent = periodText;
+
+      var since = new Date(Date.now() - daysBack * 86400 * 1000).toISOString();
       var commits = [];
-      for (var pg = 1; pg <= 5; pg++) {
+      for (var pg = 1; pg <= maxPages; pg++) {
         var chunk = await safeFetch(GH_API + '/commits?per_page=100&since=' + since + '&page=' + pg);
         if (!Array.isArray(chunk) || chunk.length === 0) break;
         commits = commits.concat(chunk);
@@ -532,58 +588,116 @@
       }
 
       if (commits.length === 0) {
-        setText('timeline-loading', 'Timeline unavailable');
+        var ldEl = document.getElementById('timeline-loading');
+        if (ldEl) ldEl.textContent = 'Timeline unavailable';
         return;
       }
 
-      // Build 52 weekly buckets aligned to the current Sunday
-      var now = new Date();
-      var anchor = new Date(now);
-      anchor.setDate(now.getDate() - now.getDay());
-      anchor.setHours(0, 0, 0, 0);
+      var buckets = [];
+      var i, j, cd, ds;
 
-      var weeks = [];
-      for (var w = 51; w >= 0; w--) {
-        weeks.push({ start: new Date(anchor.getTime() - w * 7 * 86400000), count: 0 });
+      if (view === 'day') {
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        for (i = 89; i >= 0; i--) {
+          buckets.push({ date: new Date(today.getTime() - i * 86400000), count: 0 });
+        }
+        for (i = 0; i < commits.length; i++) {
+          ds = (commits[i].commit.author && commits[i].commit.author.date) ||
+               (commits[i].commit.committer && commits[i].commit.committer.date);
+          if (!ds) continue;
+          cd = new Date(ds); cd.setHours(0, 0, 0, 0);
+          for (j = 0; j < buckets.length; j++) {
+            if (buckets[j].date.getTime() === cd.getTime()) { buckets[j].count++; break; }
+          }
+        }
+      } else if (view === 'month') {
+        var nowM = new Date();
+        for (i = 23; i >= 0; i--) {
+          buckets.push({ date: new Date(nowM.getFullYear(), nowM.getMonth() - i, 1), count: 0 });
+        }
+        for (i = 0; i < commits.length; i++) {
+          ds = (commits[i].commit.author && commits[i].commit.author.date) ||
+               (commits[i].commit.committer && commits[i].commit.committer.date);
+          if (!ds) continue;
+          cd = new Date(ds);
+          var cy = cd.getFullYear(), cmo = cd.getMonth();
+          for (j = 0; j < buckets.length; j++) {
+            if (buckets[j].date.getFullYear() === cy && buckets[j].date.getMonth() === cmo) {
+              buckets[j].count++; break;
+            }
+          }
+        }
+      } else {
+        var nowW = new Date();
+        var anchor = new Date(nowW);
+        anchor.setDate(nowW.getDate() - nowW.getDay());
+        anchor.setHours(0, 0, 0, 0);
+        for (i = 51; i >= 0; i--) {
+          buckets.push({ date: new Date(anchor.getTime() - i * 7 * 86400000), count: 0 });
+        }
+        for (i = 0; i < commits.length; i++) {
+          ds = (commits[i].commit.author && commits[i].commit.author.date) ||
+               (commits[i].commit.committer && commits[i].commit.committer.date);
+          if (!ds) continue;
+          cd = new Date(ds);
+          var sun = new Date(cd.getTime() - cd.getDay() * 86400000);
+          sun.setHours(0, 0, 0, 0);
+          for (j = 0; j < buckets.length; j++) {
+            if (buckets[j].date.getTime() === sun.getTime()) { buckets[j].count++; break; }
+          }
+        }
       }
 
-      commits.forEach(function (c) {
-        var ds = (c.commit.author && c.commit.author.date) ||
-                 (c.commit.committer && c.commit.committer.date);
-        if (!ds) return;
-        var d = new Date(ds);
-        var sun = new Date(d.getTime() - d.getDay() * 86400000);
-        sun.setHours(0, 0, 0, 0);
-        var ts = sun.getTime();
-        for (var j = 0; j < weeks.length; j++) {
-          if (weeks[j].start.getTime() === ts) { weeks[j].count++; break; }
-        }
-      });
-
-      // Clear loading placeholder and render bars
       barsEl.innerHTML = '';
-      var maxCount = Math.max.apply(null, weeks.map(function (w) { return w.count; }));
+      var maxCount = Math.max.apply(null, buckets.map(function (b) { return b.count; }));
       if (maxCount === 0) maxCount = 1;
 
       var monthsSeen = {};
-      weeks.forEach(function (week, i) {
+      for (i = 0; i < buckets.length; i++) {
+        var bucket = buckets[i];
         var bar = document.createElement('div');
-        bar.className = 'timeline-bar' + (week.count === 0 ? ' zero' : '');
-        var heightPx = week.count === 0 ? 2 : Math.max(3, Math.round((week.count / maxCount) * 72));
+        bar.className = 'timeline-bar' + (bucket.count === 0 ? ' zero' : '');
+        var heightPx = bucket.count === 0 ? 2 : Math.max(3, Math.round((bucket.count / maxCount) * 72));
         bar.style.height = heightPx + 'px';
-        var dateStr = week.start.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
-        bar.title = dateStr + ': ' + week.count + (week.count === 1 ? ' commit' : ' commits');
+
+        var tooltipDate;
+        if (view === 'day') {
+          tooltipDate = bucket.date.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+        } else if (view === 'month') {
+          tooltipDate = bucket.date.toLocaleDateString('en', { month: 'short', year: 'numeric' });
+        } else {
+          tooltipDate = 'Week of ' + bucket.date.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        bar.title = tooltipDate + ': ' + bucket.count + (bucket.count === 1 ? ' commit' : ' commits');
         barsEl.appendChild(bar);
 
-        var monthKey = week.start.getFullYear() + '-' + week.start.getMonth();
-        if (!monthsSeen[monthKey]) {
-          monthsSeen[monthKey] = true;
-          var label = document.createElement('span');
-          label.className = 'timeline-month-label';
-          label.textContent = week.start.toLocaleDateString('en', { month: 'short' });
-          label.style.left = ((i / 52) * 100) + '%';
-          monthsEl.appendChild(label);
+        var mKey = bucket.date.getFullYear() + '-' + bucket.date.getMonth();
+        var showLbl = view === 'month'
+          ? (bucket.date.getMonth() % 3 === 0 && !monthsSeen[mKey])
+          : !monthsSeen[mKey];
+        if (showLbl) {
+          monthsSeen[mKey] = true;
+          var lbl = document.createElement('span');
+          lbl.className = 'timeline-month-label';
+          lbl.textContent = (view === 'month' && bucket.date.getMonth() === 0)
+            ? String(bucket.date.getFullYear())
+            : bucket.date.toLocaleDateString('en', { month: 'short' });
+          lbl.style.left = ((i / buckets.length) * 100) + '%';
+          monthsEl.appendChild(lbl);
         }
+      }
+    }
+
+    var LS_VIEW_KEY = 'project-stats-timeline-view';
+    var viewSel = document.getElementById('timeline-view-select');
+    var currentView = localStorage.getItem(LS_VIEW_KEY) || 'week';
+    if (viewSel) {
+      viewSel.value = currentView;
+      viewSel.addEventListener('change', function () {
+        currentView = viewSel.value;
+        localStorage.setItem(LS_VIEW_KEY, currentView);
+        loadTimeline(currentView);
       });
     }
 
@@ -591,7 +705,7 @@
       setText('fetch-note', 'Could not reach GitHub API');
     });
 
-    loadTimeline();
+    loadTimeline(currentView);
   })();
   </script>
 
