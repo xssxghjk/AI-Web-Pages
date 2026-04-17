@@ -490,12 +490,12 @@
   .week-grid-scroll::-webkit-scrollbar { display: none; }
 
   /* Responsive */
-  @media (max-width: 640px) {
-    .week-grid { grid-template-columns: repeat(7, 72px); gap: 5px; min-width: max-content; }
-    .day-cell { padding: 8px 5px; min-height: 80px; }
-    .day-name { font-size: 10px; }
-    .day-date { font-size: 11px; }
-    .day-workout-short { font-size: 10px; }
+  @media (max-width: 700px) {
+    .week-grid { grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .day-cell { padding: 6px 4px; min-height: 75px; }
+    .day-name { font-size: 9px; }
+    .day-date { font-size: 10px; }
+    .day-workout-short { font-size: 9px; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
     .main { padding: 12px; }
     .modal-actions { grid-template-columns: 1fr; }
