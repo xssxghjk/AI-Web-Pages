@@ -1229,12 +1229,34 @@ function today() {
 // ============================================================
 const LS_KEY = 'c2hm_v1';
 
+// Migrate data saved by old code that used toISOString() (UTC dates).
+// For UTC+ users, local midnight is the previous UTC day, so entries were
+// stored 1 day early. Shift all date keys +1 day and mark version: 1.
+function migrateLegacyData(data) {
+  if (data.version >= 1) return data;
+  function shiftIso(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    const nd = new Date(y, m - 1, d + 1);
+    return nd.getFullYear() + '-' + String(nd.getMonth() + 1).padStart(2, '0') + '-' + String(nd.getDate()).padStart(2, '0');
+  }
+  if (new Date().getTimezoneOffset() < 0) {
+    const newDays = {};
+    for (const [k, v] of Object.entries(data.days || {})) newDays[shiftIso(k)] = v;
+    data.days = newDays;
+    if (data.planStart) data.planStart = shiftIso(data.planStart);
+    if (data.pause && data.pause.since) data.pause.since = shiftIso(data.pause.since);
+  }
+  data.version = 1;
+  saveData(data);
+  return data;
+}
+
 function loadData() {
   try {
     const raw = localStorage.getItem(LS_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) return migrateLegacyData(JSON.parse(raw));
   } catch(e) {}
-  return { days: {}, pause: null, planStart: null };
+  return { days: {}, pause: null, planStart: null, version: 1 };
 }
 
 // Returns the Sunday of the week containing the plan start date, or null if not started
@@ -1875,6 +1897,7 @@ function render() {
 // ============================================================
 function startTraining() {
   appData.planStart = dateKey(today());
+  appData.version = 1;
   saveData(appData);
   render();
 }

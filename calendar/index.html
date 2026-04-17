@@ -490,12 +490,29 @@
       const data = JSON.parse(raw);
       if (!data.planStart) return;
 
+      // Old marathon-training used toISOString() (UTC dates). For UTC+ users,
+      // local midnight is the previous UTC day, so entries were stored 1 day early.
+      // Shift all keys +1 day in-memory when no version field is present.
+      function shiftIso(iso) {
+        const [y, m, d] = iso.split('-').map(Number);
+        const nd = new Date(y, m - 1, d + 1);
+        return nd.getFullYear() + '-' + String(nd.getMonth() + 1).padStart(2, '0') + '-' + String(nd.getDate()).padStart(2, '0');
+      }
+      let days = data.days || {};
+      let planStart = data.planStart;
+      if (!data.version && new Date().getTimezoneOffset() < 0) {
+        const shifted = {};
+        for (const [k, v] of Object.entries(days)) shifted[shiftIso(k)] = v;
+        days = shifted;
+        planStart = shiftIso(planStart);
+      }
+
       const REST_DAYS = [
         [0,1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],
         [1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[0,1,5],[1,5],[0,1,5],[1,3,5,6]
       ];
 
-      const start = new Date(data.planStart + 'T00:00:00');
+      const start = new Date(planStart + 'T00:00:00');
       const week1Sun = new Date(start.getTime() - start.getDay() * 86400000);
       week1Sun.setHours(0, 0, 0, 0);
 
@@ -510,7 +527,7 @@
 
           if (REST_DAYS[w].includes(d)) continue; // rest days get no dot
 
-          const entry = data.days && data.days[iso];
+          const entry = days[iso];
           if (entry && (entry.status === 'completed' || entry.status === 'modified')) {
             window.WORKOUT_STATUS[iso] = 'done';
           } else if (dt.getTime() < todayMs) {
@@ -677,9 +694,9 @@
       if (hasFabEvent) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-fab-event"></div><span>FaB Events</span></div>`);
       const ws = window.WORKOUT_STATUS || {};
       const vals = Object.values(ws);
-      if (vals.some(v => v === 'done'))    items.push('<div class="cal-legend-item"><div class="workout-dot wd-done" style="margin:0"></div><span>Workout done</span></div>');
-      if (vals.some(v => v === 'skipped')) items.push('<div class="cal-legend-item"><div class="workout-dot wd-skipped" style="margin:0"></div><span>Workout skipped</span></div>');
-      if (vals.some(v => v === 'missed'))  items.push('<div class="cal-legend-item"><div class="workout-dot wd-missed" style="margin:0"></div><span>Workout missed</span></div>');
+      if (vals.some(v => v === 'done'))    items.push('<div class="cal-legend-item"><div class="workout-dot wd-done" style="position:static;flex-shrink:0"></div><span>Workout done</span></div>');
+      if (vals.some(v => v === 'skipped')) items.push('<div class="cal-legend-item"><div class="workout-dot wd-skipped" style="position:static;flex-shrink:0"></div><span>Workout skipped</span></div>');
+      if (vals.some(v => v === 'missed'))  items.push('<div class="cal-legend-item"><div class="workout-dot wd-missed" style="position:static;flex-shrink:0"></div><span>Workout missed</span></div>');
       legend.innerHTML = items.join('');
     }
 
