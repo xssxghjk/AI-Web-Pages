@@ -1193,7 +1193,7 @@ function getDateForWeekDay(weekNum, dayOfWeek) {
   const week1Sun = getWeek1Sun();
   if (!week1Sun) return null;
   const offsetDays = (weekNum - 1) * 7 + dayOfWeek;
-  return new Date(week1Sun.getTime() + offsetDays * 86400000);
+  return new Date(week1Sun.getFullYear(), week1Sun.getMonth(), week1Sun.getDate() + offsetDays);
 }
 
 // Get week number and day index for a given date
@@ -1209,7 +1209,9 @@ function getWeekDayForDate(date) {
 }
 
 function dateKey(date) {
-  return date.toISOString().slice(0, 10);
+  return date.getFullYear() + '-' +
+    String(date.getMonth() + 1).padStart(2, '0') + '-' +
+    String(date.getDate()).padStart(2, '0');
 }
 
 function formatDate(date) {
