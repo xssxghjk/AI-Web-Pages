@@ -198,7 +198,9 @@
       display: flex;
       align-items: flex-end;
       height: 72px;
-      gap: 2px;
+      gap: 4px;
+      padding-top: 20px;
+      box-sizing: content-box;
     }
 
     .timeline-bar {
@@ -217,6 +219,19 @@
       background: var(--border2);
       opacity: 0.5;
     }
+
+    .bar-count {
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.6rem;
+      color: var(--muted);
+      white-space: nowrap;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .timeline-bar:not(.zero) .bar-count { color: var(--text); opacity: 0.8; }
 
     .timeline-months {
       position: relative;
@@ -573,9 +588,9 @@
       if (monthsEl) monthsEl.innerHTML = '';
 
       var daysBack, maxPages, periodText;
-      if (view === 'day')        { daysBack = 90;  maxPages = 3;  periodText = 'last 90 days'; }
-      else if (view === 'month') { daysBack = 730; maxPages = 10; periodText = 'last 24 months'; }
-      else                       { daysBack = 364; maxPages = 5;  periodText = 'last 52 weeks'; }
+      if (view === 'day')        { daysBack = 10;  maxPages = 1;  periodText = 'last 10 days'; }
+      else if (view === 'month') { daysBack = 305; maxPages = 4;  periodText = 'last 10 months'; }
+      else                       { daysBack = 70;  maxPages = 1;  periodText = 'last 10 weeks'; }
       if (periodLabel) periodLabel.textContent = periodText;
 
       var since = new Date(Date.now() - daysBack * 86400 * 1000).toISOString();
@@ -599,7 +614,7 @@
       if (view === 'day') {
         var today = new Date();
         today.setHours(0, 0, 0, 0);
-        for (i = 89; i >= 0; i--) {
+        for (i = 9; i >= 0; i--) {
           buckets.push({ date: new Date(today.getTime() - i * 86400000), count: 0 });
         }
         for (i = 0; i < commits.length; i++) {
@@ -613,7 +628,7 @@
         }
       } else if (view === 'month') {
         var nowM = new Date();
-        for (i = 23; i >= 0; i--) {
+        for (i = 9; i >= 0; i--) {
           buckets.push({ date: new Date(nowM.getFullYear(), nowM.getMonth() - i, 1), count: 0 });
         }
         for (i = 0; i < commits.length; i++) {
@@ -633,7 +648,7 @@
         var anchor = new Date(nowW);
         anchor.setDate(nowW.getDate() - nowW.getDay());
         anchor.setHours(0, 0, 0, 0);
-        for (i = 51; i >= 0; i--) {
+        for (i = 9; i >= 0; i--) {
           buckets.push({ date: new Date(anchor.getTime() - i * 7 * 86400000), count: 0 });
         }
         for (i = 0; i < commits.length; i++) {
@@ -653,7 +668,6 @@
       var maxCount = Math.max.apply(null, buckets.map(function (b) { return b.count; }));
       if (maxCount === 0) maxCount = 1;
 
-      var monthsSeen = {};
       for (i = 0; i < buckets.length; i++) {
         var bucket = buckets[i];
         var bar = document.createElement('div');
@@ -670,22 +684,25 @@
           tooltipDate = 'Week of ' + bucket.date.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
         }
         bar.title = tooltipDate + ': ' + bucket.count + (bucket.count === 1 ? ' commit' : ' commits');
+
+        var countEl = document.createElement('span');
+        countEl.className = 'bar-count';
+        countEl.textContent = bucket.count;
+        bar.appendChild(countEl);
+
         barsEl.appendChild(bar);
 
-        var mKey = bucket.date.getFullYear() + '-' + bucket.date.getMonth();
-        var showLbl = view === 'month'
-          ? (bucket.date.getMonth() % 3 === 0 && !monthsSeen[mKey])
-          : !monthsSeen[mKey];
-        if (showLbl) {
-          monthsSeen[mKey] = true;
-          var lbl = document.createElement('span');
-          lbl.className = 'timeline-month-label';
-          lbl.textContent = (view === 'month' && bucket.date.getMonth() === 0)
-            ? String(bucket.date.getFullYear())
-            : bucket.date.toLocaleDateString('en', { month: 'short' });
-          lbl.style.left = ((i / buckets.length) * 100) + '%';
-          monthsEl.appendChild(lbl);
+        var lbl = document.createElement('span');
+        lbl.className = 'timeline-month-label';
+        if (view === 'day') {
+          lbl.textContent = bucket.date.toLocaleDateString('en', { month: 'short', day: 'numeric' });
+        } else if (view === 'month') {
+          lbl.textContent = bucket.date.toLocaleDateString('en', { month: 'short', year: '2-digit' });
+        } else {
+          lbl.textContent = bucket.date.toLocaleDateString('en', { month: 'short', day: 'numeric' });
         }
+        lbl.style.left = ((i / buckets.length) * 100) + '%';
+        monthsEl.appendChild(lbl);
       }
     }
 
