@@ -3,13 +3,13 @@ import { test, expect } from '@playwright/test';
 test('home redirects to calendar', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL(/\/calendar\//);
-  await expect(page).toHaveTitle(/Trip Calendar/);
+  await expect(page).toHaveTitle(/Calendar/);
 });
 
 test('calendar page loads', async ({ page }) => {
   await page.goto('/calendar/');
-  await expect(page).toHaveTitle(/Trip Calendar/);
-  await expect(page.locator('h1')).toContainText('Trip Calendar');
+  await expect(page).toHaveTitle(/Calendar/);
+  await expect(page.locator('h1')).toContainText('Calendar');
   // Navigation is accessible via sidebar (desktop) or hamburger button (mobile)
   const sidebarVisible = await page.locator('.sidebar').isVisible();
   const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();
