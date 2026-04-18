@@ -78,8 +78,8 @@
   .app-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; }
   .app-title span { color: var(--accent); }
   .countdown-badge {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 20px;
+    background: var(--accent);
+    border-radius: 4px;
     padding: 4px 12px;
     font-size: 12px;
     font-weight: 600;
@@ -184,7 +184,7 @@
   .progress-bar-fill {
     height: 100%;
     border-radius: 99px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    background: var(--accent);
     transition: width 0.5s ease;
   }
   .progress-label {
@@ -204,39 +204,25 @@
     50%       { opacity: 0.85; transform: scale(1.05); }
   }
   .today-card {
-    background: linear-gradient(135deg, rgba(74,124,31,0.08) 0%, rgba(181,128,58,0.05) 100%);
+    background: rgba(74,124,31,0.06);
     border: 2px solid var(--accent);
     border-radius: 12px;
     padding: 22px;
     margin-bottom: 16px;
     animation: today-glow 3s ease-in-out infinite;
-    position: relative;
-    overflow: hidden;
-  }
-  .today-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(74,124,31,0.04) 0%, rgba(181,128,58,0.03) 100%);
-    pointer-events: none;
   }
   .today-badge {
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    background: var(--accent);
     color: #fff;
-    border-radius: 6px;
+    border-radius: 4px;
     padding: 4px 12px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    display: inline-block;
     margin-bottom: 12px;
-    animation: badge-pulse 2.5s ease-in-out infinite;
-    box-shadow: 0 2px 10px rgba(74,124,31,0.35);
   }
-  .today-badge::before { content: '▶'; font-size: 9px; }
   .today-workout-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 6px; }
   .today-workout-desc { color: var(--text2); margin-bottom: 16px; font-size: 14px; line-height: 1.55; }
   .checkin-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -552,7 +538,7 @@
 
   /* Race Countdown Hero */
   .race-hero {
-    background: linear-gradient(135deg, rgba(74,124,31,0.1) 0%, rgba(181,128,58,0.07) 100%);
+    background: rgba(74,124,31,0.06);
     border: 1px solid rgba(74,124,31,0.3);
     border-radius: 12px;
     padding: 18px 24px;
@@ -567,10 +553,7 @@
     font-size: 56px;
     font-weight: 900;
     line-height: 1;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--accent);
     flex-shrink: 0;
   }
   .race-hero-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); margin-top: 2px; }
@@ -614,7 +597,7 @@
   .start-detail-value { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--accent); }
   .start-detail-label { font-size: 11px; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
   .btn-start {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    background: var(--accent);
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -723,12 +706,12 @@
 
 <header class="app-header">
   <div class="header-inner">
-    <div class="app-title">🏃 Couch to <span>Half Marathon</span></div>
+    <div class="app-title">Couch to <span>Half Marathon</span></div>
     <div id="countdownBadge" class="countdown-badge">Loading...</div>
     <div class="header-actions" id="headerActions">
-      <button class="btn btn-ghost btn-sm" onclick="exportData()">⬆ Export</button>
-      <button class="btn btn-ghost btn-sm" onclick="togglePause()">⏸ Pause</button>
-      <button class="btn btn-danger btn-sm" onclick="confirmReset()">↺ Reset</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportData()">Export</button>
+      <button class="btn btn-ghost btn-sm" onclick="togglePause()">Pause</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmReset()">Reset</button>
     </div>
   </div>
 </header>
@@ -737,7 +720,6 @@
 <div id="startScreen" class="hidden">
   <div class="start-screen">
     <div class="start-card">
-      <div class="start-icon">🏃</div>
       <div class="start-title">Couch to <span>Half Marathon</span></div>
       <div class="start-sub">A 20-week plan taking you from zero to 21.1 km. Start whenever you're ready — your plan will begin from today.</div>
       <div class="start-details">
@@ -761,16 +743,15 @@
 </div>
 
 <nav class="nav-tabs" id="navTabs">
-  <div class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Dashboard</div>
-  <div class="nav-tab" data-tab="calendar" onclick="switchTab('calendar')">📅 This Week</div>
-  <div class="nav-tab" data-tab="heatmap" onclick="switchTab('heatmap')">🔥 Activity</div>
-  <div class="nav-tab" data-tab="progress" onclick="switchTab('progress')">📈 Progress</div>
+  <div class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</div>
+  <div class="nav-tab" data-tab="calendar" onclick="switchTab('calendar')">This Week</div>
+  <div class="nav-tab" data-tab="heatmap" onclick="switchTab('heatmap')">Activity</div>
+  <div class="nav-tab" data-tab="progress" onclick="switchTab('progress')">Progress</div>
 </nav>
 
 <div id="pauseBanner" class="hidden">
   <div class="main" style="padding-top:0; padding-bottom:0;">
     <div class="pause-banner">
-      <span>⚠️</span>
       <span class="pause-text" id="pauseText">Training is paused.</span>
       <button class="btn btn-sm btn-ghost" onclick="resumeTraining()">Resume Training</button>
     </div>
@@ -811,7 +792,7 @@
 
     <!-- Overall Progress -->
     <div class="card">
-      <div class="card-title"><span class="icon">🎯</span> Overall Progress</div>
+      <div class="card-title">Overall Progress</div>
       <div class="progress-label">
         <span id="progWeekLabel">Week 1 of 20</span>
         <span id="progPct">0%</span>
@@ -825,7 +806,7 @@
 
     <!-- This Week -->
     <div class="card" id="thisWeekCard">
-      <div class="card-title"><span class="icon">📆</span> This Week</div>
+      <div class="card-title">This Week</div>
       <div id="thisWeekGrid"></div>
     </div>
   </div>
@@ -846,7 +827,7 @@
       <div class="section-sub">Your training consistency at a glance</div>
     </div>
     <div class="card">
-      <div class="card-title"><span class="icon">🔥</span> Activity Heat Map</div>
+      <div class="card-title">Activity Heat Map</div>
       <div class="heatmap-grid" id="heatmapGrid"></div>
       <div class="heatmap-labels">
         <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--success)"></span> Completed</span>
@@ -857,7 +838,7 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-title"><span class="icon">📊</span> Weekly Summary</div>
+      <div class="card-title">Weekly Summary</div>
       <div id="weeklySummaryList"></div>
     </div>
   </div>
@@ -880,9 +861,9 @@
     <div class="modal-subtitle" id="modalSubtitle"></div>
     <div class="modal-workout" id="modalWorkout"></div>
     <div class="modal-actions">
-      <button class="modal-btn" id="btnCompleted" onclick="setStatus('completed')">✅ Completed</button>
-      <button class="modal-btn" id="btnSkipped" onclick="setStatus('skipped')">⏭️ Skipped</button>
-      <button class="modal-btn" id="btnModified" onclick="setStatus('modified')">🔄 Modified</button>
+      <button class="modal-btn" id="btnCompleted" onclick="setStatus('completed')">Completed</button>
+      <button class="modal-btn" id="btnSkipped" onclick="setStatus('skipped')">Skipped</button>
+      <button class="modal-btn" id="btnModified" onclick="setStatus('modified')">Modified</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div class="form-group">
@@ -909,7 +890,7 @@
 <!-- Pause Modal -->
 <div id="pauseModal" class="modal-overlay hidden" onclick="closePauseOutside(event)">
   <div class="modal">
-    <div class="modal-title">⏸ Pause Training</div>
+    <div class="modal-title">Pause Training</div>
     <div class="modal-subtitle">Pausing will shift your schedule forward</div>
     <div class="form-group">
       <label class="form-label">Reason</label>
@@ -929,7 +910,7 @@
 <!-- Export Modal -->
 <div id="exportModal" class="modal-overlay hidden" onclick="closeExportOutside(event)">
   <div class="modal">
-    <div class="modal-title">⬆ Export Data</div>
+    <div class="modal-title">Export Data</div>
     <div class="modal-subtitle">Copy your training data as JSON</div>
     <div class="export-area" id="exportArea"></div>
     <div class="modal-footer" style="margin-top:12px;">
@@ -950,7 +931,7 @@
     </div>
     <div class="timer-summary" id="timerSummary"></div>
     <div class="timer-controls">
-      <button class="btn btn-ghost" id="btnTimerPause" onclick="toggleTimerPause()">⏸ Pause</button>
+      <button class="btn btn-ghost" id="btnTimerPause" onclick="toggleTimerPause()">Pause</button>
       <button class="btn btn-danger" onclick="closeTimerModal()">✕ Stop</button>
     </div>
   </div>
@@ -1200,7 +1181,7 @@ function buildPlan() {
 
   // Week 20 (Race Week)
   weeks.push([
-    { type:'race', short:'RACE DAY! 🏅', desc:'HALF MARATHON RACE DAY! You\'ve done the work. Trust your training, enjoy the journey, and cross that finish line! 21.1km — you\'ve got this! 🎉' }, // Sun
+    { type:'race', short:'RACE DAY', desc:'Half Marathon Race Day. You\'ve done the work. Trust your training, enjoy the journey, and cross that finish line — 21.1km.' }, // Sun
     rest(), // Mon
     R('20 min easy','Short easy 20 min run. Stay relaxed, don\'t do anything new.'), // Tue
     rest(), // Wed — rest
@@ -1332,7 +1313,7 @@ function openDayModal(weekNum, dayOfWeek) {
   document.getElementById('modalSubtitle').textContent = `Week ${weekNum} — ${getPhase(weekNum).name}`;
   const modalIntervals = workout.type === 'run' ? parseIntervals(workout.desc) : null;
   const modalTimerBtn = modalIntervals
-    ? `<div style="margin-top:10px;"><button onclick="closeModal();openTimerForWorkout(${modalIntervals.runDuration},${modalIntervals.walkDuration},${modalIntervals.reps})" style="background:rgba(81,207,102,0.12);border:1px solid var(--success);color:var(--success);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">⏱ Start Interval Timer</button></div>`
+    ? `<div style="margin-top:10px;"><button onclick="closeModal();openTimerForWorkout(${modalIntervals.runDuration},${modalIntervals.walkDuration},${modalIntervals.reps})" style="background:rgba(81,207,102,0.12);border:1px solid var(--success);color:var(--success);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">Start Interval Timer</button></div>`
     : '';
   document.getElementById('modalWorkout').innerHTML = `
     <span class="tag tag-${workout.type}">${workout.type}</span>
@@ -1477,10 +1458,10 @@ function renderStats() {
   const racePct = Math.min(100, Math.round(elapsed / totalDays * 100));
 
   // Race hero
-  document.getElementById('heroRaceDays').textContent = daysToRace > 0 ? daysToRace : '🏅';
+  document.getElementById('heroRaceDays').textContent = daysToRace > 0 ? daysToRace : '!';
   document.getElementById('heroRaceDate').textContent = daysToRace > 0
     ? `Race: Sun ${raceDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
-    : 'Race Day — Go get it! 🎉';
+    : 'Race Day';
   document.getElementById('heroPhaseLabel').textContent = getPhase(s.currentWeek).name + ` · Week ${s.currentWeek}/20`;
   document.getElementById('heroProgPct').textContent = racePct + '%';
   document.getElementById('heroProgBar').style.width = racePct + '%';
@@ -1512,8 +1493,8 @@ function renderStats() {
   document.getElementById('progPct').textContent = pct + '%';
   document.getElementById('progWeekLabel').textContent = `Week ${s.currentWeek} of 20`;
   document.getElementById('phaseLabel').textContent = getPhase(s.currentWeek).name;
-  document.getElementById('raceCountdown').textContent = daysToRace > 0 ? `Race in ${daysToRace} days` : '🏅 Race Day!';
-  document.getElementById('countdownBadge').textContent = daysToRace > 0 ? `${daysToRace} days to race` : '🏅 Race Day!';
+  document.getElementById('raceCountdown').textContent = daysToRace > 0 ? `Race in ${daysToRace} days` : 'Race Day';
+  document.getElementById('countdownBadge').textContent = daysToRace > 0 ? `${daysToRace} days to race` : 'Race Day';
 }
 
 function renderToday() {
@@ -1534,10 +1515,10 @@ function renderToday() {
 
   const statusHtml = dd ? `
     <div style="margin-bottom:12px;">
-      ${dd.status === 'completed' ? '<span style="color:var(--success)">✅ Completed</span>' : ''}
-      ${dd.status === 'skipped' ? '<span style="color:var(--danger)">⏭️ Skipped</span>' : ''}
-      ${dd.status === 'modified' ? '<span style="color:var(--warning)">🔄 Modified</span>' : ''}
-      ${dd.time ? `<span style="color:var(--text2);font-size:12px;margin-left:8px">⏱ ${dd.time} min</span>` : ''}
+      ${dd.status === 'completed' ? '<span style="color:var(--success)">Completed</span>' : ''}
+      ${dd.status === 'skipped' ? '<span style="color:var(--danger)">Skipped</span>' : ''}
+      ${dd.status === 'modified' ? '<span style="color:var(--warning)">Modified</span>' : ''}
+      ${dd.time ? `<span style="color:var(--text2);font-size:12px;margin-left:8px">${dd.time} min</span>` : ''}
       ${dd.km ? `<span style="color:var(--accent2);font-size:12px;margin-left:8px">📍 ${dd.km} km</span>` : ''}
       ${dd.notes ? `<div class="inline-note">"${dd.notes}"</div>` : ''}
     </div>
@@ -1547,34 +1528,30 @@ function renderToday() {
     sec.innerHTML = `
       <div class="today-card">
         <div class="today-badge">Today</div>
-        <div class="today-workout-title">😴 Rest Day</div>
+        <div class="today-workout-title">Rest Day</div>
         <div class="today-workout-desc">${workout.desc}</div>
       </div>
     `;
     return;
   }
 
-  const typeIcon = { run:'🏃', strength:'💪', cross:'🚴', race:'🏅' }[workout.type] || '📋';
   const intervals = workout.type === 'run' ? parseIntervals(workout.desc) : null;
   const timerBtnHtml = intervals
-    ? `<button class="btn-checkin" onclick="openTimerForWorkout(${intervals.runDuration},${intervals.walkDuration},${intervals.reps})" style="width:100%;margin-bottom:10px;border-color:var(--success);color:var(--success);background:rgba(81,207,102,0.08);">⏱ Interval Timer · ${fmtDur(intervals.runDuration)} run / ${fmtDur(intervals.walkDuration)} walk × ${intervals.reps}</button>`
+    ? `<button class="btn-checkin" onclick="openTimerForWorkout(${intervals.runDuration},${intervals.walkDuration},${intervals.reps})" style="width:100%;margin-bottom:10px;border-color:var(--success);color:var(--success);background:rgba(81,207,102,0.08);">Interval Timer · ${fmtDur(intervals.runDuration)} run / ${fmtDur(intervals.walkDuration)} walk × ${intervals.reps}</button>`
     : '';
 
   sec.innerHTML = `
     <div class="today-card">
       <div class="today-badge">Today — Week ${weekNum} ${phase.name}</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-        <span style="font-size:24px">${typeIcon}</span>
-        <div class="today-workout-title">${workout.short}</div>
-      </div>
+      <div class="today-workout-title">${workout.short}</div>
       <div class="today-workout-desc">${workout.desc}</div>
       ${statusHtml}
       ${timerBtnHtml}
       <div class="checkin-buttons">
-        <button class="btn-checkin ${dd?.status === 'completed' ? 'active-completed' : ''}" onclick="quickCheckin('completed')">✅ Completed</button>
-        <button class="btn-checkin ${dd?.status === 'skipped' ? 'active-skipped' : ''}" onclick="quickCheckin('skipped')">⏭️ Skipped</button>
-        <button class="btn-checkin ${dd?.status === 'modified' ? 'active-modified' : ''}" onclick="quickCheckin('modified')">🔄 Modified</button>
-        <button class="btn-checkin" onclick="openDayModal(${weekNum}, ${dayOfWeek})" style="border-color:var(--accent);color:var(--accent);">📝 Add Notes</button>
+        <button class="btn-checkin ${dd?.status === 'completed' ? 'active-completed' : ''}" onclick="quickCheckin('completed')">Completed</button>
+        <button class="btn-checkin ${dd?.status === 'skipped' ? 'active-skipped' : ''}" onclick="quickCheckin('skipped')">Skipped</button>
+        <button class="btn-checkin ${dd?.status === 'modified' ? 'active-modified' : ''}" onclick="quickCheckin('modified')">Modified</button>
+        <button class="btn-checkin" onclick="openDayModal(${weekNum}, ${dayOfWeek})" style="border-color:var(--accent);color:var(--accent);">Add Notes</button>
       </div>
     </div>
   `;
@@ -1616,8 +1593,8 @@ function renderWeekGrid(container, weekNum, compact) {
     const pastCls = isPast && !isToday ? 'is-past' : '';
     const restCls = isRest ? 'is-rest' : '';
 
-    const typeIcon = { run:'🏃', strength:'💪', cross:'🚴', rest:'😴', race:'🏅' }[workout.type] || '📋';
-    const statusIcon = dd?.status === 'completed' ? '✅' : dd?.status === 'skipped' ? '⏭️' : dd?.status === 'modified' ? '🔄' : '';
+    const typeIcon = '';
+    const statusIcon = dd?.status === 'completed' ? '✓' : dd?.status === 'skipped' ? '✕' : dd?.status === 'modified' ? '~' : '';
 
     const clickHandler = isRest ? '' : `onclick="openDayModal(${weekNum}, ${d})"`;
 
@@ -1690,7 +1667,7 @@ function renderWeekProgress() {
     }
 
     const clickHandler = isRest ? '' : `onclick="openDayModal(${weekNum}, ${d})"`;
-    const typeIcon = { run: '🏃', strength: '💪', cross: '🚴', rest: '😴', race: '🏅' }[workout.type] || '📋';
+    const typeIcon = '';
 
     dotsHtml += `
       <div class="wp-day ${isToday ? 'wp-day-today' : ''}" ${clickHandler} style="${isRest ? '' : 'cursor:pointer'}">
@@ -1808,7 +1785,7 @@ function renderProgress() {
   `;
 
   // Phase progress
-  html += '<div class="card"><div class="card-title"><span class="icon">🔄</span> Phase Progress</div>';
+  html += '<div class="card"><div class="card-title">Phase Progress</div>';
   for (const phase of PHASES) {
     let pDone = 0, pTotal = 0;
     for (const w of phase.weeks) {
@@ -1838,7 +1815,7 @@ function renderProgress() {
   html += '</div>';
 
   // Recent activity
-  html += '<div class="card"><div class="card-title"><span class="icon">📋</span> Recent Logged Days</div>';
+  html += '<div class="card"><div class="card-title">Recent Logged Days</div>';
   const entries = Object.entries(appData.days)
     .filter(([,v]) => v.status || v.notes)
     .sort(([a],[b]) => b.localeCompare(a))
@@ -1852,10 +1829,11 @@ function renderProgress() {
       const wd = getWeekDayForDate(d);
       if (!wd) continue;
       const workout = PLAN[wd.weekNum-1][wd.dayOfWeek];
-      const icon = val.status === 'completed' ? '✅' : val.status === 'skipped' ? '⏭️' : val.status === 'modified' ? '🔄' : '📝';
+      const statusColor = val.status === 'completed' ? 'var(--success)' : val.status === 'skipped' ? 'var(--danger)' : val.status === 'modified' ? 'var(--warning)' : 'var(--text2)';
+      const statusLabel = val.status === 'completed' ? 'Done' : val.status === 'skipped' ? 'Skip' : val.status === 'modified' ? 'Mod' : '—';
       html += `
         <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);">
-          <span style="font-size:18px">${icon}</span>
+          <span style="font-size:11px;font-weight:700;color:${statusColor};width:32px;flex-shrink:0;padding-top:2px;">${statusLabel}</span>
           <div>
             <div style="font-size:13px;font-weight:600;">${formatDate(d)} — ${workout.short}</div>
             <div style="font-size:11px;color:var(--text2);">
@@ -1988,7 +1966,7 @@ function copyExport() {
   const text = document.getElementById('exportArea').textContent;
   navigator.clipboard.writeText(text).then(() => {
     const btn = event.target;
-    btn.textContent = '✅ Copied!';
+    btn.textContent = 'Copied!';
     setTimeout(() => btn.textContent = 'Copy to Clipboard', 2000);
   });
 }
@@ -2049,7 +2027,7 @@ function openTimerForWorkout(runSec, walkSec, reps) {
   };
   document.getElementById('timerSummary').textContent =
     `${fmtDur(runSec)} run / ${fmtDur(walkSec)} walk × ${reps} reps`;
-  document.getElementById('btnTimerPause').textContent = '⏸ Pause';
+  document.getElementById('btnTimerPause').textContent = 'Pause';
   document.getElementById('btnTimerPause').disabled = false;
   document.getElementById('timerModal').classList.remove('hidden');
   updateTimerDisplay();
@@ -2096,7 +2074,7 @@ function updateTimerDisplay() {
 
   if (s.phase === 'done') {
     card.className = 'timer-card phase-done';
-    document.getElementById('timerPhaseLabel').textContent = '🎉 Workout Complete!';
+    document.getElementById('timerPhaseLabel').textContent = 'Workout Complete';
     document.getElementById('timerTime').textContent = 'Done!';
     document.getElementById('timerRepLabel').textContent = `${s.totalReps} reps completed`;
     document.getElementById('timerProgressFill').style.width = '100%';
@@ -2105,7 +2083,7 @@ function updateTimerDisplay() {
   }
 
   card.className = `timer-card phase-${s.phase}`;
-  document.getElementById('timerPhaseLabel').textContent = s.phase === 'run' ? '🏃 RUN' : '🚶 WALK';
+  document.getElementById('timerPhaseLabel').textContent = s.phase === 'run' ? 'RUN' : 'WALK';
   const mins = Math.floor(s.timeLeft / 60);
   const secs = s.timeLeft % 60;
   document.getElementById('timerTime').textContent = `${mins}:${String(secs).padStart(2, '0')}`;
@@ -2119,7 +2097,7 @@ function updateTimerDisplay() {
 function toggleTimerPause() {
   if (!timerState) return;
   timerState.paused = !timerState.paused;
-  document.getElementById('btnTimerPause').textContent = timerState.paused ? '▶ Resume' : '⏸ Pause';
+  document.getElementById('btnTimerPause').textContent = timerState.paused ? 'Resume' : 'Pause';
 }
 
 function closeTimerModal() {
