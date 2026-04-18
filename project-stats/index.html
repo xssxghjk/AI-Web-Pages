@@ -5,22 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Project Stats</title>
   <script src="../nav.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #030712;
-      --surface:   #0c1220;
-      --surface2:  #111827;
-      --border:    #1e3a5f;
-      --border2:   #1e4976;
-      --accent:    #67e8f9;
-      --accent-dim: rgba(103,232,249,0.08);
-      --text:      #e2f8ff;
-      --muted:     #4ba3c7;
-      --muted2:    #7ab8cc;
-      --muted-2:   #2a6080;
+      --bg:        #1c1814;
+      --surface:   #252018;
+      --surface2:  #2e2820;
+      --border:    #3a3025;
+      --border2:   #4a4030;
+      --accent:    #e8314a;
+      --accent-dim: rgba(232,49,74,0.08);
+      --text:      #e8dfd0;
+      --muted:     #7a6e60;
+      --muted2:    #9a8a76;
+      --muted-2:   #5a5040;
     }
 
     @keyframes pulse {
@@ -37,7 +39,7 @@
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Fira Code', 'Courier New', monospace;
+      font-family: 'DM Serif Text', Georgia, serif;
       line-height: 1.6;
       min-height: 100vh;
       display: flex;
@@ -47,49 +49,39 @@
     body::before {
       content: '';
       position: fixed; inset: 0;
-      background: repeating-linear-gradient(
-        -45deg,
-        transparent,
-        transparent 4px,
-        rgba(103,232,249,0.015) 4px,
-        rgba(103,232,249,0.015) 5px
-      );
+      background-image: radial-gradient(circle, rgba(232,223,208,0.06) 1px, transparent 1px);
+      background-size: 24px 24px;
       pointer-events: none;
       z-index: 0;
     }
-    body::after {
-      content: '';
-      position: fixed; inset: 0;
-      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.5) 100%);
-      pointer-events: none;
-      z-index: 0;
-    }
-    header, main, footer { position: relative; z-index: 1; }
+    .hero-wrap, main, footer { position: relative; z-index: 1; }
 
     /* ── HERO ── */
+    .hero-wrap {
+      border-bottom: 2px solid var(--text);
+    }
     .hero {
+      max-width: 1000px;
+      margin: 0 auto;
       padding: 2.5rem 1.5rem 2rem;
-      text-align: center;
-      background: linear-gradient(180deg, rgba(103,232,249,0.05) 0%, transparent 100%);
-      border-bottom: 1px solid var(--border);
+      text-align: left;
     }
     .hero h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: clamp(1.1rem, 3.5vw, 1.8rem);
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      line-height: 1.2;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
       margin-bottom: 0.5rem;
-      color: var(--accent);
-      text-shadow: 0 0 20px rgba(103,232,249,0.6), 0 0 40px rgba(103,232,249,0.2);
+      color: var(--text);
     }
     .hero p {
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
       color: var(--muted2);
-      font-size: 0.82rem;
-      max-width: 440px;
-      margin-inline: auto;
+      font-size: 0.9rem;
     }
-    .hero p::before { content: '// '; color: var(--muted); }
 
     /* ── MAIN ── */
     .main {
@@ -130,11 +122,9 @@
       top: 0; left: 0; right: 0;
       height: 2px;
       background: var(--card-accent, var(--accent));
-      box-shadow: 0 0 8px var(--card-accent, var(--accent));
     }
     .stat-card:hover {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent), 0 0 16px rgba(103,232,249,0.12);
+      border-color: var(--muted2);
     }
 
     .stat-icon {
@@ -145,14 +135,13 @@
     }
 
     .stat-value {
-      font-family: 'Orbitron', sans-serif;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 900;
       font-size: 1.8rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
+      letter-spacing: -0.02em;
       line-height: 1;
       color: var(--text);
       margin-bottom: 0.45rem;
-      text-shadow: 0 0 10px rgba(226,248,255,0.3);
     }
 
     .stat-label {
@@ -196,13 +185,13 @@
     }
 
     .timeline-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.72rem;
-      font-weight: 700;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.8rem;
+      font-weight: 400;
       color: var(--accent);
-      letter-spacing: 0.1em;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
-      text-shadow: 0 0 8px rgba(103,232,249,0.4);
     }
 
     .timeline-sub {
@@ -216,8 +205,9 @@
       border: 1px solid var(--border2);
       border-radius: 2px;
       color: var(--muted2);
-      font-family: 'Fira Code', monospace;
-      font-size: 0.68rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.75rem;
       padding: 0.2rem 0.5rem;
       cursor: pointer;
       outline: none;
@@ -248,9 +238,8 @@
       transition: opacity 0.15s;
       cursor: default;
       position: relative;
-      box-shadow: 0 0 4px rgba(103,232,249,0.3);
     }
-    .timeline-bar:hover { opacity: 1; box-shadow: 0 0 8px rgba(103,232,249,0.6); }
+    .timeline-bar:hover { opacity: 1; }
     .timeline-bar.zero {
       background: var(--border2);
       opacity: 0.4;
@@ -302,11 +291,12 @@
     /* ── FOOTER NOTE ── */
     .fetch-note {
       text-align: center;
-      font-size: 0.65rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.72rem;
       color: var(--muted-2);
       margin-top: 0.5rem;
     }
-    .fetch-note::before { content: '$ '; }
 
     /* ── FOOTER ── */
     footer {
@@ -322,15 +312,17 @@
       margin-top: auto;
     }
     footer a { color: var(--muted); text-decoration: none; }
-    footer a:hover { color: var(--accent); text-shadow: 0 0 8px rgba(103,232,249,0.5); }
+    footer a:hover { color: var(--accent); }
   </style>
 </head>
 <body>
 
-  <header class="hero">
-    <h1>Project Stats</h1>
-    <p>Live metrics for this project, pulled fresh from GitHub on every page load.</p>
-  </header>
+  <div class="hero-wrap">
+    <header class="hero">
+      <h1>Project Stats</h1>
+      <p>Live metrics for this project, pulled fresh from GitHub on every page load.</p>
+    </header>
+  </div>
 
   <main class="main">
     <div class="stats-grid" id="stats-grid">

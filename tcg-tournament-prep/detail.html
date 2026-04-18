@@ -5,36 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Prep – FaB Tournament Prep</title>
   <script src="../nav.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Serif+Text:ital@0;1&display=swap">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #111118;
-      --surface: #17171f;
-      --surface2: #1e1e28;
-      --border: #252535;
-      --border2: #353550;
-      --accent: #f59e0b;
-      --accent-bg: rgba(245,158,11,0.07);
-      --accent-border: rgba(245,158,11,0.28);
-      --accent-dim: rgba(245,158,11,0.13);
-      --text: #e2e8f0;
-      --muted: #56638a;
-      --muted2: #8896b3;
-      --muted-2: #1e2235;
-      --t1: #60a5fa;
-      --t1-bg: rgba(96,165,250,0.07);
-      --t1-border: rgba(96,165,250,0.22);
-      --t2: #34d399;
-      --t2-bg: rgba(52,211,153,0.07);
-      --t2-border: rgba(52,211,153,0.22);
-      --t3: #f59e0b;
-      --t3-bg: rgba(245,158,11,0.07);
-      --t3-border: rgba(245,158,11,0.28);
-      --t4: #c084fc;
-      --t4-bg: rgba(192,132,252,0.07);
-      --t4-border: rgba(192,132,252,0.22);
+      --bg: #1c1814;
+      --surface: #252018;
+      --surface2: #2e271d;
+      --border: #3a3025;
+      --border2: #4a3e2e;
+      --accent: #e8314a;
+      --accent-bg: rgba(232,49,74,0.08);
+      --accent-border: rgba(232,49,74,0.25);
+      --accent-dim: rgba(232,49,74,0.10);
+      --text: #e8dfd0;
+      --muted: #9a8a76;
+      --muted2: #b5a48e;
+      --muted-2: #5a4e40;
+      --t1: #e8314a;
+      --t1-bg: rgba(232,49,74,0.08);
+      --t1-border: rgba(232,49,74,0.22);
+      --t2: #d4924a;
+      --t2-bg: rgba(212,146,74,0.08);
+      --t2-border: rgba(212,146,74,0.22);
+      --t3: #5ab4cc;
+      --t3-bg: rgba(90,180,204,0.08);
+      --t3-border: rgba(90,180,204,0.22);
+      --t4: #a07ae8;
+      --t4-bg: rgba(160,122,232,0.08);
+      --t4-border: rgba(160,122,232,0.22);
     }
 
     html { scroll-behavior: smooth; }
@@ -42,21 +44,22 @@
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-family: 'DM Serif Text', Georgia, serif;
       -webkit-font-smoothing: antialiased;
       line-height: 1.6;
     }
 
     body::before {
-      content: '';
+      content: "";
       position: fixed;
       inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 36px 36px;
       pointer-events: none;
       z-index: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 4px 4px, 6px 6px;
+      background-position: 0 0, 2px 2px;
     }
 
     #page-content, footer {
@@ -66,9 +69,10 @@
 
     /* ── PAGE HEADER ── */
     .page-header {
-      padding: 2.5rem 2rem 2rem;
-      background: linear-gradient(135deg, rgba(245,158,11,0.05) 0%, transparent 55%);
-      border-bottom: 2px solid var(--accent);
+      padding: 2rem 1.5rem 1.5rem;
+      border-bottom: 2px solid var(--text);
+      position: relative;
+      z-index: 1;
     }
     .page-header-inner {
       max-width: 1000px;
@@ -82,10 +86,10 @@
       margin-bottom: 0.75rem;
     }
     .tier-badge {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.62rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.65rem;
+      font-style: italic;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       padding: 0.18rem 0.55rem;
       border-radius: 2px;
@@ -96,31 +100,32 @@
     .tier-badge.t3 { color: var(--t3); background: var(--t3-bg); border-color: var(--t3-border); }
     .tier-badge.t4 { color: var(--t4); background: var(--t4-bg); border-color: var(--t4-border); }
     .format-chip {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.62rem;
-      font-weight: 700;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.65rem;
+      font-style: italic;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       padding: 0.18rem 0.55rem;
       border-radius: 2px;
-      background: var(--accent-bg);
-      border: 1px solid var(--accent-border);
-      color: var(--accent);
+      background: var(--t3-bg);
+      border: 1px solid var(--t3-border);
+      color: var(--t3);
     }
 
     .prep-title {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(1.6rem, 4vw, 2.8rem);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.1;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 3.5rem);
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -0.02em;
+      line-height: 1;
       margin-bottom: 0.5rem;
     }
     .prep-date {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.82rem;
+      font-style: italic;
       color: var(--muted2);
-      letter-spacing: 0.03em;
     }
     .header-links {
       display: flex;
@@ -133,10 +138,9 @@
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.68rem;
-      font-weight: 500;
-      letter-spacing: 0.05em;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.75rem;
+      font-style: italic;
       padding: 0.3rem 0.8rem;
       border-radius: 2px;
       border: 1px solid var(--border2);
@@ -145,7 +149,7 @@
       text-decoration: none;
       transition: border-color 0.15s, color 0.15s;
     }
-    .header-link-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .header-link-btn:hover { border-color: var(--muted2); color: var(--text); }
 
     /* ── MAIN ── */
     .main {
@@ -175,19 +179,21 @@
       background: var(--surface2);
     }
     .format-name {
-      font-family: 'Syne', sans-serif;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
       font-size: 1rem;
       font-weight: 700;
       letter-spacing: -0.01em;
     }
     .format-abbr-badge {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.6rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.65rem;
+      font-weight: 400;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
       padding: 0.15rem 0.5rem;
-      border-radius: 2px;
+      border-radius: 999px;
       background: var(--accent-bg);
       border: 1px solid var(--accent-border);
       color: var(--accent);
@@ -201,10 +207,11 @@
     .prep-section:last-child { border-bottom: none; }
 
     .section-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.62rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--accent);
       margin-bottom: 0.75rem;
@@ -227,7 +234,8 @@
       margin-bottom: 0.65rem;
     }
     .hero-name {
-      font-family: 'Syne', sans-serif;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
       font-size: 1.1rem;
       font-weight: 700;
       color: var(--text);
@@ -239,31 +247,31 @@
       gap: 0.3rem;
     }
     .hero-reasons li {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.85rem;
       color: var(--muted2);
       line-height: 1.6;
       padding-left: 1.2rem;
       position: relative;
     }
     .hero-reasons li::before {
-      content: '>';
+      content: '–';
       position: absolute;
       left: 0;
-      color: var(--accent);
-      font-weight: 700;
+      color: var(--muted);
     }
 
     /* Meta table */
     .meta-table {
       width: 100%;
       border-collapse: collapse;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'DM Serif Text', Georgia, serif;
     }
     .meta-table th {
-      font-size: 0.6rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
+      font-size: 0.65rem;
+      font-weight: 400;
+      font-style: italic;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
       color: var(--muted);
       text-align: left;
@@ -272,7 +280,7 @@
       background: var(--surface2);
     }
     .meta-table td {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: var(--muted2);
       padding: 0.45rem 0.65rem;
       border-bottom: 1px solid var(--border);
@@ -306,23 +314,23 @@
       background: var(--surface2);
       border: none;
       color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      font-weight: 500;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.85rem;
+      font-weight: 400;
       cursor: pointer;
       text-align: left;
       padding: 0.6rem 0.9rem;
       transition: background 0.15s;
     }
-    .date-btn:hover { background: rgba(245,158,11,0.05); }
+    .date-btn:hover { background: rgba(232,49,74,0.05); }
     .date-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.09em;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
       color: var(--accent);
-      font-variant-numeric: tabular-nums;
     }
     .date-chevron {
       margin-left: auto;
@@ -343,10 +351,11 @@
     .note-section { margin-bottom: 0.75rem; }
     .note-section:last-child { margin-bottom: 0; }
     .note-section-heading {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.09em;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
       color: var(--muted);
       margin-bottom: 0.4rem;
@@ -360,8 +369,8 @@
       gap: 0.3rem;
     }
     .note-bullets li {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.85rem;
       color: var(--muted2);
       line-height: 1.6;
       padding-left: 1.2rem;
@@ -381,8 +390,8 @@
       gap: 0.5rem;
     }
     .note-para {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.85rem;
       color: var(--muted2);
       line-height: 1.65;
     }
@@ -392,10 +401,11 @@
       text-align: center;
       padding: 5rem 1rem;
       color: var(--muted);
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'DM Serif Text', Georgia, serif;
     }
     .not-found h2 {
-      font-family: 'Syne', sans-serif;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
       font-size: 1.4rem;
       margin-bottom: 0.75rem;
       color: var(--text);
@@ -410,13 +420,14 @@
       margin-bottom: 1.25rem;
     }
     .tab-btn {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
       background: var(--surface);
       border: 1px solid var(--border2);
       color: var(--muted2);
-      font-size: 0.75rem;
-      font-weight: 500;
-      letter-spacing: 0.05em;
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 0.03em;
       padding: 0.4rem 1rem;
       border-radius: 2px;
       cursor: pointer;
@@ -431,17 +442,18 @@
 
     /* ── SUMMARY ── */
     .summary-card {
-      background: rgba(245,158,11,0.04);
+      background: rgba(232,49,74,0.04);
       border: 1px solid var(--accent-border);
       border-radius: 2px;
       padding: 1rem 1.25rem;
       margin-bottom: 0.15rem;
     }
     .summary-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.62rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--accent);
       margin-bottom: 0.75rem;
@@ -462,20 +474,18 @@
       gap: 0.4rem;
     }
     .summary-list li {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.85rem;
       color: var(--muted2);
       line-height: 1.6;
       padding-left: 1.2rem;
       position: relative;
     }
     .summary-list li::before {
-      content: '▸';
+      content: '–';
       position: absolute;
       left: 0;
       color: var(--accent);
-      font-size: 0.65rem;
-      top: 0.3em;
     }
 
     /* ── RESPONSIVE ── */
@@ -490,7 +500,7 @@
     /* ── FOOTER ── */
     footer {
       padding: 1.5rem 2rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'DM Serif Text', Georgia, serif;
       font-size: 0.72rem;
       color: var(--muted-2);
       border-top: 1px solid var(--border);

@@ -6,35 +6,35 @@
   <title>Trips</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Serif+Text:ital@0;1&display=swap">
   <script src="../nav.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0c0a08;
-      --surface: #141109;
-      --surface2: #1c160e;
-      --border: #28200f;
-      --border2: #382e18;
-      --accent: #b8860b;
-      --accent-dim: rgba(184,134,11,0.12);
-      --text: #e8dcc8;
-      --muted: #7a6e58;
-      --muted2: #9a8e78;
-      --muted-2: #342c1a;
-      --upcoming: #c8921c;
-      --upcoming-bg: rgba(200,146,28,0.09);
-      --upcoming-border: rgba(200,146,28,0.22);
-      --ongoing: #6b9e6b;
-      --ongoing-bg: rgba(107,158,107,0.08);
-      --ongoing-border: rgba(107,158,107,0.2);
+      --bg: #1c1814;
+      --surface: #252018;
+      --surface2: #2e271d;
+      --border: #3a3025;
+      --border2: #4a3e2e;
+      --accent: #e8314a;
+      --accent-dim: rgba(232,49,74,0.10);
+      --text: #e8dfd0;
+      --muted: #9a8a76;
+      --muted2: #b5a48e;
+      --muted-2: #5a4e40;
+      --upcoming: #d4924a;
+      --upcoming-bg: rgba(212,146,74,0.10);
+      --upcoming-border: rgba(212,146,74,0.25);
+      --ongoing: #7ab87a;
+      --ongoing-bg: rgba(122,184,122,0.10);
+      --ongoing-border: rgba(122,184,122,0.25);
       --past: #7a8a9a;
-      --past-bg: rgba(122,138,154,0.07);
-      --past-border: rgba(122,138,154,0.18);
-      --planning: #7a9e9a;
-      --planning-bg: rgba(122,158,154,0.07);
-      --planning-border: rgba(122,158,154,0.18);
+      --past-bg: rgba(122,138,154,0.10);
+      --past-border: rgba(122,138,154,0.22);
+      --planning: #5ab4cc;
+      --planning-bg: rgba(90,180,204,0.10);
+      --planning-border: rgba(90,180,204,0.25);
     }
 
     html { scroll-behavior: smooth; }
@@ -42,55 +42,59 @@
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Lora', Georgia, serif;
+      font-family: 'DM Serif Text', Georgia, serif;
       -webkit-font-smoothing: antialiased;
       line-height: 1.65;
     }
 
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 4px 4px, 6px 6px;
+      background-position: 0 0, 2px 2px;
+    }
+
     /* ── HERO ── */
     .hero {
-      padding: 2.5rem 2rem 1.75rem;
-      border-bottom: 1px solid var(--border);
+      padding: 2rem 1.5rem 1.5rem;
+      border-bottom: 2px solid var(--text);
       position: relative;
-      overflow: hidden;
+      z-index: 1;
     }
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(135deg, rgba(184,134,11,0.06) 0%, transparent 60%);
-      pointer-events: none;
-    }
-    .hero-inner { position: relative; max-width: 1000px; margin: 0 auto; }
+    .hero-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: baseline; gap: 1.5rem; flex-wrap: wrap; }
     .hero h1 {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: clamp(2.4rem, 5vw, 4rem);
-      font-weight: 600;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
       font-style: italic;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.02em;
       line-height: 1;
-      margin-bottom: 0.6rem;
       color: var(--text);
     }
     .hero p {
-      color: var(--muted2);
-      font-size: 0.92rem;
+      color: var(--muted);
+      font-size: 0.9rem;
       font-style: italic;
-      max-width: 480px;
-      margin-bottom: 1.25rem;
     }
     .hero-stats {
       display: flex;
       gap: 0.6rem;
       flex-wrap: wrap;
+      margin-top: 0.5rem;
+      width: 100%;
     }
     .stat-pill {
-      font-family: 'Lora', Georgia, serif;
+      font-family: 'DM Serif Text', Georgia, serif;
       font-size: 0.78rem;
       font-style: italic;
       padding: 0.3rem 0.9rem;
-      border-radius: 1px;
+      border-radius: 2px;
       background: var(--surface);
       border: 1px solid var(--border2);
       color: var(--muted2);
@@ -100,22 +104,24 @@
 
     /* ── FILTER TOGGLE ── */
     .filter-toggle-bar {
-      padding: 0.55rem 2rem;
+      padding: 0.55rem 1.5rem;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       gap: 0.6rem;
       background: var(--surface);
+      position: relative;
+      z-index: 1;
     }
     .filter-toggle-btn {
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      font-family: 'Lora', Georgia, serif;
+      font-family: 'DM Serif Text', Georgia, serif;
       font-size: 0.75rem;
       font-style: italic;
       padding: 0.25rem 0.65rem;
-      border-radius: 1px;
+      border-radius: 2px;
       background: transparent;
       border: 1px solid var(--border2);
       color: var(--muted);
@@ -125,7 +131,7 @@
     .filter-toggle-btn:hover { border-color: var(--muted2); color: var(--text); }
     .filter-toggle-btn.has-filters {
       background: var(--accent-dim);
-      border-color: rgba(184,134,11,0.35);
+      border-color: rgba(232,49,74,0.35);
       color: var(--accent);
     }
     .filter-badge {
@@ -152,16 +158,16 @@
       font-size: 0.7rem;
       font-style: italic;
       padding: 0.15rem 0.5rem;
-      border-radius: 1px;
+      border-radius: 2px;
       background: var(--accent-dim);
-      border: 1px solid rgba(184,134,11,0.28);
+      border: 1px solid rgba(232,49,74,0.28);
       color: var(--accent);
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 0.3rem;
     }
-    .filter-active-tag:hover { background: rgba(184,134,11,0.18); }
+    .filter-active-tag:hover { background: rgba(232,49,74,0.18); }
     .filter-active-tag .remove { opacity: 0.7; font-size: 0.8rem; line-height: 1; font-style: normal; }
 
     /* ── FILTER PANEL ── */
@@ -171,11 +177,13 @@
       overflow: hidden;
       max-height: 0;
       transition: max-height 0.22s ease, padding 0.22s ease;
-      padding: 0 2rem;
+      padding: 0 1.5rem;
+      position: relative;
+      z-index: 1;
     }
     .filter-panel.open {
       max-height: 120px;
-      padding: 0.85rem 2rem;
+      padding: 0.85rem 1.5rem;
     }
     .filter-group {
       display: flex;
@@ -186,7 +194,7 @@
     }
     .filter-group:last-child { margin-bottom: 0; }
     .filter-label {
-      font-family: 'Lora', Georgia, serif;
+      font-family: 'DM Serif Text', Georgia, serif;
       font-size: 0.68rem;
       font-style: italic;
       letter-spacing: 0.06em;
@@ -197,11 +205,11 @@
     }
     .filter-pills { display: flex; gap: 0.3rem; flex-wrap: wrap; }
     .filter-pill {
-      font-family: 'Lora', Georgia, serif;
+      font-family: 'DM Serif Text', Georgia, serif;
       font-size: 0.72rem;
       font-style: italic;
       padding: 0.2rem 0.6rem;
-      border-radius: 1px;
+      border-radius: 2px;
       background: transparent;
       border: 1px solid var(--border2);
       color: var(--muted);
@@ -211,7 +219,7 @@
     .filter-pill:hover { border-color: var(--muted2); color: var(--text); }
     .filter-pill.active {
       background: var(--accent-dim);
-      border-color: rgba(184,134,11,0.4);
+      border-color: rgba(232,49,74,0.4);
       color: var(--accent);
     }
     .filter-pill.s-upcoming.active { background: var(--upcoming-bg); border-color: var(--upcoming-border); color: var(--upcoming); }
@@ -222,8 +230,10 @@
     /* ── MAIN ── */
     .main {
       max-width: 1000px;
-      margin: 2rem auto;
+      margin: 1.75rem auto;
       padding: 0 1.25rem 4rem;
+      position: relative;
+      z-index: 1;
     }
 
     .no-results {
@@ -284,29 +294,29 @@
       flex: 1;
     }
     .tile-title {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 1.2rem;
-      font-weight: 600;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 700;
       font-style: italic;
       line-height: 1.2;
       color: var(--text);
     }
     .tile-fab-tag {
-      font-family: 'Lora', Georgia, serif;
+      font-family: 'DM Serif Text', Georgia, serif;
       font-size: 0.6rem;
       font-style: italic;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--accent);
       background: var(--accent-dim);
-      border: 1px solid rgba(184,134,11,0.25);
-      border-radius: 1px;
+      border: 1px solid rgba(232,49,74,0.25);
+      border-radius: 2px;
       padding: 0.1rem 0.45rem;
       align-self: flex-start;
     }
 
     .tile-countdown {
-      font-family: 'Lora', Georgia, serif;
+      font-family: 'DM Serif Text', Georgia, serif;
       font-size: 0.78rem;
       font-style: italic;
       white-space: nowrap;
@@ -323,7 +333,7 @@
     /* ── CALENDAR LINK ── */
     .cal-link {
       margin-left: auto;
-      font-family: 'Lora', Georgia, serif;
+      font-family: 'DM Serif Text', Georgia, serif;
       font-size: 0.75rem;
       font-style: italic;
       color: var(--muted2);
@@ -355,6 +365,8 @@
       gap: 1rem;
       flex-wrap: wrap;
       margin-top: auto;
+      position: relative;
+      z-index: 1;
     }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--text); }

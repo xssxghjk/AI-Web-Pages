@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FaB Pitch Simulator</title>
   <script src="../nav.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -19,27 +21,27 @@
     }
 
     :root {
-      --bg:        #000800;
-      --surface:   #001400;
-      --surface-2: #002200;
-      --border:    #004400;
-      --border-2:  #006600;
-      --accent:    #00ff41;
-      --text:      #00ff41;
-      --muted:     #00aa2a;
-      --muted-2:   #007718;
-      --red-c:     #ff4444;
-      --red-bg:    rgba(255,68,68,0.08);
-      --yellow-c:  #ffcc00;
-      --yellow-bg: rgba(255,204,0,0.08);
-      --blue-c:    #00ccff;
-      --blue-bg:   rgba(0,204,255,0.08);
+      --bg:        #1c1814;
+      --surface:   #252018;
+      --surface-2: #2e2820;
+      --border:    #3a3025;
+      --border-2:  #4a4030;
+      --accent:    #e8314a;
+      --text:      #e8dfd0;
+      --muted:     #7a6e60;
+      --muted-2:   #9a8a76;
+      --red-c:     #e8314a;
+      --red-bg:    rgba(232,49,74,0.08);
+      --yellow-c:  #d4924a;
+      --yellow-bg: rgba(212,146,74,0.08);
+      --blue-c:    #5ab4cc;
+      --blue-bg:   rgba(90,180,204,0.08);
     }
 
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Share Tech Mono', monospace;
+      font-family: 'DM Serif Text', Georgia, serif;
       min-height: 100vh;
       position: relative;
     }
@@ -47,55 +49,47 @@
     body::before {
       content: '';
       position: fixed; inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.18) 2px,
-        rgba(0,0,0,0.18) 4px
-      );
+      background-image: radial-gradient(circle, rgba(232,223,208,0.06) 1px, transparent 1px);
+      background-size: 24px 24px;
       pointer-events: none;
-      z-index: 999;
-    }
-
-    body::after {
-      content: '';
-      position: fixed; inset: 0;
-      background: radial-gradient(ellipse at center, transparent 58%, rgba(0,0,0,0.55) 100%);
-      pointer-events: none;
-      z-index: 998;
+      z-index: 0;
     }
 
     /* ── Hero ── */
     .hero {
       padding: 2rem 2rem 1.75rem;
       text-align: left;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 2px solid var(--text);
       position: relative; z-index: 1;
+      max-width: 1000px;
+      margin: 0 auto;
     }
+    .hero-wrap { border-bottom: 2px solid var(--text); }
+    .hero { border-bottom: none; }
     .hero h1 {
-      font-size: clamp(1.2rem, 3vw, 1.7rem);
-      font-weight: 400;
-      letter-spacing: 0.04em;
-      text-shadow: 0 0 12px rgba(0,255,65,0.7);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-weight: 900;
+      font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+      letter-spacing: -0.02em;
+      color: var(--text);
     }
-    .hero h1::before { content: '> '; color: var(--muted); }
-    .hero h1::after  { content: '█'; animation: blink 1s step-end infinite; margin-left: 2px; }
     .hero p {
       margin-top: 0.65rem;
-      color: var(--muted);
-      font-size: 0.82rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      color: var(--muted-2);
+      font-size: 0.88rem;
       line-height: 1.7;
     }
-    .hero p::before { content: '  '; }
 
     /* ── Layout ── */
+    .hero-wrap, main, footer { position: relative; z-index: 1; }
     main {
       max-width: 1000px;
       margin: 2rem auto 4rem;
       padding: 0 2rem;
       display: flex; flex-direction: column; gap: 1.5rem;
-      position: relative; z-index: 1;
     }
 
     /* ── Section ── */
@@ -109,14 +103,13 @@
     .section-header {
       padding: 0.7rem 1.25rem;
       border-bottom: 1px solid var(--border);
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--accent);
-      text-shadow: 0 0 8px rgba(0,255,65,0.5);
     }
-    .section-header::before { content: '['; margin-right: 0.25em; color: var(--muted); }
-    .section-header::after  { content: ']'; margin-left: 0.25em; color: var(--muted); }
     .section-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
 
     /* ── Inputs ── */
@@ -128,11 +121,12 @@
     }
     .inp-group { display: flex; flex-direction: column; gap: 0.4rem; }
     .inp-label {
-      font-size: 0.68rem;
-      letter-spacing: 0.12em;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-    .inp-label::before { content: '# '; color: var(--muted); }
     .inp-label.red    { color: var(--red-c); }
     .inp-label.yellow { color: var(--yellow-c); }
     .inp-label.blue   { color: var(--blue-c); }
@@ -143,17 +137,15 @@
       background: var(--surface-2);
       border: 1px solid var(--border-2);
       border-radius: 2px;
-      color: var(--accent);
-      font-family: 'Share Tech Mono', monospace;
+      color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
       font-size: 1rem;
       padding: 0.5rem 0.75rem;
       width: 100%; outline: none;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      text-shadow: 0 0 8px rgba(0,255,65,0.5);
+      transition: border-color 0.15s;
     }
     input[type=number]:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent), 0 0 10px rgba(0,255,65,0.2);
     }
 
     /* ── Deck summary ── */
@@ -166,8 +158,7 @@
       display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center;
     }
     .ds-item { display: flex; gap: 0.35rem; align-items: baseline; }
-    .ds-item::before { content: '$ '; color: var(--muted-2); font-size: 0.7rem; }
-    .ds-val { color: var(--accent); text-shadow: 0 0 8px rgba(0,255,65,0.5); }
+    .ds-val { color: var(--accent); font-weight: 700; }
 
     .pitch-bar {
       height: 4px; border-radius: 2px;
@@ -188,40 +179,35 @@
       border: 1px solid rgba(255,68,68,0.3);
       border-radius: 2px;
     }
-    .err::before { content: '! ERROR: '; }
+    .err::before { content: ''; }
 
     /* ── Buttons ── */
     .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
     button {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.82rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.85rem;
       padding: 0.55rem 1.1rem;
       border-radius: 2px;
       cursor: pointer;
-      transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
-      letter-spacing: 0.06em;
+      transition: background 0.15s, opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.03em;
     }
     button:active { transform: scale(0.97); }
     .btn-primary {
-      background: transparent;
-      color: var(--accent);
-      border: 1px solid var(--accent);
-      text-shadow: 0 0 8px rgba(0,255,65,0.5);
+      background: var(--accent);
+      color: #fff;
+      border: none;
     }
-    .btn-primary::before { content: '> '; }
-    .btn-primary:hover {
-      background: rgba(0,255,65,0.08);
-      box-shadow: 0 0 12px rgba(0,255,65,0.25);
-    }
+    .btn-primary:hover { opacity: 0.88; }
     .btn-secondary {
-      background: transparent;
-      color: var(--muted);
+      background: var(--surface-2);
+      color: var(--muted-2);
       border: 1px solid var(--border-2);
     }
-    .btn-secondary::before { content: '# '; color: var(--muted-2); }
     .btn-secondary:hover {
-      border-color: var(--muted);
-      color: var(--accent);
+      border-color: var(--muted-2);
+      color: var(--text);
     }
     button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
 
@@ -239,18 +225,17 @@
     }
     .card-chip:hover { transform: translateY(-4px); }
     .card-chip .chip-sub { font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; }
-    .card-chip.red    { background: var(--red-bg);    border-color: var(--red-c);    color: var(--red-c);    text-shadow: 0 0 8px rgba(255,68,68,0.5); }
-    .card-chip.yellow { background: var(--yellow-bg); border-color: var(--yellow-c); color: var(--yellow-c); text-shadow: 0 0 8px rgba(255,204,0,0.5); }
-    .card-chip.blue   { background: var(--blue-bg);   border-color: var(--blue-c);   color: var(--blue-c);   text-shadow: 0 0 8px rgba(0,204,255,0.5); }
+    .card-chip.red    { background: var(--red-bg);    border-color: var(--red-c);    color: var(--red-c); }
+    .card-chip.yellow { background: var(--yellow-bg); border-color: var(--yellow-c); color: var(--yellow-c); }
+    .card-chip.blue   { background: var(--blue-bg);   border-color: var(--blue-c);   color: var(--blue-c); }
     .hand-total {
       margin-left: auto;
       display: flex; flex-direction: column; align-items: flex-end; gap: 0.2rem;
     }
-    .ht-label { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
-    .ht-val   { font-size: 2.2rem; line-height: 1; color: var(--accent); text-shadow: 0 0 16px rgba(0,255,65,0.7); }
+    .ht-label { font-family: 'DM Serif Text', Georgia, serif; font-style: italic; font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .ht-val   { font-family: 'Playfair Display', Georgia, serif; font-weight: 900; font-size: 2.2rem; line-height: 1; color: var(--accent); }
     .ht-sub   { font-size: 0.68rem; color: var(--muted); }
-    .hand-empty { color: var(--muted); font-size: 0.8rem; align-self: center; }
-    .hand-empty::before { content: '_ '; animation: blink 1.2s step-end infinite; }
+    .hand-empty { color: var(--muted-2); font-size: 0.85rem; align-self: center; font-style: italic; }
 
     /* ── Turns list ── */
     .turns-list {
@@ -265,7 +250,7 @@
       border-radius: 2px;
       font-size: 0.82rem;
     }
-    .turn-row::before { content: '>'; color: var(--muted); font-size: 0.75rem; }
+    .turn-row::before { content: ''; }
     .turn-num {
       font-size: 0.62rem; letter-spacing: 0.08em;
       text-transform: uppercase; color: var(--muted); min-width: 38px;
@@ -293,15 +278,13 @@
       border-radius: 2px; padding: 0.75rem 0.9rem;
       display: flex; flex-direction: column; gap: 0.25rem;
     }
-    .stat-box-label { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-    .stat-box-label::before { content: '> '; color: var(--muted-2); }
-    .stat-box-val   { font-size: 1.35rem; color: var(--accent); text-shadow: 0 0 10px rgba(0,255,65,0.6); font-variant-numeric: tabular-nums; }
+    .stat-box-label { font-family: 'DM Serif Text', Georgia, serif; font-style: italic; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .stat-box-val   { font-family: 'Playfair Display', Georgia, serif; font-weight: 900; font-size: 1.35rem; color: var(--accent); font-variant-numeric: tabular-nums; }
     .stat-box-sub   { font-size: 0.65rem; color: var(--muted); }
 
     /* ── Histogram ── */
     .histogram-wrap { display: flex; flex-direction: column; gap: 0.5rem; }
-    .histogram-label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-    .histogram-label::before { content: '// '; color: var(--muted-2); }
+    .histogram-label { font-family: 'DM Serif Text', Georgia, serif; font-style: italic; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
     .histogram {
       display: flex; align-items: flex-end; gap: 3px;
       height: 80px;
@@ -310,7 +293,6 @@
     .h-bar {
       width: 100%; background: var(--accent); border-radius: 2px 2px 0 0;
       min-height: 2px; transition: height 0.25s;
-      box-shadow: 0 0 6px rgba(0,255,65,0.4);
     }
     .h-lbl { font-size: 0.55rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
@@ -322,9 +304,8 @@
       background: var(--surface-2); border: 1px solid var(--border);
       border-radius: 2px; font-size: 0.8rem;
     }
-    .thresh-row::before { content: '$ '; color: var(--muted-2); font-size: 0.7rem; }
     .thresh-row .tr-key { color: var(--muted); flex: 1; }
-    .thresh-row .tr-val { color: var(--accent); text-shadow: 0 0 8px rgba(0,255,65,0.5); }
+    .thresh-row .tr-val { color: var(--accent); font-weight: 700; }
 
     /* ── Footer ── */
     footer {
@@ -335,7 +316,7 @@
       position: relative; z-index: 1;
     }
     footer a { color: var(--muted); text-decoration: none; }
-    footer a:hover { color: var(--accent); text-shadow: 0 0 8px rgba(0,255,65,0.5); }
+    footer a:hover { color: var(--accent); }
 
     /* ── Mobile ── */
     @media (max-width: 600px) {
@@ -349,10 +330,12 @@
 </head>
 <body>
 
-<header class="hero">
-  <h1>FaB Pitch Simulator</h1>
-  <p>Configure your deck's pitch distribution and simulate hands, turns, and resource generation.</p>
-</header>
+<div class="hero-wrap">
+  <header class="hero">
+    <h1>FaB Pitch Simulator</h1>
+    <p>Configure your deck's pitch distribution and simulate hands, turns, and resource generation.</p>
+  </header>
+</div>
 
 <main>
 
