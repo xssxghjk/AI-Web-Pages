@@ -1,5 +1,16 @@
 # Project Instructions
 
+## Before Creating a PR
+
+Always check for conflicts with `main` before creating a pull request:
+
+```bash
+git fetch origin main
+git merge-tree $(git merge-base HEAD origin/main) HEAD origin/main
+```
+
+If conflicts exist, resolve them on the feature branch before opening the PR.
+
 ## Before Every Push
 
 Always run the full test suite and fix any failures before pushing:
