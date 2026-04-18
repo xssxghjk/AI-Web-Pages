@@ -573,6 +573,7 @@
             String(dt.getDate()).padStart(2, '0');
 
           if (REST_DAYS[w].includes(d)) continue; // rest days get no dot
+          if (dt.getTime() < start.getTime()) continue; // before plan start
 
           const entry = days[iso];
           if (entry && (entry.status === 'completed' || entry.status === 'modified')) {
