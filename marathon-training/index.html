@@ -1594,7 +1594,7 @@ function renderWeekGrid(container, weekNum, compact) {
     const restCls = isRest ? 'is-rest' : '';
 
     const typeIcon = '';
-    const statusIcon = dd?.status === 'completed' ? '✓' : dd?.status === 'skipped' ? '✕' : dd?.status === 'modified' ? '~' : '';
+    const statusIcon = '';
 
     const clickHandler = isRest ? '' : `onclick="openDayModal(${weekNum}, ${d})"`;
 
@@ -1648,13 +1648,13 @@ function renderWeekProgress() {
       label = 'Rest';
     } else if (dd?.status === 'completed') {
       dotCls += ' wp-done';
-      label = '✓';
+      label = '';
     } else if (dd?.status === 'skipped') {
       dotCls += ' wp-skipped';
-      label = '✕';
+      label = '';
     } else if (dd?.status === 'modified') {
       dotCls += ' wp-modified';
-      label = '~';
+      label = '';
     } else if (isToday) {
       dotCls += ' wp-today';
       label = '·';
