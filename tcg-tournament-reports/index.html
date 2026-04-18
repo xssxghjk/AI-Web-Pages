@@ -18,6 +18,8 @@
       --border: #3a3025;
       --border2: #4a3e2e;
       --accent: #e8314a;
+      --accent-bg: rgba(232,49,74,0.08);
+      --accent-border: rgba(232,49,74,0.25);
       --accent-dim: rgba(232,49,74,0.10);
       --text: #e8dfd0;
       --muted: #9a8a76;
@@ -231,8 +233,8 @@
     /* ── MAIN ── */
     .main {
       max-width: 1000px;
-      margin: 0 auto;
-      padding: 0 0 4rem;
+      margin: 2rem auto;
+      padding: 0 1.5rem 4rem;
       position: relative;
       z-index: 1;
     }
@@ -245,17 +247,16 @@
       font-style: italic;
     }
 
-    /* ── TILES GRID — ledger format ── */
+    /* ── TILES GRID ── */
     .tiles-grid {
-      display: flex;
-      flex-direction: column;
-      border-top: 1px solid var(--border2);
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.75rem;
     }
 
-    @keyframes rowFlash {
-      0%   { opacity: 0; transform: translateX(-6px); }
-      70%  { opacity: 1; transform: translateX(1px); }
-      100% { opacity: 1; transform: none; }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: none; }
     }
 
     /* ── REPORT TILE ── */
@@ -263,41 +264,48 @@
       display: block;
       text-decoration: none;
       color: inherit;
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid var(--border);
-      border-left: 3px solid transparent;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2px;
       overflow: hidden;
-      transition: background 0.1s, border-left-color 0.12s;
+      border-top: 2px solid var(--border2);
+      transition: border-color 0.2s, box-shadow 0.2s;
       position: relative;
       opacity: 0;
-      animation: rowFlash 0.3s ease forwards;
+      animation: cardIn 0.4s ease forwards;
     }
-    .report-tile:nth-child(2)  { animation-delay: 0.03s; }
-    .report-tile:nth-child(3)  { animation-delay: 0.07s; }
-    .report-tile:nth-child(4)  { animation-delay: 0.11s; }
-    .report-tile:nth-child(5)  { animation-delay: 0.15s; }
-    .report-tile:nth-child(6)  { animation-delay: 0.19s; }
-    .report-tile:nth-child(7)  { animation-delay: 0.23s; }
-    .report-tile:nth-child(n+8){ animation-delay: 0.27s; }
     .report-tile:hover {
-      background: rgba(232,223,208,0.04);
-      border-left-color: var(--muted2);
+      box-shadow: 0 6px 28px rgba(0,0,0,0.45);
+      border-color: var(--border2);
     }
-    .report-tile.tier-1 { border-left-color: rgba(232,49,74,0.2); }
-    .report-tile.tier-2 { border-left-color: rgba(212,146,74,0.2); }
-    .report-tile.tier-3 { border-left-color: rgba(90,180,204,0.2); }
-    .report-tile.tier-4 { border-left-color: rgba(160,122,232,0.2); }
-    .report-tile.tier-1:hover { border-left-color: var(--t1); background: rgba(232,49,74,0.04); }
-    .report-tile.tier-2:hover { border-left-color: var(--t2); background: rgba(212,146,74,0.04); }
-    .report-tile.tier-3:hover { border-left-color: var(--t3); background: rgba(90,180,204,0.04); }
-    .report-tile.tier-4:hover { border-left-color: var(--t4); background: rgba(160,122,232,0.04); }
+    .report-tile.tier-1 { border-top-color: var(--t1); }
+    .report-tile.tier-2 { border-top-color: var(--t2); }
+    .report-tile.tier-3 { border-top-color: var(--t3); }
+    .report-tile.tier-4 { border-top-color: var(--t4); }
+    .report-tile:nth-child(2) { animation-delay: 0.05s; }
+    .report-tile:nth-child(3) { animation-delay: 0.1s; }
+    .report-tile:nth-child(4) { animation-delay: 0.15s; }
+    .report-tile:nth-child(5) { animation-delay: 0.2s; }
+    .report-tile:nth-child(6) { animation-delay: 0.25s; }
 
     .tile-body {
-      padding: 0.65rem 1.25rem 0.65rem 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
+      padding: 1.1rem 1.25rem 0.9rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .tile-body::after {
+      content: attr(data-tier-label);
+      position: absolute;
+      bottom: -0.5rem;
+      right: 0.5rem;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 900;
+      font-style: italic;
+      font-size: 4rem;
+      line-height: 1;
+      color: rgba(255,255,255,0.025);
+      pointer-events: none;
+      user-select: none;
     }
 
     .tile-meta {
@@ -305,6 +313,7 @@
       align-items: center;
       gap: 0.4rem;
       flex-wrap: wrap;
+      margin-bottom: 0.6rem;
     }
     .tier-badge {
       font-family: 'DM Serif Text', Georgia, serif;
@@ -347,10 +356,11 @@
 
     .tile-title {
       font-family: 'Playfair Display', Georgia, serif;
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 700;
       font-style: italic;
-      line-height: 1.1;
+      line-height: 1.25;
+      margin-bottom: 0.7rem;
       color: var(--text);
     }
 
@@ -359,6 +369,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 0.5rem;
+      margin-top: 0.4rem;
     }
     .tile-date {
       font-family: 'DM Serif Text', Georgia, serif;
@@ -374,6 +385,36 @@
     .rr-win  { color: var(--win); }
     .rr-loss { color: var(--loss); }
     .rr-sep  { color: var(--muted); margin: 0 0.15rem; }
+
+    .tile-cta {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 1.25rem;
+      border-top: 1px solid var(--border);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.78rem;
+      font-style: italic;
+      color: var(--muted);
+      transition: color 0.15s, background 0.15s;
+    }
+    .report-tile:hover .tile-cta {
+      color: var(--muted2);
+      background: rgba(232,223,208,0.04);
+    }
+    .tile-cta-arrow {
+      margin-left: auto;
+      font-size: 1rem;
+      transition: transform 0.15s;
+    }
+    .report-tile:hover .tile-cta-arrow { transform: translateX(3px); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .tiles-grid { grid-template-columns: 1fr; }
+      .hero { padding: 1.75rem 1.25rem 1.5rem; }
+      .filter-toggle-bar { padding: 0.55rem 1.25rem; }
+    }
 
     /* ── FOOTER ── */
     footer {
@@ -493,7 +534,7 @@
           data-tier="${tier}"
           data-format="${esc((r.format || '').toLowerCase())}"
         >
-          <div class="tile-body">
+          <div class="tile-body" data-tier-label="T${tier}">
             <div class="tile-meta">
               <span class="tier-badge ${tierClass}">${esc(tierLabel)}</span>
               <span class="hero-badge">${esc(r.hero)}</span>
@@ -508,6 +549,10 @@
                 <span class="rr-loss">${rec.losses}L</span>
               </span>
             </div>
+          </div>
+          <div class="tile-cta">
+            View report
+            <span class="tile-cta-arrow">→</span>
           </div>
         </a>`;
     }
