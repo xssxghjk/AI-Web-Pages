@@ -437,6 +437,18 @@
         .replace(/"/g, '&quot;');
     }
 
+    /* Compute effective status from dates so hardcoded values don't go stale */
+    const _today = new Date();
+    _today.setHours(0, 0, 0, 0);
+    TRIPS.forEach(t => {
+      if (t.status === 'planning') return;
+      const start = new Date(t.startDate);
+      const end   = new Date(t.endDate);
+      if (_today > end)        t.status = 'past';
+      else if (_today >= start) t.status = 'ongoing';
+      else                      t.status = 'upcoming';
+    });
+
     TRIPS.sort((a, b) => (a.startDate > b.startDate ? 1 : -1));
 
     /* ── RENDER TILE ── */
