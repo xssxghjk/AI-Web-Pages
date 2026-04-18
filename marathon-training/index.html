@@ -5,46 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Couch to Half Marathon — 20-Week Plan</title>
 <script src="../nav.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d0d0d;
-    --surface: #171717;
-    --surface2: #222222;
-    --border: #2d2d2d;
-    --border-2: #3d3d3d;
-    --accent: #3b82f6;
-    --accent2: #4ecdc4;
-    --success: #51cf66;
-    --warning: #ffd43b;
-    --danger: #ff6b6b;
-    --text: #e8e8e8;
-    --text2: #9a9a9a;
-    --muted-2: #525252;
-    --run: #3b82f6;
-    --strength: #ff8c42;
-    --cross: #4ecdc4;
-    --rest: #2d2d2d;
-    --race: #ffd43b;
-    --phase1: #ff6b6b;
-    --phase2: #ffa94d;
-    --phase3: #51cf66;
-    --phase4: #4ecdc4;
+    --bg:       #f4f1eb;
+    --surface:  #faf8f4;
+    --surface2: #eeeae0;
+    --border:   #d8d2c4;
+    --border-2: #c5bba8;
+    --accent:   #4a7c1f;
+    --accent2:  #b5803a;
+    --success:  #3d7a2e;
+    --warning:  #c07020;
+    --danger:   #a83020;
+    --text:     #2d2e1e;
+    --text2:    #7a7260;
+    --muted-2:  #a89f8e;
+    --run:      #4a7c1f;
+    --strength: #c07020;
+    --cross:    #2a7a88;
+    --rest:     #c8c0ae;
+    --race:     #8a2020;
+    --phase1:   #c07020;
+    --phase2:   #4a7c1f;
+    --phase3:   #2a7a88;
+    --phase4:   #8a2020;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    -webkit-font-smoothing: antialiased;
+    font-family: 'Source Serif 4', 'Georgia', serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.55;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle, rgba(74,124,31,0.05) 1px, transparent 1px),
+      radial-gradient(circle, rgba(181,128,58,0.03) 1px, transparent 1px);
+    background-size: 32px 32px, 64px 64px;
+    background-position: 0 0, 16px 16px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .app-header, .nav-tabs, .main, .app-footer, .start-screen, .modal-overlay, .timer-overlay {
+    position: relative; z-index: 1;
   }
   a { color: var(--accent); }
 
   /* Header */
   .app-header {
-    background: linear-gradient(135deg, var(--surface) 0%, var(--bg) 100%);
+    background: var(--surface);
     border-bottom: 1px solid var(--border);
     padding: 16px 20px;
     position: sticky;
@@ -60,24 +75,26 @@
     gap: 12px;
     flex-wrap: wrap;
   }
-  .app-title { font-size: 20px; font-weight: 700; }
+  .app-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; }
   .app-title span { color: var(--accent); }
   .countdown-badge {
-    background: linear-gradient(135deg, var(--accent), #a855f7);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
     border-radius: 20px;
     padding: 4px 12px;
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
+    color: #fff;
   }
   .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.btn {
+  .btn {
     padding: 7px 14px;
-    border-radius: 8px;
+    border-radius: 6px;
     border: none;
     cursor: pointer;
     font-size: 13px;
     font-weight: 600;
+    font-family: 'Source Serif 4', serif;
     transition: all 0.15s;
     display: inline-flex;
     align-items: center;
@@ -87,7 +104,7 @@
   .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); }
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
   .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: #5a4fd4; }
+  .btn-primary:hover { filter: brightness(1.15); }
   .btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
   .btn-danger:hover { background: var(--danger); color: #fff; }
   .btn-success { background: var(--success); color: #fff; }
@@ -106,6 +123,7 @@
     padding: 12px 20px;
     cursor: pointer;
     color: var(--text2);
+    font-family: 'Source Serif 4', serif;
     font-weight: 600;
     font-size: 13px;
     white-space: nowrap;
@@ -128,6 +146,7 @@
     margin-bottom: 16px;
   }
   .card-title {
+    font-family: 'Playfair Display', serif;
     font-size: 16px;
     font-weight: 700;
     margin-bottom: 16px;
@@ -151,7 +170,7 @@
     padding: 14px;
     text-align: center;
   }
-  .stat-value { font-size: 24px; font-weight: 800; color: var(--accent); }
+  .stat-value { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--accent); }
   .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
 
   /* Progress Bar */
@@ -177,17 +196,17 @@
 
   /* Today's Workout */
   @keyframes today-glow {
-    0%, 100% { box-shadow: 0 0 12px rgba(59,130,246,0.4), 0 0 24px rgba(59,130,246,0.15); }
-    50%       { box-shadow: 0 0 20px rgba(59,130,246,0.7), 0 0 40px rgba(59,130,246,0.25); }
+    0%, 100% { box-shadow: 0 0 12px rgba(74,124,31,0.25), 0 0 24px rgba(74,124,31,0.08); }
+    50%       { box-shadow: 0 0 20px rgba(74,124,31,0.4),  0 0 40px rgba(74,124,31,0.15); }
   }
   @keyframes badge-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50%       { opacity: 0.85; transform: scale(1.05); }
   }
   .today-card {
-    background: linear-gradient(135deg, #1e2040 0%, #1b2a40 100%);
+    background: linear-gradient(135deg, rgba(74,124,31,0.08) 0%, rgba(181,128,58,0.05) 100%);
     border: 2px solid var(--accent);
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 22px;
     margin-bottom: 16px;
     animation: today-glow 3s ease-in-out infinite;
@@ -198,16 +217,16 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(78,205,196,0.05) 100%);
+    background: linear-gradient(135deg, rgba(74,124,31,0.04) 0%, rgba(181,128,58,0.03) 100%);
     pointer-events: none;
   }
   .today-badge {
-    background: linear-gradient(90deg, var(--accent), #8b83ff);
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
     color: #fff;
-    border-radius: 8px;
+    border-radius: 6px;
     padding: 4px 12px;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     display: inline-flex;
@@ -215,30 +234,31 @@
     gap: 6px;
     margin-bottom: 12px;
     animation: badge-pulse 2.5s ease-in-out infinite;
-    box-shadow: 0 2px 10px rgba(59,130,246,0.5);
+    box-shadow: 0 2px 10px rgba(74,124,31,0.35);
   }
   .today-badge::before { content: '▶'; font-size: 9px; }
-  .today-workout-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.3px; }
-  .today-workout-desc { color: var(--text2); margin-bottom: 16px; font-size: 14px; line-height: 1.5; }
+  .today-workout-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .today-workout-desc { color: var(--text2); margin-bottom: 16px; font-size: 14px; line-height: 1.55; }
   .checkin-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
   .btn-checkin {
     flex: 1;
     min-width: 90px;
     padding: 10px;
-    border-radius: 10px;
+    border-radius: 8px;
     border: 1px solid var(--border);
     background: var(--surface2);
     color: var(--text);
     cursor: pointer;
     font-size: 13px;
     font-weight: 600;
+    font-family: 'Source Serif 4', serif;
     text-align: center;
     transition: all 0.15s;
   }
   .btn-checkin:hover { border-color: var(--accent); }
-  .btn-checkin.active-completed { background: rgba(81,207,102,0.2); border-color: var(--success); color: var(--success); }
-  .btn-checkin.active-skipped { background: rgba(255,107,107,0.2); border-color: var(--danger); color: var(--danger); }
-  .btn-checkin.active-modified { background: rgba(255,212,59,0.2); border-color: var(--warning); color: var(--warning); }
+  .btn-checkin.active-completed { background: rgba(61,122,46,0.15); border-color: var(--success); color: var(--success); }
+  .btn-checkin.active-skipped   { background: rgba(168,48,32,0.15); border-color: var(--danger);  color: var(--danger); }
+  .btn-checkin.active-modified  { background: rgba(192,112,32,0.15); border-color: var(--warning); color: var(--warning); }
 
   /* Week Grid */
   .week-section { margin-bottom: 24px; }
@@ -250,19 +270,19 @@
     flex-wrap: wrap;
     gap: 8px;
   }
-  .week-title { font-size: 15px; font-weight: 700; }
+  .week-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; }
   .phase-badge {
-    border-radius: 6px;
+    border-radius: 4px;
     padding: 2px 10px;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  .phase-1 { background: rgba(255,107,107,0.2); color: var(--phase1); border: 1px solid rgba(255,107,107,0.4); }
-  .phase-2 { background: rgba(255,169,77,0.2); color: var(--phase2); border: 1px solid rgba(255,169,77,0.4); }
-  .phase-3 { background: rgba(81,207,102,0.2); color: var(--phase3); border: 1px solid rgba(81,207,102,0.4); }
-  .phase-4 { background: rgba(78,205,196,0.2); color: var(--phase4); border: 1px solid rgba(78,205,196,0.4); }
+  .phase-1 { background: rgba(192,112,32,0.15); color: var(--phase1); border: 1px solid rgba(192,112,32,0.4); }
+  .phase-2 { background: rgba(74,124,31,0.15);  color: var(--phase2); border: 1px solid rgba(74,124,31,0.4); }
+  .phase-3 { background: rgba(42,122,136,0.15); color: var(--phase3); border: 1px solid rgba(42,122,136,0.4); }
+  .phase-4 { background: rgba(138,32,32,0.15);  color: var(--phase4); border: 1px solid rgba(138,32,32,0.4); }
   .week-completion { font-size: 12px; color: var(--text2); }
   .week-grid {
     display: grid;
@@ -284,13 +304,13 @@
   .day-cell.is-today {
     border-color: var(--accent);
     border-width: 2px;
-    background: rgba(59,130,246,0.18);
-    box-shadow: 0 0 10px rgba(59,130,246,0.35), inset 0 0 8px rgba(59,130,246,0.08);
+    background: rgba(74,124,31,0.1);
+    box-shadow: 0 0 10px rgba(74,124,31,0.2);
   }
   .day-cell.is-past { opacity: 0.7; }
-  .day-cell.status-completed { background: rgba(81,207,102,0.1); border-color: rgba(81,207,102,0.4); }
-  .day-cell.status-skipped { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.3); }
-  .day-cell.status-modified { background: rgba(255,212,59,0.1); border-color: rgba(255,212,59,0.3); }
+  .day-cell.status-completed { background: rgba(61,122,46,0.1);  border-color: rgba(61,122,46,0.4); }
+  .day-cell.status-skipped   { background: rgba(168,48,32,0.08); border-color: rgba(168,48,32,0.3); }
+  .day-cell.status-modified  { background: rgba(192,112,32,0.08); border-color: rgba(192,112,32,0.3); }
   .day-cell.is-rest { opacity: 0.5; cursor: default; }
   .day-cell.is-rest:hover { border-color: var(--border); transform: none; }
   .day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text2); margin-bottom: 4px; }
@@ -302,7 +322,7 @@
   /* Modal */
   .modal-overlay {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7);
+    background: rgba(45,46,30,0.55);
     z-index: 200;
     display: flex;
     align-items: center;
@@ -320,7 +340,7 @@
     max-height: 90vh;
     overflow-y: auto;
   }
-  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
   .modal-subtitle { color: var(--text2); font-size: 13px; margin-bottom: 20px; }
   .modal-workout { background: var(--surface2); border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 14px; }
   .modal-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
@@ -337,9 +357,9 @@
     transition: all 0.15s;
   }
   .modal-btn:hover { border-color: var(--accent); }
-  .modal-btn.active-completed { background: rgba(81,207,102,0.2); border-color: var(--success); color: var(--success); }
-  .modal-btn.active-skipped { background: rgba(255,107,107,0.2); border-color: var(--danger); color: var(--danger); }
-  .modal-btn.active-modified { background: rgba(255,212,59,0.2); border-color: var(--warning); color: var(--warning); }
+  .modal-btn.active-completed { background: rgba(61,122,46,0.15);  border-color: var(--success); color: var(--success); }
+  .modal-btn.active-skipped   { background: rgba(168,48,32,0.15);  border-color: var(--danger);  color: var(--danger); }
+  .modal-btn.active-modified  { background: rgba(192,112,32,0.15); border-color: var(--warning); color: var(--warning); }
   .form-group { margin-bottom: 14px; }
   .form-label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
   .form-input {
@@ -398,8 +418,8 @@
 
   /* Injury Pause */
   .pause-banner {
-    background: rgba(255,212,59,0.1);
-    border: 1px solid rgba(255,212,59,0.4);
+    background: rgba(192,112,32,0.1);
+    border: 1px solid rgba(192,112,32,0.4);
     border-radius: 10px;
     padding: 12px 16px;
     margin-bottom: 16px;
@@ -442,10 +462,10 @@
     border: 1px solid transparent;
     transition: background 0.15s;
   }
-  .wp-day[onclick]:hover { background: rgba(59,130,246,0.08); }
+  .wp-day[onclick]:hover { background: rgba(74,124,31,0.08); }
   .wp-day-today {
     border-color: var(--accent);
-    background: rgba(59,130,246,0.1);
+    background: rgba(74,124,31,0.08);
   }
   .wp-day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text2); }
   .wp-day-icon { font-size: 16px; }
@@ -462,11 +482,11 @@
     font-weight: 700;
     border: 2px solid transparent;
   }
-  .wp-done { background: rgba(81,207,102,0.25); border-color: var(--success); color: var(--success); }
-  .wp-skipped { background: rgba(255,107,107,0.2); border-color: var(--danger); color: var(--danger); }
-  .wp-modified { background: rgba(255,212,59,0.2); border-color: var(--warning); color: var(--warning); }
-  .wp-today { background: rgba(59,130,246,0.2); border-color: var(--accent); color: var(--accent); }
-  .wp-missed { background: rgba(255,107,107,0.08); border-color: rgba(255,107,107,0.3); color: var(--danger); opacity: 0.6; }
+  .wp-done     { background: rgba(61,122,46,0.2);   border-color: var(--success); color: var(--success); }
+  .wp-skipped  { background: rgba(168,48,32,0.15);  border-color: var(--danger);  color: var(--danger); }
+  .wp-modified { background: rgba(192,112,32,0.15); border-color: var(--warning); color: var(--warning); }
+  .wp-today    { background: rgba(74,124,31,0.15);  border-color: var(--accent);  color: var(--accent); }
+  .wp-missed   { background: rgba(168,48,32,0.06);  border-color: rgba(168,48,32,0.3); color: var(--danger); opacity: 0.6; }
   .wp-rest { background: var(--surface2); border-color: var(--border); color: var(--text2); font-size: 10px; opacity: 0.5; }
   .wp-future { background: var(--surface2); border-color: var(--border); color: var(--text2); opacity: 0.4; }
   .wp-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
@@ -518,23 +538,23 @@
     text-transform: uppercase;
     letter-spacing: 0.3px;
   }
-  .tag-run { background: rgba(59,130,246,0.2); color: var(--run); }
-  .tag-strength { background: rgba(255,140,66,0.2); color: var(--strength); }
-  .tag-cross { background: rgba(78,205,196,0.2); color: var(--cross); }
-  .tag-rest { background: rgba(46,51,71,0.6); color: var(--text2); }
-  .tag-race { background: rgba(255,212,59,0.2); color: var(--race); }
+  .tag-run      { background: rgba(74,124,31,0.15);  color: var(--run); }
+  .tag-strength { background: rgba(192,112,32,0.15); color: var(--strength); }
+  .tag-cross    { background: rgba(42,122,136,0.15); color: var(--cross); }
+  .tag-rest     { background: rgba(200,192,174,0.4); color: var(--text2); }
+  .tag-race     { background: rgba(138,32,32,0.15);  color: var(--race); }
 
   .section-header { margin-bottom: 20px; }
-  .section-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
   .section-sub { color: var(--text2); font-size: 13px; }
 
   .inline-note { font-size: 11px; color: var(--warning); margin-top: 4px; font-style: italic; }
 
   /* Race Countdown Hero */
   .race-hero {
-    background: linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(78,205,196,0.08) 100%);
-    border: 1px solid rgba(59,130,246,0.35);
-    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(74,124,31,0.1) 0%, rgba(181,128,58,0.07) 100%);
+    border: 1px solid rgba(74,124,31,0.3);
+    border-radius: 12px;
     padding: 18px 24px;
     margin-bottom: 16px;
     display: flex;
@@ -543,6 +563,7 @@
     flex-wrap: wrap;
   }
   .race-hero-number {
+    font-family: 'Playfair Display', serif;
     font-size: 56px;
     font-weight: 900;
     line-height: 1;
@@ -576,7 +597,7 @@
     text-align: center;
   }
   .start-icon { font-size: 64px; margin-bottom: 20px; }
-  .start-title { font-size: 28px; font-weight: 900; margin-bottom: 8px; }
+  .start-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; margin-bottom: 8px; }
   .start-title span { color: var(--accent); }
   .start-sub { color: var(--text2); font-size: 15px; line-height: 1.6; margin-bottom: 32px; }
   .start-details {
@@ -590,16 +611,17 @@
     border-radius: 10px;
     padding: 14px 8px;
   }
-  .start-detail-value { font-size: 22px; font-weight: 800; color: var(--accent); }
+  .start-detail-value { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--accent); }
   .start-detail-label { font-size: 11px; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
   .btn-start {
-    background: linear-gradient(135deg, var(--accent), #a855f7);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
     color: #fff;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 14px 32px;
     font-size: 16px;
     font-weight: 700;
+    font-family: 'Source Serif 4', serif;
     cursor: pointer;
     width: 100%;
     transition: opacity 0.15s;
@@ -610,7 +632,7 @@
   /* ── INTERVAL TIMER ── */
   .timer-overlay {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.96);
+    background: rgba(45,46,30,0.96);
     z-index: 400;
     display: flex;
     align-items: center;
@@ -627,20 +649,22 @@
     text-align: center;
     transition: border-color 0.4s ease, background 0.4s ease;
   }
-  .timer-card.phase-walk { border-color: var(--accent2); background: rgba(78,205,196,0.05); }
-  .timer-card.phase-done { border-color: var(--success); background: rgba(81,207,102,0.08); }
+  .timer-card.phase-walk { border-color: var(--cross);   background: rgba(42,122,136,0.05); }
+  .timer-card.phase-done { border-color: var(--success); background: rgba(61,122,46,0.08); }
   .timer-phase-label {
+    font-family: 'Source Serif 4', serif;
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 4px;
     color: var(--run);
     margin-bottom: 16px;
     transition: color 0.4s;
   }
-  .timer-card.phase-walk .timer-phase-label { color: var(--accent2); }
+  .timer-card.phase-walk .timer-phase-label { color: var(--cross); }
   .timer-card.phase-done .timer-phase-label { color: var(--success); font-size: 18px; letter-spacing: 1px; }
   .timer-time {
+    font-family: 'Playfair Display', serif;
     font-size: 88px;
     font-weight: 900;
     line-height: 1;
@@ -669,7 +693,7 @@
     width: 0%;
     transition: width 1s linear, background 0.4s;
   }
-  .timer-card.phase-walk .timer-progress-fill { background: var(--accent2); }
+  .timer-card.phase-walk .timer-progress-fill { background: var(--cross); }
   .timer-card.phase-done .timer-progress-fill { background: var(--success); }
   .timer-controls { display: flex; gap: 10px; justify-content: center; }
   .timer-summary { font-size: 12px; color: var(--text2); margin-bottom: 24px; line-height: 1.6; }
@@ -692,7 +716,7 @@
     margin-top: 2rem;
   }
   .app-footer a { color: var(--text2); text-decoration: none; }
-  .app-footer a:hover { color: var(--text); }
+  .app-footer a:hover { color: var(--accent); }
 </style>
 </head>
 <body>

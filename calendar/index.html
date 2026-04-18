@@ -4,37 +4,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Calendar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Serif+Text:ital@0;1&display=swap">
   <script src="../nav.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0d0d0d;
-      --surface: #171717;
-      --surface2: #222222;
-      --border: #2d2d2d;
-      --border2: #3d3d3d;
-      --accent: #3b82f6;
-      --accent-dim: rgba(59,130,246,0.12);
-      --text: #e8e8e8;
-      --muted: #737373;
-      --muted2: #9a9a9a;
-      --muted-2: #4d4d4d;
-      --upcoming: #f59e0b;
-      --upcoming-bg: rgba(245,158,11,0.08);
-      --upcoming-border: rgba(245,158,11,0.25);
-      --ongoing: #22c55e;
-      --ongoing-bg: rgba(34,197,94,0.08);
-      --ongoing-border: rgba(34,197,94,0.25);
-      --past: #94a3b8;
-      --past-bg: rgba(148,163,184,0.08);
-      --past-border: rgba(148,163,184,0.25);
-      --planning: #14b8a6;
-      --planning-bg: rgba(20,184,166,0.08);
-      --planning-border: rgba(20,184,166,0.25);
-      --fab-event: #8b5cf6;
-      --fab-event-bg: rgba(139,92,246,0.08);
-      --fab-event-border: rgba(139,92,246,0.25);
+      --bg: #faf7f2;
+      --surface: #f2ece0;
+      --surface2: #e8e0d2;
+      --border: #ddd6c6;
+      --border2: #c8bfac;
+      --accent: #c8102e;
+      --accent-dim: rgba(200,16,46,0.09);
+      --text: #1a1610;
+      --muted: #6b5e4e;
+      --muted2: #8c7c68;
+      --muted-2: #b5a898;
+      --upcoming: #92400e;
+      --upcoming-bg: rgba(146,64,14,0.08);
+      --upcoming-border: rgba(146,64,14,0.2);
+      --ongoing: #14532d;
+      --ongoing-bg: rgba(20,83,45,0.08);
+      --ongoing-border: rgba(20,83,45,0.2);
+      --past: #475569;
+      --past-bg: rgba(71,85,105,0.08);
+      --past-border: rgba(71,85,105,0.2);
+      --planning: #155e75;
+      --planning-bg: rgba(21,94,117,0.08);
+      --planning-border: rgba(21,94,117,0.2);
+      --fab-event: #5b21b6;
+      --fab-event-bg: rgba(91,33,182,0.08);
+      --fab-event-border: rgba(91,33,182,0.2);
     }
 
     html { scroll-behavior: smooth; }
@@ -42,38 +45,63 @@
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'DM Serif Text', Georgia, serif;
       -webkit-font-smoothing: antialiased;
       line-height: 1.6;
     }
 
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        radial-gradient(circle, rgba(0,0,0,0.035) 1px, transparent 1px),
+        radial-gradient(circle, rgba(0,0,0,0.02) 1px, transparent 1px);
+      background-size: 4px 4px, 6px 6px;
+      background-position: 0 0, 2px 2px;
+    }
+
     /* ── HERO ── */
     .hero {
-      padding: 1.5rem 1.5rem 1.25rem;
-      text-align: center;
-      background: linear-gradient(180deg, rgba(59,130,246,0.04) 0%, transparent 100%);
-      border-bottom: 1px solid var(--border);
+      padding: 2rem 1.5rem 1.5rem;
+      text-align: left;
+      border-bottom: 2px solid var(--text);
+      position: relative;
+      z-index: 1;
+    }
+    .hero-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: baseline;
+      gap: 1.5rem;
+      flex-wrap: wrap;
     }
     .hero h1 {
-      font-size: clamp(1.3rem, 3vw, 1.9rem);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.1;
-      margin-bottom: 0.4rem;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--text);
     }
     .hero p {
       color: var(--muted);
       font-size: 0.9rem;
-      max-width: 520px;
-      margin-inline: auto;
+      font-style: italic;
     }
 
     /* ── MAIN ── */
     .main {
       width: 100%;
       max-width: 1000px;
-      margin: 2rem auto;
+      margin: 1.75rem auto;
       padding: 0 1.25rem 4rem;
+      position: relative;
+      z-index: 1;
     }
 
     /* ── CALENDAR NAV ── */
@@ -90,19 +118,20 @@
       justify-content: center;
       width: 2rem;
       height: 2rem;
-      border-radius: 8px;
-      background: var(--surface);
+      border-radius: 2px;
+      background: transparent;
       border: 1px solid var(--border2);
       color: var(--muted);
       cursor: pointer;
       transition: all 0.15s;
       flex-shrink: 0;
     }
-    .cal-nav-btn:hover { border-color: var(--muted2); color: var(--text); }
+    .cal-nav-btn:hover { border-color: var(--text); color: var(--text); background: var(--surface); }
     .cal-month-label {
-      font-size: 1rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
       color: var(--text);
     }
 
@@ -115,28 +144,40 @@
     }
     .cal-dow {
       text-align: center;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: var(--muted2);
       padding: 0.25rem 0 0.5rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+    }
+
+    @keyframes calReveal {
+      from { opacity: 0; transform: translateY(5px); }
+      to   { opacity: 1; transform: none; }
     }
 
     /* Each calendar week is a wrapper containing the day cells + floating trip bars */
     .cal-week-wrapper {
       position: relative;
       margin-bottom: 3px;
+      opacity: 0;
+      animation: calReveal 0.35s ease-out forwards;
     }
+    .cal-week-wrapper:nth-child(2) { animation-delay: 0.04s; }
+    .cal-week-wrapper:nth-child(3) { animation-delay: 0.09s; }
+    .cal-week-wrapper:nth-child(4) { animation-delay: 0.14s; }
+    .cal-week-wrapper:nth-child(5) { animation-delay: 0.19s; }
+    .cal-week-wrapper:nth-child(6) { animation-delay: 0.24s; }
     .cal-week-days {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 3px;
     }
     .cal-day {
-      /* height set per-week via inline style so all cells in a row are equal */
       position: relative;
-      border-radius: 8px;
+      border-radius: 2px;
       background: var(--surface);
       border: 1px solid var(--border);
       padding: 0.3rem 0.35rem 0.25rem;
@@ -146,31 +187,22 @@
       background: transparent;
       border-color: transparent;
     }
-    .cal-day.today { border-color: var(--accent); }
+    .cal-day.today { border-color: var(--accent); background: var(--accent-dim); }
     .cal-day.has-trip { border-color: var(--border2); }
     .cal-day-num {
-      font-size: 0.72rem;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 0.75rem;
       font-weight: 700;
       color: var(--muted2);
       line-height: 1;
     }
     .cal-day.today .cal-day-num { color: var(--accent); }
 
-    /*
-      Trip bars sit absolutely within .cal-week-wrapper.
-      --c: 0-indexed column start
-      --s: column span count
-      Formula accounts for the 3px gap between cells (6 gaps total in 7 columns):
-        cell width  = (100% - 18px) / 7
-        unit step   = cell width + 3px = (100% - 18px) / 7 + 3px
-        left        = --c * unit step
-        width       = --s * unit step - 3px
-    */
     .cal-trip-bar {
       position: absolute;
       left: calc(var(--c) * ((100% - 18px) / 7 + 3px));
       width: calc(var(--s) * ((100% - 18px) / 7 + 3px) - 3px);
-      border-radius: 4px;
+      border-radius: 2px;
       padding: 0 0.3rem;
       font-size: 0.6rem;
       font-weight: 700;
@@ -181,8 +213,9 @@
       cursor: pointer;
       transition: filter 0.15s;
       overflow: hidden;
+      font-family: 'DM Serif Text', Georgia, serif;
     }
-    .cal-trip-bar:hover { filter: brightness(1.15); }
+    .cal-trip-bar:hover { filter: brightness(0.88); }
     .cal-trip-bar .bar-label {
       min-width: 0;
       overflow: hidden;
@@ -190,7 +223,6 @@
       white-space: nowrap;
     }
 
-    /* Square off the end that flows into another week row */
     .cal-trip-bar.overflow-left  { border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none; }
     .cal-trip-bar.overflow-right { border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: none; }
 
@@ -209,9 +241,9 @@
       height: 6px;
       border-radius: 50%;
     }
-    .wd-done    { background: #22c55e; }
-    .wd-skipped { background: #f59e0b; }
-    .wd-missed  { background: #ef4444; }
+    .wd-done    { background: #166534; }
+    .wd-skipped { background: #92400e; }
+    .wd-missed  { background: #c8102e; }
 
     /* ── LEGEND ── */
     .cal-legend {
@@ -228,11 +260,12 @@
       gap: 0.35rem;
       font-size: 0.72rem;
       color: var(--muted2);
+      font-style: italic;
     }
     .cal-legend-dot {
       width: 8px;
       height: 8px;
-      border-radius: 2px;
+      border-radius: 1px;
       flex-shrink: 0;
     }
     .cal-legend-dot.s-upcoming  { background: var(--upcoming); }
@@ -256,12 +289,14 @@
       .cal-dow { font-size: 0.55rem; }
       .cal-day-num { font-size: 0.65rem; }
       .cal-trip-bar { font-size: 0.5rem; padding: 0 0.2rem; }
-      .cal-month-label { font-size: 0.9rem; }
+      .cal-month-label { font-size: 0.95rem; }
+      .hero { padding: 1.25rem 0.75rem 1rem; }
+      .hero h1 { font-size: 1.9rem; }
     }
 
     /* ── TWO-MONTH DESKTOP LAYOUT ── */
     .cal-panel-label {
-      display: none; /* shown only on desktop */
+      display: none;
     }
     @media (min-width: 768px) {
       .main { max-width: 1400px; }
@@ -272,11 +307,14 @@
       }
       .cal-panel-label {
         display: block;
-        font-size: 0.92rem;
-        font-weight: 800;
-        letter-spacing: -0.02em;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 1rem;
+        font-weight: 700;
+        font-style: italic;
         color: var(--text);
         margin-bottom: 0.6rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.4rem;
       }
     }
 
@@ -284,17 +322,16 @@
     .fab-popup {
       position: fixed;
       z-index: 500;
-      background: var(--surface);
+      background: var(--bg);
       border: 1px solid var(--border2);
-      border-radius: 10px;
+      border-radius: 3px;
       padding: 0.8rem 0.85rem;
       min-width: 210px;
       max-width: 270px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3);
-      /* animation */
+      box-shadow: 0 6px 24px rgba(26,22,16,0.15), 0 2px 6px rgba(26,22,16,0.08);
       visibility: hidden;
       opacity: 0;
-      transform: scale(0.88) translateY(-6px);
+      transform: scale(0.92) translateY(-4px);
       transform-origin: top left;
       pointer-events: none;
       transition: opacity 0.16s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1), visibility 0s linear 0.2s;
@@ -307,13 +344,15 @@
       transition: opacity 0.16s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1), visibility 0s linear 0s;
     }
     .fab-popup-title {
-      font-size: 0.82rem;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 0.88rem;
       font-weight: 700;
       color: var(--text);
       margin-bottom: 0.15rem;
     }
     .fab-popup-dates {
       font-size: 0.7rem;
+      font-style: italic;
       color: var(--muted);
       margin-bottom: 0.65rem;
     }
@@ -327,30 +366,31 @@
       align-items: center;
       gap: 0.4rem;
       padding: 0.4rem 0.6rem;
-      border-radius: 6px;
+      border-radius: 2px;
       font-size: 0.75rem;
       font-weight: 600;
       text-decoration: none;
       border: 1px solid var(--border2);
-      background: var(--surface2);
+      background: var(--surface);
       color: var(--text);
       cursor: pointer;
       transition: border-color 0.15s, background 0.15s;
       text-align: left;
+      font-family: 'DM Serif Text', Georgia, serif;
     }
-    .fab-popup-btn:hover { border-color: var(--muted); background: var(--border); color: var(--text); }
+    .fab-popup-btn:hover { border-color: var(--muted); background: var(--surface2); }
     .fab-popup-btn.p-event { color: var(--fab-event); border-color: var(--fab-event-border); background: var(--fab-event-bg); }
-    .fab-popup-btn.p-event:hover { filter: brightness(1.15); }
+    .fab-popup-btn.p-event:hover { filter: brightness(0.9); }
     .fab-popup-btn.p-prep { color: var(--accent); border-color: var(--upcoming-border); background: var(--upcoming-bg); }
-    .fab-popup-btn.p-prep:hover { filter: brightness(1.2); }
+    .fab-popup-btn.p-prep:hover { filter: brightness(0.9); }
     .fab-popup-btn.p-upcoming { color: var(--upcoming); border-color: var(--upcoming-border); background: var(--upcoming-bg); }
-    .fab-popup-btn.p-upcoming:hover { filter: brightness(1.15); }
+    .fab-popup-btn.p-upcoming:hover { filter: brightness(0.9); }
     .fab-popup-btn.p-ongoing  { color: var(--ongoing);  border-color: var(--ongoing-border);  background: var(--ongoing-bg);  }
-    .fab-popup-btn.p-ongoing:hover  { filter: brightness(1.15); }
+    .fab-popup-btn.p-ongoing:hover  { filter: brightness(0.9); }
     .fab-popup-btn.p-past     { color: var(--past);     border-color: var(--past-border);     background: var(--past-bg);     }
-    .fab-popup-btn.p-past:hover     { filter: brightness(1.15); }
+    .fab-popup-btn.p-past:hover     { filter: brightness(0.9); }
     .fab-popup-btn.p-planning { color: var(--planning); border-color: var(--planning-border); background: var(--planning-bg); }
-    .fab-popup-btn.p-planning:hover { filter: brightness(1.15); }
+    .fab-popup-btn.p-planning:hover { filter: brightness(0.9); }
 
     /* ── IFRAME MODAL ── */
     .iframe-modal-overlay {
@@ -360,7 +400,6 @@
       background: var(--bg);
       display: flex;
       flex-direction: column;
-      /* slide-up animation */
       transform: translateY(100%);
       visibility: hidden;
       transition: transform 0.42s cubic-bezier(0.32,0.72,0,1), visibility 0s linear 0.42s;
@@ -376,7 +415,7 @@
       gap: 0.75rem;
       padding: 0 1rem;
       height: 48px;
-      background: rgba(10,10,12,0.92);
+      background: rgba(250,247,242,0.95);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
@@ -386,21 +425,24 @@
       align-items: center;
       gap: 0.35rem;
       padding: 0.35rem 0.7rem;
-      border-radius: 6px;
+      border-radius: 2px;
       font-size: 0.8rem;
       font-weight: 600;
-      background: var(--surface2);
+      background: var(--surface);
       border: 1px solid var(--border2);
       color: var(--text);
       cursor: pointer;
       transition: border-color 0.15s;
       flex-shrink: 0;
       white-space: nowrap;
+      font-family: 'DM Serif Text', Georgia, serif;
     }
-    .iframe-modal-back:hover { border-color: var(--muted); }
+    .iframe-modal-back:hover { border-color: var(--text); }
     .iframe-modal-title {
-      font-size: 0.82rem;
-      font-weight: 600;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-style: italic;
       color: var(--muted2);
       min-width: 0;
       overflow: hidden;
@@ -419,6 +461,7 @@
     footer {
       padding: 1.75rem 2rem;
       font-size: 0.78rem;
+      font-style: italic;
       color: var(--muted-2);
       border-top: 1px solid var(--border);
       display: flex;
@@ -427,6 +470,8 @@
       gap: 1rem;
       flex-wrap: wrap;
       margin-top: auto;
+      position: relative;
+      z-index: 1;
     }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--text); }
@@ -435,8 +480,10 @@
 <body>
 
   <header class="hero">
-    <h1>Calendar</h1>
-    <p>Trips and FaB events laid out month by month.</p>
+    <div class="hero-inner">
+      <h1>Calendar</h1>
+      <p>Trips and FaB events laid out month by month.</p>
+    </div>
   </header>
 
   <main class="main">
