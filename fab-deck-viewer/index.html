@@ -7,7 +7,7 @@
   <script src="../nav.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -17,8 +17,8 @@
       --surface-2:  #2e2820;
       --border:     #3a3025;
       --border-2:   #4a4030;
-      --accent:     #e8314a;
-      --accent-dim: rgba(232,49,74,0.08);
+      --accent:     #c4864a;
+      --accent-dim: rgba(196,134,74,0.08);
       --text:       #e8dfd0;
       --muted:      #7a6e60;
       --muted-2:    #9a8a76;
@@ -83,18 +83,18 @@
     }
     .loading-ring.r1 {
       border-top-color: var(--accent);
-      border-right-color: rgba(232,49,74,0.25);
+      border-right-color: rgba(196,134,74,0.25);
       animation: spin 0.85s linear infinite;
     }
     .loading-ring.r2 {
       inset: 8px;
-      border-bottom-color: rgba(232,49,74,0.55);
-      border-left-color: rgba(232,49,74,0.12);
+      border-bottom-color: rgba(196,134,74,0.55);
+      border-left-color: rgba(196,134,74,0.12);
       animation: spin 1.3s linear infinite reverse;
     }
     .loading-ring.r3 {
       inset: 18px;
-      border-top-color: rgba(232,49,74,0.8);
+      border-top-color: rgba(196,134,74,0.8);
       animation: spin 0.6s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -134,7 +134,7 @@
       border-bottom: 2px solid var(--text);
     }
     .page-header-title {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       font-style: italic;
       font-size: clamp(1.1rem, 2.5vw, 1.5rem);
       font-weight: 900;
@@ -155,7 +155,7 @@
 
     .btn-primary {
       background: var(--accent); color: #fff;
-      border: 1px solid rgba(232,49,74,0.5);
+      border: 1px solid rgba(196,134,74,0.5);
       font-family: 'DM Serif Text', Georgia, serif;
       font-style: italic;
       font-size: 0.8rem;
@@ -209,7 +209,7 @@
     }
     .deck-row-icon {
       width: 36px; height: 36px; flex-shrink: 0;
-      background: rgba(232,49,74,0.06);
+      background: rgba(196,134,74,0.06);
       border: 1px solid var(--border);
       border-radius: 2px;
       display: flex; align-items: center; justify-content: center;
@@ -217,7 +217,7 @@
     }
     .deck-row-body { flex: 1; min-width: 0; }
     .deck-row-name {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       font-style: italic;
       font-size: 0.95rem; font-weight: 700;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -261,7 +261,7 @@
       color: var(--muted-2); opacity: 0.6;
     }
     .empty-state-title {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       font-style: italic;
       font-size: 1.1rem; font-weight: 900;
       color: var(--text);
@@ -307,7 +307,7 @@
     }
     input[type="text"]:focus, textarea:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(232,49,74,0.12);
+      box-shadow: 0 0 0 2px rgba(196,134,74,0.12);
     }
     input[type="text"]::placeholder, textarea::placeholder { color: var(--muted-2); }
 
@@ -336,7 +336,7 @@
       border-bottom: 1px solid var(--border);
     }
     .detail-head-name {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       font-style: italic;
       font-size: clamp(1.2rem, 2.5vw, 1.6rem);
       font-weight: 900; letter-spacing: -0.01em;
@@ -368,8 +368,8 @@
     .card-warn {
       display: none; font-size: 0.78rem; color: var(--muted-2);
       padding: 0.55rem 0.85rem; margin-bottom: 1.25rem;
-      background: rgba(232,49,74,0.06);
-      border: 1px solid rgba(232,49,74,0.25);
+      background: rgba(196,134,74,0.06);
+      border: 1px solid rgba(196,134,74,0.25);
       border-radius: 2px;
       font-family: 'DM Serif Text', Georgia, serif;
     }
@@ -419,7 +419,7 @@
       transition: box-shadow 0.2s;
     }
     .card-entry:hover .card-frame {
-      box-shadow: 0 0 0 2px var(--accent), 0 6px 20px rgba(232,49,74,0.25);
+      box-shadow: 0 0 0 2px var(--accent), 0 6px 20px rgba(196,134,74,0.25);
     }
     .card-frame img {
       position: absolute; inset: 0;

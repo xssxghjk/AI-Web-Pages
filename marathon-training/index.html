@@ -7,7 +7,7 @@
 <script src="../nav.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg:       #1c1814;
@@ -15,12 +15,12 @@
     --surface2: #2e2820;
     --border:   #3a3025;
     --border-2: #4a4030;
-    --accent:   #e8314a;
-    --accent-bg:   rgba(232,49,74,0.08);
-    --accent-border: rgba(232,49,74,0.3);
+    --accent:   #c4864a;
+    --accent-bg:   rgba(196,134,74,0.08);
+    --accent-border: rgba(196,134,74,0.3);
     --success:  #7ab87a;
     --warning:  #d4924a;
-    --danger:   #e8314a;
+    --danger:   #c4864a;
     --text:     #e8dfd0;
     --text2:    #9a8a76;
     --muted-2:  #5a5040;
@@ -28,11 +28,11 @@
     --strength: #d4924a;
     --cross:    #5ab4cc;
     --rest:     #4a4030;
-    --race:     #e8314a;
+    --race:     #c4864a;
     --phase1:   #d4924a;
     --phase2:   #7ab87a;
     --phase3:   #5ab4cc;
-    --phase4:   #e8314a;
+    --phase4:   #c4864a;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -75,7 +75,7 @@
     gap: 12px;
     flex-wrap: wrap;
   }
-  .app-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; }
+  .app-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; }
   .app-title span { color: var(--accent); }
   .countdown-badge {
     background: var(--accent);
@@ -146,7 +146,7 @@
     margin-bottom: 16px;
   }
   .card-title {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Cormorant Garamond', serif;
     font-size: 16px;
     font-weight: 700;
     margin-bottom: 16px;
@@ -170,7 +170,7 @@
     padding: 14px;
     text-align: center;
   }
-  .stat-value { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--accent); }
+  .stat-value { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 700; color: var(--accent); }
   .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
 
   /* Progress Bar */
@@ -196,15 +196,15 @@
 
   /* Today's Workout */
   @keyframes today-glow {
-    0%, 100% { box-shadow: 0 0 12px rgba(232,49,74,0.2), 0 0 24px rgba(232,49,74,0.06); }
-    50%       { box-shadow: 0 0 20px rgba(232,49,74,0.32), 0 0 40px rgba(232,49,74,0.1); }
+    0%, 100% { box-shadow: 0 0 12px rgba(196,134,74,0.2), 0 0 24px rgba(196,134,74,0.06); }
+    50%       { box-shadow: 0 0 20px rgba(196,134,74,0.32), 0 0 40px rgba(196,134,74,0.1); }
   }
   @keyframes badge-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50%       { opacity: 0.85; transform: scale(1.05); }
   }
   .today-card {
-    background: rgba(232,49,74,0.05);
+    background: rgba(196,134,74,0.05);
     border: 2px solid var(--accent);
     border-radius: 12px;
     padding: 22px;
@@ -223,7 +223,7 @@
     display: inline-block;
     margin-bottom: 12px;
   }
-  .today-workout-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .today-workout-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; margin-bottom: 6px; }
   .today-workout-desc { color: var(--text2); margin-bottom: 16px; font-size: 14px; line-height: 1.55; }
   .checkin-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
   .btn-checkin {
@@ -256,7 +256,7 @@
     flex-wrap: wrap;
     gap: 8px;
   }
-  .week-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; }
+  .week-title { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 700; }
   .phase-badge {
     border-radius: 4px;
     padding: 2px 10px;
@@ -290,8 +290,8 @@
   .day-cell.is-today {
     border-color: var(--accent);
     border-width: 2px;
-    background: rgba(232,49,74,0.08);
-    box-shadow: 0 0 10px rgba(232,49,74,0.15);
+    background: rgba(196,134,74,0.08);
+    box-shadow: 0 0 10px rgba(196,134,74,0.15);
   }
   .day-cell.is-past { opacity: 0.7; }
   .day-cell.status-completed { background: rgba(122,184,122,0.1);  border-color: rgba(61,122,46,0.4); }
@@ -326,7 +326,7 @@
     max-height: 90vh;
     overflow-y: auto;
   }
-  .modal-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
   .modal-subtitle { color: var(--text2); font-size: 13px; margin-bottom: 20px; }
   .modal-workout { background: var(--surface2); border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 14px; }
   .modal-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
@@ -448,10 +448,10 @@
     border: 1px solid transparent;
     transition: background 0.15s;
   }
-  .wp-day[onclick]:hover { background: rgba(232,49,74,0.06); }
+  .wp-day[onclick]:hover { background: rgba(196,134,74,0.06); }
   .wp-day-today {
     border-color: var(--accent);
-    background: rgba(232,49,74,0.06);
+    background: rgba(196,134,74,0.06);
   }
   .wp-day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text2); }
   .wp-day-icon { font-size: 16px; }
@@ -471,7 +471,7 @@
   .wp-done     { background: rgba(122,184,122,0.2);   border-color: var(--success); color: var(--success); }
   .wp-skipped  { background: rgba(168,48,32,0.15);  border-color: var(--danger);  color: var(--danger); }
   .wp-modified { background: rgba(192,112,32,0.15); border-color: var(--warning); color: var(--warning); }
-  .wp-today    { background: rgba(232,49,74,0.12);  border-color: var(--accent);  color: var(--accent); }
+  .wp-today    { background: rgba(196,134,74,0.12);  border-color: var(--accent);  color: var(--accent); }
   .wp-missed   { background: rgba(168,48,32,0.06);  border-color: rgba(168,48,32,0.3); color: var(--danger); opacity: 0.6; }
   .wp-rest { background: var(--surface2); border-color: var(--border); color: var(--text2); font-size: 10px; opacity: 0.5; }
   .wp-future { background: var(--surface2); border-color: var(--border); color: var(--text2); opacity: 0.4; }
@@ -531,15 +531,15 @@
   .tag-race     { background: rgba(138,32,32,0.15);  color: var(--race); }
 
   .section-header { margin-bottom: 20px; }
-  .section-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .section-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
   .section-sub { color: var(--text2); font-size: 13px; }
 
   .inline-note { font-size: 11px; color: var(--warning); margin-top: 4px; font-style: italic; }
 
   /* Race Countdown Hero */
   .race-hero {
-    background: rgba(232,49,74,0.05);
-    border: 1px solid rgba(232,49,74,0.25);
+    background: rgba(196,134,74,0.05);
+    border: 1px solid rgba(196,134,74,0.25);
     border-radius: 12px;
     padding: 18px 24px;
     margin-bottom: 16px;
@@ -549,7 +549,7 @@
     flex-wrap: wrap;
   }
   .race-hero-number {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Cormorant Garamond', serif;
     font-size: 56px;
     font-weight: 900;
     line-height: 1;
@@ -580,7 +580,7 @@
     text-align: center;
   }
   .start-icon { font-size: 64px; margin-bottom: 20px; }
-  .start-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; margin-bottom: 8px; }
+  .start-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 900; margin-bottom: 8px; }
   .start-title span { color: var(--accent); }
   .start-sub { color: var(--text2); font-size: 15px; line-height: 1.6; margin-bottom: 32px; }
   .start-details {
@@ -594,7 +594,7 @@
     border-radius: 10px;
     padding: 14px 8px;
   }
-  .start-detail-value { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--accent); }
+  .start-detail-value { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: var(--accent); }
   .start-detail-label { font-size: 11px; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
   .btn-start {
     background: var(--accent);
@@ -647,7 +647,7 @@
   .timer-card.phase-walk .timer-phase-label { color: var(--cross); }
   .timer-card.phase-done .timer-phase-label { color: var(--success); font-size: 18px; letter-spacing: 1px; }
   .timer-time {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Cormorant Garamond', serif;
     font-size: 88px;
     font-weight: 900;
     line-height: 1;
