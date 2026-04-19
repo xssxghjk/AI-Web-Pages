@@ -487,7 +487,7 @@
     }
 
     /* ── FILTER STATE ── */
-    let activeStatus = 'all';
+    let activeStatus = 'upcoming';
     let activeRegion = 'all';
     const regionLabelMap = {};
 
@@ -544,9 +544,9 @@
 
       const statusEl = document.getElementById('status-filter');
       statusEl.innerHTML =
-        `<button class="filter-pill active" data-ftype="status" data-fval="all">All</button>` +
+        `<button class="filter-pill${activeStatus === 'all' ? ' active' : ''}" data-ftype="status" data-fval="all">All</button>` +
         statuses.map(s =>
-          `<button class="filter-pill s-${esc(s)}" data-ftype="status" data-fval="${esc(s)}">${esc(STATUS_LABELS[s] || s)}</button>`
+          `<button class="filter-pill s-${esc(s)}${activeStatus === s ? ' active' : ''}" data-ftype="status" data-fval="${esc(s)}">${esc(STATUS_LABELS[s] || s)}</button>`
         ).join('');
 
       const regionEl = document.getElementById('region-filter');
@@ -594,6 +594,7 @@
       container.innerHTML = TRIPS.map(renderTile).join('');
       buildStats();
       buildFilters();
+      applyFilters();
     }
 
     init();
