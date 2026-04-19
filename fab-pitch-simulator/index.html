@@ -318,6 +318,44 @@
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--accent); }
 
+    /* ── Saved deck selector ── */
+    .deck-select-row {
+      display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;
+    }
+    select {
+      flex: 1; min-width: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.88rem;
+      padding: 0.5rem 0.75rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a6e60' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      padding-right: 2rem;
+    }
+    select:focus { border-color: var(--accent); }
+    select option { background: var(--surface-2); color: var(--text); }
+    .deck-load-note {
+      font-size: 0.75rem; color: var(--muted);
+      font-style: italic; line-height: 1.5;
+    }
+    .deck-load-note a { color: var(--muted-2); text-decoration: underline; text-underline-offset: 2px; }
+    .deck-load-note a:hover { color: var(--accent); }
+    .no-decks-msg {
+      font-size: 0.82rem; color: var(--muted); font-style: italic; line-height: 1.6;
+    }
+    .no-decks-msg a { color: var(--muted-2); text-decoration: underline; text-underline-offset: 2px; }
+    .no-decks-msg a:hover { color: var(--accent); }
+
     /* ── Mobile ── */
     @media (max-width: 600px) {
       .hero { padding: 1.5rem 1.25rem 1.25rem; }
@@ -338,6 +376,23 @@
 </div>
 
 <main>
+
+  <!-- ── Saved Decks ── -->
+  <div class="section" id="section-saved">
+    <div class="section-header">Load Saved Deck</div>
+    <div class="section-body">
+      <div id="saved-has-decks" style="display:none;flex-direction:column;gap:0.9rem;">
+        <div class="deck-select-row">
+          <select id="saved-deck-select"></select>
+          <button class="btn-primary" id="btn-load-deck">Load</button>
+        </div>
+        <div class="deck-load-note" id="deck-load-note" style="display:none;"></div>
+      </div>
+      <div id="saved-no-decks" class="no-decks-msg" style="display:none;">
+        No saved decks found. <a href="../fab-deck-viewer/">Import a deck</a> in the Deck Viewer first, then come back here to load it.
+      </div>
+    </div>
+  </div>
 
   <!-- ── Deck Config ── -->
   <div class="section">
@@ -690,7 +745,91 @@
     document.getElementById('monte-out').style.display = 'none';
   });
 
+  /* ── Saved Decks ──────────────────────────────────────────────────── */
+  const DECK_STORAGE_KEY = 'fab_saved_decks_v1';
+
+  function loadSavedDecks() {
+    try { return JSON.parse(localStorage.getItem(DECK_STORAGE_KEY)) || []; }
+    catch { return []; }
+  }
+
+  function parsePitchCounts(raw) {
+    const counts = { red: 0, yellow: 0, blue: 0, other: 0 };
+    for (const line of raw.split('\n')) {
+      const s = line.trim();
+      if (!s || !/^\d/.test(s)) continue;
+      const qm = s.match(/^(\d+)x?\s+(.+)$/i);
+      if (!qm) continue;
+      const qty = Math.max(1, +qm[1] || 1);
+      const name = qm[2].trim();
+      const hm = name.match(/\((\d+|red|yellow|blue)\)\s*$/i);
+      if (hm) {
+        const h = hm[1].toLowerCase();
+        if      (h === '1' || h === 'red')    counts.red    += qty;
+        else if (h === '2' || h === 'yellow') counts.yellow += qty;
+        else if (h === '3' || h === 'blue')   counts.blue   += qty;
+        else counts.other += qty;
+      } else {
+        counts.other += qty;
+      }
+    }
+    return counts;
+  }
+
+  function initSavedDecks() {
+    const decks = loadSavedDecks();
+    const hasEl  = document.getElementById('saved-has-decks');
+    const noneEl = document.getElementById('saved-no-decks');
+
+    if (decks.length === 0) {
+      hasEl.style.display  = 'none';
+      noneEl.style.display = '';
+      return;
+    }
+
+    hasEl.style.display  = 'flex';
+    noneEl.style.display = 'none';
+
+    const sel = document.getElementById('saved-deck-select');
+    sel.innerHTML = '';
+    decks.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value       = d.id;
+      opt.textContent = d.name;
+      sel.appendChild(opt);
+    });
+  }
+
+  document.getElementById('btn-load-deck').addEventListener('click', function () {
+    const decks = loadSavedDecks();
+    const id    = document.getElementById('saved-deck-select').value;
+    const deck  = decks.find(d => d.id === id);
+    if (!deck) return;
+
+    const counts = parsePitchCounts(deck.decklist);
+    document.getElementById('inp-red').value    = counts.red;
+    document.getElementById('inp-yellow').value = counts.yellow;
+    document.getElementById('inp-blue').value   = counts.blue;
+    updateSummary();
+
+    const noteEl = document.getElementById('deck-load-note');
+    const parts = [];
+    if (counts.red > 0)    parts.push(`${counts.red} red`);
+    if (counts.yellow > 0) parts.push(`${counts.yellow} yellow`);
+    if (counts.blue > 0)   parts.push(`${counts.blue} blue`);
+    const pitchTotal = counts.red + counts.yellow + counts.blue;
+    let note = pitchTotal > 0
+      ? `Loaded ${pitchTotal} pitch cards (${parts.join(', ')}).`
+      : 'No pitch cards found in this decklist.';
+    if (counts.other > 0) {
+      note += ` ${counts.other} arena/non-pitch card${counts.other !== 1 ? 's' : ''} ignored.`;
+    }
+    noteEl.textContent  = note;
+    noteEl.style.display = '';
+  });
+
   /* ── Init ── */
+  initSavedDecks();
   updateSummary();
 })();
 </script>
