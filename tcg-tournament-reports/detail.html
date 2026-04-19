@@ -6,7 +6,7 @@
   <title>Report – FaB Tournament Reports</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Serif+Text:ital@0;1&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&display=swap">
   <script src="../nav.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -17,15 +17,15 @@
       --surface2: #2e271d;
       --border: #3a3025;
       --border2: #4a3e2e;
-      --accent: #e8314a;
-      --accent-dim: rgba(232,49,74,0.10);
+      --accent: #c4864a;
+      --accent-dim: rgba(196,134,74,0.10);
       --text: #e8dfd0;
       --muted: #9a8a76;
       --muted2: #b5a48e;
       --muted-2: #5a4e40;
-      --t1: #e8314a;
-      --t1-bg: rgba(232,49,74,0.08);
-      --t1-border: rgba(232,49,74,0.22);
+      --t1: #c4864a;
+      --t1-bg: rgba(196,134,74,0.08);
+      --t1-border: rgba(196,134,74,0.22);
       --t2: #d4924a;
       --t2-bg: rgba(212,146,74,0.08);
       --t2-border: rgba(212,146,74,0.22);
@@ -37,8 +37,8 @@
       --t4-border: rgba(160,122,232,0.22);
       --win: #7ab87a;
       --win-bg: rgba(122,184,122,0.10);
-      --loss: #e8314a;
-      --loss-bg: rgba(232,49,74,0.08);
+      --loss: #c4864a;
+      --loss-bg: rgba(196,134,74,0.08);
     }
 
     html { scroll-behavior: smooth; }
@@ -127,7 +127,7 @@
       color: var(--t3);
     }
     .report-title {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: clamp(2rem, 5vw, 3.5rem);
       font-weight: 900;
       font-style: italic;
@@ -314,7 +314,7 @@
       transition: background 0.1s, border-left-color 0.12s;
     }
     .round-row.win  { border-left-color: rgba(122,184,122,0.3); }
-    .round-row.loss { border-left-color: rgba(232,49,74,0.3); }
+    .round-row.loss { border-left-color: rgba(196,134,74,0.3); }
     .round-row:hover { background: var(--surface); }
 
     .round-row:not(:last-child) .round-connector::after {
@@ -346,7 +346,7 @@
       z-index: 1;
     }
     .round-row.win  .round-dot { border-color: var(--win);  background: rgba(122,184,122,0.2); }
-    .round-row.loss .round-dot { border-color: var(--loss); background: rgba(232,49,74,0.2); }
+    .round-row.loss .round-dot { border-color: var(--loss); background: rgba(196,134,74,0.2); }
 
     .round-body {
       padding: 0.65rem 0 1.1rem 0.25rem;
@@ -373,7 +373,7 @@
       min-width: 28px;
     }
     .round-opponent {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: 1.05rem;
       font-weight: 700;
       font-style: italic;
@@ -405,7 +405,7 @@
       flex-shrink: 0;
     }
     .round-result.win  { color: var(--win);  background: var(--win-bg);  border: 1px solid rgba(122,184,122,0.3); }
-    .round-result.loss { color: var(--loss); background: var(--loss-bg); border: 1px solid rgba(232,49,74,0.3); }
+    .round-result.loss { color: var(--loss); background: var(--loss-bg); border: 1px solid rgba(196,134,74,0.3); }
 
     .round-score {
       font-family: 'DM Serif Text', Georgia, serif;
@@ -481,7 +481,7 @@
       font-style: italic;
     }
     .not-found h2 {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: 2rem;
       font-weight: 900;
       font-style: italic;
