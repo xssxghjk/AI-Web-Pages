@@ -499,9 +499,39 @@
       return (TIER_INFO[eventType] || { label: 'Tier ? · ' + eventType }).label;
     }
 
-    function computeRecord(rounds) {
-      const wins   = rounds.filter(r => r.result === 'win').length;
-      const losses = rounds.filter(r => r.result === 'loss').length;
+    // Split 'Mario / Briar' → ['mario', 'briar']
+    function getHeroes(r) {
+      return r.hero.split(' / ').map(h => h.trim().toLowerCase());
+    }
+
+    // Split 'CC / Sage' → ['cc', 'sage']
+    function getFormats(r) {
+      return (r.format || '').split(' / ').map(f => f.trim().toLowerCase()).filter(Boolean);
+    }
+
+    // For a multi-hero report, returns the format tag (lowercase) the given hero played, or null
+    function getHeroFormatTag(r, heroLower) {
+      const heroes  = r.hero.split(' / ').map(h => h.trim());
+      const formats = (r.format || '').split(' / ').map(f => f.trim());
+      const idx = heroes.findIndex(h => h.toLowerCase() === heroLower);
+      if (idx < 0 || heroes.length <= 1) return null;
+      return formats[idx] ? formats[idx].toLowerCase() : null;
+    }
+
+    // Detects format tag in first note of a round, e.g. '[Sage]' → 'sage'
+    function getRoundTag(round) {
+      if (!round.notes || !round.notes.length) return null;
+      const m = round.notes[0].match(/^\[([^\]]+)\]/);
+      return m ? m[1].toLowerCase() : null;
+    }
+
+    // Compute W/L record, optionally limited to rounds matching a format tag
+    function computeRecord(rounds, formatTag) {
+      const filtered = formatTag != null
+        ? rounds.filter(rnd => getRoundTag(rnd) === formatTag)
+        : rounds;
+      const wins   = filtered.filter(r => r.result === 'win').length;
+      const losses = filtered.filter(r => r.result === 'loss').length;
       return { wins, losses };
     }
 
@@ -517,10 +547,23 @@
 
     /* ── RENDER TILE ── */
     function renderTile(r) {
-      const rec = computeRecord(r.rounds);
+      const heroes  = getHeroes(r);
+      const formats = getFormats(r);
       const tierLabel = getTierLabel(r.eventType);
       const tier = getTierForReport(r);
       const tierClass = `t${tier}`;
+
+      const recFull = computeRecord(r.rounds);
+
+      // Pre-compute per-hero records for multi-hero events and store as data attrs
+      let heroRecAttrs = '';
+      if (heroes.length > 1) {
+        heroes.forEach(h => {
+          const fmtTag = getHeroFormatTag(r, h);
+          const rec = computeRecord(r.rounds, fmtTag);
+          heroRecAttrs += ` data-rec-${h}="${rec.wins}-${rec.losses}"`;
+        });
+      }
 
       const formatHtml = r.format
         ? `<span class="format-badge">${esc(r.format)}</span>`
@@ -530,9 +573,11 @@
         <a
           class="report-tile tier-${tier}"
           href="./detail.html?id=${esc(r.id)}"
-          data-hero="${esc(r.hero.toLowerCase())}"
+          data-heroes="${esc(heroes.join(' '))}"
+          data-formats="${esc(formats.join(' '))}"
           data-tier="${tier}"
-          data-format="${esc((r.format || '').toLowerCase())}"
+          data-rec-full="${recFull.wins}-${recFull.losses}"
+          ${heroRecAttrs}
         >
           <div class="tile-body" data-tier-label="T${tier}">
             <div class="tile-meta">
@@ -544,9 +589,9 @@
             <div class="tile-footer">
               <span class="tile-date">${esc(r.displayDate)}</span>
               <span class="tile-record">
-                <span class="rr-win">${rec.wins}W</span>
+                <span class="rr-win">${recFull.wins}W</span>
                 <span class="rr-sep">–</span>
-                <span class="rr-loss">${rec.losses}L</span>
+                <span class="rr-loss">${recFull.losses}L</span>
               </span>
             </div>
           </div>
@@ -571,19 +616,39 @@
       const tiles = document.querySelectorAll('.report-tile');
       let visible = 0;
       tiles.forEach(tile => {
-        const heroMatch   = activeHero   === 'all' || tile.dataset.hero   === activeHero;
-        const tierMatch   = activeTier   === 'all' || tile.dataset.tier   === activeTier;
-        const formatMatch = activeFormat === 'all' || tile.dataset.format === activeFormat;
+        const tileHeroes  = tile.dataset.heroes  ? tile.dataset.heroes.split(' ')  : [];
+        const tileFormats = tile.dataset.formats ? tile.dataset.formats.split(' ') : [];
+        const heroMatch   = activeHero   === 'all' || tileHeroes.includes(activeHero);
+        const tierMatch   = activeTier   === 'all' || tile.dataset.tier === activeTier;
+        const formatMatch = activeFormat === 'all' || tileFormats.includes(activeFormat);
         const show = heroMatch && tierMatch && formatMatch;
         tile.style.display = show ? '' : 'none';
-        if (show) visible++;
+        if (show) {
+          visible++;
+          // For multi-hero tiles, update displayed record to reflect the active hero's rounds only
+          const recEl = tile.querySelector('.tile-record');
+          if (recEl) {
+            let recStr = tile.dataset.recFull;
+            if (activeHero !== 'all' && tileHeroes.length > 1) {
+              const heroKey = 'rec' + activeHero.charAt(0).toUpperCase() + activeHero.slice(1);
+              recStr = tile.dataset[heroKey] || tile.dataset.recFull;
+            }
+            if (recStr) {
+              const [w, l] = recStr.split('-');
+              recEl.innerHTML =
+                `<span class="rr-win">${w}W</span><span class="rr-sep">–</span><span class="rr-loss">${l}L</span>`;
+            }
+          }
+        }
       });
       document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
       updateFilterUI();
       const filteredReports = REPORTS.filter(r => {
-        const heroMatch   = activeHero   === 'all' || r.hero.toLowerCase() === activeHero;
+        const heroes  = getHeroes(r);
+        const formats = getFormats(r);
+        const heroMatch   = activeHero   === 'all' || heroes.includes(activeHero);
         const tierMatch   = activeTier   === 'all' || getTierForReport(r) == activeTier;
-        const formatMatch = activeFormat === 'all' || (r.format || '').toLowerCase() === activeFormat;
+        const formatMatch = activeFormat === 'all' || formats.includes(activeFormat);
         return heroMatch && tierMatch && formatMatch;
       });
       buildStats(filteredReports);
@@ -604,9 +669,9 @@
       btn.classList.toggle('has-filters', activeCount > 0);
 
       const parts = [];
-      if (activeHero   !== 'all') parts.push({ label: heroLabelMap[activeHero]     || activeHero,   type: 'hero' });
-      if (activeTier   !== 'all') parts.push({ label: tierLabels[activeTier]        || 'Tier ' + activeTier, type: 'tier' });
-      if (activeFormat !== 'all') parts.push({ label: formatLabelMap[activeFormat]  || activeFormat, type: 'format' });
+      if (activeHero   !== 'all') parts.push({ label: heroLabelMap[activeHero]    || activeHero,   type: 'hero' });
+      if (activeTier   !== 'all') parts.push({ label: tierLabels[activeTier]       || 'Tier ' + activeTier, type: 'tier' });
+      if (activeFormat !== 'all') parts.push({ label: formatLabelMap[activeFormat] || activeFormat, type: 'format' });
 
       tags.innerHTML = parts.map(p =>
         `<span class="filter-active-tag" data-clear="${p.type}">
@@ -634,16 +699,26 @@
 
     /* ── BUILD FILTERS ── */
     function buildFilters() {
-      const heroes  = [...new Set(REPORTS.map(r => r.hero))].sort();
-      const tiers   = [...new Set(REPORTS.map(r => getTierForReport(r)))].sort();
-      const formats = [...new Set(REPORTS.map(r => r.format).filter(Boolean))].sort();
+      // Unique individual heroes — 'Mario / Briar' contributes 'mario' and 'briar' separately
+      const heroSet = new Set();
+      REPORTS.forEach(r => getHeroes(r).forEach(h => heroSet.add(h)));
+      const heroes = [...heroSet].sort();
+
+      const tiers = [...new Set(REPORTS.map(r => getTierForReport(r)))].sort();
+
+      // Unique individual formats — 'CC / Sage' contributes 'cc' and 'sage' separately
+      const formatSet = new Set();
+      REPORTS.forEach(r => getFormats(r).forEach(f => formatSet.add(f)));
+      const formats = [...formatSet].sort();
 
       const heroEl = document.getElementById('hero-filter');
       heroEl.innerHTML =
         `<button class="filter-pill active" data-ftype="hero" data-fval="all">All</button>` +
         heroes.map(h => {
-          heroLabelMap[h.toLowerCase()] = h;
-          return `<button class="filter-pill" data-ftype="hero" data-fval="${esc(h.toLowerCase())}">${esc(h)}</button>`;
+          const displayH = REPORTS.flatMap(r => r.hero.split(' / ').map(s => s.trim()))
+            .find(s => s.toLowerCase() === h) || h;
+          heroLabelMap[h] = displayH;
+          return `<button class="filter-pill" data-ftype="hero" data-fval="${esc(h)}">${esc(displayH)}</button>`;
         }).join('');
 
       const tierEl = document.getElementById('tier-filter');
@@ -657,8 +732,10 @@
       formatEl.innerHTML =
         `<button class="filter-pill active" data-ftype="format" data-fval="all">All</button>` +
         formats.map(f => {
-          formatLabelMap[f.toLowerCase()] = f;
-          return `<button class="filter-pill" data-ftype="format" data-fval="${esc(f.toLowerCase())}">${esc(f)}</button>`;
+          const displayF = REPORTS.flatMap(r => (r.format || '').split(' / ').map(s => s.trim()))
+            .find(s => s.toLowerCase() === f) || f;
+          formatLabelMap[f] = displayF;
+          return `<button class="filter-pill" data-ftype="format" data-fval="${esc(f)}">${esc(displayF)}</button>`;
         }).join('');
 
       document.querySelectorAll('.filter-pill').forEach(btn => {
@@ -678,7 +755,13 @@
       reports = reports || REPORTS;
       let wins = 0, losses = 0;
       reports.forEach(r => {
-        const rec = computeRecord(r.rounds);
+        const heroes = getHeroes(r);
+        // For multi-hero events, count only the rounds belonging to the active hero
+        let fmtTag = null;
+        if (activeHero !== 'all' && heroes.length > 1) {
+          fmtTag = getHeroFormatTag(r, activeHero);
+        }
+        const rec = computeRecord(r.rounds, fmtTag);
         wins   += rec.wins;
         losses += rec.losses;
       });
