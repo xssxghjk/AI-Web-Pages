@@ -213,6 +213,7 @@ const FAB_WORLD_TOUR = [
     description: 'The Calling (Classic Constructed, $20K) + Silver Age Showdown at Rotterdam Ahoy.',
     link: 'https://fabtcg.com/organised-play/2026/calling-rotterdam/',
     tags: ['FaB', 'Calling', 'World Tour'],
+    reportId: 'calling-rotterdam-2026',
   },
 
   {

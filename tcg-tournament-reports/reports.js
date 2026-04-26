@@ -25,6 +25,146 @@ const REPORTS = [
   // ── PASTE YOUR NEXT REPORT HERE (newest first) ────────────────────────────
 
   {
+    id: 'calling-rotterdam-2026',
+    hero: 'Mario',
+    date: '2026-04-24',
+    displayDate: '24–26.04.26',
+    event: 'Calling Rotterdam',
+    eventType: 'Calling',
+    format: 'CC',
+    day1End: 7,
+    summary: 'Made Day Two with a solid run. Blood Splattered Vest was insanely strong against Oscilio — the most common matchup across both days. Day Two featured several very close Oscilio losses to topdeck arcane damage. Codex of Inertia underperformed throughout; Shred was consistently strong.',
+    generalNotes: [
+      'Blood Splattered Vest is insanely good into Oscilio',
+      'Codex of Inertia underperformed',
+      'Shred was really good',
+      'Should probably block early rather than late on the combo turn — Oscilio can shoot arcane early and go taller than expected',
+    ],
+    rounds: [
+      {
+        number: 1,
+        opponent: 'Teklovossen',
+        result: 'win',
+        notes: [
+          'Matchup is very favourable — not close',
+          'Be careful using equipment too early because of T-Bones',
+        ],
+      },
+      {
+        number: 2,
+        opponent: 'Gravy',
+        result: 'loss',
+        notes: [
+          'Early game went well — he was gold-starved with few allies',
+          'Schism lost the game: bricked my Ponder, put blue in arsenal, and unbricked opponent',
+        ],
+      },
+      {
+        number: 3,
+        opponent: 'Oscilio',
+        result: 'loss',
+        notes: [
+          'Early game went really well — Blood Splattered Vest opened up cool new lines',
+          'Wobbled Savour Bloodshed on the turn needed to present lethal',
+          'Opponent full comboed and left at very low life; topdecked a shock + lightning card to finish',
+          'Should probably block early rather than late on the combo turn — arcane can go taller than expected',
+        ],
+      },
+      {
+        number: 4,
+        opponent: 'Viktor',
+        result: 'win',
+        notes: [
+          'Very close — opponent failed early clashes',
+          'Was ahead but Pummel in arsenal with crush cards was rough',
+          'Had the read and full blocked into Codex of Inertia to reset the state',
+          'Miscounted lethal with Codex and gave him a Golden Sun, but still won',
+        ],
+      },
+      {
+        number: 5,
+        opponent: 'Cindra',
+        result: 'win',
+        notes: [
+          'Went first and highrolled hard',
+          'Mark of the Black Widow with Redback into another Mark of the Black Widow (blue)',
+          'Drew double Savour Bloodshed afterwards — gamewinning',
+          'List worked out perfectly',
+        ],
+      },
+      {
+        number: 6,
+        opponent: 'Mario',
+        result: 'win',
+        notes: [
+          'Opponent had no idea what he was doing — non-game',
+        ],
+      },
+      {
+        number: 7,
+        opponent: 'Fang',
+        result: 'win',
+        notes: [
+          'Very close — opponent had heavy Fealty pressure turn one',
+          'Came back with Trap Doors',
+        ],
+      },
+      {
+        number: 8,
+        opponent: 'Oscilio',
+        result: 'win',
+        notes: [
+          'Disruption plan worked perfectly',
+          'Blood Splattered Vest was really strong',
+        ],
+      },
+      {
+        number: 9,
+        opponent: 'Jarl',
+        result: 'win',
+        notes: [
+          'Boarded against fatigue but he was midrange',
+          'A little close because of disruption, but edged it out',
+          'Got Chelicera early which helped',
+        ],
+      },
+      {
+        number: 10,
+        opponent: 'Oscilio',
+        result: 'loss',
+        notes: [
+          'Very defensive opponent — very close game',
+          'Played Cap of Quick Thinking and prevented Flick early',
+          'Blood Splattered Vest was really good',
+          'Topdeck arcane lost the game in the end',
+        ],
+      },
+      {
+        number: 11,
+        opponent: 'Oscilio',
+        result: 'loss',
+        notes: [
+          'Opponent found full combo early — massive damage into arcane shock on the following turn',
+          'Chest overperformed again',
+        ],
+      },
+      {
+        number: 12,
+        opponent: 'Huntsman',
+        result: 'win',
+        notes: [
+          'Really cool game — opponent found Hunter or Hunted quickly and banished multiple Cut from the Same Cloth and Just a Nicks',
+          'Had double T-Tox hand but opponent had d-reacts; lots of back and forth',
+          'Kept retrieve cards in the deck and got maximum value from every Flick',
+          'Mantled into Kiss of Death thrice — pretty clean overall',
+          'First Schism was bad (got a blue, he got Hunter or Hunted)',
+          'Second cycle Schism was insane (got Codex, his arsenal was full)',
+        ],
+      },
+    ],
+  },
+
+  {
     id: 'showdown-yokohama-2026-04-12',
     hero: 'Briar',
     date: '2026-04-12',
