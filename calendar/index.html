@@ -244,6 +244,7 @@
     .wd-done    { background: #166534; }
     .wd-skipped { background: #92400e; }
     .wd-missed  { background: #c8102e; }
+    .wd-paused  { background: #1e3f6e; border: 1px solid #2a5a90; }
 
     /* ── LEGEND ── */
     .cal-legend {
@@ -578,8 +579,22 @@
           const entry = days[iso];
           if (entry && (entry.status === 'completed' || entry.status === 'modified')) {
             window.WORKOUT_STATUS[iso] = 'done';
+          } else if (entry && entry.status === 'skipped') {
+            window.WORKOUT_STATUS[iso] = 'skipped';
           } else if (dt.getTime() < todayMs) {
-            window.WORKOUT_STATUS[iso] = entry && entry.status === 'skipped' ? 'skipped' : 'missed';
+            const dMs = dt.getTime();
+            let paused = false;
+            for (const p of (data.pauseHistory || [])) {
+              const s = new Date(p.since + 'T00:00:00').getTime();
+              const e = new Date(p.end   + 'T00:00:00').getTime();
+              if (dMs >= s && dMs < e) { paused = true; break; }
+            }
+            if (!paused && data.pause) {
+              const s = new Date(data.pause.since + 'T00:00:00').getTime();
+              const e = s + data.pause.days * 86400000;
+              if (dMs >= s && dMs < e) paused = true;
+            }
+            window.WORKOUT_STATUS[iso] = paused ? 'paused' : 'missed';
           }
         }
       }
@@ -705,6 +720,7 @@
           const dotHtml = wStatus === 'done'    ? '<div class="workout-dot wd-done"></div>'
                         : wStatus === 'skipped' ? '<div class="workout-dot wd-skipped"></div>'
                         : wStatus === 'missed'  ? '<div class="workout-dot wd-missed"></div>'
+                        : wStatus === 'paused'  ? '<div class="workout-dot wd-paused"></div>'
                         : '';
           return `<div class="cal-day${isToday ? ' today' : ''}${hasTrip ? ' has-trip' : ''}" style="height:${cellH}px">` +
             `<div class="cal-day-num">${date.getDate()}</div>${dotHtml}</div>`;
@@ -744,6 +760,7 @@
       const vals = Object.values(ws);
       if (vals.some(v => v === 'done'))    items.push('<div class="cal-legend-item"><div class="workout-dot wd-done" style="position:static;flex-shrink:0"></div><span>Workout done</span></div>');
       if (vals.some(v => v === 'skipped')) items.push('<div class="cal-legend-item"><div class="workout-dot wd-skipped" style="position:static;flex-shrink:0"></div><span>Workout skipped</span></div>');
+      if (vals.some(v => v === 'paused'))  items.push('<div class="cal-legend-item"><div class="workout-dot wd-paused" style="position:static;flex-shrink:0"></div><span>Workout paused</span></div>');
       if (vals.some(v => v === 'missed'))  items.push('<div class="cal-legend-item"><div class="workout-dot wd-missed" style="position:static;flex-shrink:0"></div><span>Workout missed</span></div>');
       legend.innerHTML = items.join('');
     }

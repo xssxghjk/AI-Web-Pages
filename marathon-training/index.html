@@ -297,6 +297,7 @@
   .day-cell.status-completed { background: rgba(122,184,122,0.1);  border-color: rgba(61,122,46,0.4); }
   .day-cell.status-skipped   { background: rgba(168,48,32,0.08); border-color: rgba(168,48,32,0.3); }
   .day-cell.status-modified  { background: rgba(192,112,32,0.08); border-color: rgba(192,112,32,0.3); }
+  .day-cell.status-paused    { background: rgba(30,63,110,0.12); border-color: rgba(42,90,144,0.4); }
   .day-cell.is-rest { opacity: 0.5; cursor: default; }
   .day-cell.is-rest:hover { border-color: var(--border); transform: none; }
   .day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text2); margin-bottom: 4px; }
@@ -385,6 +386,8 @@
   .heatmap-cell.hm-modified { background: var(--warning); border-color: var(--warning); }
   .heatmap-cell.hm-future { background: var(--surface2); }
   .heatmap-cell.hm-rest { background: var(--border); opacity: 0.4; }
+  .heatmap-cell.hm-missed { background: rgba(196,16,46,0.35); border-color: rgba(196,16,46,0.55); }
+  .heatmap-cell.hm-paused { background: #1e3f6e; border-color: #2a5a90; }
   .heatmap-labels { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
   .heatmap-label { font-size: 11px; color: var(--text2); display: flex; align-items: center; gap: 4px; }
   .heatmap-dot { width: 10px; height: 10px; border-radius: 2px; }
@@ -473,6 +476,7 @@
   .wp-modified { background: rgba(192,112,32,0.15); border-color: var(--warning); color: var(--warning); }
   .wp-today    { background: rgba(196,134,74,0.12);  border-color: var(--accent);  color: var(--accent); }
   .wp-missed   { background: rgba(168,48,32,0.06);  border-color: rgba(168,48,32,0.3); color: var(--danger); opacity: 0.6; }
+  .wp-paused   { background: rgba(30,63,110,0.2);  border-color: #2a5a90; color: #5ab4cc; opacity: 0.75; }
   .wp-rest { background: var(--surface2); border-color: var(--border); color: var(--text2); font-size: 10px; opacity: 0.5; }
   .wp-future { background: var(--surface2); border-color: var(--border); color: var(--text2); opacity: 0.4; }
   .wp-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
@@ -833,6 +837,8 @@
         <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--success)"></span> Completed</span>
         <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--warning)"></span> Modified</span>
         <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--danger); opacity:0.7"></span> Skipped</span>
+        <span class="heatmap-label"><span class="heatmap-dot" style="background:#1e3f6e;border:1px solid #2a5a90"></span> Paused</span>
+        <span class="heatmap-label"><span class="heatmap-dot" style="background:rgba(196,16,46,0.35);border:1px solid rgba(196,16,46,0.55)"></span> Missed</span>
         <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--border)"></span> Rest</span>
         <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--surface2); border:1px solid var(--border)"></span> Upcoming</span>
       </div>
@@ -1261,7 +1267,7 @@ function loadData() {
     const raw = localStorage.getItem(LS_KEY);
     if (raw) return migrateLegacyData(JSON.parse(raw));
   } catch(e) {}
-  return { days: {}, pause: null, planStart: null, version: 1 };
+  return { days: {}, pause: null, pauseHistory: [], planStart: null, version: 1 };
 }
 
 // Returns the Sunday of the week containing the plan start date, or null if not started
@@ -1279,6 +1285,22 @@ function saveData(data) {
 }
 
 let appData = loadData();
+
+// Returns true if dateStr falls within any declared pause window (historical or active).
+function isPausedDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00').getTime();
+  for (const p of (appData.pauseHistory || [])) {
+    const s = new Date(p.since + 'T00:00:00').getTime();
+    const e = new Date(p.end   + 'T00:00:00').getTime();
+    if (d >= s && d < e) return true;
+  }
+  if (appData.pause) {
+    const s = new Date(appData.pause.since + 'T00:00:00').getTime();
+    const e = s + appData.pause.days * 86400000;
+    if (d >= s && d < e) return true;
+  }
+  return false;
+}
 
 function getDayData(dateStr) {
   return appData.days[dateStr] || null;
@@ -1588,7 +1610,8 @@ function renderWeekGrid(container, weekNum, compact) {
     const isToday = dateStr === dateKey(t);
     const isPast = date < t;
     const isRest = workout.type === 'rest';
-    const statusCls = dd?.status ? `status-${dd.status}` : '';
+    const statusCls = dd?.status ? `status-${dd.status}` :
+      (isPast && !isToday && !isRest && isPausedDate(dateStr) ? 'status-paused' : '');
     const todayCls = isToday ? 'is-today' : '';
     const pastCls = isPast && !isToday ? 'is-past' : '';
     const restCls = isRest ? 'is-rest' : '';
@@ -1659,8 +1682,13 @@ function renderWeekProgress() {
       dotCls += ' wp-today';
       label = '·';
     } else if (isPast) {
-      dotCls += ' wp-missed';
-      label = '!';
+      if (isPausedDate(dateStr)) {
+        dotCls += ' wp-paused';
+        label = '—';
+      } else {
+        dotCls += ' wp-missed';
+        label = '!';
+      }
     } else {
       dotCls += ' wp-future';
       label = '·';
@@ -1695,6 +1723,8 @@ function renderWeekProgress() {
         <span class="wp-legend-item"><span class="wp-dot wp-today" style="width:12px;height:12px;font-size:0;display:inline-block;"></span> Today</span>
         <span class="wp-legend-item"><span class="wp-dot wp-skipped" style="width:12px;height:12px;font-size:0;display:inline-block;"></span> Skipped</span>
         <span class="wp-legend-item"><span class="wp-dot wp-modified" style="width:12px;height:12px;font-size:0;display:inline-block;"></span> Modified</span>
+        <span class="wp-legend-item"><span class="wp-dot wp-paused" style="width:12px;height:12px;font-size:0;display:inline-block;"></span> Paused</span>
+        <span class="wp-legend-item"><span class="wp-dot wp-missed" style="width:12px;height:12px;font-size:0;display:inline-block;"></span> Missed</span>
         <span class="wp-legend-item"><span class="wp-dot wp-rest" style="width:12px;height:12px;font-size:0;display:inline-block;"></span> Rest</span>
       </div>
     </div>
@@ -1720,7 +1750,8 @@ function renderHeatmap() {
       else if (dd?.status === 'completed') cls = 'hm-completed';
       else if (dd?.status === 'skipped') cls = 'hm-skipped';
       else if (dd?.status === 'modified') cls = 'hm-modified';
-      else cls = 'hm-future'; // past but unlogged
+      else if (isPausedDate(dateStr)) cls = 'hm-paused';
+      else cls = 'hm-missed';
 
       const title = `W${w} ${DOW[d]}: ${workout.short}`;
       html += `<div class="heatmap-cell ${cls}" title="${title}"></div>`;
@@ -1926,6 +1957,14 @@ function confirmPause() {
 }
 
 function resumeTraining() {
+  if (appData.pause) {
+    if (!appData.pauseHistory) appData.pauseHistory = [];
+    appData.pauseHistory.push({
+      since: appData.pause.since,
+      end: dateKey(today()),
+      reason: appData.pause.reason,
+    });
+  }
   appData.pause = null;
   saveData(appData);
   updatePauseBanner();
