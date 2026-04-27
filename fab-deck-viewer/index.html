@@ -2922,6 +2922,16 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const deck  = decks.find(d => d.id === currentDeckId);
     if (!deck) { closeReplaceCardModal(); return; }
 
+    const existingNewEntry = parseDecklist(deck.decklist).find(e =>
+      e.name.toLowerCase() === newName.toLowerCase() && (e.hint || '') === newHint
+    );
+    const existingNewQty = existingNewEntry ? existingNewEntry.qty : 0;
+    if (existingNewQty + qtyToReplace > 3) {
+      errEl.textContent = `Cannot add ${qtyToReplace} cop${qtyToReplace === 1 ? 'y' : 'ies'} — deck already has ${existingNewQty} cop${existingNewQty === 1 ? 'y' : 'ies'} of this card (max 3).`;
+      errEl.style.display = '';
+      return;
+    }
+
     deck.decklist = replaceCardInRaw(deck.decklist, oldName, oldHint, newName, newHint, qtyToReplace);
 
     if (Array.isArray(deck.sideboardGuide)) {
