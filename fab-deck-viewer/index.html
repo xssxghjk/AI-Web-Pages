@@ -1633,6 +1633,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   let analysisAnimated = false;
   let sideboardRendered = false;
   let currentDeckPairs  = [];
+  let currentAnalysisPairs = [];
   let currentAnalysisMatchupId = '';
 
   function renderDetail(deck, pairs) {
@@ -1650,6 +1651,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     analysisAnimated = false;
     sideboardRendered = false;
     currentDeckPairs = pairs;
+    currentAnalysisPairs = pairs;
     currentAnalysisMatchupId = '';
 
     const buckets = {};
@@ -1809,7 +1811,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     document.getElementById('analysis-matchup-sel').addEventListener('change', e => {
       currentAnalysisMatchupId = e.target.value;
       const matchup = guide.find(m => m.id === currentAnalysisMatchupId) || null;
-      renderAnalysis(computeStats(applyMatchupFilter(pairs, matchup)));
+      currentAnalysisPairs = applyMatchupFilter(pairs, matchup);
+      renderAnalysis(computeStats(currentAnalysisPairs));
       requestAnimationFrame(() => requestAnimationFrame(animateAnalysis));
     });
   }
@@ -1994,13 +1997,13 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   function openCategoryPopup(filterType, filterKey) {
     let pairs, title;
     if (filterType === 'type') {
-      pairs = currentDeckPairs.filter(p => p.card && p.card.types.includes(filterKey));
+      pairs = currentAnalysisPairs.filter(p => p.card && p.card.types.includes(filterKey));
       title = filterKey;
     } else if (filterType === 'keyword') {
-      pairs = currentDeckPairs.filter(p => p.card && p.card.keywords.includes(filterKey));
+      pairs = currentAnalysisPairs.filter(p => p.card && p.card.keywords.includes(filterKey));
       title = filterKey;
     } else if (filterType === 'rarity') {
-      pairs = currentDeckPairs.filter(p => p.card && p.card.rarity === filterKey);
+      pairs = currentAnalysisPairs.filter(p => p.card && p.card.rarity === filterKey);
       title = RARITY_LABELS[filterKey] || filterKey;
     } else {
       return;
