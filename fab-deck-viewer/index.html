@@ -358,6 +358,63 @@
       font-family: 'DM Serif Text', Georgia, serif;
     }
 
+    /* ── Card autocomplete ── */
+    .card-ac-wrap { position: relative; }
+    .card-ac-list {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      border-radius: 3px;
+      max-height: 260px;
+      overflow-y: auto;
+      z-index: 9999;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+    }
+    .card-ac-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.45rem 0.65rem;
+      cursor: pointer;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.88rem;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    .card-ac-item:last-child { border-bottom: none; }
+    .card-ac-item:hover, .card-ac-item[aria-selected="true"] {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+    .card-ac-img {
+      width: 36px;
+      height: 50px;
+      object-fit: cover;
+      object-position: top center;
+      border-radius: 2px;
+      background: var(--border);
+      flex-shrink: 0;
+      display: block;
+    }
+    .card-ac-img-placeholder {
+      width: 36px;
+      height: 50px;
+      flex-shrink: 0;
+      background: var(--border);
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 0.65rem;
+    }
+    .card-ac-info { display: flex; flex-direction: column; gap: 0.18rem; min-width: 0; }
+    .card-ac-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-ac-meta { font-size: 0.72rem; color: var(--muted-2); }
+
     /* ── Detail view header ── */
     .detail-head {
       margin-bottom: 1.25rem;
@@ -1177,7 +1234,10 @@
         </div>
         <div class="sb-editor-field">
           <label>With card</label>
-          <input type="text" id="replace-new-name" placeholder="New card name" autocomplete="off" />
+          <div class="card-ac-wrap">
+            <input type="text" id="replace-new-name" placeholder="New card name" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="card-ac-list" />
+            <div id="card-ac-list" class="card-ac-list" role="listbox" style="display:none;"></div>
+          </div>
         </div>
         <div class="sb-editor-field">
           <label>New pitch</label>
@@ -2533,6 +2593,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   function closeReplaceCardModal() {
     document.getElementById('replace-card-backdrop').style.display = 'none';
     document.body.style.overflow = '';
+    const acList = document.getElementById('card-ac-list');
+    if (acList) { acList.style.display = 'none'; acList.innerHTML = ''; }
   }
 
   function openReplaceCardModal() {
@@ -2563,6 +2625,115 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     document.body.style.overflow = 'hidden';
     setTimeout(() => document.getElementById('replace-new-name').focus(), 60);
   }
+
+  /* ── Card name autocomplete ─────────────────────────────────────── */
+  (function () {
+    const input   = document.getElementById('replace-new-name');
+    const list    = document.getElementById('card-ac-list');
+    let acIndex   = -1;
+    let acItems   = [];
+
+    function getUniqueCardNames() {
+      if (!db) return [];
+      // Collect unique canonical names from db, deduped
+      const seen = new Set();
+      const names = [];
+      for (const [key, entry] of db) {
+        if (!seen.has(entry.name)) {
+          seen.add(entry.name);
+          names.push(entry);
+        }
+      }
+      return names;
+    }
+
+    function closeAc() {
+      list.style.display = 'none';
+      list.innerHTML = '';
+      acIndex = -1;
+      acItems = [];
+      input.setAttribute('aria-expanded', 'false');
+    }
+
+    function selectItem(entry) {
+      input.value = entry.name;
+      closeAc();
+    }
+
+    function buildAc(query) {
+      const q = query.toLowerCase().trim();
+      if (q.length < 2) { closeAc(); return; }
+
+      const allEntries = getUniqueCardNames();
+      // Prioritise names that start with the query, then contains
+      const starts   = allEntries.filter(e => e.name.toLowerCase().startsWith(q));
+      const contains = allEntries.filter(e => !e.name.toLowerCase().startsWith(q) && e.name.toLowerCase().includes(q));
+      const results  = [...starts, ...contains].slice(0, 12);
+
+      if (results.length === 0) { closeAc(); return; }
+
+      list.innerHTML = '';
+      acItems = results;
+      acIndex = -1;
+
+      results.forEach((entry, i) => {
+        const item = document.createElement('div');
+        item.className = 'card-ac-item';
+        item.setAttribute('role', 'option');
+        item.setAttribute('aria-selected', 'false');
+
+        const pitchLabel = entry.color === 'red' ? 'Red · 1' : entry.color === 'yellow' ? 'Yellow · 2' : entry.color === 'blue' ? 'Blue · 3' : '';
+        const typesStr   = Array.isArray(entry.types) ? entry.types.slice(0, 2).join(', ') : '';
+        const meta       = [typesStr, pitchLabel].filter(Boolean).join(' · ');
+
+        if (entry.imgUrl) {
+          item.innerHTML = `<img class="card-ac-img" src="${esc(entry.imgUrl)}" alt="" loading="lazy" />`
+            + `<div class="card-ac-info"><div class="card-ac-name">${esc(entry.name)}</div>${meta ? `<div class="card-ac-meta">${esc(meta)}</div>` : ''}</div>`;
+        } else {
+          item.innerHTML = `<div class="card-ac-img-placeholder">?</div>`
+            + `<div class="card-ac-info"><div class="card-ac-name">${esc(entry.name)}</div>${meta ? `<div class="card-ac-meta">${esc(meta)}</div>` : ''}</div>`;
+        }
+
+        item.addEventListener('mousedown', e => { e.preventDefault(); selectItem(entry); });
+        list.appendChild(item);
+      });
+
+      list.style.display = '';
+      input.setAttribute('aria-expanded', 'true');
+    }
+
+    function setAcActive(idx) {
+      acItems.forEach((_, i) => {
+        const el = list.children[i];
+        if (!el) return;
+        el.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+      });
+      acIndex = idx;
+      if (idx >= 0 && list.children[idx]) {
+        list.children[idx].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    input.addEventListener('input', () => buildAc(input.value));
+
+    input.addEventListener('keydown', e => {
+      if (list.style.display === 'none') return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setAcActive(Math.min(acIndex + 1, acItems.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setAcActive(Math.max(acIndex - 1, 0));
+      } else if (e.key === 'Enter' && acIndex >= 0) {
+        e.preventDefault();
+        selectItem(acItems[acIndex]);
+      } else if (e.key === 'Escape') {
+        closeAc();
+      }
+    });
+
+    input.addEventListener('blur', () => setTimeout(closeAc, 120));
+  })();
 
   document.getElementById('replace-card-save').addEventListener('click', () => {
     const errEl = document.getElementById('replace-card-err');
