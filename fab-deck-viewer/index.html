@@ -412,8 +412,46 @@
       font-size: 0.65rem;
     }
     .card-ac-info { display: flex; flex-direction: column; gap: 0.18rem; min-width: 0; }
-    .card-ac-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-ac-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 0.35rem; }
     .card-ac-meta { font-size: 0.72rem; color: var(--muted-2); }
+
+    /* ── Card context menu ── */
+    .card-ctx-menu {
+      position: fixed;
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      border-radius: 3px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.7);
+      z-index: 9990;
+      overflow: hidden;
+      animation: fade-in 0.1s ease;
+    }
+    .card-ctx-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.1rem;
+      cursor: pointer;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.85rem;
+      color: var(--text);
+      transition: background 0.1s;
+      white-space: nowrap;
+    }
+    .card-ctx-item:hover { background: var(--accent-dim); color: var(--accent); }
+
+    /* ── Replace old card display ── */
+    .replace-old-display {
+      padding: 0.45rem 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.88rem;
+      color: var(--text);
+    }
 
     /* ── Detail view header ── */
     .detail-head {
@@ -1222,6 +1260,16 @@
   </div>
 </div>
 
+<!-- ── Card context menu ── -->
+<div id="card-ctx-menu" class="card-ctx-menu" style="display:none;">
+  <div class="card-ctx-item" id="card-ctx-replace">
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1 8a7 7 0 0 1 7-7 7 7 0 0 1 5 2.1L15 1v4h-4l1.7-1.7A5 5 0 1 0 13 11"/>
+    </svg>
+    Replace card
+  </div>
+</div>
+
 <!-- ── Replace Card Modal ── -->
 <div id="replace-card-backdrop" class="cat-popup-backdrop" style="display:none;" role="dialog" aria-modal="true" aria-label="Replace Card">
   <div class="cat-popup" style="max-width:480px">
@@ -1236,25 +1284,19 @@
     <div class="cat-popup-body">
       <div class="sb-editor" style="border:none;padding:0;border-top:none;background:transparent;">
         <div class="sb-editor-field">
-          <label>Replace</label>
-          <select id="replace-old-select"></select>
+          <label>Replacing</label>
+          <div class="replace-old-display" id="replace-old-display"></div>
+        </div>
+        <div class="sb-editor-field">
+          <label>Copies to replace</label>
+          <select id="replace-qty-select"></select>
         </div>
         <div class="sb-editor-field">
           <label>With card</label>
           <div class="card-ac-wrap">
-            <input type="text" id="replace-new-name" placeholder="New card name" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="card-ac-list" />
+            <input type="text" id="replace-new-name" placeholder="Search by name, includes pitch variants…" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="card-ac-list" />
             <div id="card-ac-list" class="card-ac-list" role="listbox" style="display:none;"></div>
           </div>
-        </div>
-        <div class="sb-editor-field">
-          <label>New pitch</label>
-          <select id="replace-new-hint">
-            <option value="">Same as original</option>
-            <option value="red">Red (pitch 1)</option>
-            <option value="yellow">Yellow (pitch 2)</option>
-            <option value="blue">Blue (pitch 3)</option>
-            <option value="none">No pitch</option>
-          </select>
         </div>
         <div class="err" id="replace-card-err"></div>
         <div class="sb-editor-actions" style="position:static;margin-top:0;">
@@ -1353,7 +1395,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         My Decks
       </button>
       <div style="flex:1"></div>
-      <button class="btn-ghost" id="btn-replace-card">Replace Card</button>
       <button class="btn-danger" id="btn-delete-deck">Delete</button>
     </div>
 
@@ -1399,6 +1440,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   const DB_URL = 'https://raw.githubusercontent.com/the-fab-cube/flesh-and-blood-cards/omens-of-the-third-age/json/english/card.json';
   let db = null;
+  let currentReplaceEntry = null;
+  let currentReplaceNewEntry = null;
 
   /* ── Storage ──────────────────────────────────────────────────────── */
   const STORAGE_KEY = 'fab_saved_decks_v1';
@@ -1712,6 +1755,12 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     nameEl.title     = entry.name;
     nameEl.textContent = entry.name;
     wrap.appendChild(nameEl);
+
+    wrap.style.cursor = 'pointer';
+    wrap.addEventListener('click', e => {
+      e.stopPropagation();
+      showCardContextMenu(e, entry);
+    });
 
     return wrap;
   }
@@ -2583,8 +2632,36 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     });
   }
 
+  /* ── Card context menu ──────────────────────────────────────────── */
+  let ctxMenuEntry = null;
+
+  function showCardContextMenu(e, entry) {
+    ctxMenuEntry = entry;
+    const menu = document.getElementById('card-ctx-menu');
+    menu.style.display = '';
+    const rect = menu.getBoundingClientRect();
+    const x = Math.min(e.clientX, window.innerWidth - (rect.width || 160) - 8);
+    const y = Math.min(e.clientY, window.innerHeight - (rect.height || 48) - 8);
+    menu.style.left = Math.max(8, x) + 'px';
+    menu.style.top  = Math.max(8, y) + 'px';
+  }
+
+  function closeCardContextMenu() {
+    document.getElementById('card-ctx-menu').style.display = 'none';
+    ctxMenuEntry = null;
+  }
+
+  document.addEventListener('click', closeCardContextMenu);
+
+  document.getElementById('card-ctx-replace').addEventListener('click', e => {
+    e.stopPropagation();
+    const entry = ctxMenuEntry;
+    closeCardContextMenu();
+    if (entry) openReplaceCardModal(entry);
+  });
+
   /* ── Replace Card ────────────────────────────────────────────────── */
-  function replaceCardInRaw(text, oldName, oldHint, newName, newHint) {
+  function replaceCardInRaw(text, oldName, oldHint, newName, newHint, qtyToReplace) {
     return text.split('\n').map(line => {
       const s = line.trim();
       if (!s || !/^\d/.test(s)) return line;
@@ -2598,16 +2675,16 @@ Header lines, section labels, and footers are ignored automatically."></textarea
                            : '';
       if (name.toLowerCase() !== oldName.toLowerCase()) return line;
       if (normalizedHint !== (oldHint || '')) return line;
-      const qty = parseInt(m[1], 10);
-      let resolvedHint;
-      if (!newHint) {
-        resolvedHint = normalizedHint;
-      } else if (newHint === 'none') {
-        resolvedHint = '';
-      } else {
-        resolvedHint = newHint;
+      const totalQty = parseInt(m[1], 10);
+      const replacing = (qtyToReplace !== undefined) ? Math.min(qtyToReplace, totalQty) : totalQty;
+      const remaining = totalQty - replacing;
+      const resolvedHint = newHint || normalizedHint;
+      const newLine = `${replacing} ${newName}${resolvedHint ? ` (${resolvedHint})` : ''}`;
+      if (remaining > 0) {
+        const oldHintStr = normalizedHint ? ` (${normalizedHint})` : '';
+        return `${remaining} ${name}${oldHintStr}\n${newLine}`;
       }
-      return `${qty} ${newName}${resolvedHint ? ` (${resolvedHint})` : ''}`;
+      return newLine;
     }).join('\n');
   }
 
@@ -2625,30 +2702,28 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     document.body.style.overflow = '';
     const acList = document.getElementById('card-ac-list');
     if (acList) { acList.style.display = 'none'; acList.innerHTML = ''; }
+    currentReplaceEntry = null;
+    currentReplaceNewEntry = null;
   }
 
-  function openReplaceCardModal() {
-    const deck = loadDecks().find(d => d.id === currentDeckId);
-    if (!deck) return;
-    const entries = parseDecklist(deck.decklist);
+  function openReplaceCardModal(entry) {
+    currentReplaceEntry = entry;
+    currentReplaceNewEntry = null;
 
-    // Build unique card list preserving deck order
-    const seen  = new Set();
-    const uniq  = [];
-    for (const e of entries) {
-      const key = e.name.toLowerCase() + '|' + (e.hint || '');
-      if (!seen.has(key)) { seen.add(key); uniq.push(e); }
+    const hintStr = entry.hint ? ` (${entry.hint})` : '';
+    document.getElementById('replace-old-display').textContent = entry.name + hintStr + ' ×' + entry.qty;
+
+    const qtySelect = document.getElementById('replace-qty-select');
+    qtySelect.innerHTML = '';
+    for (let i = 1; i <= entry.qty; i++) {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = i === entry.qty ? `${i} (all)` : String(i);
+      qtySelect.appendChild(opt);
     }
-
-    const sel = document.getElementById('replace-old-select');
-    sel.innerHTML = uniq.map(e => {
-      const hintStr = e.hint ? ` (${e.hint})` : '';
-      const val = esc(e.name + '|' + (e.hint || ''));
-      return `<option value="${val}">${esc(e.name + hintStr)} ×${e.qty}</option>`;
-    }).join('');
+    qtySelect.value = entry.qty;
 
     document.getElementById('replace-new-name').value = '';
-    document.getElementById('replace-new-hint').value = '';
     document.getElementById('replace-card-err').style.display = 'none';
 
     document.getElementById('replace-card-backdrop').style.display = 'flex';
@@ -2663,18 +2738,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     let acIndex   = -1;
     let acItems   = [];
 
-    function getUniqueCardNames() {
+    function getAllCardVariants() {
       if (!db) return [];
-      // Collect unique canonical names from db, deduped
       const seen = new Set();
-      const names = [];
-      for (const [key, entry] of db) {
-        if (!seen.has(entry.name)) {
-          seen.add(entry.name);
-          names.push(entry);
-        }
+      const variants = [];
+      for (const entry of db.values()) {
+        const key = entry.name.toLowerCase() + '|' + (entry.color || '');
+        if (!seen.has(key)) { seen.add(key); variants.push(entry); }
       }
-      return names;
+      return variants;
     }
 
     function closeAc() {
@@ -2687,6 +2759,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     function selectItem(entry) {
       input.value = entry.name;
+      currentReplaceNewEntry = entry;
       closeAc();
     }
 
@@ -2694,11 +2767,10 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const q = query.toLowerCase().trim();
       if (q.length < 2) { closeAc(); return; }
 
-      const allEntries = getUniqueCardNames();
-      // Prioritise names that start with the query, then contains
-      const starts   = allEntries.filter(e => e.name.toLowerCase().startsWith(q));
-      const contains = allEntries.filter(e => !e.name.toLowerCase().startsWith(q) && e.name.toLowerCase().includes(q));
-      const results  = [...starts, ...contains].slice(0, 12);
+      const allVariants = getAllCardVariants();
+      const starts   = allVariants.filter(e => e.name.toLowerCase().startsWith(q));
+      const contains = allVariants.filter(e => !e.name.toLowerCase().startsWith(q) && e.name.toLowerCase().includes(q));
+      const results  = [...starts, ...contains].slice(0, 18);
 
       if (results.length === 0) { closeAc(); return; }
 
@@ -2706,23 +2778,28 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       acItems = results;
       acIndex = -1;
 
-      results.forEach((entry, i) => {
+      const PITCH_COLOR = { red: 'var(--red-c)', yellow: 'var(--yellow-c)', blue: 'var(--blue-c)' };
+      const PITCH_LABEL = { red: 'Red · 1', yellow: 'Yellow · 2', blue: 'Blue · 3' };
+
+      results.forEach((entry) => {
         const item = document.createElement('div');
         item.className = 'card-ac-item';
         item.setAttribute('role', 'option');
         item.setAttribute('aria-selected', 'false');
 
-        const pitchLabel = entry.color === 'red' ? 'Red · 1' : entry.color === 'yellow' ? 'Yellow · 2' : entry.color === 'blue' ? 'Blue · 3' : '';
+        const pitchLabel = PITCH_LABEL[entry.color] || '';
         const typesStr   = Array.isArray(entry.types) ? entry.types.slice(0, 2).join(', ') : '';
         const meta       = [typesStr, pitchLabel].filter(Boolean).join(' · ');
+        const dotStyle   = entry.color ? `display:inline-block;width:8px;height:8px;border-radius:50%;background:${PITCH_COLOR[entry.color]};flex-shrink:0;` : '';
 
-        if (entry.imgUrl) {
-          item.innerHTML = `<img class="card-ac-img" src="${esc(entry.imgUrl)}" alt="" loading="lazy" />`
-            + `<div class="card-ac-info"><div class="card-ac-name">${esc(entry.name)}</div>${meta ? `<div class="card-ac-meta">${esc(meta)}</div>` : ''}</div>`;
-        } else {
-          item.innerHTML = `<div class="card-ac-img-placeholder">?</div>`
-            + `<div class="card-ac-info"><div class="card-ac-name">${esc(entry.name)}</div>${meta ? `<div class="card-ac-meta">${esc(meta)}</div>` : ''}</div>`;
-        }
+        const imgEl = entry.imgUrl
+          ? `<img class="card-ac-img" src="${esc(entry.imgUrl)}" alt="" loading="lazy" />`
+          : `<div class="card-ac-img-placeholder">?</div>`;
+
+        const dotEl = dotStyle ? `<span style="${dotStyle}" aria-hidden="true"></span>` : '';
+
+        item.innerHTML = imgEl
+          + `<div class="card-ac-info"><div class="card-ac-name">${dotEl}${esc(entry.name)}</div>${meta ? `<div class="card-ac-meta">${esc(meta)}</div>` : ''}</div>`;
 
         item.addEventListener('mousedown', e => { e.preventDefault(); selectItem(entry); });
         list.appendChild(item);
@@ -2744,7 +2821,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       }
     }
 
-    input.addEventListener('input', () => buildAc(input.value));
+    input.addEventListener('input', () => { currentReplaceNewEntry = null; buildAc(input.value); });
 
     input.addEventListener('keydown', e => {
       if (list.style.display === 'none') return;
@@ -2769,20 +2846,21 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const errEl = document.getElementById('replace-card-err');
     errEl.style.display = 'none';
 
-    const rawVal = document.getElementById('replace-old-select').value;
-    const pipe   = rawVal.lastIndexOf('|');
-    const oldName = rawVal.slice(0, pipe);
-    const oldHint = rawVal.slice(pipe + 1) || '';
+    if (!currentReplaceEntry) { closeReplaceCardModal(); return; }
+    const oldName = currentReplaceEntry.name;
+    const oldHint = currentReplaceEntry.hint || '';
+    const qtyToReplace = parseInt(document.getElementById('replace-qty-select').value, 10);
 
-    const newName = document.getElementById('replace-new-name').value.trim();
-    const newHint = document.getElementById('replace-new-hint').value;
+    const newEntry = currentReplaceNewEntry;
+    const newName  = newEntry ? newEntry.name : document.getElementById('replace-new-name').value.trim();
+    const newHint  = newEntry ? (newEntry.color || '') : '';
 
     if (!newName) {
       errEl.textContent = 'New card name is required.';
       errEl.style.display = '';
       return;
     }
-    if (newName.toLowerCase() === oldName.toLowerCase() && (!newHint || newHint === oldHint || (newHint === 'none' && !oldHint))) {
+    if (newName.toLowerCase() === oldName.toLowerCase() && newHint === oldHint) {
       errEl.textContent = 'New card is the same as the original.';
       errEl.style.display = '';
       return;
@@ -2792,12 +2870,12 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const deck  = decks.find(d => d.id === currentDeckId);
     if (!deck) { closeReplaceCardModal(); return; }
 
-    deck.decklist = replaceCardInRaw(deck.decklist, oldName, oldHint, newName, newHint);
+    deck.decklist = replaceCardInRaw(deck.decklist, oldName, oldHint, newName, newHint, qtyToReplace);
 
     if (Array.isArray(deck.sideboardGuide)) {
       deck.sideboardGuide = deck.sideboardGuide.map(m => ({
         ...m,
-        cardsOutRaw: replaceCardInRaw(m.cardsOutRaw || '', oldName, oldHint, newName, newHint),
+        cardsOutRaw: replaceCardInRaw(m.cardsOutRaw || '', oldName, oldHint, newName, newHint, qtyToReplace),
       }));
     }
 
@@ -2812,8 +2890,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   document.getElementById('replace-card-backdrop').addEventListener('click', function (e) {
     if (e.target === this) closeReplaceCardModal();
   });
-
-  document.getElementById('btn-replace-card').addEventListener('click', openReplaceCardModal);
 
   /* ── Tab switching ────────────────────────────────────────────────── */
   document.getElementById('tab-btn-decklist').addEventListener('click', () => {
