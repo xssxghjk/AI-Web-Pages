@@ -1016,7 +1016,7 @@
       gap: 1rem; margin-bottom: 1rem;
     }
     .sb-inout-col { display: flex; flex-direction: column; }
-    .sb-card-out, .sb-card-in {
+    .sb-card-out, .sb-card-in, .sb-card-stay {
       display: flex; align-items: baseline; gap: 0.3rem;
       font-size: 0.8rem; padding: 0.16rem 0;
       font-family: 'DM Serif Text', Georgia, serif; color: var(--text);
@@ -1027,6 +1027,11 @@
     .sb-card-hint { color: var(--muted); font-size: 0.72rem; }
     .sb-card-none { font-size: 0.78rem; color: var(--muted); font-style: italic;
       font-family: 'DM Serif Text', Georgia, serif; padding: 0.16rem 0; }
+    .sb-body-sublabel {
+      font-size: 0.63rem; letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--muted); margin-top: 0.75rem; margin-bottom: 0.2rem;
+    }
+    .sb-body-sublabel:first-child { margin-top: 0; }
 
     /* ── Heatmap ── */
     .sb-heatmap {
@@ -2069,7 +2074,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   const RATINGS = ['auto-win', 'favoured', 'even', 'unfavoured', 'auto-loss'];
 
-  function exportSideboardPdf(deck, guide) {
+  function exportSideboardPdf(deck, guide, deckPairs) {
     const ratingLabel = r => r.charAt(0).toUpperCase() + r.slice(1).replace(/-/g, ' ');
     const goLabel = g => g === 'first' ? 'Go First' : g === 'second' ? 'Go Second' : 'Either';
     const ratingColor = {
@@ -2082,22 +2087,42 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     const matchupsHtml = guide.map(m => {
       const cuts = parseDecklist(m.cardsOutRaw || '');
-      const ins  = parseDecklist(m.cardsInRaw  || '');
-      const cardLi = (c, marker) => {
+      const cutLi = c => {
         const qty = c.qty > 1 ? `${c.qty}× ` : '';
         const hint = c.hint ? ` <span class="hint">(${c.hint})</span>` : '';
-        return `<li><span class="marker">${marker}</span>${qty}${c.name}${hint}</li>`;
+        return `<li><span class="marker">−</span>${qty}${c.name}${hint}</li>`;
       };
-      const hasCards = cuts.length > 0 || ins.length > 0;
+
+      const remainingPairs = deckPairs ? applyMatchupFilter(deckPairs, m) : [];
+      const arenaRemaining = remainingPairs.filter(p => !p.card || !p.card.color);
+      const pitchRemaining = remainingPairs.filter(p => p.card && p.card.color);
+      const showSegs = arenaRemaining.length > 0 && pitchRemaining.length > 0;
+      const pairLi = p => {
+        const qty = p.entry.qty > 1 ? `${p.entry.qty}× ` : '';
+        const hint = p.entry.hint ? ` <span class="hint">(${p.entry.hint})</span>` : '';
+        return `<li>${qty}${p.entry.name}${hint}</li>`;
+      };
+      let insHtml = '';
+      if (arenaRemaining.length > 0) {
+        if (showSegs) insHtml += `<div class="sublabel">Arena</div>`;
+        insHtml += `<ul class="cards-list">${arenaRemaining.map(pairLi).join('')}</ul>`;
+      }
+      if (pitchRemaining.length > 0) {
+        if (showSegs) insHtml += `<div class="sublabel">Pitch</div>`;
+        insHtml += `<ul class="cards-list">${pitchRemaining.map(pairLi).join('')}</ul>`;
+      }
+      if (!insHtml) insHtml = `<ul class="cards-list"><li class="none">—</li></ul>`;
+
+      const hasCards = cuts.length > 0 || remainingPairs.length > 0;
       const cardsHtml = hasCards
         ? `<div class="inout-row">
             <div class="inout-col">
-              <div class="section-label">Out</div>
-              <ul class="cards-list">${cuts.length ? cuts.map(c => cardLi(c, '−')).join('') : '<li class="none">—</li>'}</ul>
+              <div class="section-label">In</div>
+              ${insHtml}
             </div>
             <div class="inout-col">
-              <div class="section-label">In</div>
-              <ul class="cards-list">${ins.length ? ins.map(c => cardLi(c, '+')).join('') : '<li class="none">—</li>'}</ul>
+              <div class="section-label">Out</div>
+              <ul class="cards-list">${cuts.length ? cuts.map(cutLi).join('') : '<li class="none">—</li>'}</ul>
             </div>
           </div>`
         : '';
@@ -2182,15 +2207,17 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     text-transform: uppercase; color: #888;
     margin-bottom: 0.2rem; margin-top: 0.4rem;
   }
+  .sublabel {
+    font-size: 6.5pt; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #bbb; margin-top: 0.4rem; margin-bottom: 0.1rem;
+  }
   .cards-list {
     list-style: none; padding: 0;
     margin-bottom: 0.2rem; font-size: 9.5pt;
   }
   .cards-list li { padding: 0.05rem 0; display: flex; gap: 0.3rem; align-items: baseline; }
   .cards-list li.none { color: #bbb; font-style: italic; }
-  .marker { font-weight: 700; flex-shrink: 0; }
-  .inout-col:first-child .marker { color: #b45309; }
-  .inout-col:last-child .marker  { color: #15803d; }
+  .marker { font-weight: 700; flex-shrink: 0; color: #b45309; }
   .hint { color: #999; font-size: 8.5pt; }
   .note { font-size: 9.5pt; color: #333; font-style: italic; margin-top: 0.15rem; }
   @media print {
@@ -2306,7 +2333,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     pdfBtn.className = 'btn-secondary';
     pdfBtn.id = 'sb-export-pdf';
     pdfBtn.textContent = 'Export PDF';
-    pdfBtn.addEventListener('click', () => exportSideboardPdf(deck, guide));
+    pdfBtn.addEventListener('click', () => exportSideboardPdf(deck, guide, deckPairs));
 
     actionsRow.appendChild(addBtn);
     actionsRow.appendChild(pdfBtn);
@@ -2335,7 +2362,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   function renderMatchupBody(bodyEl, matchup, deckPairs, deck) {
     const cuts = parseDecklist(matchup.cardsOutRaw || '');
-    const ins  = parseDecklist(matchup.cardsInRaw  || '');
     let html = '';
 
     const cardLine = (c, cls) => {
@@ -2344,16 +2370,39 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       return `<div class="${cls}">${esc(qty + c.name)}${hint}</div>`;
     };
 
-    if (cuts.length > 0 || ins.length > 0) {
+    const pairLine = p => {
+      const qty  = p.entry.qty > 1 ? `${p.entry.qty}× ` : '';
+      const hint = p.entry.hint ? ` <span class="sb-card-hint">${esc(p.entry.hint)}</span>` : '';
+      return `<div class="sb-card-stay">${esc(qty + p.entry.name)}${hint}</div>`;
+    };
+
+    const remainingPairs = applyMatchupFilter(deckPairs, matchup);
+    const arenaRemaining = remainingPairs.filter(p => !p.card || !p.card.color);
+    const pitchRemaining = remainingPairs.filter(p => p.card && p.card.color);
+    const showSegments   = arenaRemaining.length > 0 && pitchRemaining.length > 0;
+
+    const buildInHtml = () => {
+      if (remainingPairs.length === 0) return '<div class="sb-card-none">—</div>';
+      let out = '';
+      if (arenaRemaining.length > 0) {
+        if (showSegments) out += `<div class="sb-body-sublabel">Arena</div>`;
+        out += arenaRemaining.map(pairLine).join('');
+      }
+      if (pitchRemaining.length > 0) {
+        if (showSegments) out += `<div class="sb-body-sublabel">Pitch</div>`;
+        out += pitchRemaining.map(pairLine).join('');
+      }
+      return out;
+    };
+
+    if (cuts.length > 0 || remainingPairs.length > 0) {
       const outsHtml = cuts.length
         ? cuts.map(c => cardLine(c, 'sb-card-out')).join('')
         : '<div class="sb-card-none">—</div>';
-      const insHtml = ins.length
-        ? ins.map(c => cardLine(c, 'sb-card-in')).join('')
-        : '<div class="sb-card-none">—</div>';
+      const insHtml = buildInHtml();
       html += `<div class="sb-inout-row">
-        <div class="sb-inout-col"><div class="sb-body-label">Out</div>${outsHtml}</div>
         <div class="sb-inout-col"><div class="sb-body-label">In</div>${insHtml}</div>
+        <div class="sb-inout-col"><div class="sb-body-label">Out</div>${outsHtml}</div>
       </div>`;
     }
 
