@@ -1079,6 +1079,43 @@
       .sb-heatmap-row { grid-template-columns: 90px 1fr 80px; padding: 0.4rem 0.9rem; }
       .sb-cards-out { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
     }
+
+    /* ── Analysis filter bar ── */
+    .analysis-filter-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.8rem 0 0.8rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.25rem;
+    }
+    .analysis-filter-label {
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.68rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .analysis-matchup-sel {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.8rem;
+      padding: 0.3rem 0.65rem;
+      cursor: pointer;
+      outline: none;
+      flex: 1;
+      min-width: 0;
+    }
+    .analysis-matchup-sel:hover, .analysis-matchup-sel:focus {
+      border-color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -1226,6 +1263,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     </div>
 
     <div id="tab-analysis" class="tab-panel" style="display:none">
+      <div id="analysis-filter-bar"></div>
       <div id="analysis-content"></div>
     </div>
 
@@ -1433,6 +1471,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   let analysisAnimated = false;
   let sideboardRendered = false;
   let currentDeckPairs  = [];
+  let currentAnalysisMatchupId = '';
 
   function renderDetail(deck, pairs) {
     document.getElementById('detail-name').textContent = deck.name;
@@ -1449,6 +1488,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     analysisAnimated = false;
     sideboardRendered = false;
     currentDeckPairs = pairs;
+    currentAnalysisMatchupId = '';
 
     const buckets = {};
     GROUPS.forEach(g => { buckets[g.key] = []; });
@@ -1503,6 +1543,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     // Pre-render analysis (hidden until tab is clicked)
     renderAnalysis(computeStats(pairs));
+    buildAnalysisFilterBar(deck, pairs);
   }
 
   function makeCard(entry, card) {
@@ -1559,6 +1600,50 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     wrap.appendChild(nameEl);
 
     return wrap;
+  }
+
+  /* ── Analysis filter helpers ────────────────────────────────────── */
+  function applyMatchupFilter(pairs, matchup) {
+    if (!matchup) return pairs;
+    const cutMap = {};
+    for (const c of parseDecklist(matchup.cardsOutRaw || '')) {
+      const key = c.name.toLowerCase() + '|' + (c.hint || '');
+      cutMap[key] = (cutMap[key] || 0) + c.qty;
+    }
+    return pairs.flatMap(p => {
+      const key = p.entry.name.toLowerCase() + '|' + (p.entry.hint || '');
+      const cut = cutMap[key] || 0;
+      if (cut === 0) return [p];
+      const remaining = p.entry.qty - cut;
+      if (remaining <= 0) return [];
+      return [{ entry: { ...p.entry, qty: remaining }, card: p.card }];
+    });
+  }
+
+  function buildAnalysisFilterBar(deck, pairs) {
+    const bar = document.getElementById('analysis-filter-bar');
+    const guide = getSideboardGuide(deck);
+    if (guide.length === 0) {
+      bar.innerHTML = '';
+      return;
+    }
+    const isValid = guide.some(m => m.id === currentAnalysisMatchupId);
+    if (!isValid && currentAnalysisMatchupId) currentAnalysisMatchupId = '';
+
+    bar.innerHTML = `<div class="analysis-filter-wrap">
+      <label class="analysis-filter-label" for="analysis-matchup-sel">vs matchup</label>
+      <select id="analysis-matchup-sel" class="analysis-matchup-sel">
+        <option value="">Full deck</option>
+        ${guide.map(m => `<option value="${esc(m.id)}"${m.id === currentAnalysisMatchupId ? ' selected' : ''}>${esc(m.hero)} — ${m.rating}</option>`).join('')}
+      </select>
+    </div>`;
+
+    document.getElementById('analysis-matchup-sel').addEventListener('change', e => {
+      currentAnalysisMatchupId = e.target.value;
+      const matchup = guide.find(m => m.id === currentAnalysisMatchupId) || null;
+      renderAnalysis(computeStats(applyMatchupFilter(pairs, matchup)));
+      requestAnimationFrame(() => requestAnimationFrame(animateAnalysis));
+    });
   }
 
   /* ── Analysis ────────────────────────────────────────────────────── */
@@ -2236,6 +2321,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     document.getElementById('tab-decklist').style.display = 'none';
     document.getElementById('tab-analysis').style.display = '';
     document.getElementById('tab-sideboard').style.display = 'none';
+    // Rebuild filter bar with latest sideboard data (handles newly added matchups)
+    const freshDeck = loadDecks().find(d => d.id === currentDeckId);
+    if (freshDeck) buildAnalysisFilterBar(freshDeck, currentDeckPairs);
     if (!analysisAnimated) {
       analysisAnimated = true;
       requestAnimationFrame(() => requestAnimationFrame(animateAnalysis));
