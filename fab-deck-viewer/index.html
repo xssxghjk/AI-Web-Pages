@@ -918,9 +918,16 @@
     .sb-picker-btn:hover:not(:disabled) { background: var(--border-2); }
     .sb-picker-btn:disabled { opacity: 0.3; cursor: default; }
     .sb-picker-count {
-      min-width: 1.5rem; text-align: center;
-      font-size: 0.85rem; font-weight: 700; color: var(--text);
+      min-width: 2.8rem; text-align: center;
+      font-size: 0.82rem; font-weight: 700; color: var(--text);
       font-family: 'DM Serif Text', Georgia, serif;
+    }
+    .sb-picker-section {
+      padding: 0.3rem 0.75rem;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 1;
     }
 
     @media (max-width: 600px) {
@@ -1835,17 +1842,23 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       if (!pickerEl) return;
 
       pickerEl.innerHTML = '';
-      for (const pair of deckPairs) {
+
+      const arenaPairs = deckPairs.filter(p => !p.card || !p.card.color);
+      const pitchPairs = deckPairs.filter(p => p.card && p.card.color);
+      const showSections = arenaPairs.length > 0 && pitchPairs.length > 0;
+
+      function renderRow(pair) {
         const key = pair.entry.name.toLowerCase() + '|' + (pair.entry.hint || '');
-        const qty = boardMap[key] || 0;
+        const boardedOut = boardMap[key] || 0;
         const max = pair.entry.qty;
+        const remaining = max - boardedOut;
         const hintColor = pair.entry.hint === 'red'    ? 'var(--red-c)'
                         : pair.entry.hint === 'blue'   ? 'var(--blue-c)'
                         : pair.entry.hint === 'yellow' ? 'var(--yellow-c)'
                         : null;
 
         const row = document.createElement('div');
-        row.className = 'sb-picker-row' + (qty > 0 ? ' boarding' : '');
+        row.className = 'sb-picker-row' + (boardedOut > 0 ? ' boarding' : '');
         row.dataset.key = key;
 
         const nameDiv = document.createElement('div');
@@ -1859,40 +1872,38 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         const nameSpan = document.createElement('span');
         nameSpan.textContent = pair.entry.name;
         nameDiv.appendChild(nameSpan);
-        const availSpan = document.createElement('span');
-        availSpan.className = 'sb-picker-avail';
-        availSpan.textContent = `/ ${max}`;
-        nameDiv.appendChild(availSpan);
 
         const ctrl = document.createElement('div');
         ctrl.className = 'sb-picker-ctrl';
 
+        // – boards out one more (remaining decreases)
         const minusBtn = document.createElement('button');
         minusBtn.className = 'sb-picker-btn sb-picker-minus';
         minusBtn.type = 'button';
         minusBtn.textContent = '–';
-        minusBtn.disabled = qty === 0;
+        minusBtn.disabled = boardedOut >= max;
         minusBtn.addEventListener('click', () => {
-          if ((boardMap[key] || 0) > 0) {
-            boardMap[key] = boardMap[key] - 1;
-            if (boardMap[key] === 0) delete boardMap[key];
+          const cur = boardMap[key] || 0;
+          if (cur < max) {
+            boardMap[key] = cur + 1;
             renderPicker();
           }
         });
 
         const countSpan = document.createElement('span');
         countSpan.className = 'sb-picker-count';
-        countSpan.textContent = qty;
+        countSpan.textContent = `${remaining}/${max}`;
 
+        // + puts one back (remaining increases)
         const plusBtn = document.createElement('button');
         plusBtn.className = 'sb-picker-btn sb-picker-plus';
         plusBtn.type = 'button';
         plusBtn.textContent = '+';
-        plusBtn.disabled = qty >= max;
+        plusBtn.disabled = boardedOut === 0;
         plusBtn.addEventListener('click', () => {
-          const cur = boardMap[key] || 0;
-          if (cur < max) {
-            boardMap[key] = cur + 1;
+          if ((boardMap[key] || 0) > 0) {
+            boardMap[key] = boardMap[key] - 1;
+            if (boardMap[key] === 0) delete boardMap[key];
             renderPicker();
           }
         });
@@ -1905,11 +1916,25 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         pickerEl.appendChild(row);
       }
 
+      function renderSection(pairs, label) {
+        if (pairs.length === 0) return;
+        if (showSections) {
+          const header = document.createElement('div');
+          header.className = 'sb-picker-section';
+          header.textContent = label;
+          pickerEl.appendChild(header);
+        }
+        pairs.forEach(renderRow);
+      }
+
+      renderSection(arenaPairs, 'Arena');
+      renderSection(pitchPairs, 'Pitch');
+
       const total = Object.values(boardMap).reduce((s, v) => s + v, 0);
       if (summaryEl) {
         summaryEl.textContent = total > 0
           ? `${total} card${total !== 1 ? 's' : ''} selected to board out`
-          : 'Click + to board out cards';
+          : 'Click – to board out cards';
       }
     }
 

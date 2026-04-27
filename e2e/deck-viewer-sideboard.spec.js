@@ -83,10 +83,10 @@ test.describe('sideboard guide', () => {
     // Select "First" go-first segment
     await page.click('#sb-go-seg .sb-seg-btn[data-go="first"]');
 
-    // Click + twice on Fry to board out 2 copies
+    // Click – twice on Fry to board out 2 copies
     const fryRow = page.locator('.sb-picker-row', { hasText: 'Fry' });
-    await fryRow.locator('.sb-picker-plus').click();
-    await fryRow.locator('.sb-picker-plus').click();
+    await fryRow.locator('.sb-picker-minus').click();
+    await fryRow.locator('.sb-picker-minus').click();
 
     await page.click('#sb-save');
 
