@@ -1158,6 +1158,47 @@
   </div>
 </div>
 
+<!-- ── Replace Card Modal ── -->
+<div id="replace-card-backdrop" class="cat-popup-backdrop" style="display:none;" role="dialog" aria-modal="true" aria-label="Replace Card">
+  <div class="cat-popup" style="max-width:480px">
+    <div class="cat-popup-header">
+      <span class="cat-popup-title">Replace Card</span>
+      <button class="cat-popup-close" id="replace-card-close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M3 3l10 10M13 3L3 13"/>
+        </svg>
+      </button>
+    </div>
+    <div class="cat-popup-body">
+      <div class="sb-editor" style="border:none;padding:0;border-top:none;background:transparent;">
+        <div class="sb-editor-field">
+          <label>Replace</label>
+          <select id="replace-old-select"></select>
+        </div>
+        <div class="sb-editor-field">
+          <label>With card</label>
+          <input type="text" id="replace-new-name" placeholder="New card name" autocomplete="off" />
+        </div>
+        <div class="sb-editor-field">
+          <label>New pitch</label>
+          <select id="replace-new-hint">
+            <option value="">Same as original</option>
+            <option value="red">Red (pitch 1)</option>
+            <option value="yellow">Yellow (pitch 2)</option>
+            <option value="blue">Blue (pitch 3)</option>
+            <option value="none">No pitch</option>
+          </select>
+        </div>
+        <div class="err" id="replace-card-err"></div>
+        <div class="sb-editor-actions" style="position:static;margin-top:0;">
+          <button class="btn-primary" id="replace-card-save">Replace</button>
+          <button class="btn-secondary" id="replace-card-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════
      VIEW: LIST
      ══════════════════════════════════════════ -->
@@ -1245,6 +1286,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         My Decks
       </button>
       <div style="flex:1"></div>
+      <button class="btn-ghost" id="btn-replace-card">Replace Card</button>
       <button class="btn-danger" id="btn-delete-deck">Delete</button>
     </div>
 
@@ -2451,6 +2493,127 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     });
   }
 
+  /* ── Replace Card ────────────────────────────────────────────────── */
+  function replaceCardInRaw(text, oldName, oldHint, newName, newHint) {
+    return text.split('\n').map(line => {
+      const s = line.trim();
+      if (!s || !/^\d/.test(s)) return line;
+      const m = s.match(/^(\d+)x?\s+(.+?)(\s*\((\d+|red|yellow|blue)\))?\s*$/i);
+      if (!m) return line;
+      const name = m[2].trim();
+      const rawHint = m[4] ? m[4].toLowerCase() : '';
+      const normalizedHint = (rawHint === '1' || rawHint === 'red')    ? 'red'
+                           : (rawHint === '2' || rawHint === 'yellow') ? 'yellow'
+                           : (rawHint === '3' || rawHint === 'blue')   ? 'blue'
+                           : '';
+      if (name.toLowerCase() !== oldName.toLowerCase()) return line;
+      if (normalizedHint !== (oldHint || '')) return line;
+      const qty = parseInt(m[1], 10);
+      let resolvedHint;
+      if (!newHint) {
+        resolvedHint = normalizedHint;
+      } else if (newHint === 'none') {
+        resolvedHint = '';
+      } else {
+        resolvedHint = newHint;
+      }
+      return `${qty} ${newName}${resolvedHint ? ` (${resolvedHint})` : ''}`;
+    }).join('\n');
+  }
+
+  function reRenderCurrentDeck() {
+    const deck = loadDecks().find(d => d.id === currentDeckId);
+    if (!deck) return;
+    const entries = parseDecklist(deck.decklist);
+    const pairs   = entries.map(e => ({ entry: e, card: lookup(e.name, e.hint) }));
+    renderDetail(deck, pairs);
+    showView('view-detail');
+  }
+
+  function closeReplaceCardModal() {
+    document.getElementById('replace-card-backdrop').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function openReplaceCardModal() {
+    const deck = loadDecks().find(d => d.id === currentDeckId);
+    if (!deck) return;
+    const entries = parseDecklist(deck.decklist);
+
+    // Build unique card list preserving deck order
+    const seen  = new Set();
+    const uniq  = [];
+    for (const e of entries) {
+      const key = e.name.toLowerCase() + '|' + (e.hint || '');
+      if (!seen.has(key)) { seen.add(key); uniq.push(e); }
+    }
+
+    const sel = document.getElementById('replace-old-select');
+    sel.innerHTML = uniq.map(e => {
+      const hintStr = e.hint ? ` (${e.hint})` : '';
+      const val = esc(e.name + '|' + (e.hint || ''));
+      return `<option value="${val}">${esc(e.name + hintStr)} ×${e.qty}</option>`;
+    }).join('');
+
+    document.getElementById('replace-new-name').value = '';
+    document.getElementById('replace-new-hint').value = '';
+    document.getElementById('replace-card-err').style.display = 'none';
+
+    document.getElementById('replace-card-backdrop').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('replace-new-name').focus(), 60);
+  }
+
+  document.getElementById('replace-card-save').addEventListener('click', () => {
+    const errEl = document.getElementById('replace-card-err');
+    errEl.style.display = 'none';
+
+    const rawVal = document.getElementById('replace-old-select').value;
+    const pipe   = rawVal.lastIndexOf('|');
+    const oldName = rawVal.slice(0, pipe);
+    const oldHint = rawVal.slice(pipe + 1) || '';
+
+    const newName = document.getElementById('replace-new-name').value.trim();
+    const newHint = document.getElementById('replace-new-hint').value;
+
+    if (!newName) {
+      errEl.textContent = 'New card name is required.';
+      errEl.style.display = '';
+      return;
+    }
+    if (newName.toLowerCase() === oldName.toLowerCase() && (!newHint || newHint === oldHint || (newHint === 'none' && !oldHint))) {
+      errEl.textContent = 'New card is the same as the original.';
+      errEl.style.display = '';
+      return;
+    }
+
+    const decks = loadDecks();
+    const deck  = decks.find(d => d.id === currentDeckId);
+    if (!deck) { closeReplaceCardModal(); return; }
+
+    deck.decklist = replaceCardInRaw(deck.decklist, oldName, oldHint, newName, newHint);
+
+    if (Array.isArray(deck.sideboardGuide)) {
+      deck.sideboardGuide = deck.sideboardGuide.map(m => ({
+        ...m,
+        cardsOutRaw: replaceCardInRaw(m.cardsOutRaw || '', oldName, oldHint, newName, newHint),
+      }));
+    }
+
+    deck.cardCount = parseDecklist(deck.decklist).reduce((s, e) => s + e.qty, 0);
+    saveDecks(decks);
+    closeReplaceCardModal();
+    reRenderCurrentDeck();
+  });
+
+  document.getElementById('replace-card-cancel').addEventListener('click', closeReplaceCardModal);
+  document.getElementById('replace-card-close').addEventListener('click', closeReplaceCardModal);
+  document.getElementById('replace-card-backdrop').addEventListener('click', function (e) {
+    if (e.target === this) closeReplaceCardModal();
+  });
+
+  document.getElementById('btn-replace-card').addEventListener('click', openReplaceCardModal);
+
   /* ── Tab switching ────────────────────────────────────────────────── */
   document.getElementById('tab-btn-decklist').addEventListener('click', () => {
     document.getElementById('tab-btn-decklist').className = 'tab-btn active';
@@ -2567,6 +2730,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   });
 
   document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('replace-card-backdrop').style.display !== 'none') {
+      closeReplaceCardModal();
+    }
     if (e.key === 'Escape' && document.getElementById('category-popup').style.display !== 'none') {
       closeCategoryPopup();
     }
