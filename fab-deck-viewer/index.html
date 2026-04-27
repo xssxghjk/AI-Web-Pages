@@ -486,6 +486,224 @@
       .card-grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 0.5rem; }
       .loading-card { padding: 2rem 2rem; min-width: 220px; }
     }
+
+    /* ── Tab bar ── */
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.75rem;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      padding: 0.6rem 1.4rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.78rem;
+      font-weight: 400;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+    .tab-btn:hover { color: var(--text); background: none; }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-btn:active { transform: none; }
+
+    /* ── Analysis sections ── */
+    .analysis-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: 2px;
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+    }
+    .analysis-head {
+      padding: 0.55rem 1.25rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.68rem;
+      font-weight: 400;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+    }
+    .analysis-body { padding: 1.25rem; }
+
+    /* ── Metric tiles ── */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 0.75rem;
+    }
+    .metric-tile {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.85rem 1rem 0.75rem;
+    }
+    .metric-label {
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.63rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+    .metric-val {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+    .metric-sub {
+      font-size: 0.6rem;
+      color: var(--muted-2);
+      font-family: 'DM Serif Text', Georgia, serif;
+    }
+
+    /* ── Pitch segmented bar ── */
+    .pitch-seg {
+      display: flex;
+      height: 30px;
+      border-radius: 2px;
+      overflow: hidden;
+      gap: 2px;
+      margin-bottom: 0.85rem;
+    }
+    .pitch-seg-piece {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      font-family: 'DM Serif Text', Georgia, serif;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: flex 0.65s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .pitch-seg-labels {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .pitch-seg-legend {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.71rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      color: var(--muted-2);
+    }
+    .pitch-seg-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Vertical bar chart (cost curve) ── */
+    .vchart {
+      display: flex;
+      gap: 0.4rem;
+      align-items: flex-end;
+      height: 100px;
+      padding-bottom: 0;
+    }
+    .vchart-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      height: 100%;
+    }
+    .vchart-fill-wrap {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: flex-end;
+    }
+    .vchart-fill {
+      width: 100%;
+      border-radius: 2px 2px 0 0;
+      background: var(--accent);
+      height: 0%;
+      transition: height 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .vchart-label {
+      font-size: 0.63rem;
+      color: var(--muted-2);
+      font-family: 'DM Serif Text', Georgia, serif;
+      text-align: center;
+    }
+    .vchart-count {
+      font-size: 0.58rem;
+      color: var(--muted);
+      font-family: 'DM Serif Text', Georgia, serif;
+      text-align: center;
+      min-height: 0.9em;
+    }
+
+    /* ── Horizontal bar rows ── */
+    .hbar-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .hbar-row {
+      display: grid;
+      grid-template-columns: 105px 1fr 34px;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .hbar-label {
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.71rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .hbar-track {
+      height: 6px;
+      background: var(--surface-2);
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    .hbar-fill {
+      height: 100%;
+      border-radius: 1px;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .hbar-count {
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.66rem;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    /* ── Two-column analysis layout ── */
+    .analysis-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .analysis-cols .analysis-section { margin-bottom: 0; }
+
+    @media (max-width: 600px) {
+      .analysis-cols { grid-template-columns: 1fr; }
+      .hbar-row { grid-template-columns: 80px 1fr 28px; }
+      .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -602,7 +820,18 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     <div class="card-warn" id="card-warn"></div>
 
-    <div id="card-groups"></div>
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-btn-decklist">Decklist</button>
+      <button class="tab-btn" id="tab-btn-analysis">Analysis</button>
+    </div>
+
+    <div id="tab-decklist" class="tab-panel">
+      <div id="card-groups"></div>
+    </div>
+
+    <div id="tab-analysis" class="tab-panel" style="display:none">
+      <div id="analysis-content"></div>
+    </div>
   </div>
 </div>
 
@@ -696,12 +925,23 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     updateLoading('Indexing cards…');
     db = new Map();
     for (const card of cards) {
-      const imgUrl = card.printings && card.printings.length
-        ? (card.printings[0].image_url || null) : null;
+      const printing  = card.printings && card.printings.length ? card.printings[0] : null;
+      const imgUrl    = printing ? (printing.image_url || null) : null;
+      const rarityCode = printing ? (printing.rarity || '') : '';
+      const pitchNum  = card.pitch  !== '' ? parseInt(card.pitch,  10) : null;
+      const costNum   = card.cost   !== '' ? parseInt(card.cost,   10) : null;
+      const powerNum  = card.power  !== '' ? parseInt(card.power,  10) : null;
+      const defNum    = card.defense!== '' ? parseInt(card.defense,10) : null;
       const entry = {
-        name:  card.name,
-        pitch: card.pitch || null,
-        color: (card.color || '').toLowerCase(),
+        name:     card.name,
+        pitch:    isNaN(pitchNum)  ? null : pitchNum,
+        cost:     isNaN(costNum)   ? null : costNum,
+        power:    isNaN(powerNum)  ? null : powerNum,
+        defense:  isNaN(defNum)    ? null : defNum,
+        color:    (card.color || '').toLowerCase(),
+        types:    Array.isArray(card.types) ? card.types : [],
+        keywords: Array.isArray(card.card_keywords) ? card.card_keywords.filter(Boolean) : [],
+        rarity:   rarityCode,
         imgUrl,
       };
       const nameLow = card.name.toLowerCase();
@@ -790,10 +1030,19 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     { key: 'blue',   label: 'Blue — Pitch 3',    color: '#60a5fa' },
   ];
 
+  let analysisAnimated = false;
+
   function renderDetail(deck, pairs) {
     document.getElementById('detail-name').textContent = deck.name;
     document.getElementById('detail-date').textContent =
       new Date(deck.savedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Reset tabs to Decklist
+    document.getElementById('tab-btn-decklist').className = 'tab-btn active';
+    document.getElementById('tab-btn-analysis').className = 'tab-btn';
+    document.getElementById('tab-decklist').style.display = '';
+    document.getElementById('tab-analysis').style.display = 'none';
+    analysisAnimated = false;
 
     const buckets = {};
     GROUPS.forEach(g => { buckets[g.key] = []; });
@@ -845,6 +1094,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       section.appendChild(grid);
       groupsEl.appendChild(section);
     }
+
+    // Pre-render analysis (hidden until tab is clicked)
+    renderAnalysis(computeStats(pairs));
   }
 
   function makeCard(entry, card) {
@@ -902,6 +1154,198 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     return wrap;
   }
+
+  /* ── Analysis ────────────────────────────────────────────────────── */
+  const RARITY_LABELS = { C:'Common', R:'Rare', M:'Majestic', L:'Legendary', F:'Fable', T:'Token', P:'Promo', S:'Super Rare' };
+  const RARITY_COLORS = { C:'#9ca3af', R:'#f87171', M:'#60a5fa', L:'#c084fc', F:'#f59e0b', T:'#6b7280', P:'#34d399', S:'#fb923c' };
+  const RARITY_ORDER  = ['F','L','M','S','R','P','C','T'];
+
+  function computeStats(pairs) {
+    const s = {
+      total: 0, found: 0,
+      pitchCounts: { red:0, yellow:0, blue:0 },
+      pitchSum: 0, pitchCards: 0,
+      costDist: {}, costSum: 0, costCards: 0,
+      powerDist: {}, powerSum: 0, powerCards: 0,
+      defenseDist: {}, defenseSum: 0, defenseCards: 0,
+      typeCounts: {}, keywordCounts: {}, rarityCounts: {},
+    };
+    for (const { entry, card } of pairs) {
+      const qty = entry.qty;
+      s.total += qty;
+      if (!card) continue;
+      s.found += qty;
+      const col = card.color;
+      if (col === 'red')    s.pitchCounts.red    += qty;
+      else if (col === 'yellow') s.pitchCounts.yellow += qty;
+      else if (col === 'blue')   s.pitchCounts.blue   += qty;
+      if (card.pitch != null) { s.pitchSum   += card.pitch * qty; s.pitchCards += qty; }
+      if (card.cost  != null) {
+        const k = String(card.cost >= 7 ? '7+' : card.cost);
+        s.costDist[k]   = (s.costDist[k]  || 0) + qty;
+        s.costSum  += card.cost * qty; s.costCards += qty;
+      }
+      if (card.power   != null) {
+        const k = String(card.power >= 9 ? '9+' : card.power);
+        s.powerDist[k]   = (s.powerDist[k]   || 0) + qty;
+        s.powerSum   += card.power   * qty; s.powerCards   += qty;
+      }
+      if (card.defense != null) {
+        const k = String(card.defense >= 7 ? '7+' : card.defense);
+        s.defenseDist[k] = (s.defenseDist[k] || 0) + qty;
+        s.defenseSum += card.defense * qty; s.defenseCards += qty;
+      }
+      for (const t of card.types)    s.typeCounts[t]    = (s.typeCounts[t]    || 0) + qty;
+      for (const k of card.keywords) s.keywordCounts[k] = (s.keywordCounts[k] || 0) + qty;
+      if (card.rarity && RARITY_LABELS[card.rarity])
+        s.rarityCounts[card.rarity] = (s.rarityCounts[card.rarity] || 0) + qty;
+    }
+    return s;
+  }
+
+  function analysisSectionHtml(title, bodyHtml) {
+    return `<div class="analysis-section"><div class="analysis-head">${title}</div><div class="analysis-body">${bodyHtml}</div></div>`;
+  }
+
+  function hbarHtml(label, count, maxCount, color) {
+    const pct = maxCount ? (count / maxCount * 100) : 0;
+    const fill = color ? `background:${color}` : '';
+    return `<div class="hbar-row">
+      <div class="hbar-label">${esc(label)}</div>
+      <div class="hbar-track"><div class="hbar-fill" data-pct="${pct.toFixed(1)}" style="width:0%;${fill}"></div></div>
+      <div class="hbar-count">${count}</div>
+    </div>`;
+  }
+
+  function renderAnalysis(stats) {
+    const el = document.getElementById('analysis-content');
+    let html = '';
+
+    // ── Key Metrics ──
+    const avgPitch   = stats.pitchCards   ? (stats.pitchSum   / stats.pitchCards).toFixed(2)   : '—';
+    const avgCost    = stats.costCards    ? (stats.costSum    / stats.costCards).toFixed(2)    : '—';
+    const avgPower   = stats.powerCards   ? (stats.powerSum   / stats.powerCards).toFixed(2)   : '—';
+    const avgDefense = stats.defenseCards ? (stats.defenseSum / stats.defenseCards).toFixed(2) : '—';
+
+    html += analysisSectionHtml('Key Metrics', `<div class="metric-grid">
+      <div class="metric-tile"><div class="metric-label">Avg Pitch</div><div class="metric-val">${avgPitch}</div><div class="metric-sub">${stats.pitchCards} pitched cards</div></div>
+      <div class="metric-tile"><div class="metric-label">Avg Cost</div><div class="metric-val">${avgCost}</div><div class="metric-sub">${stats.costCards} costed cards</div></div>
+      <div class="metric-tile"><div class="metric-label">Avg Power</div><div class="metric-val">${avgPower}</div><div class="metric-sub">${stats.powerCards} attack cards</div></div>
+      <div class="metric-tile"><div class="metric-label">Avg Defense</div><div class="metric-val">${avgDefense}</div><div class="metric-sub">${stats.defenseCards} defensive cards</div></div>
+    </div>`);
+
+    // ── Pitch Distribution ──
+    const { red, yellow, blue } = stats.pitchCounts;
+    const pitchTotal = red + yellow + blue;
+    if (pitchTotal > 0) {
+      const rPct = Math.round(red    / pitchTotal * 100);
+      const yPct = Math.round(yellow / pitchTotal * 100);
+      const bPct = 100 - rPct - yPct;
+      const segPiece = (count, flex, bg, textCol, pct) => count > 0
+        ? `<div class="pitch-seg-piece" style="flex:${flex};background:${bg};color:${textCol}">${pct > 9 ? pct + '%' : ''}</div>` : '';
+      html += analysisSectionHtml('Pitch Distribution', `
+        <div class="pitch-seg">
+          ${segPiece(red,    red,    'var(--red-c)',    '#fff',     rPct)}
+          ${segPiece(yellow, yellow, 'var(--yellow-c)', '#2c1810',  yPct)}
+          ${segPiece(blue,   blue,   'var(--blue-c)',   '#fff',     bPct)}
+        </div>
+        <div class="pitch-seg-labels">
+          ${red    > 0 ? `<div class="pitch-seg-legend"><div class="pitch-seg-dot" style="background:var(--red-c)"></div>Red (pitch 1) &mdash; ${red} cards</div>` : ''}
+          ${yellow > 0 ? `<div class="pitch-seg-legend"><div class="pitch-seg-dot" style="background:var(--yellow-c)"></div>Yellow (pitch 2) &mdash; ${yellow} cards</div>` : ''}
+          ${blue   > 0 ? `<div class="pitch-seg-legend"><div class="pitch-seg-dot" style="background:var(--blue-c)"></div>Blue (pitch 3) &mdash; ${blue} cards</div>` : ''}
+        </div>`);
+    }
+
+    // ── Cost Curve ──
+    const costKeys = ['0','1','2','3','4','5','6','7+'];
+    const visibleCostKeys = costKeys.filter(k => stats.costDist[k]);
+    if (visibleCostKeys.length > 0) {
+      const maxC = Math.max(...costKeys.map(k => stats.costDist[k] || 0));
+      const cols = costKeys.map(k => {
+        const count = stats.costDist[k] || 0;
+        const pct = maxC ? (count / maxC * 100).toFixed(1) : 0;
+        return `<div class="vchart-col">
+          <div class="vchart-fill-wrap"><div class="vchart-fill" data-h="${pct}" style="height:0%"></div></div>
+          <div class="vchart-label">${k}</div>
+          <div class="vchart-count">${count > 0 ? count : ''}</div>
+        </div>`;
+      }).join('');
+      html += analysisSectionHtml('Cost Curve', `<div class="vchart">${cols}</div>`);
+    }
+
+    // ── Power & Defense ──
+    const hasPower   = Object.keys(stats.powerDist).length   > 0;
+    const hasDefense = Object.keys(stats.defenseDist).length > 0;
+    if (hasPower || hasDefense) {
+      const powerKeys   = ['0','1','2','3','4','5','6','7','8','9+'];
+      const defenseKeys = ['0','1','2','3','4','5','6','7+'];
+      let colsHtml = '';
+      if (hasPower) {
+        const maxP = Math.max(...Object.values(stats.powerDist));
+        const rows = powerKeys.filter(k => stats.powerDist[k]).map(k =>
+          hbarHtml(k, stats.powerDist[k], maxP, 'var(--red-c)')).join('');
+        colsHtml += analysisSectionHtml('Attack Power', `<div class="hbar-list">${rows}</div>`);
+      }
+      if (hasDefense) {
+        const maxD = Math.max(...Object.values(stats.defenseDist));
+        const rows = defenseKeys.filter(k => stats.defenseDist[k]).map(k =>
+          hbarHtml(k, stats.defenseDist[k], maxD, 'var(--blue-c)')).join('');
+        colsHtml += analysisSectionHtml('Defense', `<div class="hbar-list">${rows}</div>`);
+      }
+      html += `<div class="analysis-cols">${colsHtml}</div>`;
+    }
+
+    // ── Card Types ──
+    const typeEntries = Object.entries(stats.typeCounts).sort((a,b) => b[1]-a[1]);
+    if (typeEntries.length > 0) {
+      const maxT = typeEntries[0][1];
+      const rows = typeEntries.map(([t,c]) => hbarHtml(t, c, maxT, null)).join('');
+      html += analysisSectionHtml('Card Types', `<div class="hbar-list">${rows}</div>`);
+    }
+
+    // ── Keywords ──
+    const kwEntries = Object.entries(stats.keywordCounts).sort((a,b) => b[1]-a[1]).slice(0, 14);
+    if (kwEntries.length > 0) {
+      const maxK = kwEntries[0][1];
+      const rows = kwEntries.map(([k,c]) => hbarHtml(k, c, maxK, 'var(--yellow-c)')).join('');
+      html += analysisSectionHtml('Keywords', `<div class="hbar-list">${rows}</div>`);
+    }
+
+    // ── Rarity ──
+    const rarityEntries = RARITY_ORDER.map(r => [r, stats.rarityCounts[r] || 0]).filter(([,c]) => c > 0);
+    if (rarityEntries.length > 1) {
+      const maxR = Math.max(...rarityEntries.map(([,c]) => c));
+      const rows = rarityEntries.map(([r,c]) => hbarHtml(RARITY_LABELS[r], c, maxR, RARITY_COLORS[r])).join('');
+      html += analysisSectionHtml('Rarity', `<div class="hbar-list">${rows}</div>`);
+    }
+
+    el.innerHTML = html;
+  }
+
+  function animateAnalysis() {
+    const el = document.getElementById('analysis-content');
+    el.querySelectorAll('.vchart-fill').forEach(b => { b.style.height = b.dataset.h + '%'; });
+    el.querySelectorAll('.hbar-fill').forEach(b => { b.style.width = b.dataset.pct + '%'; });
+  }
+
+  /* ── Tab switching ────────────────────────────────────────────────── */
+  document.getElementById('tab-btn-decklist').addEventListener('click', () => {
+    document.getElementById('tab-btn-decklist').className = 'tab-btn active';
+    document.getElementById('tab-btn-analysis').className = 'tab-btn';
+    document.getElementById('tab-decklist').style.display = '';
+    document.getElementById('tab-analysis').style.display = 'none';
+  });
+
+  document.getElementById('tab-btn-analysis').addEventListener('click', () => {
+    document.getElementById('tab-btn-decklist').className = 'tab-btn';
+    document.getElementById('tab-btn-analysis').className = 'tab-btn active';
+    document.getElementById('tab-decklist').style.display = 'none';
+    document.getElementById('tab-analysis').style.display = '';
+    if (!analysisAnimated) {
+      analysisAnimated = true;
+      requestAnimationFrame(() => requestAnimationFrame(animateAnalysis));
+    }
+  });
 
   /* ── Import handlers ──────────────────────────────────────────────── */
   function goToImport() {
