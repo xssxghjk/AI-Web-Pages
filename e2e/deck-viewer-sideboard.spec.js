@@ -78,10 +78,10 @@ test.describe('sideboard guide', () => {
     await page.click('text=+ Add matchup');
     await page.fill('#sb-hero-input', 'Kayo');
 
-    // Select "Favoured" rating segment
-    await page.click('#sb-rating-seg .sb-seg-btn[data-rating="favoured"]');
-    // Select "First" go-first segment
-    await page.click('#sb-go-seg .sb-seg-btn[data-go="first"]');
+    // Select "Favoured" rating dropdown
+    await page.selectOption('#sb-rating-select', 'favoured');
+    // Select "First" go-first dropdown
+    await page.selectOption('#sb-go-select', 'first');
 
     // Click – twice on Fry to board out 2 copies
     const fryRow = page.locator('.sb-picker-row', { hasText: 'Fry' });
@@ -121,7 +121,10 @@ test.describe('sideboard guide', () => {
     await seedDeck(page, deck);
     await openDeckSideboard(page);
 
-    await page.click('.sb-edit-btn');
+    // Expand the matchup row to reveal the Edit button
+    await page.click('.sb-matchup-head');
+    await page.waitForSelector('.sb-matchup-edit-btn', { state: 'visible' });
+    await page.click('.sb-matchup-edit-btn');
     await page.fill('#sb-hero-input', 'Ira');
     await page.click('#sb-save');
 
@@ -138,7 +141,10 @@ test.describe('sideboard guide', () => {
     await seedDeck(page, deck);
     await openDeckSideboard(page);
 
-    await page.click('.sb-edit-btn');
+    // Expand the matchup row to reveal the Edit button
+    await page.click('.sb-matchup-head');
+    await page.waitForSelector('.sb-matchup-edit-btn', { state: 'visible' });
+    await page.click('.sb-matchup-edit-btn');
     page.once('dialog', dialog => dialog.accept());
     await page.click('#sb-delete');
 
