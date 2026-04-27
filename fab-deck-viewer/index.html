@@ -311,6 +311,35 @@
     }
     input[type="text"]::placeholder, textarea::placeholder { color: var(--muted-2); }
 
+    select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border-2);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.88rem;
+      padding: 0.7rem 1rem;
+      padding-right: 2.5rem;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a6e60' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.875rem center;
+    }
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(196,134,74,0.12);
+    }
+    select option {
+      background: var(--bg);
+      color: var(--text);
+    }
+
     textarea {
       font-family: 'Courier New', monospace;
       font-size: 0.82rem; line-height: 1.7;
@@ -773,9 +802,24 @@
     .sb-matchup-row.expanded .sb-chevron { transform: rotate(90deg); color: var(--accent); }
 
     .sb-matchup-body {
-      padding: 1.25rem;
-      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.28s ease;
+      border-top: 1px solid transparent;
       background: var(--surface-2);
+      overflow: hidden;
+    }
+    .sb-matchup-row.expanded .sb-matchup-body {
+      grid-template-rows: 1fr;
+      border-top-color: var(--border);
+    }
+    .sb-matchup-body-inner {
+      overflow: hidden;
+      padding: 0 1.25rem;
+      transition: padding 0.28s ease;
+    }
+    .sb-matchup-row.expanded .sb-matchup-body-inner {
+      padding: 1.25rem;
     }
     .sb-body-label {
       font-family: 'DM Serif Text', Georgia, serif; font-style: italic;
@@ -872,7 +916,26 @@
     .sb-seg-btn:active { transform: none; }
 
     .sb-add-btn { font-style: italic; }
-    .sb-edit-btn { font-size: 0.72rem; padding: 0.3rem 0.65rem; flex-shrink: 0; }
+
+    .sb-editor-actions {
+      position: sticky;
+      bottom: 0;
+      background: var(--surface);
+      padding: 0.875rem 0 0.25rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      z-index: 5;
+      margin-top: 0.5rem;
+    }
+
+    .sb-matchup-edit-btn {
+      width: 100%;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      padding: 0.7rem 1rem;
+    }
 
     .sb-picker-summary {
       font-size: 0.76rem; color: var(--muted); font-style: italic;
@@ -1679,10 +1742,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           <span class="sb-rating-badge sb-rating-${matchup.rating}">${matchup.rating}</span>
           <span class="sb-go-indicator ${goFirstClass}">${goFirstLabel}</span>
           <span class="sb-cuts-label">${totalCuts} card${totalCuts !== 1 ? 's' : ''} out</span>
-          <button class="btn-ghost sb-edit-btn" data-id="${esc(matchup.id)}">Edit</button>
           <span class="sb-chevron">›</span>
         </div>
-        <div class="sb-matchup-body" style="display:none"></div>
+        <div class="sb-matchup-body"><div class="sb-matchup-body-inner"></div></div>
       </div>`;
     }).join('');
 
@@ -1694,35 +1756,28 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     addBtn.addEventListener('click', () => openMatchupEditor(deck, deckPairs, null));
     container.appendChild(addBtn);
 
-    // Accordion toggle
+    // Accordion toggle — whole row is clickable
     container.querySelectorAll('.sb-matchup-row').forEach(row => {
-      row.querySelector('.sb-matchup-head').addEventListener('click', (e) => {
-        if (e.target.closest('.sb-edit-btn')) return;
-        const body = row.querySelector('.sb-matchup-body');
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('.sb-matchup-edit-btn')) return;
+        const inner = row.querySelector('.sb-matchup-body-inner');
         const isExpanded = row.classList.contains('expanded');
         container.querySelectorAll('.sb-matchup-row.expanded').forEach(r => {
           r.classList.remove('expanded');
-          r.querySelector('.sb-matchup-body').style.display = 'none';
         });
         if (!isExpanded) {
           row.classList.add('expanded');
-          body.style.display = '';
-          const matchup = guide.find(m => m.id === row.dataset.id);
-          if (matchup) renderMatchupBody(body, matchup, deckPairs);
+          if (!inner.dataset.rendered) {
+            const matchup = guide.find(m => m.id === row.dataset.id);
+            if (matchup) renderMatchupBody(inner, matchup, deckPairs, deck);
+            inner.dataset.rendered = '1';
+          }
         }
-      });
-    });
-
-    // Edit buttons
-    container.querySelectorAll('.sb-edit-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openMatchupEditor(deck, deckPairs, btn.dataset.id);
       });
     });
   }
 
-  function renderMatchupBody(bodyEl, matchup, deckPairs) {
+  function renderMatchupBody(bodyEl, matchup, deckPairs, deck) {
     const cuts = parseDecklist(matchup.cardsOutRaw || '');
     let html = '';
 
@@ -1758,6 +1813,18 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         });
       }
     }
+
+    if (deck) {
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn-primary sb-matchup-edit-btn';
+      editBtn.type = 'button';
+      editBtn.textContent = 'Edit Matchup';
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openMatchupEditor(deck, deckPairs, matchup.id);
+      });
+      bodyEl.appendChild(editBtn);
+    }
   }
 
   function openMatchupEditor(deck, deckPairs, matchupIdOrNull) {
@@ -1787,18 +1854,18 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       return lines.join('\n');
     }
 
-    const ratingSegHtml = RATINGS.map(r =>
-      `<button class="sb-seg-btn${currentRating === r ? ' active' : ''}" data-rating="${r}" type="button">${r}</button>`
-    ).join('');
+    const ratingSelectHtml = `<select id="sb-rating-select">${
+      RATINGS.map(r => {
+        const label = r.charAt(0).toUpperCase() + r.slice(1).replace(/-/g, ' ');
+        return `<option value="${r}"${currentRating === r ? ' selected' : ''}>${label}</option>`;
+      }).join('')
+    }</select>`;
 
-    const goOptions = [
-      { value: 'first', label: 'First' },
-      { value: null,    label: 'Either' },
-      { value: 'second', label: 'Second' },
-    ];
-    const goSegHtml = goOptions.map(o =>
-      `<button class="sb-seg-btn${currentGoFirst === o.value ? ' active' : ''}" data-go="${o.value === null ? '__null__' : o.value}" type="button">${o.label}</button>`
-    ).join('');
+    const goSelectHtml = `<select id="sb-go-select">
+      <option value="first"${currentGoFirst === 'first' ? ' selected' : ''}>First</option>
+      <option value=""${(currentGoFirst === null || currentGoFirst === undefined) ? ' selected' : ''}>Either</option>
+      <option value="second"${currentGoFirst === 'second' ? ' selected' : ''}>Second</option>
+    </select>`;
 
     const initialTotal = Object.values(boardMap).reduce((s, v) => s + v, 0);
 
@@ -1812,11 +1879,11 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         </div>
         <div class="sb-editor-field">
           <label>Rating</label>
-          <div class="sb-seg" id="sb-rating-seg">${ratingSegHtml}</div>
+          ${ratingSelectHtml}
         </div>
         <div class="sb-editor-field">
           <label>Go First</label>
-          <div class="sb-seg" id="sb-go-seg">${goSegHtml}</div>
+          ${goSelectHtml}
         </div>
         <div class="sb-editor-field">
           <label>Cards Out</label>
@@ -1828,7 +1895,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           <textarea id="sb-note" rows="4" placeholder="Optional gameplan notes…">${esc(existing ? existing.note : '')}</textarea>
         </div>
         <div class="err" id="sb-warn"></div>
-        <div class="btn-row">
+        <div class="sb-editor-actions">
           <button class="btn-primary" id="sb-save">Save</button>
           <button class="btn-secondary" id="sb-cancel">Cancel</button>
           ${existing ? '<button class="btn-danger" id="sb-delete">Delete</button>' : ''}
@@ -1943,20 +2010,12 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     let selectedRating = currentRating;
     let selectedGoFirst = currentGoFirst;
 
-    container.querySelectorAll('#sb-rating-seg .sb-seg-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        container.querySelectorAll('#sb-rating-seg .sb-seg-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedRating = btn.dataset.rating;
-      });
+    document.getElementById('sb-rating-select').addEventListener('change', (e) => {
+      selectedRating = e.target.value;
     });
 
-    container.querySelectorAll('#sb-go-seg .sb-seg-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        container.querySelectorAll('#sb-go-seg .sb-seg-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedGoFirst = btn.dataset.go === '__null__' ? null : btn.dataset.go;
-      });
+    document.getElementById('sb-go-select').addEventListener('change', (e) => {
+      selectedGoFirst = e.target.value || null;
     });
 
     document.getElementById('sb-cancel').addEventListener('click', () => {
