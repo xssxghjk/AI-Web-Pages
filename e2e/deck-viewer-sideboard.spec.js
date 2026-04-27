@@ -167,6 +167,18 @@ test.describe('sideboard guide', () => {
     await expect(candidateRow.locator('.sb-cut-candidate')).toBeVisible();
   });
 
+  test('9: export PDF button is visible when guide has matchups', async ({ page }) => {
+    const deck = {
+      ...SEED_DECK,
+      sideboardGuide: [
+        { id: 'kayo', hero: 'Kayo', rating: 'favoured', goFirst: 'first', note: '', cardsOutRaw: '2 Fry (red)' },
+      ],
+    };
+    await seedDeck(page, deck);
+    await openDeckSideboard(page);
+    await expect(page.locator('#sb-export-pdf')).toBeVisible();
+  });
+
   test('8: sideboard tab resets between deck navigations', async ({ page }) => {
     await seedDecks(page, [SEED_DECK_2, SEED_DECK]);
     await page.goto('/fab-deck-viewer/');

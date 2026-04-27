@@ -998,6 +998,11 @@
 
     .sb-add-btn { font-style: italic; }
 
+    .sb-actions-row {
+      display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
     .sb-editor-actions {
       position: sticky;
       bottom: 0;
@@ -1906,6 +1911,136 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   const RATINGS = ['auto-win', 'favoured', 'even', 'unfavoured', 'auto-loss'];
 
+  function exportSideboardPdf(deck, guide) {
+    const ratingLabel = r => r.charAt(0).toUpperCase() + r.slice(1).replace(/-/g, ' ');
+    const goLabel = g => g === 'first' ? 'Go First' : g === 'second' ? 'Go Second' : 'Either';
+    const ratingColor = {
+      'auto-win':   '#16a34a',
+      'favoured':   '#15803d',
+      'even':       '#888',
+      'unfavoured': '#b45309',
+      'auto-loss':  '#991b1b',
+    };
+
+    const matchupsHtml = guide.map(m => {
+      const cuts = parseDecklist(m.cardsOutRaw || '');
+      const cutsHtml = cuts.length
+        ? `<div class="section-label">Cards Out</div><ul class="cards-list">${
+            cuts.map(c => `<li>${c.qty > 1 ? `×${c.qty} ` : ''}${c.name}${c.hint ? ` <span class="hint">(${c.hint})</span>` : ''}</li>`).join('')
+          }</ul>`
+        : '';
+      const noteHtml = m.note
+        ? `<div class="section-label">Gameplan</div><p class="note">${m.note.replace(/\n/g, '<br>')}</p>`
+        : '';
+      const color = ratingColor[m.rating] || '#888';
+      return `<div class="matchup">
+        <div class="matchup-header">
+          <span class="vs">vs</span>
+          <span class="hero">${m.hero.toUpperCase()}</span>
+          <span class="badge" style="background:${color}">${ratingLabel(m.rating)}</span>
+          <span class="go">${goLabel(m.goFirst)}</span>
+        </div>
+        ${cutsHtml}${noteHtml}
+      </div>`;
+    }).join('');
+
+    const ratingCounts = {};
+    for (const m of guide) ratingCounts[m.rating] = (ratingCounts[m.rating] || 0) + 1;
+    const overviewParts = RATINGS.filter(r => ratingCounts[r])
+      .map(r => `<span>${ratingCounts[r]} ${ratingLabel(r)}</span>`).join(' · ');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>${deck.name} — Sideboard Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Serif Text', Georgia, serif;
+    background: #fff; color: #1a1412;
+    padding: 2.5cm 2.5cm 3cm;
+    font-size: 10pt;
+    line-height: 1.55;
+  }
+  .doc-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic; font-weight: 700;
+    font-size: 22pt; letter-spacing: -0.01em;
+    border-bottom: 2px solid #1a1412;
+    padding-bottom: 0.4rem; margin-bottom: 0.25rem;
+  }
+  .doc-subtitle {
+    font-size: 8pt; color: #666; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 0.2rem;
+  }
+  .overview {
+    font-size: 8.5pt; color: #555; margin-bottom: 1.5rem;
+    border-left: 2px solid #c4864a; padding-left: 0.5rem;
+  }
+  .overview span { margin: 0 0.15rem; }
+  .matchup {
+    border-top: 1px solid #ddd;
+    padding: 0.85rem 0 0.5rem;
+    page-break-inside: avoid;
+  }
+  .matchup:last-child { border-bottom: 1px solid #ddd; }
+  .matchup-header {
+    display: flex; align-items: baseline; gap: 0.6rem;
+    margin-bottom: 0.5rem; flex-wrap: wrap;
+  }
+  .vs { font-size: 7.5pt; color: #999; letter-spacing: 0.06em; text-transform: uppercase; }
+  .hero {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic; font-weight: 700;
+    font-size: 13pt; color: #1a1412;
+  }
+  .badge {
+    font-size: 6.5pt; font-weight: 700; color: #fff;
+    padding: 1px 6px; border-radius: 2px;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    font-style: italic;
+  }
+  .go { font-size: 8pt; color: #888; font-style: italic; }
+  .section-label {
+    font-size: 7pt; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: #888;
+    margin-bottom: 0.2rem; margin-top: 0.4rem;
+  }
+  .cards-list {
+    list-style: none; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.1rem 1rem; margin-bottom: 0.4rem;
+    font-size: 9.5pt;
+  }
+  .cards-list li { padding: 0.05rem 0; }
+  .hint { color: #999; font-size: 8.5pt; }
+  .note { font-size: 9.5pt; color: #333; font-style: italic; margin-top: 0.15rem; }
+  @media print {
+    body { padding: 1.5cm 2cm 2cm; }
+    @page { margin: 1.5cm; }
+  }
+</style>
+</head>
+<body>
+  <div class="doc-title">${deck.name}</div>
+  <div class="doc-subtitle">Sideboard Guide · ${guide.length} matchup${guide.length !== 1 ? 's' : ''}</div>
+  <div class="overview">${overviewParts}</div>
+  ${matchupsHtml}
+</body>
+</html>`;
+
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    win.addEventListener('load', () => {
+      win.focus();
+      win.print();
+    });
+  }
+
   function renderSideboard(deck, deckPairs) {
     const guide = getSideboardGuide(deck);
     const container = document.getElementById('sideboard-content');
@@ -1976,11 +2111,23 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     container.innerHTML = overviewHtml + heatmapHtml + `<div class="sb-matchup-list">${listHtml}</div>`;
 
+    const actionsRow = document.createElement('div');
+    actionsRow.className = 'sb-actions-row';
+
     const addBtn = document.createElement('button');
     addBtn.className = 'btn-secondary sb-add-btn';
     addBtn.textContent = '+ Add matchup';
     addBtn.addEventListener('click', () => openMatchupEditor(deck, deckPairs, null));
-    container.appendChild(addBtn);
+
+    const pdfBtn = document.createElement('button');
+    pdfBtn.className = 'btn-secondary';
+    pdfBtn.id = 'sb-export-pdf';
+    pdfBtn.textContent = 'Export PDF';
+    pdfBtn.addEventListener('click', () => exportSideboardPdf(deck, guide));
+
+    actionsRow.appendChild(addBtn);
+    actionsRow.appendChild(pdfBtn);
+    container.appendChild(actionsRow);
 
     // Accordion toggle — whole row is clickable
     container.querySelectorAll('.sb-matchup-row').forEach(row => {
