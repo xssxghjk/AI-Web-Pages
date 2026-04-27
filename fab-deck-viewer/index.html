@@ -734,6 +734,87 @@
       .metric-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
+    /* ── Clickable hbar rows ── */
+    .hbar-row--clickable {
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background 0.15s;
+    }
+    .hbar-row--clickable:hover {
+      background: var(--accent-dim);
+    }
+    .hbar-row--clickable:hover .hbar-label {
+      color: var(--accent);
+    }
+    .hbar-row--clickable:focus-visible {
+      outline: 1px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    /* ── Category popup ── */
+    .cat-popup-backdrop {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(18,14,10,0.88);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 4vh 1rem 2rem;
+      animation: fade-in 0.18s ease;
+      overflow-y: auto;
+    }
+    .cat-popup {
+      background: var(--surface);
+      border: 1px solid var(--border-2);
+      border-top: 3px solid var(--accent);
+      border-radius: 3px;
+      width: 100%; max-width: 860px;
+      box-shadow: 0 24px 72px rgba(0,0,0,0.55);
+      animation: popupSlide 0.22s cubic-bezier(0.22,0.9,0.36,1) forwards;
+      flex-shrink: 0;
+    }
+    @keyframes popupSlide {
+      from { opacity: 0; transform: translateY(18px) scale(0.97); }
+      to   { opacity: 1; transform: none; }
+    }
+    .cat-popup-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.9rem 1.25rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+    .cat-popup-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+    .cat-popup-count {
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-left: 0.6rem;
+    }
+    .cat-popup-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); padding: 0.3rem;
+      border-radius: 2px;
+      transition: color 0.15s, background 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cat-popup-close:hover { color: var(--text); background: var(--border); }
+    .cat-popup-body {
+      padding: 1.25rem;
+    }
+    .cat-popup-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.75rem;
+    }
+    @media (max-width: 600px) {
+      .cat-popup-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 0.5rem; }
+      .cat-popup { border-radius: 2px; }
+    }
+
     /* ── Sideboard Guide ── */
     .sb-overview {
       display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
@@ -1012,6 +1093,26 @@
     </div>
     <div class="loading-label">Loading deck…</div>
     <div class="loading-msg" id="loading-msg">Fetching card database…</div>
+  </div>
+</div>
+
+<!-- ── Category popup ── -->
+<div id="category-popup" class="cat-popup-backdrop" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="cat-popup-title">
+  <div class="cat-popup">
+    <div class="cat-popup-header">
+      <div>
+        <span class="cat-popup-title" id="cat-popup-title"></span>
+        <span class="cat-popup-count" id="cat-popup-count"></span>
+      </div>
+      <button class="cat-popup-close" id="cat-popup-close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M3 3l10 10M13 3L3 13"/>
+        </svg>
+      </button>
+    </div>
+    <div class="cat-popup-body">
+      <div class="cat-popup-grid" id="cat-popup-grid"></div>
+    </div>
   </div>
 </div>
 
@@ -1512,10 +1613,13 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     return `<div class="analysis-section"><div class="analysis-head">${title}</div><div class="analysis-body">${bodyHtml}</div></div>`;
   }
 
-  function hbarHtml(label, count, maxCount, color) {
+  function hbarHtml(label, count, maxCount, color, filterType, filterKey) {
     const pct = maxCount ? (count / maxCount * 100) : 0;
     const fill = color ? `background:${color}` : '';
-    return `<div class="hbar-row">
+    const clickable = filterType
+      ? ` class="hbar-row hbar-row--clickable" data-filter-type="${esc(filterType)}" data-filter-key="${esc(filterKey)}" tabindex="0" role="button"`
+      : ' class="hbar-row"';
+    return `<div${clickable}>
       <div class="hbar-label">${esc(label)}</div>
       <div class="hbar-track"><div class="hbar-fill" data-pct="${pct.toFixed(1)}" style="width:0%;${fill}"></div></div>
       <div class="hbar-count">${count}</div>
@@ -1604,7 +1708,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const typeEntries = Object.entries(stats.typeCounts).sort((a,b) => b[1]-a[1]);
     if (typeEntries.length > 0) {
       const maxT = typeEntries[0][1];
-      const rows = typeEntries.map(([t,c]) => hbarHtml(t, c, maxT, null)).join('');
+      const rows = typeEntries.map(([t,c]) => hbarHtml(t, c, maxT, null, 'type', t)).join('');
       html += analysisSectionHtml('Card Types', `<div class="hbar-list">${rows}</div>`);
     }
 
@@ -1612,7 +1716,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const kwEntries = Object.entries(stats.keywordCounts).sort((a,b) => b[1]-a[1]).slice(0, 14);
     if (kwEntries.length > 0) {
       const maxK = kwEntries[0][1];
-      const rows = kwEntries.map(([k,c]) => hbarHtml(k, c, maxK, 'var(--yellow-c)')).join('');
+      const rows = kwEntries.map(([k,c]) => hbarHtml(k, c, maxK, 'var(--yellow-c)', 'keyword', k)).join('');
       html += analysisSectionHtml('Keywords', `<div class="hbar-list">${rows}</div>`);
     }
 
@@ -1620,7 +1724,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const rarityEntries = RARITY_ORDER.map(r => [r, stats.rarityCounts[r] || 0]).filter(([,c]) => c > 0);
     if (rarityEntries.length > 1) {
       const maxR = Math.max(...rarityEntries.map(([,c]) => c));
-      const rows = rarityEntries.map(([r,c]) => hbarHtml(RARITY_LABELS[r], c, maxR, RARITY_COLORS[r])).join('');
+      const rows = rarityEntries.map(([r,c]) => hbarHtml(RARITY_LABELS[r], c, maxR, RARITY_COLORS[r], 'rarity', r)).join('');
       html += analysisSectionHtml('Rarity', `<div class="hbar-list">${rows}</div>`);
     }
 
@@ -1631,6 +1735,43 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const el = document.getElementById('analysis-content');
     el.querySelectorAll('.vchart-fill').forEach(b => { b.style.height = b.dataset.h + '%'; });
     el.querySelectorAll('.hbar-fill').forEach(b => { b.style.width = b.dataset.pct + '%'; });
+  }
+
+  /* ── Category Popup ─────────────────────────────────────────────── */
+  function openCategoryPopup(filterType, filterKey) {
+    let pairs, title;
+    if (filterType === 'type') {
+      pairs = currentDeckPairs.filter(p => p.card && p.card.types.includes(filterKey));
+      title = filterKey;
+    } else if (filterType === 'keyword') {
+      pairs = currentDeckPairs.filter(p => p.card && p.card.keywords.includes(filterKey));
+      title = filterKey;
+    } else if (filterType === 'rarity') {
+      pairs = currentDeckPairs.filter(p => p.card && p.card.rarity === filterKey);
+      title = RARITY_LABELS[filterKey] || filterKey;
+    } else {
+      return;
+    }
+
+    const totalCards = pairs.reduce((s, p) => s + p.entry.qty, 0);
+    document.getElementById('cat-popup-title').textContent = title;
+    document.getElementById('cat-popup-count').textContent = `${totalCards} card${totalCards !== 1 ? 's' : ''}`;
+
+    const grid = document.getElementById('cat-popup-grid');
+    grid.innerHTML = '';
+    for (const { entry, card } of pairs) {
+      grid.appendChild(makeCard(entry, card));
+    }
+
+    const backdrop = document.getElementById('category-popup');
+    backdrop.style.display = 'flex';
+    backdrop.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCategoryPopup() {
+    document.getElementById('category-popup').style.display = 'none';
+    document.body.style.overflow = '';
   }
 
   /* ── Sideboard Guide ─────────────────────────────────────────────── */
@@ -2181,6 +2322,33 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     currentDeckId = null;
     renderList();
     showView('view-list');
+  });
+
+  /* ── Category popup handlers ─────────────────────────────────────── */
+  document.getElementById('cat-popup-close').addEventListener('click', closeCategoryPopup);
+
+  document.getElementById('category-popup').addEventListener('click', function(e) {
+    if (e.target === this) closeCategoryPopup();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('category-popup').style.display !== 'none') {
+      closeCategoryPopup();
+    }
+  });
+
+  document.getElementById('analysis-content').addEventListener('click', function(e) {
+    const row = e.target.closest('.hbar-row--clickable');
+    if (!row) return;
+    openCategoryPopup(row.dataset.filterType, row.dataset.filterKey);
+  });
+
+  document.getElementById('analysis-content').addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const row = e.target.closest('.hbar-row--clickable');
+    if (!row) return;
+    e.preventDefault();
+    openCategoryPopup(row.dataset.filterType, row.dataset.filterKey);
   });
 
   /* ── Init ─────────────────────────────────────────────────────────── */
