@@ -874,6 +874,55 @@
     .sb-add-btn { font-style: italic; }
     .sb-edit-btn { font-size: 0.72rem; padding: 0.3rem 0.65rem; flex-shrink: 0; }
 
+    .sb-picker-summary {
+      font-size: 0.76rem; color: var(--muted); font-style: italic;
+      font-family: 'DM Serif Text', Georgia, serif;
+      min-height: 1.1rem; margin-bottom: 0.3rem;
+    }
+    .sb-deck-picker {
+      display: flex; flex-direction: column;
+      border: 1px solid var(--border-2); border-radius: 2px;
+      max-height: 320px; overflow-y: auto;
+    }
+    .sb-picker-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+      border-left: 2px solid transparent;
+      transition: background 0.12s;
+      gap: 0.75rem;
+    }
+    .sb-picker-row:last-child { border-bottom: none; }
+    .sb-picker-row.boarding {
+      background: rgba(196,134,74,0.06);
+      border-left-color: var(--accent);
+    }
+    .sb-picker-name {
+      display: flex; align-items: center; gap: 0.45rem;
+      font-size: 0.82rem; color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      flex: 1; min-width: 0;
+    }
+    .sb-picker-hint { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .sb-picker-avail { font-size: 0.72rem; color: var(--muted); flex-shrink: 0; }
+    .sb-picker-ctrl { display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0; }
+    .sb-picker-btn {
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--border); color: var(--text);
+      border: none; border-radius: 2px; cursor: pointer;
+      font-size: 0.85rem; line-height: 1;
+      transition: background 0.12s;
+    }
+    .sb-picker-btn:hover:not(:disabled) { background: var(--border-2); }
+    .sb-picker-btn:disabled { opacity: 0.3; cursor: default; }
+    .sb-picker-count {
+      min-width: 1.5rem; text-align: center;
+      font-size: 0.85rem; font-weight: 700; color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+    }
+
     @media (max-width: 600px) {
       .sb-matchup-head { gap: 0.4rem; padding: 0.65rem 0.9rem; }
       .sb-heatmap-row { grid-template-columns: 90px 1fr 80px; padding: 0.4rem 0.9rem; }
@@ -1711,6 +1760,26 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const currentRating = existing ? existing.rating : 'even';
     const currentGoFirst = existing ? existing.goFirst : null;
 
+    // boardMap key: `${name.toLowerCase()}|${hint||''}` → qty out
+    const boardMap = {};
+    if (existing && existing.cardsOutRaw) {
+      for (const c of parseDecklist(existing.cardsOutRaw)) {
+        boardMap[c.name.toLowerCase() + '|' + (c.hint || '')] = c.qty;
+      }
+    }
+
+    function serializeBoard() {
+      const lines = [];
+      for (const pair of deckPairs) {
+        const key = pair.entry.name.toLowerCase() + '|' + (pair.entry.hint || '');
+        const qty = boardMap[key] || 0;
+        if (qty > 0) {
+          lines.push(`${qty} ${pair.entry.name}${pair.entry.hint ? ` (${pair.entry.hint})` : ''}`);
+        }
+      }
+      return lines.join('\n');
+    }
+
     const ratingSegHtml = RATINGS.map(r =>
       `<button class="sb-seg-btn${currentRating === r ? ' active' : ''}" data-rating="${r}" type="button">${r}</button>`
     ).join('');
@@ -1723,6 +1792,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const goSegHtml = goOptions.map(o =>
       `<button class="sb-seg-btn${currentGoFirst === o.value ? ' active' : ''}" data-go="${o.value === null ? '__null__' : o.value}" type="button">${o.label}</button>`
     ).join('');
+
+    const initialTotal = Object.values(boardMap).reduce((s, v) => s + v, 0);
 
     const container = document.getElementById('sideboard-content');
     container.innerHTML = `
@@ -1742,7 +1813,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         </div>
         <div class="sb-editor-field">
           <label>Cards Out</label>
-          <textarea id="sb-cards-out" rows="10" placeholder="e.g.&#10;2 Fry (red)&#10;1 Electrify (blue)">${esc(existing ? existing.cardsOutRaw : '')}</textarea>
+          <div class="sb-picker-summary" id="sb-picker-summary">${initialTotal > 0 ? `${initialTotal} card${initialTotal !== 1 ? 's' : ''} selected to board out` : 'Click + to board out cards'}</div>
+          <div class="sb-deck-picker" id="sb-deck-picker"></div>
         </div>
         <div class="sb-editor-field">
           <label>Gameplan Note</label>
@@ -1756,6 +1828,92 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         </div>
       </div>
     `;
+
+    function renderPicker() {
+      const pickerEl = document.getElementById('sb-deck-picker');
+      const summaryEl = document.getElementById('sb-picker-summary');
+      if (!pickerEl) return;
+
+      pickerEl.innerHTML = '';
+      for (const pair of deckPairs) {
+        const key = pair.entry.name.toLowerCase() + '|' + (pair.entry.hint || '');
+        const qty = boardMap[key] || 0;
+        const max = pair.entry.qty;
+        const hintColor = pair.entry.hint === 'red'    ? 'var(--red-c)'
+                        : pair.entry.hint === 'blue'   ? 'var(--blue-c)'
+                        : pair.entry.hint === 'yellow' ? 'var(--yellow-c)'
+                        : null;
+
+        const row = document.createElement('div');
+        row.className = 'sb-picker-row' + (qty > 0 ? ' boarding' : '');
+        row.dataset.key = key;
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'sb-picker-name';
+        if (hintColor) {
+          const dot = document.createElement('span');
+          dot.className = 'sb-picker-hint';
+          dot.style.background = hintColor;
+          nameDiv.appendChild(dot);
+        }
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = pair.entry.name;
+        nameDiv.appendChild(nameSpan);
+        const availSpan = document.createElement('span');
+        availSpan.className = 'sb-picker-avail';
+        availSpan.textContent = `/ ${max}`;
+        nameDiv.appendChild(availSpan);
+
+        const ctrl = document.createElement('div');
+        ctrl.className = 'sb-picker-ctrl';
+
+        const minusBtn = document.createElement('button');
+        minusBtn.className = 'sb-picker-btn sb-picker-minus';
+        minusBtn.type = 'button';
+        minusBtn.textContent = '–';
+        minusBtn.disabled = qty === 0;
+        minusBtn.addEventListener('click', () => {
+          if ((boardMap[key] || 0) > 0) {
+            boardMap[key] = boardMap[key] - 1;
+            if (boardMap[key] === 0) delete boardMap[key];
+            renderPicker();
+          }
+        });
+
+        const countSpan = document.createElement('span');
+        countSpan.className = 'sb-picker-count';
+        countSpan.textContent = qty;
+
+        const plusBtn = document.createElement('button');
+        plusBtn.className = 'sb-picker-btn sb-picker-plus';
+        plusBtn.type = 'button';
+        plusBtn.textContent = '+';
+        plusBtn.disabled = qty >= max;
+        plusBtn.addEventListener('click', () => {
+          const cur = boardMap[key] || 0;
+          if (cur < max) {
+            boardMap[key] = cur + 1;
+            renderPicker();
+          }
+        });
+
+        ctrl.appendChild(minusBtn);
+        ctrl.appendChild(countSpan);
+        ctrl.appendChild(plusBtn);
+        row.appendChild(nameDiv);
+        row.appendChild(ctrl);
+        pickerEl.appendChild(row);
+      }
+
+      const total = Object.values(boardMap).reduce((s, v) => s + v, 0);
+      if (summaryEl) {
+        summaryEl.textContent = total > 0
+          ? `${total} card${total !== 1 ? 's' : ''} selected to board out`
+          : 'Click + to board out cards';
+      }
+    }
+
+    renderPicker();
 
     let selectedRating = currentRating;
     let selectedGoFirst = currentGoFirst;
@@ -1794,7 +1952,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     document.getElementById('sb-save').addEventListener('click', () => {
       const hero = document.getElementById('sb-hero-input').value.trim();
-      const cardsOutRaw = document.getElementById('sb-cards-out').value.trim();
       const note = document.getElementById('sb-note').value.trim();
       const warnEl = document.getElementById('sb-warn');
       warnEl.style.display = 'none';
@@ -1805,18 +1962,11 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         return;
       }
 
+      const cardsOutRaw = serializeBoard();
       const cuts = parseDecklist(cardsOutRaw);
-      const warnings = [];
-      let totalQty = 0;
-      for (const cut of cuts) {
-        totalQty += cut.qty;
-        if (!deckPairs.some(p => p.entry.name.toLowerCase() === cut.name.toLowerCase())) {
-          warnings.push(`"${cut.name}" not found in deck`);
-        }
-      }
-      if (totalQty > 80) warnings.push(`Total cuts (${totalQty}) exceeds 80`);
-      if (warnings.length) {
-        warnEl.textContent = 'Warning: ' + warnings.join('; ');
+      const totalQty = cuts.reduce((s, c) => s + c.qty, 0);
+      if (totalQty > 80) {
+        warnEl.textContent = `Warning: Total cuts (${totalQty}) exceeds 80`;
         warnEl.style.display = '';
       }
 
