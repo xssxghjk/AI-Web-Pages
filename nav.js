@@ -13,6 +13,9 @@
   // ── Skip when running inside an iframe ──────────────────────────────────
   if (window.self !== window.top) return;
 
+  // Capture script base path now, while currentScript is still available
+  var NAV_BASE = (document.currentScript ? document.currentScript.src : '').replace(/\/[^\/]*$/, '/');
+
   // ── Inject Google Font ──────────────────────────────────────────────────
   var preconnect1 = document.createElement('link');
   preconnect1.rel = 'preconnect';
@@ -46,8 +49,9 @@
       'background:linear-gradient(175deg,#252018 0%,var(--nav-bg) 55%);' +
       'border-right:1px solid var(--nav-border);' +
       'display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}' +
-    '.sidebar-header{padding:0 1.25rem;height:60px;display:flex;align-items:center;' +
+    '.sidebar-header{padding:0 1.25rem;height:60px;display:flex;align-items:center;gap:0.6rem;' +
       'border-bottom:1px solid var(--nav-border);flex-shrink:0}' +
+    '.sidebar-logo{width:30px;height:30px;object-fit:contain;flex-shrink:0}' +
     '.sidebar-brand{font-family:"Playfair Display",Georgia,serif;font-size:0.78rem;font-weight:700;font-style:italic;' +
       'color:#e8dfd0;letter-spacing:0.04em}' +
     '.sidebar-nav{padding:1rem 0.5rem;overflow-y:auto;flex:1}' +
@@ -78,6 +82,7 @@
     '.hamburger-btn:hover .hb-bar{background:#b5a48e}' +
     '.mobile-brand{font-family:"Playfair Display",Georgia,serif;font-size:0.82rem;font-weight:700;font-style:italic;' +
       'color:#e8dfd0;letter-spacing:0.02em}' +
+    '.mobile-logo{width:26px;height:26px;object-fit:contain;flex-shrink:0}' +
 
     /* mobile nav overlay */
     '.mobile-nav-overlay{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0.72);' +
@@ -99,6 +104,24 @@
       'border-radius:3px;color:#58584e;transition:background 0.15s,color 0.15s}' +
     '.mobile-nav-close:hover{background:rgba(255,255,252,0.06);color:#c8c4b4}';
   document.head.appendChild(style);
+
+  // ── Inject favicon ───────────────────────────────────────────────────────
+  var faviconIco = document.createElement('link');
+  faviconIco.rel = 'icon';
+  faviconIco.href = NAV_BASE + 'assets/favicon.ico';
+  document.head.appendChild(faviconIco);
+  var favicon32 = document.createElement('link');
+  favicon32.rel = 'icon';
+  favicon32.type = 'image/png';
+  favicon32.sizes = '32x32';
+  favicon32.href = NAV_BASE + 'assets/favicon-32.png';
+  document.head.appendChild(favicon32);
+  var favicon16 = document.createElement('link');
+  favicon16.rel = 'icon';
+  favicon16.type = 'image/png';
+  favicon16.sizes = '16x16';
+  favicon16.href = NAV_BASE + 'assets/favicon-16.png';
+  document.head.appendChild(favicon16);
 
   // ── Nav structure ────────────────────────────────────────────────────────
   var SECTIONS = [
@@ -179,7 +202,10 @@
     var sidebar = document.createElement('aside');
     sidebar.className = 'sidebar';
     sidebar.innerHTML =
-      '<div class="sidebar-header"><span class="sidebar-brand">xssxghjk</span></div>' +
+      '<div class="sidebar-header">' +
+        '<img src="' + NAV_BASE + 'assets/logo-64.png" class="sidebar-logo" alt="">' +
+        '<span class="sidebar-brand">xssxghjk</span>' +
+      '</div>' +
       '<nav class="sidebar-nav">' + linksHtml + '</nav>';
 
     // Mobile header strip
@@ -193,6 +219,7 @@
         '<span class="hb-bar"></span>' +
         '<span class="hb-bar"></span>' +
       '</button>' +
+      '<img src="' + NAV_BASE + 'assets/logo-64.png" class="mobile-logo" alt="">' +
       '<span class="mobile-brand">xssxghjk</span>';
 
     // Wrap all current body children in .app-layout > .page-content
@@ -221,6 +248,7 @@
     drawer.setAttribute('aria-label', 'Navigation menu');
     drawer.innerHTML =
       '<div class="mobile-nav-drawer-header">' +
+        '<img src="' + NAV_BASE + 'assets/logo-64.png" class="mobile-logo" alt="">' +
         '<span class="sidebar-brand">xssxghjk</span>' +
         '<button class="mobile-nav-close" id="mobile-nav-close"' +
           ' aria-label="Close navigation">' +
