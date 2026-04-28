@@ -1803,7 +1803,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       <label class="analysis-filter-label" for="analysis-matchup-sel">vs matchup</label>
       <select id="analysis-matchup-sel" class="analysis-matchup-sel">
         <option value="">Full deck</option>
-        ${guide.map(m => `<option value="${esc(m.id)}"${m.id === currentAnalysisMatchupId ? ' selected' : ''}>${esc(m.hero)} — ${m.rating}</option>`).join('')}
+        ${guide.map(m => `<option value="${esc(m.id)}"${m.id === currentAnalysisMatchupId ? ' selected' : ''}>${esc(m.hero)}</option>`).join('')}
       </select>
     </div>`;
 
@@ -2087,6 +2087,37 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       'auto-loss':  '#991b1b',
     };
 
+    // Deck list for first page
+    const deckListHtml = (() => {
+      if (!deckPairs || deckPairs.length === 0) return '';
+      const cardLi = p => {
+        const hintStr = p.entry.hint ? ` (${p.entry.hint})` : '';
+        return `<li><span class="qty-col">×${p.entry.qty}</span>${p.entry.name}${hintStr}</li>`;
+      };
+      const arenaPairs  = deckPairs.filter(p => !p.card || !p.card.color);
+      const redPairs    = deckPairs.filter(p => p.card && p.card.color === 'red');
+      const yellowPairs = deckPairs.filter(p => p.card && p.card.color === 'yellow');
+      const bluePairs   = deckPairs.filter(p => p.card && p.card.color === 'blue');
+      const colHtml = (label, pairs, cls) => `
+        <div class="deck-col">
+          <div class="deck-col-header ${cls}">${label}</div>
+          <ul class="cards-list">${pairs.length ? pairs.map(cardLi).join('') : '<li class="none">—</li>'}</ul>
+        </div>`;
+      const arenaHtml = arenaPairs.length > 0 ? `
+        <div class="deck-arena">
+          <div class="section-label">Arena</div>
+          <ul class="cards-list">${arenaPairs.map(cardLi).join('')}</ul>
+        </div>` : '';
+      return `<div class="deck-page">
+        ${arenaHtml}
+        <div class="deck-pitch-cols">
+          ${colHtml('Red / Non-Pitch', redPairs, 'col-red')}
+          ${colHtml('Yellow', yellowPairs, 'col-yellow')}
+          ${colHtml('Blue', bluePairs, 'col-blue')}
+        </div>
+      </div>`;
+    })();
+
     const matchupsHtml = guide.map(m => {
       const cuts = parseDecklist(m.cardsOutRaw || '');
       const cutLi = c => {
@@ -2094,36 +2125,10 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         return `<li><span class="marker">−</span><span class="qty-col">×${c.qty}</span>${c.name}${hint}</li>`;
       };
 
-      const remainingPairs = deckPairs ? applyMatchupFilter(deckPairs, m) : [];
-      const arenaRemaining = remainingPairs.filter(p => !p.card || !p.card.color);
-      const pitchRemaining = remainingPairs.filter(p => p.card && p.card.color);
-      const showSegs = arenaRemaining.length > 0 && pitchRemaining.length > 0;
-      const pairLi = p => {
-        const hint = p.entry.hint ? ` <span class="hint">(${p.entry.hint})</span>` : '';
-        return `<li><span class="qty-col">×${p.entry.qty}</span>${p.entry.name}${hint}</li>`;
-      };
-      let insHtml = '';
-      if (arenaRemaining.length > 0) {
-        if (showSegs) insHtml += `<div class="sublabel">Arena</div>`;
-        insHtml += `<ul class="cards-list">${arenaRemaining.map(pairLi).join('')}</ul>`;
-      }
-      if (pitchRemaining.length > 0) {
-        if (showSegs) insHtml += `<div class="sublabel">Pitch</div>`;
-        insHtml += `<ul class="cards-list">${pitchRemaining.map(pairLi).join('')}</ul>`;
-      }
-      if (!insHtml) insHtml = `<ul class="cards-list"><li class="none">—</li></ul>`;
-
-      const hasCards = cuts.length > 0 || remainingPairs.length > 0;
-      const cardsHtml = hasCards
-        ? `<div class="inout-row">
-            <div class="inout-col">
-              <div class="section-label">In</div>
-              ${insHtml}
-            </div>
-            <div class="inout-col">
-              <div class="section-label">Out</div>
-              <ul class="cards-list">${cuts.length ? cuts.map(cutLi).join('') : '<li class="none">—</li>'}</ul>
-            </div>
+      const cardsHtml = cuts.length > 0
+        ? `<div class="out-col">
+            <div class="section-label">Out</div>
+            <ul class="cards-list">${cuts.map(cutLi).join('')}</ul>
           </div>`
         : '';
       const noteHtml = m.note
@@ -2200,8 +2205,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     font-style: italic;
   }
   .go { font-size: 8pt; color: #888; font-style: italic; }
-  .inout-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.4rem; }
-  .inout-col {}
+  .out-col { margin-bottom: 0.4rem; }
+  .deck-page { page-break-after: always; margin-bottom: 2rem; }
+  .deck-arena { margin-bottom: 1rem; }
+  .deck-pitch-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-top: 0.5rem; }
+  .deck-col {}
+  .deck-col-header { font-size: 7.5pt; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding-bottom: 0.25rem; border-bottom: 2px solid; margin-bottom: 0.35rem; }
+  .col-red    { color: #b91c1c; border-color: #b91c1c; }
+  .col-yellow { color: #92400e; border-color: #b45309; }
+  .col-blue   { color: #1e40af; border-color: #1e40af; }
   .section-label {
     font-size: 7pt; font-weight: 700; letter-spacing: 0.1em;
     text-transform: uppercase; color: #888;
@@ -2228,6 +2240,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 </style>
 </head>
 <body>
+  ${deckListHtml}
   <div class="doc-title">${deck.name}</div>
   <div class="doc-subtitle">Sideboard Guide · ${guide.length} matchup${guide.length !== 1 ? 's' : ''}</div>
   <div class="overview">${overviewParts}</div>
@@ -2294,14 +2307,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     // Matchup rows
     const listHtml = guide.map(matchup => {
       const cuts = parseDecklist(matchup.cardsOutRaw || '');
-      const ins  = parseDecklist(matchup.cardsInRaw  || '');
       const totalCuts = cuts.reduce((s, c) => s + c.qty, 0);
-      const totalIns  = ins.reduce((s, c) => s + c.qty, 0);
-      const swapLabel = totalCuts > 0 && totalIns > 0
-        ? `${totalCuts} out · ${totalIns} in`
-        : totalCuts > 0 ? `${totalCuts} out`
-        : totalIns  > 0 ? `${totalIns} in`
-        : '';
+      const swapLabel = totalCuts > 0 ? `${totalCuts} out` : '';
       const goFirstLabel = matchup.goFirst === 'first' ? '▸ Go First'
                          : matchup.goFirst === 'second' ? '▸ Go Second'
                          : '▸ Either';
@@ -2375,34 +2382,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       return `<div class="sb-card-stay"><span class="sb-qty">×${p.entry.qty}</span>${esc(p.entry.name)}${hint}</div>`;
     };
 
-    const remainingPairs = applyMatchupFilter(deckPairs, matchup);
-    const arenaRemaining = remainingPairs.filter(p => !p.card || !p.card.color);
-    const pitchRemaining = remainingPairs.filter(p => p.card && p.card.color);
-    const showSegments   = arenaRemaining.length > 0 && pitchRemaining.length > 0;
-
-    const buildInHtml = () => {
-      if (remainingPairs.length === 0) return '<div class="sb-card-none">—</div>';
-      let out = '';
-      if (arenaRemaining.length > 0) {
-        if (showSegments) out += `<div class="sb-body-sublabel">Arena</div>`;
-        out += arenaRemaining.map(pairLine).join('');
-      }
-      if (pitchRemaining.length > 0) {
-        if (showSegments) out += `<div class="sb-body-sublabel">Pitch</div>`;
-        out += pitchRemaining.map(pairLine).join('');
-      }
-      return out;
-    };
-
-    if (cuts.length > 0 || remainingPairs.length > 0) {
-      const outsHtml = cuts.length
-        ? cuts.map(c => cardLine(c, 'sb-card-out')).join('')
-        : '<div class="sb-card-none">—</div>';
-      const insHtml = buildInHtml();
-      html += `<div class="sb-inout-row">
-        <div class="sb-inout-col"><div class="sb-body-label">In</div>${insHtml}</div>
-        <div class="sb-inout-col"><div class="sb-body-label">Out</div>${outsHtml}</div>
-      </div>`;
+    if (cuts.length > 0) {
+      const outsHtml = cuts.map(c => cardLine(c, 'sb-card-out')).join('');
+      html += `<div class="sb-body-section"><div class="sb-body-label">Out</div>${outsHtml}</div>`;
     }
 
     if (matchup.note) {
@@ -2486,10 +2468,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           <label>Cards Out</label>
           <div class="sb-picker-summary" id="sb-picker-summary">${initialTotal > 0 ? `${initialTotal} card${initialTotal !== 1 ? 's' : ''} selected to board out` : 'Click − to board out cards'}</div>
           <div class="sb-deck-picker" id="sb-deck-picker"></div>
-        </div>
-        <div class="sb-editor-field">
-          <label>Cards In</label>
-          <textarea id="sb-cards-in" rows="3" placeholder="e.g. 2 Pummel (red)&#10;1 Sink Below (blue)">${esc(existing ? existing.cardsInRaw || '' : '')}</textarea>
         </div>
         <div class="sb-editor-field">
           <label>Gameplan Note</label>
@@ -2668,8 +2646,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         while (latestGuide.some(m => m.id === matchupId)) matchupId = `${base}-${suffix++}`;
       }
 
-      const cardsInRaw = document.getElementById('sb-cards-in').value.trim();
-      const matchupObj = { id: matchupId, hero, rating: selectedRating, goFirst: selectedGoFirst, note, cardsOutRaw, cardsInRaw };
+      const matchupObj = { id: matchupId, hero, rating: selectedRating, goFirst: selectedGoFirst, note, cardsOutRaw };
       const newGuide = existing
         ? latestGuide.map(m => m.id === existing.id ? matchupObj : m)
         : [...latestGuide, matchupObj];
