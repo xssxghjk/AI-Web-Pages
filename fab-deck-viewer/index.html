@@ -1229,6 +1229,122 @@
     .analysis-matchup-sel:hover, .analysis-matchup-sel:focus {
       border-color: var(--accent);
     }
+
+    /* ── Analysis sub-tabs ── */
+    .sub-tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+    .sub-tab-btn {
+      background: none; border: none;
+      border-bottom: 2px solid transparent; border-radius: 0;
+      padding: 0.45rem 1.1rem;
+      font-family: 'DM Serif Text', Georgia, serif; font-style: italic;
+      font-size: 0.72rem; font-weight: 400; letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--muted); cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+    .sub-tab-btn:hover { color: var(--text); background: none; }
+    .sub-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .sub-tab-btn:active { transform: none; }
+
+    /* ── Simulator panel ── */
+    .sim-deck-summary {
+      display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: center;
+      padding: 0.6rem 0.9rem;
+      background: var(--surface-2); border: 1px solid var(--border-2);
+      border-radius: 2px; font-size: 0.75rem; color: var(--muted);
+      margin-bottom: 0.85rem;
+    }
+    .sim-ds-item { display: flex; gap: 0.3rem; align-items: baseline; }
+    .sim-ds-val  { color: var(--accent); font-weight: 700; }
+    .sim-pitch-bar {
+      height: 4px; border-radius: 2px; overflow: hidden;
+      background: var(--border); display: flex; margin-bottom: 0.9rem;
+    }
+    .sim-pb-seg { height: 100%; }
+    .sim-pb-seg.red    { background: var(--red-c); }
+    .sim-pb-seg.yellow { background: var(--yellow-c); }
+    .sim-pb-seg.blue   { background: var(--blue-c); }
+    .sim-hand-row {
+      display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+    }
+    .sim-hand-label {
+      font-family: 'DM Serif Text', Georgia, serif; font-style: italic;
+      font-size: 0.68rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent);
+    }
+    .sim-hand-inp {
+      background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 2px;
+      color: var(--text); font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.88rem; padding: 0.35rem 0.6rem; width: 64px; outline: none;
+      transition: border-color 0.15s;
+    }
+    .sim-hand-inp:focus { border-color: var(--accent); }
+    .sim-hand-display {
+      display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end; min-height: 66px;
+      padding: 0.75rem 1rem; background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 2px; margin-top: 0.75rem;
+    }
+    .sim-card-chip {
+      width: 46px; height: 60px; border-radius: 2px; border: 1px solid;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.15rem; font-size: 1.2rem; transition: transform 0.15s;
+    }
+    .sim-card-chip:hover { transform: translateY(-3px); }
+    .sim-card-chip .chip-sub { font-size: 0.46rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+    .sim-card-chip.red    { background: rgba(224,80,64,0.08);  border-color: var(--red-c);    color: var(--red-c); }
+    .sim-card-chip.yellow { background: rgba(212,146,74,0.08); border-color: var(--yellow-c); color: var(--yellow-c); }
+    .sim-card-chip.blue   { background: rgba(90,180,204,0.08); border-color: var(--blue-c);   color: var(--blue-c); }
+    .sim-hand-total { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 0.15rem; }
+    .sim-ht-label { font-family: 'DM Serif Text', Georgia, serif; font-style: italic; font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .sim-ht-val   { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 900; font-size: 2rem; line-height: 1; color: var(--accent); }
+    .sim-ht-sub   { font-size: 0.62rem; color: var(--muted); }
+    .sim-hand-empty { color: var(--muted-2); font-size: 0.8rem; align-self: center; font-style: italic; }
+    .sim-turns-list {
+      display: none; flex-direction: column; gap: 0.2rem;
+      max-height: 300px; overflow-y: auto; margin-top: 0.75rem;
+    }
+    .sim-turn-row {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.4rem 0.65rem; background: var(--surface-2);
+      border: 1px solid var(--border); border-radius: 2px; font-size: 0.78rem;
+    }
+    .sim-turn-num { font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); min-width: 32px; }
+    .sim-turn-cards { display: flex; gap: 3px; flex: 1; flex-wrap: wrap; }
+    .sim-mini-chip {
+      width: 18px; height: 22px; border-radius: 2px; border: 1px solid;
+      display: flex; align-items: center; justify-content: center; font-size: 0.65rem;
+    }
+    .sim-mini-chip.red    { background: rgba(224,80,64,0.08);  border-color: var(--red-c);    color: var(--red-c); }
+    .sim-mini-chip.yellow { background: rgba(212,146,74,0.08); border-color: var(--yellow-c); color: var(--yellow-c); }
+    .sim-mini-chip.blue   { background: rgba(90,180,204,0.08); border-color: var(--blue-c);   color: var(--blue-c); }
+    .sim-turn-pitch { font-size: 0.8rem; min-width: 44px; text-align: right; color: var(--accent); }
+    .sim-turn-pitch-muted { font-size: 0.6rem; color: var(--muted); }
+    .sim-stat-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem;
+    }
+    .sim-stat-box {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 2px; padding: 0.65rem 0.85rem; display: flex; flex-direction: column; gap: 0.2rem;
+    }
+    .sim-stat-label { font-family: 'DM Serif Text', Georgia, serif; font-style: italic; font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .sim-stat-val   { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 900; font-size: 1.25rem; color: var(--accent); }
+    .sim-stat-sub   { font-size: 0.6rem; color: var(--muted); }
+    .sim-histogram  { display: flex; align-items: flex-end; gap: 3px; height: 72px; }
+    .sim-h-col      { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+    .sim-h-bar      { width: 100%; background: var(--accent); border-radius: 2px 2px 0 0; min-height: 2px; }
+    .sim-h-lbl      { font-size: 0.5rem; color: var(--muted); }
+    .sim-thresh-table { display: flex; flex-direction: column; gap: 0.2rem; }
+    .sim-thresh-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.3rem 0.65rem; background: var(--surface-2);
+      border: 1px solid var(--border); border-radius: 2px; font-size: 0.75rem;
+    }
+    .sim-thresh-key { color: var(--muted); flex: 1; }
+    .sim-thresh-val { color: var(--accent); font-weight: 700; }
+    .sim-no-pitch { padding: 2rem; text-align: center; font-style: italic; color: var(--muted); font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -1425,7 +1541,12 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     <div id="tab-analysis" class="tab-panel" style="display:none">
       <div id="analysis-filter-bar"></div>
+      <div class="sub-tab-bar">
+        <button class="sub-tab-btn active" id="sub-tab-numbers">Numbers</button>
+        <button class="sub-tab-btn" id="sub-tab-simulations">Simulations</button>
+      </div>
       <div id="analysis-content"></div>
+      <div id="analysis-simulator" style="display:none"></div>
     </div>
 
     <div id="tab-sideboard" class="tab-panel" style="display:none">
@@ -1636,6 +1757,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   let currentDeckPairs  = [];
   let currentAnalysisPairs = [];
   let currentAnalysisMatchupId = '';
+  let analysisSubTab = 'numbers';
+  let simHandSize = 4;
 
   function renderDetail(deck, pairs) {
     document.getElementById('detail-name').textContent = deck.name;
@@ -1654,6 +1777,11 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     currentDeckPairs = pairs;
     currentAnalysisPairs = pairs;
     currentAnalysisMatchupId = '';
+    analysisSubTab = 'numbers';
+    document.getElementById('sub-tab-numbers').className = 'sub-tab-btn active';
+    document.getElementById('sub-tab-simulations').className = 'sub-tab-btn';
+    document.getElementById('analysis-content').style.display = '';
+    document.getElementById('analysis-simulator').style.display = 'none';
 
     const buckets = {};
     GROUPS.forEach(g => { buckets[g.key] = []; });
@@ -1812,6 +1940,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const matchup = guide.find(m => m.id === currentAnalysisMatchupId) || null;
       currentAnalysisPairs = applyMatchupFilter(pairs, matchup);
       renderAnalysis(computeStats(currentAnalysisPairs));
+      if (analysisSubTab === 'simulations') renderSimulator(currentAnalysisPairs);
       requestAnimationFrame(() => requestAnimationFrame(animateAnalysis));
     });
   }
@@ -1990,6 +2119,241 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const el = document.getElementById('analysis-content');
     el.querySelectorAll('.vchart-fill').forEach(b => { b.style.height = b.dataset.h + '%'; });
     el.querySelectorAll('.hbar-fill').forEach(b => { b.style.width = b.dataset.pct + '%'; });
+  }
+
+  /* ── Pitch Simulator ─────────────────────────────────────────────── */
+  function renderSimulator(pairs) {
+    const el = document.getElementById('analysis-simulator');
+
+    // Preserve hand size across re-renders
+    const existingInp = document.getElementById('sim-hand-inp');
+    if (existingInp) simHandSize = Math.max(1, Math.min(10, parseInt(existingInp.value, 10) || simHandSize));
+
+    const red    = pairs.filter(p => p.card && p.card.color === 'red').reduce((s, p) => s + p.entry.qty, 0);
+    const yellow = pairs.filter(p => p.card && p.card.color === 'yellow').reduce((s, p) => s + p.entry.qty, 0);
+    const blue   = pairs.filter(p => p.card && p.card.color === 'blue').reduce((s, p) => s + p.entry.qty, 0);
+    const total  = red + yellow + blue;
+
+    if (total === 0) {
+      el.innerHTML = '<div class="sim-no-pitch">No pitch cards found in this deck configuration.</div>';
+      return;
+    }
+
+    const hs  = Math.max(1, Math.min(simHandSize, total));
+    const avg = (red + yellow * 2 + blue * 3) / total;
+    const rPct = (red    / total * 100).toFixed(1);
+    const yPct = (yellow / total * 100).toFixed(1);
+    const bPct = (100 - parseFloat(rPct) - parseFloat(yPct)).toFixed(1);
+
+    el.innerHTML = `
+      <div class="analysis-section">
+        <div class="analysis-head">Pitch Configuration</div>
+        <div class="analysis-body">
+          <div class="sim-deck-summary">
+            <div class="sim-ds-item">Total <span class="sim-ds-val">${total}</span> pitch cards</div>
+            ${red    > 0 ? `<div class="sim-ds-item"><span style="color:var(--red-c)">●</span>&nbsp;<span class="sim-ds-val">${red}</span> red</div>` : ''}
+            ${yellow > 0 ? `<div class="sim-ds-item"><span style="color:var(--yellow-c)">●</span>&nbsp;<span class="sim-ds-val">${yellow}</span> yellow</div>` : ''}
+            ${blue   > 0 ? `<div class="sim-ds-item"><span style="color:var(--blue-c)">●</span>&nbsp;<span class="sim-ds-val">${blue}</span> blue</div>` : ''}
+            <div class="sim-ds-item">Avg <span class="sim-ds-val">${avg.toFixed(2)}</span></div>
+          </div>
+          <div class="sim-pitch-bar">
+            <div class="sim-pb-seg red"    style="width:${rPct}%"></div>
+            <div class="sim-pb-seg yellow" style="width:${yPct}%"></div>
+            <div class="sim-pb-seg blue"   style="width:${bPct}%"></div>
+          </div>
+          <div class="sim-hand-row">
+            <label class="sim-hand-label" for="sim-hand-inp">Hand Size</label>
+            <input type="number" class="sim-hand-inp" id="sim-hand-inp" min="1" max="10" value="${hs}" />
+            <span style="font-size:0.72rem;color:var(--muted);font-style:italic;">Expected: <strong style="color:var(--accent)" id="sim-exp-val">${(avg * hs).toFixed(2)}</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="analysis-section">
+        <div class="analysis-head">Draw a Hand</div>
+        <div class="analysis-body">
+          <div class="btn-row">
+            <button class="btn-primary" id="sim-btn-draw">Draw Hand</button>
+            <button class="btn-secondary" id="sim-btn-draw-clear">Clear</button>
+          </div>
+          <div class="sim-hand-display" id="sim-hand-display">
+            <span class="sim-hand-empty">Draw a hand to see your cards.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="analysis-section">
+        <div class="analysis-head">Turn-by-Turn Simulation</div>
+        <div class="analysis-body">
+          <p style="font-size:0.78rem;color:var(--muted);line-height:1.6;margin-bottom:0.75rem;">Shuffles and deals <span id="sim-turns-hand-note">${hs}</span> cards per turn until the deck is exhausted.</p>
+          <div class="btn-row">
+            <button class="btn-primary" id="sim-btn-turns">Run Simulation</button>
+            <button class="btn-secondary" id="sim-btn-turns-clear">Clear</button>
+          </div>
+          <div class="sim-turns-list" id="sim-turns-list"></div>
+        </div>
+      </div>
+
+      <div class="analysis-section">
+        <div class="analysis-head">Monte Carlo Statistics</div>
+        <div class="analysis-body">
+          <p style="font-size:0.78rem;color:var(--muted);line-height:1.6;margin-bottom:0.75rem;">Simulates 10,000 random hands and shows pitch distribution and resource probabilities.</p>
+          <div class="btn-row">
+            <button class="btn-primary" id="sim-btn-monte">Run 10,000 Simulations</button>
+            <button class="btn-secondary" id="sim-btn-monte-clear">Clear</button>
+          </div>
+          <div id="sim-monte-out" style="display:none;"></div>
+        </div>
+      </div>
+    `;
+
+    function buildDeck() {
+      const deck = [];
+      for (let i = 0; i < red;    i++) deck.push(1);
+      for (let i = 0; i < yellow; i++) deck.push(2);
+      for (let i = 0; i < blue;   i++) deck.push(3);
+      return deck;
+    }
+    function simShuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = (Math.random() * (i + 1)) | 0;
+        const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+      }
+      return arr;
+    }
+    function pitchClass(v) { return v === 1 ? 'red' : v === 2 ? 'yellow' : 'blue'; }
+    function pitchName(v)  { return v === 1 ? 'Red' : v === 2 ? 'Yellow' : 'Blue'; }
+    function getHandSize() {
+      const inp = document.getElementById('sim-hand-inp');
+      return Math.max(1, Math.min(total, parseInt(inp ? inp.value : hs, 10) || hs));
+    }
+
+    // Hand size live update
+    document.getElementById('sim-hand-inp').addEventListener('input', function () {
+      simHandSize = getHandSize();
+      const expEl  = document.getElementById('sim-exp-val');
+      const noteEl = document.getElementById('sim-turns-hand-note');
+      if (expEl)  expEl.textContent  = (avg * simHandSize).toFixed(2);
+      if (noteEl) noteEl.textContent = simHandSize;
+    });
+
+    // Draw Hand
+    document.getElementById('sim-btn-draw').addEventListener('click', function () {
+      const hand    = simShuffle(buildDeck()).slice(0, getHandSize());
+      const ptotal  = hand.reduce((s, v) => s + v, 0);
+      const pavg    = (ptotal / hand.length).toFixed(1);
+      const display = document.getElementById('sim-hand-display');
+      display.innerHTML = '';
+      hand.forEach(v => {
+        const chip = document.createElement('div');
+        chip.className = 'sim-card-chip ' + pitchClass(v);
+        chip.innerHTML = `<span>${v}</span><span class="chip-sub">${pitchName(v)}</span>`;
+        display.appendChild(chip);
+      });
+      const tot = document.createElement('div');
+      tot.className = 'sim-hand-total';
+      tot.innerHTML = `<div class="sim-ht-label">Total</div><div class="sim-ht-val">${ptotal}</div><div class="sim-ht-sub">avg ${pavg}/card</div>`;
+      display.appendChild(tot);
+    });
+
+    document.getElementById('sim-btn-draw-clear').addEventListener('click', function () {
+      document.getElementById('sim-hand-display').innerHTML = '<span class="sim-hand-empty">Draw a hand to see your cards.</span>';
+    });
+
+    // Turn-by-Turn
+    document.getElementById('sim-btn-turns').addEventListener('click', function () {
+      const hs2  = getHandSize();
+      const deck = simShuffle(buildDeck());
+      const list = document.getElementById('sim-turns-list');
+      list.innerHTML = '';
+      let idx = 0, turn = 0;
+      while (idx < deck.length && turn < 200) {
+        const end  = Math.min(idx + hs2, deck.length);
+        const hand = deck.slice(idx, end);
+        idx = end; turn++;
+        const pitch = hand.reduce((s, v) => s + v, 0);
+        const row   = document.createElement('div');
+        row.className = 'sim-turn-row';
+        const chips = hand.map(v => `<div class="sim-mini-chip ${pitchClass(v)}">${v}</div>`).join('');
+        row.innerHTML = `<div class="sim-turn-num">T${turn}</div><div class="sim-turn-cards">${chips}</div><div class="sim-turn-pitch">${pitch}&nbsp;<span class="sim-turn-pitch-muted">res</span></div>`;
+        list.appendChild(row);
+      }
+      list.style.display = 'flex';
+    });
+
+    document.getElementById('sim-btn-turns-clear').addEventListener('click', function () {
+      const list = document.getElementById('sim-turns-list');
+      list.innerHTML = '';
+      list.style.display = 'none';
+    });
+
+    // Monte Carlo
+    document.getElementById('sim-btn-monte').addEventListener('click', function () {
+      const hs2     = getHandSize();
+      const SIMS    = 10000;
+      const base    = buildDeck();
+      const results = new Int32Array(SIMS);
+      for (let s = 0; s < SIMS; s++) {
+        const deck = simShuffle(base.slice());
+        let pitch = 0;
+        for (let i = 0; i < hs2; i++) pitch += deck[i];
+        results[s] = pitch;
+      }
+
+      let sum = 0;
+      for (let i = 0; i < SIMS; i++) sum += results[i];
+      const mean   = sum / SIMS;
+      const sorted = Array.from(results).sort((a, b) => a - b);
+      const median = sorted[(SIMS / 2) | 0];
+      const minV   = sorted[0], maxV = sorted[SIMS - 1];
+      let variance = 0;
+      for (let i = 0; i < SIMS; i++) variance += (results[i] - mean) ** 2;
+      const stddev = Math.sqrt(variance / SIMS);
+
+      const freq = {};
+      for (let i = 0; i < SIMS; i++) { const v = results[i]; freq[v] = (freq[v] || 0) + 1; }
+      const keys    = Object.keys(freq).map(Number).sort((a, b) => a - b);
+      const maxFreq = Math.max(...Object.values(freq));
+
+      const statsHtml = [
+        { label: 'Mean',    val: mean.toFixed(2),   sub: 'avg pitch/hand' },
+        { label: 'Median',  val: median,             sub: 'middle value' },
+        { label: 'Std Dev', val: stddev.toFixed(2),  sub: 'spread' },
+        { label: 'Min',     val: minV,               sub: 'worst hand' },
+        { label: 'Max',     val: maxV,               sub: 'best hand' },
+      ].map(s => `<div class="sim-stat-box"><div class="sim-stat-label">${s.label}</div><div class="sim-stat-val">${s.val}</div><div class="sim-stat-sub">${s.sub}</div></div>`).join('');
+
+      const histHtml = keys.map(k => {
+        const h = ((freq[k] || 0) / maxFreq * 100).toFixed(1);
+        return `<div class="sim-h-col"><div class="sim-h-bar" style="height:${h}%"></div><div class="sim-h-lbl">${k}</div></div>`;
+      }).join('');
+
+      const candidates = new Set([hs2, hs2 + 1, hs2 + 2, hs2 + 3, hs2 * 2, hs2 * 3]);
+      const thresholds = Array.from(candidates).filter(t => t >= minV && t <= maxV).sort((a, b) => a - b);
+      const threshHtml = thresholds.map(t => {
+        let count = 0;
+        for (let i = 0; i < SIMS; i++) if (results[i] >= t) count++;
+        return `<div class="sim-thresh-row"><span class="sim-thresh-key">≥ ${t} resources</span><span class="sim-thresh-val">${(count / SIMS * 100).toFixed(1)}%</span></div>`;
+      }).join('');
+
+      const out = document.getElementById('sim-monte-out');
+      out.innerHTML = `
+        <div class="sim-stat-grid">${statsHtml}</div>
+        <div style="margin-top:0.85rem;">
+          <div style="font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;font-style:italic;">Pitch Distribution</div>
+          <div class="sim-histogram">${histHtml}</div>
+        </div>
+        <div style="margin-top:0.85rem;">
+          <div style="font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;font-style:italic;">Probability of Pitching ≥ N Resources</div>
+          <div class="sim-thresh-table">${threshHtml}</div>
+        </div>
+      `;
+      out.style.display = '';
+    });
+
+    document.getElementById('sim-btn-monte-clear').addEventListener('click', function () {
+      document.getElementById('sim-monte-out').style.display = 'none';
+    });
   }
 
   /* ── Category Popup ─────────────────────────────────────────────── */
@@ -2965,6 +3329,19 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       if (deck) renderSideboard(deck, currentDeckPairs);
     }
   });
+
+  /* ── Analysis sub-tab switching ───────────────────────────────────── */
+  function switchAnalysisSubTab(tab) {
+    analysisSubTab = tab;
+    document.getElementById('sub-tab-numbers').className    = 'sub-tab-btn' + (tab === 'numbers'     ? ' active' : '');
+    document.getElementById('sub-tab-simulations').className = 'sub-tab-btn' + (tab === 'simulations' ? ' active' : '');
+    document.getElementById('analysis-content').style.display   = tab === 'numbers'     ? '' : 'none';
+    document.getElementById('analysis-simulator').style.display = tab === 'simulations' ? '' : 'none';
+    if (tab === 'simulations') renderSimulator(currentAnalysisPairs);
+  }
+
+  document.getElementById('sub-tab-numbers').addEventListener('click', () => switchAnalysisSubTab('numbers'));
+  document.getElementById('sub-tab-simulations').addEventListener('click', () => switchAnalysisSubTab('simulations'));
 
   /* ── Import handlers ──────────────────────────────────────────────── */
   function goToImport() {
