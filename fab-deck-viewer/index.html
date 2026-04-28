@@ -1187,6 +1187,61 @@
       position: sticky; top: 0; z-index: 1;
     }
 
+    /* ── Split sideboard toggle ── */
+    .sb-split-toggle-row {
+      display: flex; align-items: center; gap: 0.65rem;
+    }
+    .sb-split-check {
+      appearance: none; -webkit-appearance: none;
+      width: 34px; height: 18px;
+      background: var(--border-2); border-radius: 9px;
+      cursor: pointer; position: relative; flex-shrink: 0;
+      transition: background 0.2s; border: none; outline: none;
+    }
+    .sb-split-check:checked { background: var(--accent); }
+    .sb-split-check::after {
+      content: ''; position: absolute;
+      width: 12px; height: 12px;
+      background: #fff; border-radius: 50%;
+      top: 3px; left: 3px;
+      transition: transform 0.2s;
+    }
+    .sb-split-check:checked::after { transform: translateX(16px); }
+    .sb-split-check-label {
+      font-size: 0.78rem; color: var(--muted-2);
+      font-family: 'DM Serif Text', Georgia, serif;
+      cursor: pointer; line-height: 1.3;
+    }
+    .sb-split-tabs {
+      display: flex; gap: 0; margin-bottom: 0.4rem;
+      border: 1px solid var(--border-2); border-radius: 2px; overflow: hidden;
+    }
+    .sb-split-tab-btn {
+      flex: 1; padding: 0.4rem 0.75rem;
+      background: var(--surface-2); color: var(--muted);
+      border: none; border-right: 1px solid var(--border-2);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.74rem; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .sb-split-tab-btn:last-child { border-right: none; }
+    .sb-split-tab-btn:hover:not(.active) { background: var(--border); color: var(--text); }
+    .sb-split-tab-btn.active.first { background: var(--accent); color: #fff; }
+    .sb-split-tab-btn.active.second { background: var(--blue-c); color: #fff; }
+    .sb-deck-count {
+      font-size: 0.7rem; color: var(--blue-c);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic; opacity: 0.85;
+    }
+    .sb-split-out-label {
+      font-size: 0.63rem; letter-spacing: 0.07em; text-transform: uppercase;
+      font-family: 'DM Serif Text', Georgia, serif; font-style: italic;
+      margin-bottom: 0.35rem; margin-top: 0.6rem; padding-bottom: 0.2rem;
+    }
+    .sb-split-out-label:first-child { margin-top: 0; }
+    .sb-split-out-label.first { color: var(--accent); }
+    .sb-split-out-label.second { color: var(--blue-c); }
+
     @media (max-width: 600px) {
       .sb-matchup-head { gap: 0.4rem; padding: 0.65rem 0.9rem; }
       .sb-heatmap-row { grid-template-columns: 90px 1fr 80px; padding: 0.4rem 0.9rem; }
@@ -1903,9 +1958,14 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   function applyMatchupFilter(pairs, matchup) {
     if (!matchup) return pairs;
     const cutMap = {};
-    for (const c of parseDecklist(matchup.cardsOutRaw || '')) {
-      const key = c.name.toLowerCase() + '|' + (c.hint || '');
-      cutMap[key] = (cutMap[key] || 0) + c.qty;
+    const raws = matchup.splitSideboard
+      ? [matchup.cardsOutFirstRaw || '', matchup.cardsOutSecondRaw || '']
+      : [matchup.cardsOutRaw || ''];
+    for (const raw of raws) {
+      for (const c of parseDecklist(raw)) {
+        const key = c.name.toLowerCase() + '|' + (c.hint || '');
+        cutMap[key] = Math.max(cutMap[key] || 0, c.qty);
+      }
     }
     return pairs.flatMap(p => {
       const key = p.entry.name.toLowerCase() + '|' + (p.entry.hint || '');
@@ -2414,13 +2474,17 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const total = guide.length;
     const cutCounts = {};
     for (const matchup of guide) {
-      const cuts = parseDecklist(matchup.cardsOutRaw || '');
+      const raws = matchup.splitSideboard
+        ? [matchup.cardsOutFirstRaw || '', matchup.cardsOutSecondRaw || '']
+        : [matchup.cardsOutRaw || ''];
       const seen = new Set();
-      for (const { name } of cuts) {
-        const key = name.toLowerCase();
-        if (!seen.has(key)) {
-          cutCounts[key] = (cutCounts[key] || 0) + 1;
-          seen.add(key);
+      for (const raw of raws) {
+        for (const { name } of parseDecklist(raw)) {
+          const key = name.toLowerCase();
+          if (!seen.has(key)) {
+            cutCounts[key] = (cutCounts[key] || 0) + 1;
+            seen.add(key);
+          }
         }
       }
     }
@@ -2483,18 +2547,33 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     })();
 
     const matchupsHtml = guide.map(m => {
-      const cuts = parseDecklist(m.cardsOutRaw || '');
       const cutLi = c => {
         const hint = c.hint ? ` <span class="hint">(${c.hint})</span>` : '';
         return `<li><span class="marker">−</span><span class="qty-col">×${c.qty}</span>${c.name}${hint}</li>`;
       };
 
-      const cardsHtml = cuts.length > 0
-        ? `<div class="out-col">
-            <div class="section-label">Out</div>
-            <ul class="cards-list">${cuts.map(cutLi).join('')}</ul>
-          </div>`
-        : '';
+      let cardsHtml = '';
+      if (m.splitSideboard) {
+        const firstCuts = parseDecklist(m.cardsOutFirstRaw || '');
+        const secondCuts = parseDecklist(m.cardsOutSecondRaw || '');
+        if (firstCuts.length > 0 || secondCuts.length > 0) {
+          cardsHtml = `<div class="out-col">
+            <div class="section-label">Go First — Out</div>
+            <ul class="cards-list">${firstCuts.length ? firstCuts.map(cutLi).join('') : '<li>No changes</li>'}</ul>
+            <div class="section-label" style="margin-top:0.5em">Go Second — Out</div>
+            <ul class="cards-list">${secondCuts.length ? secondCuts.map(cutLi).join('') : '<li>No changes</li>'}</ul>
+          </div>`;
+        }
+      } else {
+        const cuts = parseDecklist(m.cardsOutRaw || '');
+        cardsHtml = cuts.length > 0
+          ? `<div class="out-col">
+              <div class="section-label">Out</div>
+              <ul class="cards-list">${cuts.map(cutLi).join('')}</ul>
+            </div>`
+          : '';
+      }
+
       const noteHtml = m.note
         ? `<div class="section-label">Gameplan</div><p class="note">${m.note.replace(/\n/g, '<br>')}</p>`
         : '';
@@ -2668,11 +2747,33 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       heatmapHtml = `<div class="sb-heatmap"><div class="sb-heatmap-title">Card Coverage</div>${rowsHtml}</div>`;
     }
 
+    // Helper: count deck card (pitch card) cuts for a matchup
+    const pitchNames = new Set(deckPairs.filter(p => p.card && p.card.color).map(p => p.entry.name.toLowerCase()));
+    function deckCardCutCount(matchup) {
+      const raws = matchup.splitSideboard
+        ? [matchup.cardsOutFirstRaw || '', matchup.cardsOutSecondRaw || '']
+        : [matchup.cardsOutRaw || ''];
+      let n = 0;
+      for (const raw of raws) {
+        for (const c of parseDecklist(raw)) {
+          if (pitchNames.has(c.name.toLowerCase())) n += c.qty;
+        }
+      }
+      return n;
+    }
+
     // Matchup rows
     const listHtml = guide.map(matchup => {
-      const cuts = parseDecklist(matchup.cardsOutRaw || '');
-      const totalCuts = cuts.reduce((s, c) => s + c.qty, 0);
-      const swapLabel = totalCuts > 0 ? `${totalCuts} out` : '';
+      let swapLabel;
+      if (matchup.splitSideboard) {
+        const fc = parseDecklist(matchup.cardsOutFirstRaw || '').reduce((s, c) => s + c.qty, 0);
+        const sc = parseDecklist(matchup.cardsOutSecondRaw || '').reduce((s, c) => s + c.qty, 0);
+        swapLabel = (fc > 0 || sc > 0) ? `${fc} 1st / ${sc} 2nd` : '';
+      } else {
+        const totalCuts = parseDecklist(matchup.cardsOutRaw || '').reduce((s, c) => s + c.qty, 0);
+        swapLabel = totalCuts > 0 ? `${totalCuts} out` : '';
+      }
+      const deckCount = deckCardCutCount(matchup);
       const goFirstLabel = matchup.goFirst === 'first' ? '▸ Go First'
                          : matchup.goFirst === 'second' ? '▸ Go Second'
                          : '▸ Either';
@@ -2685,6 +2786,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           <span class="sb-rating-badge sb-rating-${matchup.rating}">${matchup.rating}</span>
           <span class="sb-go-indicator ${goFirstClass}">${goFirstLabel}</span>
           ${swapLabel ? `<span class="sb-cuts-label">${swapLabel}</span>` : ''}
+          ${deckCount > 0 ? `<span class="sb-deck-count">${deckCount} deck</span>` : ''}
           <span class="sb-chevron">›</span>
         </div>
         <div class="sb-matchup-body"><div class="sb-matchup-body-inner"></div></div>
@@ -2733,7 +2835,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   }
 
   function renderMatchupBody(bodyEl, matchup, deckPairs, deck) {
-    const cuts = parseDecklist(matchup.cardsOutRaw || '');
     let html = '';
 
     const cardLine = (c, cls) => {
@@ -2741,14 +2842,27 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       return `<div class="${cls}"><span class="sb-qty">×${c.qty}</span>${esc(c.name)}${hint}</div>`;
     };
 
-    const pairLine = p => {
-      const hint = p.entry.hint ? ` <span class="sb-card-hint">${esc(p.entry.hint)}</span>` : '';
-      return `<div class="sb-card-stay"><span class="sb-qty">×${p.entry.qty}</span>${esc(p.entry.name)}${hint}</div>`;
-    };
-
-    if (cuts.length > 0) {
-      const outsHtml = cuts.map(c => cardLine(c, 'sb-card-out')).join('');
-      html += `<div class="sb-body-section"><div class="sb-body-label">Out</div>${outsHtml}</div>`;
+    if (matchup.splitSideboard) {
+      const firstCuts = parseDecklist(matchup.cardsOutFirstRaw || '');
+      const secondCuts = parseDecklist(matchup.cardsOutSecondRaw || '');
+      if (firstCuts.length > 0 || secondCuts.length > 0) {
+        const firstHtml = firstCuts.length > 0
+          ? firstCuts.map(c => cardLine(c, 'sb-card-out')).join('')
+          : '<div class="sb-card-none">No changes</div>';
+        const secondHtml = secondCuts.length > 0
+          ? secondCuts.map(c => cardLine(c, 'sb-card-out')).join('')
+          : '<div class="sb-card-none">No changes</div>';
+        html += `<div class="sb-body-section">
+          <div class="sb-split-out-label first">▸ Go First — Out</div>${firstHtml}
+          <div class="sb-split-out-label second">▸ Go Second — Out</div>${secondHtml}
+        </div>`;
+      }
+    } else {
+      const cuts = parseDecklist(matchup.cardsOutRaw || '');
+      if (cuts.length > 0) {
+        const outsHtml = cuts.map(c => cardLine(c, 'sb-card-out')).join('');
+        html += `<div class="sb-body-section"><div class="sb-body-label">Out</div>${outsHtml}</div>`;
+      }
     }
 
     if (matchup.note) {
@@ -2776,23 +2890,36 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     const currentRating = existing ? existing.rating : 'even';
     const currentGoFirst = existing ? existing.goFirst : null;
+    const currentSplit = !!(existing && existing.splitSideboard);
 
-    // boardMap key: `${name.toLowerCase()}|${hint||''}` → qty out
-    const boardMap = {};
-    if (existing && existing.cardsOutRaw) {
-      for (const c of parseDecklist(existing.cardsOutRaw)) {
-        boardMap[c.name.toLowerCase() + '|' + (c.hint || '')] = c.qty;
+    // boardMap helpers: key = `${name.toLowerCase()}|${hint||''}` → qty out
+    function buildBoardMap(raw) {
+      const m = {};
+      for (const c of parseDecklist(raw || '')) {
+        m[c.name.toLowerCase() + '|' + (c.hint || '')] = c.qty;
       }
+      return m;
     }
 
-    function serializeBoard() {
+    // When split: two separate maps; when not split: single map
+    const boardMapFirst  = buildBoardMap(existing ? (existing.cardsOutFirstRaw  || (currentSplit ? '' : existing.cardsOutRaw)) : '');
+    const boardMapSecond = buildBoardMap(existing ? (existing.cardsOutSecondRaw || '') : '');
+    const boardMapSingle = buildBoardMap(existing && !currentSplit ? (existing.cardsOutRaw || '') : '');
+
+    let isSplit = currentSplit;
+    let activeSplitTab = 'first';
+
+    function activeMap() {
+      if (!isSplit) return boardMapSingle;
+      return activeSplitTab === 'first' ? boardMapFirst : boardMapSecond;
+    }
+
+    function serializeBoardMap(bm) {
       const lines = [];
       for (const pair of deckPairs) {
         const key = pair.entry.name.toLowerCase() + '|' + (pair.entry.hint || '');
-        const qty = boardMap[key] || 0;
-        if (qty > 0) {
-          lines.push(`${qty} ${pair.entry.name}${pair.entry.hint ? ` (${pair.entry.hint})` : ''}`);
-        }
+        const qty = bm[key] || 0;
+        if (qty > 0) lines.push(`${qty} ${pair.entry.name}${pair.entry.hint ? ` (${pair.entry.hint})` : ''}`);
       }
       return lines.join('\n');
     }
@@ -2810,8 +2937,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       <option value="second"${currentGoFirst === 'second' ? ' selected' : ''}>Second</option>
     </select>`;
 
-    const initialTotal = Object.values(boardMap).reduce((s, v) => s + v, 0);
-
     const container = document.getElementById('sideboard-content');
     container.innerHTML = `
       <div class="sb-editor">
@@ -2825,12 +2950,20 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           ${ratingSelectHtml}
         </div>
         <div class="sb-editor-field">
-          <label>Go First</label>
+          <label>Go First Preference</label>
           ${goSelectHtml}
         </div>
         <div class="sb-editor-field">
+          <label>Split Sideboard by Turn Order</label>
+          <div class="sb-split-toggle-row">
+            <input type="checkbox" class="sb-split-check" id="sb-split-toggle" ${currentSplit ? 'checked' : ''} />
+            <label for="sb-split-toggle" class="sb-split-check-label">Separate Cards Out for Go First / Go Second</label>
+          </div>
+        </div>
+        <div class="sb-editor-field" id="sb-cards-out-field">
           <label>Cards Out</label>
-          <div class="sb-picker-summary" id="sb-picker-summary">${initialTotal > 0 ? `${initialTotal} card${initialTotal !== 1 ? 's' : ''} selected to board out` : 'Click − to board out cards'}</div>
+          <div id="sb-split-tabs-container"></div>
+          <div class="sb-picker-summary" id="sb-picker-summary"></div>
           <div class="sb-deck-picker" id="sb-deck-picker"></div>
         </div>
         <div class="sb-editor-field">
@@ -2846,12 +2979,35 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       </div>
     `;
 
+    function renderSplitTabs() {
+      const tabsContainer = document.getElementById('sb-split-tabs-container');
+      if (!tabsContainer) return;
+      if (!isSplit) {
+        tabsContainer.innerHTML = '';
+        return;
+      }
+      tabsContainer.innerHTML = `
+        <div class="sb-split-tabs">
+          <button class="sb-split-tab-btn first${activeSplitTab === 'first' ? ' active' : ''}" type="button" data-tab="first">Go First</button>
+          <button class="sb-split-tab-btn second${activeSplitTab === 'second' ? ' active' : ''}" type="button" data-tab="second">Go Second</button>
+        </div>
+      `;
+      tabsContainer.querySelectorAll('.sb-split-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeSplitTab = btn.dataset.tab;
+          renderSplitTabs();
+          renderPicker();
+        });
+      });
+    }
+
     function renderPicker() {
       const pickerEl = document.getElementById('sb-deck-picker');
       const summaryEl = document.getElementById('sb-picker-summary');
       if (!pickerEl) return;
 
       pickerEl.innerHTML = '';
+      const bm = activeMap();
 
       const arenaPairs = deckPairs.filter(p => !p.card || !p.card.color);
       const pitchPairs = deckPairs.filter(p => p.card && p.card.color);
@@ -2859,7 +3015,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
       function renderRow(pair) {
         const key = pair.entry.name.toLowerCase() + '|' + (pair.entry.hint || '');
-        const boardedOut = boardMap[key] || 0;
+        const boardedOut = bm[key] || 0;
         const max = pair.entry.qty;
         const remaining = max - boardedOut;
         const hintColor = pair.entry.hint === 'red'    ? 'var(--red-c)'
@@ -2886,34 +3042,29 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         const ctrl = document.createElement('div');
         ctrl.className = 'sb-picker-ctrl';
 
-        // – boards out one more (remaining decreases)
         const minusBtn = document.createElement('button');
         minusBtn.className = 'sb-picker-btn sb-picker-minus';
         minusBtn.type = 'button';
         minusBtn.textContent = '–';
         minusBtn.disabled = boardedOut >= max;
         minusBtn.addEventListener('click', () => {
-          const cur = boardMap[key] || 0;
-          if (cur < max) {
-            boardMap[key] = cur + 1;
-            renderPicker();
-          }
+          const cur = bm[key] || 0;
+          if (cur < max) { bm[key] = cur + 1; renderPicker(); }
         });
 
         const countSpan = document.createElement('span');
         countSpan.className = 'sb-picker-count';
         countSpan.textContent = `${remaining}/${max}`;
 
-        // + puts one back (remaining increases)
         const plusBtn = document.createElement('button');
         plusBtn.className = 'sb-picker-btn sb-picker-plus';
         plusBtn.type = 'button';
         plusBtn.textContent = '+';
         plusBtn.disabled = boardedOut === 0;
         plusBtn.addEventListener('click', () => {
-          if ((boardMap[key] || 0) > 0) {
-            boardMap[key] = boardMap[key] - 1;
-            if (boardMap[key] === 0) delete boardMap[key];
+          if ((bm[key] || 0) > 0) {
+            bm[key] = bm[key] - 1;
+            if (bm[key] === 0) delete bm[key];
             renderPicker();
           }
         });
@@ -2938,16 +3089,27 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       }
 
       renderSection(arenaPairs, 'Arena');
-      renderSection(pitchPairs, 'Pitch');
+      renderSection(pitchPairs, 'Deck Cards');
 
-      const total = Object.values(boardMap).reduce((s, v) => s + v, 0);
+      const total = Object.values(bm).reduce((s, v) => s + v, 0);
       if (summaryEl) {
-        summaryEl.textContent = total > 0
-          ? `${total} card${total !== 1 ? 's' : ''} selected to board out`
-          : 'Click – to board out cards';
+        let label = '';
+        if (isSplit) {
+          const fc = Object.values(boardMapFirst).reduce((s, v) => s + v, 0);
+          const sc = Object.values(boardMapSecond).reduce((s, v) => s + v, 0);
+          label = (fc > 0 || sc > 0)
+            ? `${fc} first / ${sc} second selected to board out`
+            : 'Click – to board out cards';
+        } else {
+          label = total > 0
+            ? `${total} card${total !== 1 ? 's' : ''} selected to board out`
+            : 'Click – to board out cards';
+        }
+        summaryEl.textContent = label;
       }
     }
 
+    renderSplitTabs();
     renderPicker();
 
     let selectedRating = currentRating;
@@ -2959,6 +3121,19 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     document.getElementById('sb-go-select').addEventListener('change', (e) => {
       selectedGoFirst = e.target.value || null;
+    });
+
+    document.getElementById('sb-split-toggle').addEventListener('change', (e) => {
+      isSplit = e.target.checked;
+      if (isSplit) {
+        // Migrate single board map into go-first on first enable
+        if (Object.keys(boardMapFirst).length === 0) {
+          Object.assign(boardMapFirst, boardMapSingle);
+        }
+        activeSplitTab = 'first';
+      }
+      renderSplitTabs();
+      renderPicker();
     });
 
     document.getElementById('sb-cancel').addEventListener('click', () => {
@@ -2989,14 +3164,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         return;
       }
 
-      const cardsOutRaw = serializeBoard();
-      const cuts = parseDecklist(cardsOutRaw);
-      const totalQty = cuts.reduce((s, c) => s + c.qty, 0);
-      if (totalQty > 80) {
-        warnEl.textContent = `Warning: Total cuts (${totalQty}) exceeds 80`;
-        warnEl.style.display = '';
-      }
-
       const latestDeck = loadDecks().find(d => d.id === deck.id) || deck;
       const latestGuide = getSideboardGuide(latestDeck);
 
@@ -3010,7 +3177,27 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         while (latestGuide.some(m => m.id === matchupId)) matchupId = `${base}-${suffix++}`;
       }
 
-      const matchupObj = { id: matchupId, hero, rating: selectedRating, goFirst: selectedGoFirst, note, cardsOutRaw };
+      let matchupObj;
+      if (isSplit) {
+        const cardsOutFirstRaw = serializeBoardMap(boardMapFirst);
+        const cardsOutSecondRaw = serializeBoardMap(boardMapSecond);
+        const totalQty = parseDecklist(cardsOutFirstRaw).reduce((s, c) => s + c.qty, 0)
+                       + parseDecklist(cardsOutSecondRaw).reduce((s, c) => s + c.qty, 0);
+        if (totalQty > 160) {
+          warnEl.textContent = `Warning: Total cuts (${totalQty}) is unusually high`;
+          warnEl.style.display = '';
+        }
+        matchupObj = { id: matchupId, hero, rating: selectedRating, goFirst: selectedGoFirst, note, splitSideboard: true, cardsOutFirstRaw, cardsOutSecondRaw };
+      } else {
+        const cardsOutRaw = serializeBoardMap(boardMapSingle);
+        const totalQty = parseDecklist(cardsOutRaw).reduce((s, c) => s + c.qty, 0);
+        if (totalQty > 80) {
+          warnEl.textContent = `Warning: Total cuts (${totalQty}) exceeds 80`;
+          warnEl.style.display = '';
+        }
+        matchupObj = { id: matchupId, hero, rating: selectedRating, goFirst: selectedGoFirst, note, cardsOutRaw };
+      }
+
       const newGuide = existing
         ? latestGuide.map(m => m.id === existing.id ? matchupObj : m)
         : [...latestGuide, matchupObj];
@@ -3272,10 +3459,13 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     deck.decklist = replaceCardInRaw(deck.decklist, oldName, oldHint, newName, newHint, qtyToReplace);
 
     if (Array.isArray(deck.sideboardGuide)) {
-      deck.sideboardGuide = deck.sideboardGuide.map(m => ({
-        ...m,
-        cardsOutRaw: replaceCardInRaw(m.cardsOutRaw || '', oldName, oldHint, newName, newHint, qtyToReplace),
-      }));
+      deck.sideboardGuide = deck.sideboardGuide.map(m => m.splitSideboard
+        ? { ...m,
+            cardsOutFirstRaw:  replaceCardInRaw(m.cardsOutFirstRaw  || '', oldName, oldHint, newName, newHint, qtyToReplace),
+            cardsOutSecondRaw: replaceCardInRaw(m.cardsOutSecondRaw || '', oldName, oldHint, newName, newHint, qtyToReplace),
+          }
+        : { ...m, cardsOutRaw: replaceCardInRaw(m.cardsOutRaw || '', oldName, oldHint, newName, newHint, qtyToReplace) }
+      );
     }
 
     deck.cardCount = parseDecklist(deck.decklist).reduce((s, e) => s + e.qty, 0);
