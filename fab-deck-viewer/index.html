@@ -1025,6 +1025,7 @@
     .sb-card-out::before { content: '−'; color: #b45309; font-weight: 700; flex-shrink: 0; }
     .sb-card-in::before  { content: '+'; color: #15803d; font-weight: 700; flex-shrink: 0; }
     .sb-card-hint { color: var(--muted); font-size: 0.72rem; }
+    .sb-qty { min-width: 2rem; text-align: right; color: var(--muted); font-size: 0.72rem; flex-shrink: 0; }
     .sb-card-none { font-size: 0.78rem; color: var(--muted); font-style: italic;
       font-family: 'DM Serif Text', Georgia, serif; padding: 0.16rem 0; }
     .sb-body-sublabel {
@@ -1741,12 +1742,10 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     `;
     frame.appendChild(placeholder);
 
-    if (entry.qty > 1) {
-      const qb = document.createElement('div');
-      qb.className = 'qty-badge';
-      qb.textContent = `×${entry.qty}`;
-      frame.appendChild(qb);
-    }
+    const qb = document.createElement('div');
+    qb.className = 'qty-badge';
+    qb.textContent = `×${entry.qty}`;
+    frame.appendChild(qb);
 
     if (card && card.pitch) {
       const pd = document.createElement('div');
@@ -2091,9 +2090,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const matchupsHtml = guide.map(m => {
       const cuts = parseDecklist(m.cardsOutRaw || '');
       const cutLi = c => {
-        const qty = c.qty > 1 ? `${c.qty}× ` : '';
         const hint = c.hint ? ` <span class="hint">(${c.hint})</span>` : '';
-        return `<li><span class="marker">−</span>${qty}${c.name}${hint}</li>`;
+        return `<li><span class="marker">−</span><span class="qty-col">×${c.qty}</span>${c.name}${hint}</li>`;
       };
 
       const remainingPairs = deckPairs ? applyMatchupFilter(deckPairs, m) : [];
@@ -2101,9 +2099,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const pitchRemaining = remainingPairs.filter(p => p.card && p.card.color);
       const showSegs = arenaRemaining.length > 0 && pitchRemaining.length > 0;
       const pairLi = p => {
-        const qty = p.entry.qty > 1 ? `${p.entry.qty}× ` : '';
         const hint = p.entry.hint ? ` <span class="hint">(${p.entry.hint})</span>` : '';
-        return `<li>${qty}${p.entry.name}${hint}</li>`;
+        return `<li><span class="qty-col">×${p.entry.qty}</span>${p.entry.name}${hint}</li>`;
       };
       let insHtml = '';
       if (arenaRemaining.length > 0) {
@@ -2221,6 +2218,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   .cards-list li { padding: 0.05rem 0; display: flex; gap: 0.3rem; align-items: baseline; }
   .cards-list li.none { color: #bbb; font-style: italic; }
   .marker { font-weight: 700; flex-shrink: 0; color: #b45309; }
+  .qty-col { min-width: 1.8em; text-align: right; color: #999; flex-shrink: 0; }
   .hint { color: #999; font-size: 8.5pt; }
   .note { font-size: 9.5pt; color: #333; font-style: italic; margin-top: 0.15rem; }
   @media print {
@@ -2368,15 +2366,13 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     let html = '';
 
     const cardLine = (c, cls) => {
-      const qty  = c.qty > 1 ? `${c.qty}× ` : '';
       const hint = c.hint ? ` <span class="sb-card-hint">${esc(c.hint)}</span>` : '';
-      return `<div class="${cls}">${esc(qty + c.name)}${hint}</div>`;
+      return `<div class="${cls}"><span class="sb-qty">×${c.qty}</span>${esc(c.name)}${hint}</div>`;
     };
 
     const pairLine = p => {
-      const qty  = p.entry.qty > 1 ? `${p.entry.qty}× ` : '';
       const hint = p.entry.hint ? ` <span class="sb-card-hint">${esc(p.entry.hint)}</span>` : '';
-      return `<div class="sb-card-stay">${esc(qty + p.entry.name)}${hint}</div>`;
+      return `<div class="sb-card-stay"><span class="sb-qty">×${p.entry.qty}</span>${esc(p.entry.name)}${hint}</div>`;
     };
 
     const remainingPairs = applyMatchupFilter(deckPairs, matchup);
