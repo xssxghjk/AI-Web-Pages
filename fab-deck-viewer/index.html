@@ -1343,15 +1343,26 @@
       border-radius: 2px; margin-top: 0.75rem;
     }
     .sim-card-chip {
-      width: 46px; height: 60px; border-radius: 2px; border: 1px solid;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 0.15rem; font-size: 1.2rem; transition: transform 0.15s;
+      width: 130px; min-height: 64px; border-radius: 3px; border: 2px solid;
+      display: flex; flex-direction: column; padding: 0.5rem 0.6rem;
+      gap: 0.25rem; transition: transform 0.15s, box-shadow 0.15s; cursor: default;
     }
-    .sim-card-chip:hover { transform: translateY(-3px); }
-    .sim-card-chip .chip-sub { font-size: 0.46rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+    .sim-card-chip:hover { transform: translateY(-4px); box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+    .sim-card-chip .chip-name { font-family: 'DM Serif Text', Georgia, serif; font-size: 0.7rem; line-height: 1.35; font-weight: 600; flex: 1; }
+    .sim-card-chip .chip-pitch { font-size: 0.54rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; margin-top: auto; }
     .sim-card-chip.red    { background: rgba(224,80,64,0.08);  border-color: var(--red-c);    color: var(--red-c); }
     .sim-card-chip.yellow { background: rgba(212,146,74,0.08); border-color: var(--yellow-c); color: var(--yellow-c); }
     .sim-card-chip.blue   { background: rgba(90,180,204,0.08); border-color: var(--blue-c);   color: var(--blue-c); }
+    /* Draw rates table */
+    .sim-dr-table { display: flex; flex-direction: column; gap: 0.18rem; }
+    .sim-dr-row {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.28rem 0.65rem; background: var(--surface-2);
+      border: 1px solid var(--border); border-radius: 2px; font-size: 0.74rem;
+    }
+    .sim-dr-type  { flex: 1; color: var(--text); }
+    .sim-dr-count { min-width: 36px; text-align: right; color: var(--muted); font-size: 0.68rem; }
+    .sim-dr-avg   { min-width: 52px; text-align: right; color: var(--accent); font-weight: 700; font-size: 0.8rem; }
     .sim-hand-total { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 0.15rem; }
     .sim-ht-label { font-family: 'DM Serif Text', Georgia, serif; font-style: italic; font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
     .sim-ht-val   { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 900; font-size: 2rem; line-height: 1; color: var(--accent); }
@@ -2207,6 +2218,24 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const yPct = (yellow / total * 100).toFixed(1);
     const bPct = (100 - parseFloat(rPct) - parseFloat(yPct)).toFixed(1);
 
+    // Compute type draw rates
+    const deckSize = pairs.reduce((s, p) => s + p.entry.qty, 0);
+    const typeCts = {};
+    for (const { entry, card } of pairs) {
+      if (!card) continue;
+      for (const t of card.types) typeCts[t] = (typeCts[t] || 0) + entry.qty;
+      if (card.types.includes('Action') && !card.types.includes('Attack'))
+        typeCts['Non-Attack Action'] = (typeCts['Non-Attack Action'] || 0) + entry.qty;
+    }
+    const typeEntries = Object.entries(typeCts).sort((a, b) => b[1] - a[1]);
+
+    function drRowHtml(hs2) {
+      return typeEntries.map(([t, c]) => {
+        const avg2 = deckSize > 0 ? (hs2 * c / deckSize).toFixed(2) : '—';
+        return `<div class="sim-dr-row"><span class="sim-dr-type">${esc(t)}</span><span class="sim-dr-count">${c} cards</span><span class="sim-dr-avg">${avg2}</span></div>`;
+      }).join('');
+    }
+
     el.innerHTML = `
       <div class="analysis-section">
         <div class="analysis-head">Pitch Configuration</div>
@@ -2230,6 +2259,18 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           </div>
         </div>
       </div>
+
+      ${typeEntries.length > 0 ? `
+      <div class="analysis-section">
+        <div class="analysis-head">Average Draw Rates</div>
+        <div class="analysis-body">
+          <p style="font-size:0.72rem;color:var(--muted);font-style:italic;margin-bottom:0.65rem;line-height:1.5;">Expected cards of each type per hand of <span id="sim-dr-hs">${hs}</span>. Updates with hand size.</p>
+          <div style="display:flex;justify-content:flex-end;gap:1rem;padding:0 0.65rem 0.3rem;font-size:0.6rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);">
+            <span style="min-width:52px;text-align:right;">avg/hand</span>
+          </div>
+          <div class="sim-dr-table" id="sim-dr-table">${drRowHtml(hs)}</div>
+        </div>
+      </div>` : ''}
 
       <div class="analysis-section">
         <div class="analysis-head">Draw a Hand</div>
@@ -2271,9 +2312,11 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     function buildDeck() {
       const deck = [];
-      for (let i = 0; i < red;    i++) deck.push(1);
-      for (let i = 0; i < yellow; i++) deck.push(2);
-      for (let i = 0; i < blue;   i++) deck.push(3);
+      for (const { entry, card } of pairs) {
+        if (!card || !['red','yellow','blue'].includes(card.color)) continue;
+        const pitch = card.pitch != null ? card.pitch : (card.color === 'red' ? 1 : card.color === 'yellow' ? 2 : 3);
+        for (let i = 0; i < entry.qty; i++) deck.push({ name: card.name, color: card.color, pitch });
+      }
       return deck;
     }
     function simShuffle(arr) {
@@ -2283,8 +2326,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       }
       return arr;
     }
-    function pitchClass(v) { return v === 1 ? 'red' : v === 2 ? 'yellow' : 'blue'; }
-    function pitchName(v)  { return v === 1 ? 'Red' : v === 2 ? 'Yellow' : 'Blue'; }
     function getHandSize() {
       const inp = document.getElementById('sim-hand-inp');
       return Math.max(1, Math.min(total, parseInt(inp ? inp.value : hs, 10) || hs));
@@ -2295,21 +2336,25 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       simHandSize = getHandSize();
       const expEl  = document.getElementById('sim-exp-val');
       const noteEl = document.getElementById('sim-turns-hand-note');
+      const hsEl   = document.getElementById('sim-dr-hs');
+      const drEl   = document.getElementById('sim-dr-table');
       if (expEl)  expEl.textContent  = (avg * simHandSize).toFixed(2);
       if (noteEl) noteEl.textContent = simHandSize;
+      if (hsEl)   hsEl.textContent   = simHandSize;
+      if (drEl)   drEl.innerHTML     = drRowHtml(simHandSize);
     });
 
     // Draw Hand
     document.getElementById('sim-btn-draw').addEventListener('click', function () {
       const hand    = simShuffle(buildDeck()).slice(0, getHandSize());
-      const ptotal  = hand.reduce((s, v) => s + v, 0);
+      const ptotal  = hand.reduce((s, c) => s + c.pitch, 0);
       const pavg    = (ptotal / hand.length).toFixed(1);
       const display = document.getElementById('sim-hand-display');
       display.innerHTML = '';
-      hand.forEach(v => {
+      hand.forEach(c => {
         const chip = document.createElement('div');
-        chip.className = 'sim-card-chip ' + pitchClass(v);
-        chip.innerHTML = `<span>${v}</span><span class="chip-sub">${pitchName(v)}</span>`;
+        chip.className = 'sim-card-chip ' + c.color;
+        chip.innerHTML = `<span class="chip-name">${esc(c.name)}</span><span class="chip-pitch">Pitch ${c.pitch}</span>`;
         display.appendChild(chip);
       });
       const tot = document.createElement('div');
@@ -2333,10 +2378,10 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         const end  = Math.min(idx + hs2, deck.length);
         const hand = deck.slice(idx, end);
         idx = end; turn++;
-        const pitch = hand.reduce((s, v) => s + v, 0);
+        const pitch = hand.reduce((s, c) => s + c.pitch, 0);
         const row   = document.createElement('div');
         row.className = 'sim-turn-row';
-        const chips = hand.map(v => `<div class="sim-mini-chip ${pitchClass(v)}">${v}</div>`).join('');
+        const chips = hand.map(c => `<div class="sim-mini-chip ${c.color}" title="${esc(c.name)}">${c.pitch}</div>`).join('');
         row.innerHTML = `<div class="sim-turn-num">T${turn}</div><div class="sim-turn-cards">${chips}</div><div class="sim-turn-pitch">${pitch}&nbsp;<span class="sim-turn-pitch-muted">res</span></div>`;
         list.appendChild(row);
       }
@@ -2358,7 +2403,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       for (let s = 0; s < SIMS; s++) {
         const deck = simShuffle(base.slice());
         let pitch = 0;
-        for (let i = 0; i < hs2; i++) pitch += deck[i];
+        for (let i = 0; i < hs2; i++) pitch += deck[i].pitch;
         results[s] = pitch;
       }
 
