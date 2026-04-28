@@ -27,9 +27,9 @@ test('trips page loads', async ({ page }) => {
   await expect(page).toHaveTitle(/Trips/);
 });
 
-test('fab deck viewer page loads', async ({ page }) => {
+test('fab deck builder page loads', async ({ page }) => {
   await page.goto('/fab-deck-viewer/');
-  await expect(page).toHaveTitle(/Deck Viewer/);
+  await expect(page).toHaveTitle(/Deck Builder/);
   const sidebarVisible = await page.locator('.sidebar').isVisible();
   const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();
   expect(sidebarVisible || hamburgerVisible).toBe(true);

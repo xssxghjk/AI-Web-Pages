@@ -38,7 +38,7 @@ test.describe('mobile navigation', () => {
     await expect(drawer.getByRole('link', { name: 'Trips' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Tournament Reports' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Tournament Prep' })).toBeVisible();
-    await expect(drawer.getByRole('link', { name: 'Deck Viewer' })).toBeVisible();
+    await expect(drawer.getByRole('link', { name: 'Deck Builder' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Card Memory' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Pitch Simulator' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Marathon Training' })).toBeVisible();
@@ -91,10 +91,10 @@ test.describe('mobile navigation', () => {
     await expect(page).toHaveURL(/\/tcg-tournament-prep\//);
   });
 
-  test('clicking Deck Viewer link navigates to deck viewer page', async ({ page }) => {
+  test('clicking Deck Builder link navigates to deck builder page', async ({ page }) => {
     await page.goto('/calendar/');
     await page.locator('#hamburger-btn').click();
-    await page.locator('#mobile-nav-drawer').getByRole('link', { name: 'Deck Viewer' }).click();
+    await page.locator('#mobile-nav-drawer').getByRole('link', { name: 'Deck Builder' }).click();
     await expect(page).toHaveURL(/\/fab-deck-viewer\//);
   });
 
