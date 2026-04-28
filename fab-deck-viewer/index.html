@@ -2552,10 +2552,37 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       </div>`;
     })();
 
+    // Build lookup for PDF arena/deck classification
+    const pdfCardLookup = {};
+    for (const p of deckPairs) {
+      pdfCardLookup[p.entry.name.toLowerCase() + '|' + (p.entry.hint || '')] = p.card;
+    }
+    const pdfIsArena = c => {
+      const card = pdfCardLookup[c.name.toLowerCase() + '|' + (c.hint || '')];
+      return !card || !card.color;
+    };
+
     const matchupEls = guide.map(m => {
       const cutLi = c => {
         const hint = c.hint ? ` <span class="hint">(${c.hint})</span>` : '';
         return `<li><span class="marker">−</span><span class="qty-col">×${c.qty}</span>${c.name}${hint}</li>`;
+      };
+
+      // Render cuts separated by Arena / Deck groups
+      const renderPdfOutCuts = cuts => {
+        if (cuts.length === 0) return '<ul class="cards-list"><li>No changes</li></ul>';
+        const arena = cuts.filter(c => pdfIsArena(c));
+        const deck  = cuts.filter(c => !pdfIsArena(c));
+        let h = '';
+        if (arena.length > 0) {
+          const n = arena.reduce((s, c) => s + c.qty, 0);
+          h += `<div class="sublabel">Arena (${n})</div><ul class="cards-list">${arena.map(cutLi).join('')}</ul>`;
+        }
+        if (deck.length > 0) {
+          const n = deck.reduce((s, c) => s + c.qty, 0);
+          h += `<div class="sublabel">Deck (${n})</div><ul class="cards-list">${deck.map(cutLi).join('')}</ul>`;
+        }
+        return h;
       };
 
       let cardsHtml = '';
@@ -2565,9 +2592,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         if (firstCuts.length > 0 || secondCuts.length > 0) {
           cardsHtml = `<div class="out-col">
             <div class="section-label">Go First — Out</div>
-            <ul class="cards-list">${firstCuts.length ? firstCuts.map(cutLi).join('') : '<li>No changes</li>'}</ul>
+            ${renderPdfOutCuts(firstCuts)}
             <div class="section-label" style="margin-top:0.5em">Go Second — Out</div>
-            <ul class="cards-list">${secondCuts.length ? secondCuts.map(cutLi).join('') : '<li>No changes</li>'}</ul>
+            ${renderPdfOutCuts(secondCuts)}
           </div>`;
         }
       } else {
@@ -2575,7 +2602,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         cardsHtml = cuts.length > 0
           ? `<div class="out-col">
               <div class="section-label">Out</div>
-              <ul class="cards-list">${cuts.map(cutLi).join('')}</ul>
+              ${renderPdfOutCuts(cuts)}
             </div>`
           : '';
       }
@@ -2775,36 +2802,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       heatmapHtml = `<div class="sb-heatmap"><div class="sb-heatmap-title">Card Coverage</div>${rowsHtml}</div>`;
     }
 
-    // Helper: count deck card (pitch card) cuts for a matchup
-    const pitchNames = new Set(deckPairs.filter(p => p.card && p.card.color).map(p => p.entry.name.toLowerCase()));
-    function deckCardCutCount(matchup) {
-      const raws = matchup.splitSideboard
-        ? [matchup.cardsOutFirstRaw || '', matchup.cardsOutSecondRaw || '']
-        : [matchup.cardsOutRaw || ''];
-      let n = 0;
-      for (const raw of raws) {
-        for (const c of parseDecklist(raw)) {
-          if (pitchNames.has(c.name.toLowerCase())) n += c.qty;
-        }
-      }
-      return n;
-    }
-
-    const deckTotal = deckPairs.reduce((s, p) => s + p.entry.qty, 0);
-
     // Matchup rows
     const listHtml = guide.map(matchup => {
-      let countLabel;
-      if (matchup.splitSideboard) {
-        const fc = parseDecklist(matchup.cardsOutFirstRaw || '').reduce((s, c) => s + c.qty, 0);
-        const sc = parseDecklist(matchup.cardsOutSecondRaw || '').reduce((s, c) => s + c.qty, 0);
-        if (fc > 0 || sc > 0) {
-          countLabel = `${fc}/${sc} out · ${deckTotal - fc}/${deckTotal - sc} left`;
-        }
-      } else {
-        const outsTotal = parseDecklist(matchup.cardsOutRaw || '').reduce((s, c) => s + c.qty, 0);
-        if (outsTotal > 0) countLabel = `${outsTotal} out · ${deckTotal - outsTotal} left`;
-      }
       const goFirstLabel = matchup.goFirst === 'first' ? '▸ Go First'
                          : matchup.goFirst === 'second' ? '▸ Go Second'
                          : '▸ Either';
@@ -2816,7 +2815,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           <span class="sb-matchup-hero">${esc(matchup.hero)}</span>
           <span class="sb-rating-badge sb-rating-${matchup.rating}">${matchup.rating}</span>
           <span class="sb-go-indicator ${goFirstClass}">${goFirstLabel}</span>
-          ${countLabel ? `<span class="sb-deck-count">${countLabel}</span>` : ''}
           <span class="sb-chevron">›</span>
         </div>
         <div class="sb-matchup-body"><div class="sb-matchup-body-inner"></div></div>
@@ -2867,31 +2865,53 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   function renderMatchupBody(bodyEl, matchup, deckPairs, deck) {
     let html = '';
 
+    // Build lookup: card name+hint → card data (to classify arena vs deck)
+    const cardLookup = {};
+    for (const p of deckPairs) {
+      cardLookup[p.entry.name.toLowerCase() + '|' + (p.entry.hint || '')] = p.card;
+    }
+    const isArena = c => {
+      const card = cardLookup[c.name.toLowerCase() + '|' + (c.hint || '')];
+      return !card || !card.color;
+    };
+
     const cardLine = (c, cls) => {
       const hint = c.hint ? ` <span class="sb-card-hint">${esc(c.hint)}</span>` : '';
       return `<div class="${cls}"><span class="sb-qty">×${c.qty}</span>${esc(c.name)}${hint}</div>`;
+    };
+
+    // Render a list of cuts separated into Arena and Deck groups
+    const renderOutCuts = cuts => {
+      if (cuts.length === 0) return '<div class="sb-card-none">No changes</div>';
+      const arena = cuts.filter(c => isArena(c));
+      const deck  = cuts.filter(c => !isArena(c));
+      let h = '';
+      if (arena.length > 0) {
+        const n = arena.reduce((s, c) => s + c.qty, 0);
+        h += `<div class="sb-body-sublabel">Arena (${n})</div>`;
+        h += arena.map(c => cardLine(c, 'sb-card-out')).join('');
+      }
+      if (deck.length > 0) {
+        const n = deck.reduce((s, c) => s + c.qty, 0);
+        h += `<div class="sb-body-sublabel">Deck (${n})</div>`;
+        h += deck.map(c => cardLine(c, 'sb-card-out')).join('');
+      }
+      return h;
     };
 
     if (matchup.splitSideboard) {
       const firstCuts = parseDecklist(matchup.cardsOutFirstRaw || '');
       const secondCuts = parseDecklist(matchup.cardsOutSecondRaw || '');
       if (firstCuts.length > 0 || secondCuts.length > 0) {
-        const firstHtml = firstCuts.length > 0
-          ? firstCuts.map(c => cardLine(c, 'sb-card-out')).join('')
-          : '<div class="sb-card-none">No changes</div>';
-        const secondHtml = secondCuts.length > 0
-          ? secondCuts.map(c => cardLine(c, 'sb-card-out')).join('')
-          : '<div class="sb-card-none">No changes</div>';
         html += `<div class="sb-body-section">
-          <div class="sb-split-out-label first">▸ Go First — Out</div>${firstHtml}
-          <div class="sb-split-out-label second">▸ Go Second — Out</div>${secondHtml}
+          <div class="sb-split-out-label first">▸ Go First — Out</div>${renderOutCuts(firstCuts)}
+          <div class="sb-split-out-label second" style="margin-top:0.75rem">▸ Go Second — Out</div>${renderOutCuts(secondCuts)}
         </div>`;
       }
     } else {
       const cuts = parseDecklist(matchup.cardsOutRaw || '');
       if (cuts.length > 0) {
-        const outsHtml = cuts.map(c => cardLine(c, 'sb-card-out')).join('');
-        html += `<div class="sb-body-section"><div class="sb-body-label">Out</div>${outsHtml}</div>`;
+        html += `<div class="sb-body-section"><div class="sb-body-label">Out</div>${renderOutCuts(cuts)}</div>`;
       }
     }
 
