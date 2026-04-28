@@ -92,7 +92,10 @@ test.describe('sideboard guide', () => {
 
     await expect(page.locator('.sb-matchup-row')).toContainText('Kayo');
     await expect(page.locator('.sb-matchup-row')).toContainText('favoured');
-    await expect(page.locator('.sb-matchup-row')).toContainText('2 out');
+
+    // Expand the matchup to verify count is inside the collapsible body
+    await page.click('.sb-matchup-head');
+    await expect(page.locator('.sb-matchup-body')).toContainText('2 out');
   });
 
   test('4: expand matchup accordion shows cards', async ({ page }) => {

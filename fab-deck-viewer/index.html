@@ -2784,21 +2784,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       return n;
     }
 
-    const deckTotal = deckPairs.reduce((s, p) => s + p.entry.qty, 0);
-
     // Matchup rows
     const listHtml = guide.map(matchup => {
-      let countLabel;
-      if (matchup.splitSideboard) {
-        const fc = parseDecklist(matchup.cardsOutFirstRaw || '').reduce((s, c) => s + c.qty, 0);
-        const sc = parseDecklist(matchup.cardsOutSecondRaw || '').reduce((s, c) => s + c.qty, 0);
-        if (fc > 0 || sc > 0) {
-          countLabel = `${fc}/${sc} out · ${deckTotal - fc}/${deckTotal - sc} left`;
-        }
-      } else {
-        const outsTotal = parseDecklist(matchup.cardsOutRaw || '').reduce((s, c) => s + c.qty, 0);
-        if (outsTotal > 0) countLabel = `${outsTotal} out · ${deckTotal - outsTotal} left`;
-      }
       const goFirstLabel = matchup.goFirst === 'first' ? '▸ Go First'
                          : matchup.goFirst === 'second' ? '▸ Go Second'
                          : '▸ Either';
@@ -2810,7 +2797,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           <span class="sb-matchup-hero">${esc(matchup.hero)}</span>
           <span class="sb-rating-badge sb-rating-${matchup.rating}">${matchup.rating}</span>
           <span class="sb-go-indicator ${goFirstClass}">${goFirstLabel}</span>
-          ${countLabel ? `<span class="sb-deck-count">${countLabel}</span>` : ''}
           <span class="sb-chevron">›</span>
         </div>
         <div class="sb-matchup-body"><div class="sb-matchup-body-inner"></div></div>
@@ -2860,6 +2846,18 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   function renderMatchupBody(bodyEl, matchup, deckPairs, deck) {
     let html = '';
+
+    const deckTotal = deckPairs.reduce((s, p) => s + p.entry.qty, 0);
+    let countLine = '';
+    if (matchup.splitSideboard) {
+      const fc = parseDecklist(matchup.cardsOutFirstRaw || '').reduce((s, c) => s + c.qty, 0);
+      const sc = parseDecklist(matchup.cardsOutSecondRaw || '').reduce((s, c) => s + c.qty, 0);
+      if (fc > 0 || sc > 0) countLine = `${deckTotal - fc}/${deckTotal - sc} left`;
+    } else {
+      const outsTotal = parseDecklist(matchup.cardsOutRaw || '').reduce((s, c) => s + c.qty, 0);
+      if (outsTotal > 0) countLine = `${outsTotal} out · ${deckTotal - outsTotal} left`;
+    }
+    if (countLine) html += `<div class="sb-deck-count" style="margin-bottom:0.75rem">${countLine}</div>`;
 
     const cardLine = (c, cls) => {
       const hint = c.hint ? ` <span class="sb-card-hint">${esc(c.hint)}</span>` : '';
