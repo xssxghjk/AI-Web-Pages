@@ -779,12 +779,12 @@
     }
 
     /* ── Horizontal bar rows ── */
-    .hbar-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .hbar-list { display: flex; flex-direction: column; gap: 0.2rem; }
     .hbar-row {
       display: grid;
-      grid-template-columns: 105px 1fr 34px;
+      grid-template-columns: 128px 1fr 34px;
       align-items: center;
-      gap: 0.55rem;
+      gap: 0.45rem;
     }
     .hbar-label {
       font-family: 'DM Serif Text', Georgia, serif;
@@ -795,7 +795,7 @@
       text-overflow: ellipsis;
     }
     .hbar-track {
-      height: 6px;
+      height: 4px;
       background: var(--surface-2);
       border-radius: 1px;
       overflow: hidden;
@@ -825,7 +825,7 @@
 
     @media (max-width: 600px) {
       .analysis-cols { grid-template-columns: 1fr; }
-      .hbar-row { grid-template-columns: 80px 1fr 28px; }
+      .hbar-row { grid-template-columns: 100px 1fr 28px; }
       .metric-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
@@ -2046,6 +2046,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         s.defenseSum += card.defense * qty; s.defenseCards += qty;
       }
       for (const t of card.types)    s.typeCounts[t]    = (s.typeCounts[t]    || 0) + qty;
+      if (card.types.includes('Action') && !card.types.includes('Attack'))
+        s.typeCounts['Non-Attack Action'] = (s.typeCounts['Non-Attack Action'] || 0) + qty;
       for (const k of card.keywords) s.keywordCounts[k] = (s.keywordCounts[k] || 0) + qty;
       if (card.rarity && RARITY_LABELS[card.rarity])
         s.rarityCounts[card.rarity] = (s.rarityCounts[card.rarity] || 0) + qty;
@@ -2420,7 +2422,11 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   function openCategoryPopup(filterType, filterKey) {
     let pairs, title;
     if (filterType === 'type') {
-      pairs = currentAnalysisPairs.filter(p => p.card && p.card.types.includes(filterKey));
+      if (filterKey === 'Non-Attack Action') {
+        pairs = currentAnalysisPairs.filter(p => p.card && p.card.types.includes('Action') && !p.card.types.includes('Attack'));
+      } else {
+        pairs = currentAnalysisPairs.filter(p => p.card && p.card.types.includes(filterKey));
+      }
       title = filterKey;
     } else if (filterType === 'keyword') {
       pairs = currentAnalysisPairs.filter(p => p.card && p.card.keywords.includes(filterKey));
