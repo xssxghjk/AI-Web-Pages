@@ -2546,7 +2546,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       </div>`;
     })();
 
-    const matchupsHtml = guide.map(m => {
+    const matchupEls = guide.map(m => {
       const cutLi = c => {
         const hint = c.hint ? ` <span class="hint">(${c.hint})</span>` : '';
         return `<li><span class="marker">−</span><span class="qty-col">×${c.qty}</span>${c.name}${hint}</li>`;
@@ -2587,7 +2587,20 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         </div>
         ${cardsHtml}${noteHtml}
       </div>`;
-    }).join('');
+    });
+
+    const matchupPagesHtml = (() => {
+      const pages = [];
+      for (let i = 0; i < matchupEls.length; i += 2) {
+        const left = matchupEls[i];
+        const right = i + 1 < matchupEls.length ? matchupEls[i + 1] : '';
+        pages.push(`<div class="matchup-page">
+          <div class="matchup-col">${left}</div>
+          <div class="matchup-col matchup-col-right">${right}</div>
+        </div>`);
+      }
+      return pages.join('');
+    })();
 
     const ratingCounts = {};
     for (const m of guide) ratingCounts[m.rating] = (ratingCounts[m.rating] || 0) + 1;
@@ -2625,6 +2638,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     border-left: 2px solid #c4864a; padding-left: 0.5rem;
   }
   .overview span { margin: 0 0.15rem; }
+  .matchup-page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1.75rem;
+    page-break-after: always;
+  }
+  .matchup-page:last-child { page-break-after: auto; }
+  .matchup-col { min-width: 0; }
+  .matchup-col-right { border-left: 1px solid #e0dbd4; padding-left: 1.75rem; }
   .matchup {
     border-top: 1px solid #ddd;
     padding: 0.85rem 0 0.5rem;
@@ -2677,8 +2699,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   .hint { color: #999; font-size: 8.5pt; }
   .note { font-size: 9.5pt; color: #333; font-style: italic; margin-top: 0.15rem; }
   @media print {
-    body { padding: 1.5cm 2cm 2cm; }
-    @page { margin: 1.5cm; }
+    body { padding: 0.4cm 0.8cm 0.8cm; }
+    @page { margin: 1cm; }
   }
 </style>
 </head>
@@ -2687,7 +2709,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   <div class="doc-title">${deck.name}</div>
   <div class="doc-subtitle">Sideboard Guide · ${guide.length} matchup${guide.length !== 1 ? 's' : ''}</div>
   <div class="overview">${overviewParts}</div>
-  ${matchupsHtml}
+  ${matchupPagesHtml}
 </body>
 </html>`;
 
