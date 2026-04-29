@@ -211,36 +211,10 @@
     }
     button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
 
-    /* ── Hand cards ── */
-    .hand-display {
-      display: flex; gap: 0.6rem; flex-wrap: wrap;
-      align-items: flex-end; min-height: 72px;
-    }
-    .card-chip {
-      width: 54px; height: 70px; border-radius: 2px; border: 1px solid;
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; gap: 0.15rem;
-      font-size: 1.4rem;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-    .card-chip:hover { transform: translateY(-4px); }
-    .card-chip .chip-sub { font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; }
-    .card-chip.red    { background: var(--red-bg);    border-color: var(--red-c);    color: var(--red-c); }
-    .card-chip.yellow { background: var(--yellow-bg); border-color: var(--yellow-c); color: var(--yellow-c); }
-    .card-chip.blue   { background: var(--blue-bg);   border-color: var(--blue-c);   color: var(--blue-c); }
-    .hand-total {
-      margin-left: auto;
-      display: flex; flex-direction: column; align-items: flex-end; gap: 0.2rem;
-    }
-    .ht-label { font-family: 'DM Serif Text', Georgia, serif; font-style: italic; font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-    .ht-val   { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 900; font-size: 2.2rem; line-height: 1; color: var(--accent); }
-    .ht-sub   { font-size: 0.68rem; color: var(--muted); }
-    .hand-empty { color: var(--muted-2); font-size: 0.85rem; align-self: center; font-style: italic; }
-
     /* ── Turns list ── */
     .turns-list {
       display: none; flex-direction: column; gap: 0.25rem;
-      max-height: 340px; overflow-y: auto;
+      max-height: 520px; overflow-y: auto;
     }
     .turn-row {
       display: flex; align-items: center; gap: 0.75rem;
@@ -255,7 +229,7 @@
       font-size: 0.62rem; letter-spacing: 0.08em;
       text-transform: uppercase; color: var(--muted); min-width: 38px;
     }
-    .turn-cards { display: flex; gap: 3px; flex: 1; flex-wrap: wrap; }
+    .turn-cards { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; align-items: flex-end; }
     .mini-chip {
       width: 20px; height: 26px; border-radius: 2px; border: 1px solid;
       display: flex; align-items: center; justify-content: center;
@@ -267,45 +241,38 @@
     .turn-pitch { font-size: 0.85rem; min-width: 48px; text-align: right; color: var(--accent); }
     .turn-pitch-muted { font-size: 0.65rem; color: var(--muted); }
 
-    /* ── Monte Carlo stats ── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 0.5rem;
+    /* ── Card images in turn rows ── */
+    .turn-row-images { align-items: flex-start; padding: 0.55rem 0.75rem; }
+    .tc-wrap {
+      position: relative; flex-shrink: 0;
+      width: 46px; height: 64px; border-radius: 3px; overflow: hidden;
+      cursor: default;
     }
-    .stat-box {
-      background: var(--surface-2); border: 1px solid var(--border);
-      border-radius: 2px; padding: 0.75rem 0.9rem;
-      display: flex; flex-direction: column; gap: 0.25rem;
+    .tc-img {
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: top center;
+      display: block;
     }
-    .stat-box-label { font-family: 'DM Serif Text', Georgia, serif; font-style: italic; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-    .stat-box-val   { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 900; font-size: 1.35rem; color: var(--accent); font-variant-numeric: tabular-nums; }
-    .stat-box-sub   { font-size: 0.65rem; color: var(--muted); }
-
-    /* ── Histogram ── */
-    .histogram-wrap { display: flex; flex-direction: column; gap: 0.5rem; }
-    .histogram-label { font-family: 'DM Serif Text', Georgia, serif; font-style: italic; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-    .histogram {
-      display: flex; align-items: flex-end; gap: 3px;
-      height: 80px;
+    .tc-badge {
+      position: absolute; bottom: 2px; right: 2px;
+      width: 15px; height: 15px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.52rem; font-weight: 700; line-height: 1;
     }
-    .h-col { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
-    .h-bar {
-      width: 100%; background: var(--accent); border-radius: 2px 2px 0 0;
-      min-height: 2px; transition: height 0.25s;
+    .tc-badge.red    { background: var(--red-c);    color: #fff; }
+    .tc-badge.yellow { background: var(--yellow-c); color: #1c1814; }
+    .tc-badge.blue   { background: var(--blue-c);   color: #1c1814; }
+    .tc-badge.arena  { background: var(--muted);    color: #1c1814; }
+    .tc-placeholder {
+      width: 46px; height: 64px; border-radius: 3px; border: 1px solid;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative;
     }
-    .h-lbl { font-size: 0.55rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-
-    /* ── Threshold table ── */
-    .thresh-table { display: flex; flex-direction: column; gap: 0.25rem; }
-    .thresh-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0.35rem 0.75rem;
-      background: var(--surface-2); border: 1px solid var(--border);
-      border-radius: 2px; font-size: 0.8rem;
-    }
-    .thresh-row .tr-key { color: var(--muted); flex: 1; }
-    .thresh-row .tr-val { color: var(--accent); font-weight: 700; }
+    .tc-placeholder.red    { background: var(--red-bg);    border-color: var(--red-c);    color: var(--red-c); }
+    .tc-placeholder.yellow { background: var(--yellow-bg); border-color: var(--yellow-c); color: var(--yellow-c); }
+    .tc-placeholder.blue   { background: var(--blue-bg);   border-color: var(--blue-c);   color: var(--blue-c); }
+    .tc-placeholder.arena  { background: var(--surface-2); border-color: var(--border-2); color: var(--muted); }
+    .tc-letter { font-size: 0.9rem; font-weight: 700; }
 
     /* ── Footer ── */
     footer {
@@ -438,26 +405,12 @@
     </div>
   </div>
 
-  <!-- ── Single Hand ── -->
-  <div class="section">
-    <div class="section-header">Draw a Hand</div>
-    <div class="section-body">
-      <div class="btn-row">
-        <button class="btn-primary"   id="btn-draw">Draw Hand</button>
-        <button class="btn-secondary" id="btn-draw-clear">Clear</button>
-      </div>
-      <div class="hand-display" id="hand-display">
-        <span class="hand-empty">Draw a hand to see your cards.</span>
-      </div>
-    </div>
-  </div>
-
   <!-- ── Turn Simulation ── -->
   <div class="section">
     <div class="section-header">Turn-by-Turn Simulation</div>
     <div class="section-body">
       <p style="font-size:0.82rem;color:var(--muted);line-height:1.6;">
-        Shuffles your deck and deals <span id="turns-hand-note">4</span> cards per turn until the deck runs out, showing pitch resources per turn.
+        Shuffles your deck and deals <span id="turns-hand-note">4</span> cards per turn until the deck runs out. When a deck is loaded, card art is shown for each draw. Arena cards are included in the draw order but do not contribute to pitch totals.
       </p>
       <div class="btn-row">
         <button class="btn-primary"   id="btn-turns">Run Simulation</button>
@@ -467,31 +420,6 @@
     </div>
   </div>
 
-  <!-- ── Monte Carlo ── -->
-  <div class="section">
-    <div class="section-header">Monte Carlo Statistics</div>
-    <div class="section-body">
-      <p style="font-size:0.82rem;color:var(--muted);line-height:1.6;">
-        Simulates 10,000 random hands and shows the pitch distribution, averages, and probability of hitting resource thresholds.
-      </p>
-      <div class="btn-row">
-        <button class="btn-primary"   id="btn-monte">Run 10,000 Simulations</button>
-        <button class="btn-secondary" id="btn-monte-clear">Clear</button>
-      </div>
-
-      <div id="monte-out" style="display:none;display:none;">
-        <div class="stats-grid" id="stats-grid" style="margin-bottom:1.25rem;"></div>
-        <div class="histogram-wrap">
-          <div class="histogram-label">Pitch Distribution</div>
-          <div class="histogram" id="histogram"></div>
-        </div>
-        <div style="margin-top:1.25rem;">
-          <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem;">Probability of Pitching ≥ N Resources</div>
-          <div class="thresh-table" id="thresh-table"></div>
-        </div>
-      </div>
-    </div>
-  </div>
 
 </main>
 
@@ -505,8 +433,17 @@
 (function () {
   'use strict';
 
+  const DB_URL = 'https://raw.githubusercontent.com/the-fab-cube/flesh-and-blood-cards/omens-of-the-third-age/json/english/card.json';
+
+  let db         = null;  // card database Map (lazy-loaded)
+  let loadedDeck = null;  // array of { name, hint } for the loaded deck
+
   /* ── Utils ─────────────────────────────────────────────────────────── */
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v | 0)); }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 
   function getConfig() {
     const red    = clamp(+document.getElementById('inp-red').value    || 0, 0, 200);
@@ -516,16 +453,14 @@
     return { red, yellow, blue, hand, total: red + yellow + blue };
   }
 
-  function buildDeck(cfg) {
-    const deck = new Array(cfg.total);
-    let i = 0;
-    for (let k = 0; k < cfg.red;    k++) deck[i++] = 1;
-    for (let k = 0; k < cfg.yellow; k++) deck[i++] = 2;
-    for (let k = 0; k < cfg.blue;   k++) deck[i++] = 3;
+  function buildPitchDeck(cfg) {
+    const deck = [];
+    for (let k = 0; k < cfg.red;    k++) deck.push(1);
+    for (let k = 0; k < cfg.yellow; k++) deck.push(2);
+    for (let k = 0; k < cfg.blue;   k++) deck.push(3);
     return deck;
   }
 
-  // Fisher-Yates in-place shuffle
   function shuffle(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
       const j = (Math.random() * (i + 1)) | 0;
@@ -535,7 +470,6 @@
   }
 
   function pitchClass(v) { return v === 1 ? 'red' : v === 2 ? 'yellow' : 'blue'; }
-  function pitchName(v)  { return v === 1 ? 'Red' : v === 2 ? 'Yellow' : 'Blue'; }
 
   function validate(cfg) {
     if (cfg.total === 0) return 'Deck has no cards. Add at least one card.';
@@ -573,50 +507,100 @@
     document.getElementById(id).addEventListener('input', updateSummary)
   );
 
-  /* ── Draw Hand ──────────────────────────────────────────────────────── */
-  document.getElementById('btn-draw').addEventListener('click', function () {
-    const cfg = getConfig();
-    if (validate(cfg)) { updateSummary(); return; }
+  /* ── Card database ─────────────────────────────────────────────────── */
+  async function ensureDb() {
+    if (db) return;
+    const resp = await fetch(DB_URL);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status} fetching card database`);
+    const cards = await resp.json();
+    db = new Map();
+    for (const card of cards) {
+      const printing = card.printings && card.printings.length ? card.printings[0] : null;
+      const imgUrl   = printing ? (printing.image_url || null) : null;
+      const pitchNum = card.pitch !== '' ? parseInt(card.pitch, 10) : null;
+      const entry = {
+        name:  card.name,
+        pitch: isNaN(pitchNum) ? null : pitchNum,
+        color: (card.color || '').toLowerCase(),
+        imgUrl,
+      };
+      const nameLow = card.name.toLowerCase();
+      if (entry.color) db.set(`${nameLow}_${entry.color}`, entry);
+      if (!db.has(nameLow)) db.set(nameLow, entry);
+    }
+  }
 
-    const deck = shuffle(buildDeck(cfg));
-    const hand = deck.slice(0, cfg.hand);
-    const total = hand.reduce((s, v) => s + v, 0);
-    const avg   = (total / hand.length).toFixed(1);
+  function lookupCard(name, hint) {
+    if (!db) return null;
+    const n = name.toLowerCase();
+    if (hint && db.has(`${n}_${hint}`)) return db.get(`${n}_${hint}`);
+    if (db.has(n)) return db.get(n);
+    const front = n.split(' // ')[0].trim();
+    if (front !== n) {
+      if (hint && db.has(`${front}_${hint}`)) return db.get(`${front}_${hint}`);
+      if (db.has(front)) return db.get(front);
+    }
+    return null;
+  }
 
-    const el = document.getElementById('hand-display');
-    el.innerHTML = '';
-    hand.forEach(v => {
-      const chip = document.createElement('div');
-      chip.className = 'card-chip ' + pitchClass(v);
-      chip.innerHTML = `<span>${v}</span><span class="chip-sub">${pitchName(v)}</span>`;
-      el.appendChild(chip);
-    });
-
-    const tot = document.createElement('div');
-    tot.className = 'hand-total';
-    tot.innerHTML = `
-      <div class="ht-label">Pitch Total</div>
-      <div class="ht-val">${total}</div>
-      <div class="ht-sub">avg ${avg}/card</div>
-    `;
-    el.appendChild(tot);
-  });
-
-  document.getElementById('btn-draw-clear').addEventListener('click', function () {
-    document.getElementById('hand-display').innerHTML =
-      '<span class="hand-empty">Draw a hand to see your cards.</span>';
-  });
+  /* ── Full deck parsing ─────────────────────────────────────────────── */
+  function parseFullDeck(raw) {
+    const out = [];
+    for (const line of raw.split('\n')) {
+      const s = line.trim();
+      if (!s || !/^\d/.test(s)) continue;
+      const qm = s.match(/^(\d+)x?\s+(.+)$/i);
+      if (!qm) continue;
+      const qty = Math.max(1, +qm[1] || 1);
+      let name = qm[2].trim();
+      let hint = null;
+      const hm = name.match(/^(.+?)\s*\((\d+|red|yellow|blue)\)\s*$/i);
+      if (hm) {
+        name = hm[1].trim();
+        const h = hm[2].toLowerCase();
+        hint = (h === '1' || h === 'red')    ? 'red'
+             : (h === '2' || h === 'yellow') ? 'yellow'
+             : (h === '3' || h === 'blue')   ? 'blue'
+             : null;
+      }
+      if (name) for (let i = 0; i < qty; i++) out.push({ name, hint });
+    }
+    return out;
+  }
 
   /* ── Turn Simulation ────────────────────────────────────────────────── */
-  document.getElementById('btn-turns').addEventListener('click', function () {
+  document.getElementById('btn-turns').addEventListener('click', async function () {
     const cfg = getConfig();
     if (validate(cfg)) { updateSummary(); return; }
 
-    const deck = shuffle(buildDeck(cfg));
+    const btn = this;
+    btn.disabled = true;
+    const origText = btn.textContent;
+    btn.textContent = loadedDeck ? 'Loading cards…' : 'Running…';
+
+    try {
+      if (loadedDeck) {
+        await runDeckSimulation(cfg);
+      } else {
+        runPitchSimulation(cfg);
+      }
+    } catch (e) {
+      console.error(e);
+      const list = document.getElementById('turns-list');
+      list.innerHTML = `<div style="color:var(--red-c);font-size:0.82rem;padding:0.5rem">Error: ${esc(e.message)}</div>`;
+      list.style.display = 'flex';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = origText;
+    }
+  });
+
+  function runPitchSimulation(cfg) {
+    const deck = shuffle(buildPitchDeck(cfg));
     const list = document.getElementById('turns-list');
     list.innerHTML = '';
 
-    const MAX_TURNS = 200; // hard cap — prevents hang on huge decks
+    const MAX_TURNS = 200;
     let idx = 0, turnNum = 0;
 
     while (idx < deck.length && turnNum < MAX_TURNS) {
@@ -642,107 +626,75 @@
     }
 
     list.style.display = 'flex';
-  });
+  }
+
+  async function runDeckSimulation(cfg) {
+    await ensureDb();
+
+    const resolved = loadedDeck.map(e => {
+      const card = lookupCard(e.name, e.hint);
+      return {
+        name:   e.name,
+        pitch:  card ? card.pitch : null,
+        color:  card ? card.color : null,
+        imgUrl: card ? card.imgUrl : null,
+      };
+    });
+
+    const deck = shuffle(resolved.slice());
+    const list = document.getElementById('turns-list');
+    list.innerHTML = '';
+
+    const handSize = cfg.hand;
+    const MAX_TURNS = 200;
+    let idx = 0, turnNum = 0;
+
+    while (idx < deck.length && turnNum < MAX_TURNS) {
+      const end  = Math.min(idx + handSize, deck.length);
+      const hand = deck.slice(idx, end);
+      idx = end;
+      turnNum++;
+
+      // Arena cards (pitch === null) contribute 0 to pitch total
+      const pitch = hand.reduce((s, c) => s + (c.pitch || 0), 0);
+
+      const row = document.createElement('div');
+      row.className = 'turn-row turn-row-images';
+
+      const cardsHtml = hand.map(c => {
+        const isArena = c.pitch == null;
+        const cls     = isArena ? 'arena' : pitchClass(c.pitch);
+        const badge   = isArena
+          ? `<span class="tc-badge arena">A</span>`
+          : `<span class="tc-badge ${cls}">${c.pitch}</span>`;
+
+        if (c.imgUrl) {
+          return `<div class="tc-wrap" title="${esc(c.name)}">` +
+            `<img class="tc-img" src="${esc(c.imgUrl)}" alt="${esc(c.name)}" loading="lazy" />` +
+            badge +
+            `</div>`;
+        }
+        return `<div class="tc-placeholder ${cls}" title="${esc(c.name)}">` +
+          `<span class="tc-letter">${c.pitch ?? '—'}</span>` +
+          badge +
+          `</div>`;
+      }).join('');
+
+      row.innerHTML = `
+        <div class="turn-num">T${turnNum}</div>
+        <div class="turn-cards">${cardsHtml}</div>
+        <div class="turn-pitch">${pitch} <span class="turn-pitch-muted">res</span></div>
+      `;
+      list.appendChild(row);
+    }
+
+    list.style.display = 'flex';
+  }
 
   document.getElementById('btn-turns-clear').addEventListener('click', function () {
     const list = document.getElementById('turns-list');
     list.innerHTML = '';
     list.style.display = 'none';
-  });
-
-  /* ── Monte Carlo ────────────────────────────────────────────────────── */
-  document.getElementById('btn-monte').addEventListener('click', function () {
-    const cfg = getConfig();
-    if (validate(cfg)) { updateSummary(); return; }
-
-    const SIMS = 10000;
-    const baseDeck = buildDeck(cfg);
-    const results  = new Int32Array(SIMS);
-
-    for (let s = 0; s < SIMS; s++) {
-      const deck = shuffle(baseDeck.slice());
-      let pitch = 0;
-      for (let i = 0; i < cfg.hand; i++) pitch += deck[i];
-      results[s] = pitch;
-    }
-
-    // ── Statistics ──
-    let sum = 0;
-    for (let i = 0; i < SIMS; i++) sum += results[i];
-    const mean = sum / SIMS;
-
-    const sorted = Array.from(results).sort((a, b) => a - b);
-    const median = sorted[(SIMS / 2) | 0];
-    const minV   = sorted[0];
-    const maxV   = sorted[SIMS - 1];
-
-    let variance = 0;
-    for (let i = 0; i < SIMS; i++) variance += (results[i] - mean) ** 2;
-    const stddev = Math.sqrt(variance / SIMS);
-
-    // ── Frequency map ──
-    const freq = {};
-    for (let i = 0; i < SIMS; i++) {
-      const v = results[i];
-      freq[v] = (freq[v] || 0) + 1;
-    }
-    const keys    = Object.keys(freq).map(Number).sort((a, b) => a - b);
-    const maxFreq = Math.max(...Object.values(freq));
-
-    // ── Render stats ──
-    document.getElementById('stats-grid').innerHTML = [
-      { label: 'Mean',    val: mean.toFixed(2), sub: 'avg pitch/hand' },
-      { label: 'Median',  val: median,           sub: 'middle value'   },
-      { label: 'Std Dev', val: stddev.toFixed(2),sub: 'spread'         },
-      { label: 'Min',     val: minV,             sub: 'worst hand'     },
-      { label: 'Max',     val: maxV,             sub: 'best hand'      },
-    ].map(s => `
-      <div class="stat-box">
-        <div class="stat-box-label">${s.label}</div>
-        <div class="stat-box-val">${s.val}</div>
-        <div class="stat-box-sub">${s.sub}</div>
-      </div>
-    `).join('');
-
-    // ── Histogram ──
-    const hist = document.getElementById('histogram');
-    hist.innerHTML = '';
-    keys.forEach(k => {
-      const h = ((freq[k] || 0) / maxFreq * 100).toFixed(1);
-      const col = document.createElement('div');
-      col.className = 'h-col';
-      col.innerHTML = `
-        <div class="h-bar" style="height:${h}%"></div>
-        <div class="h-lbl">${k}</div>
-      `;
-      hist.appendChild(col);
-    });
-
-    // ── Thresholds ──
-    const base = cfg.hand; // minimum possible (all reds)
-    const candidates = new Set([base, base + 1, base + 2, base + 3, cfg.hand * 2, cfg.hand * 3]);
-    const thresholds = Array.from(candidates).filter(t => t >= minV && t <= maxV).sort((a,b) => a-b);
-
-    const tbl = document.getElementById('thresh-table');
-    tbl.innerHTML = '';
-    thresholds.forEach(t => {
-      let count = 0;
-      for (let i = 0; i < SIMS; i++) if (results[i] >= t) count++;
-      const pct = (count / SIMS * 100).toFixed(1);
-      const row = document.createElement('div');
-      row.className = 'thresh-row';
-      row.innerHTML = `<span class="tr-key">≥ ${t} resources</span><span class="tr-val">${pct}%</span>`;
-      tbl.appendChild(row);
-    });
-
-    const out = document.getElementById('monte-out');
-    out.style.display = 'flex';
-    out.style.flexDirection = 'column';
-    out.style.gap = '0';
-  });
-
-  document.getElementById('btn-monte-clear').addEventListener('click', function () {
-    document.getElementById('monte-out').style.display = 'none';
   });
 
   /* ── Saved Decks ──────────────────────────────────────────────────── */
@@ -812,6 +764,9 @@
     document.getElementById('inp-blue').value   = counts.blue;
     updateSummary();
 
+    // Store full deck list for image-based simulation
+    loadedDeck = parseFullDeck(deck.decklist);
+
     const noteEl = document.getElementById('deck-load-note');
     const parts = [];
     if (counts.red > 0)    parts.push(`${counts.red} red`);
@@ -822,7 +777,7 @@
       ? `Loaded ${pitchTotal} pitch cards (${parts.join(', ')}).`
       : 'No pitch cards found in this decklist.';
     if (counts.other > 0) {
-      note += ` ${counts.other} arena/non-pitch card${counts.other !== 1 ? 's' : ''} ignored.`;
+      note += ` ${counts.other} arena card${counts.other !== 1 ? 's' : ''} included in draw order.`;
     }
     noteEl.textContent  = note;
     noteEl.style.display = '';
