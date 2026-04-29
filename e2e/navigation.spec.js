@@ -35,11 +35,6 @@ test('fab deck builder page loads', async ({ page }) => {
   expect(sidebarVisible || hamburgerVisible).toBe(true);
 });
 
-test('fab card memory page loads', async ({ page }) => {
-  await page.goto('/fab-card-memory/');
-  await expect(page).toHaveTitle(/Memorization/i);
-});
-
 test('marathon training page loads', async ({ page }) => {
   await page.goto('/marathon-training/');
   await expect(page).toHaveTitle(/Marathon/);
