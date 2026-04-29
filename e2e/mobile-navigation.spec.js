@@ -40,7 +40,6 @@ test.describe('mobile navigation', () => {
     await expect(drawer.getByRole('link', { name: 'Tournament Prep' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Deck Builder' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Card Memory' })).toBeVisible();
-    await expect(drawer.getByRole('link', { name: 'Pitch Simulator' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Marathon Training' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Project Stats' })).toBeVisible();
   });
@@ -103,13 +102,6 @@ test.describe('mobile navigation', () => {
     await page.locator('#hamburger-btn').click();
     await page.locator('#mobile-nav-drawer').getByRole('link', { name: 'Card Memory' }).click();
     await expect(page).toHaveURL(/\/fab-card-memory\//);
-  });
-
-  test('clicking Pitch Simulator link navigates to pitch simulator page', async ({ page }) => {
-    await page.goto('/calendar/');
-    await page.locator('#hamburger-btn').click();
-    await page.locator('#mobile-nav-drawer').getByRole('link', { name: 'Pitch Simulator' }).click();
-    await expect(page).toHaveURL(/\/fab-pitch-simulator\//);
   });
 
   test('clicking Marathon Training link navigates to marathon training page', async ({ page }) => {
