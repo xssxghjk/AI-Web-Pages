@@ -98,7 +98,12 @@
     '.mobile-nav-close{display:flex;align-items:center;justify-content:center;' +
       'width:32px;height:32px;border:none;background:none;cursor:pointer;' +
       'border-radius:3px;color:#58584e;transition:background 0.15s,color 0.15s}' +
-    '.mobile-nav-close:hover{background:rgba(255,255,252,0.06);color:#c8c4b4}';
+    '.mobile-nav-close:hover{background:rgba(255,255,252,0.06);color:#c8c4b4}' +
+
+    /* legal disclaimer strip */
+    '.nav-disclaimer{padding:0.85rem 1.5rem;font-size:0.67rem;font-style:italic;' +
+      'color:#4a4035;border-top:1px solid #2a2318;text-align:center;' +
+      'line-height:1.65;flex-shrink:0}';
   document.head.appendChild(style);
 
   // ── Inject favicon ───────────────────────────────────────────────────────
@@ -218,6 +223,12 @@ if (/\/marathon-training(\/|$)/.test(p))      return 'marathon';
       pageContent.appendChild(document.body.firstChild);
     }
     pageContent.insertBefore(mobileHeader, pageContent.firstChild);
+    var disclaimer = document.createElement('div');
+    disclaimer.className = 'nav-disclaimer';
+    disclaimer.textContent = 'This is an unofficial fan site. Not affiliated with, endorsed by, or sponsored by Legend Story Studios. ' +
+      'Flesh and Blood and all related marks are trademarks of Legend Story Studios.';
+    pageContent.appendChild(disclaimer);
+
     appLayout.appendChild(sidebar);
     appLayout.appendChild(pageContent);
     document.body.appendChild(appLayout);
