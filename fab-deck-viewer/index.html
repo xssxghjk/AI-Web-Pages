@@ -629,6 +629,11 @@
     .tab-btn:hover { color: var(--text); background: none; }
     .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
     .tab-btn:active { transform: none; }
+    @media (max-width: 600px) {
+      .tab-bar { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+      .tab-bar::-webkit-scrollbar { display: none; }
+      .tab-btn { white-space: nowrap; flex-shrink: 0; }
+    }
 
     /* ── Analysis sections ── */
     .analysis-section {
