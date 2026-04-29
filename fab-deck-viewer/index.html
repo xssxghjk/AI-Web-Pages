@@ -629,6 +629,10 @@
     .tab-btn:hover { color: var(--text); background: none; }
     .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
     .tab-btn:active { transform: none; }
+    @media (max-width: 600px) {
+      .tab-bar { gap: 0; }
+      .tab-btn { flex: 1; padding: 0.6rem 0.25rem; font-size: 0.68rem; text-align: center; }
+    }
 
     /* ── Analysis sections ── */
     .analysis-section {
