@@ -182,6 +182,11 @@
       font-size: 0.82rem; padding: 0.45rem 0.75rem; border-radius: 2px;
     }
     .btn-danger:hover { background: rgba(192,57,43,0.08); color: var(--red-c); }
+    .btn-primary.btn-danger {
+      background: #c0392b; color: #fff; border: none;
+      font-size: 0.85rem; padding: 0.5rem 1.2rem;
+    }
+    .btn-primary.btn-danger:hover { background: #a93226; color: #fff; }
 
     .btn-back {
       display: flex; align-items: center; gap: 0.4rem;
@@ -440,6 +445,8 @@
       white-space: nowrap;
     }
     .card-ctx-item:hover { background: var(--accent-dim); color: var(--accent); }
+    .card-ctx-item--danger:hover { background: rgba(220,53,69,0.12); color: #e05b67; }
+    .card-ctx-sep { height: 1px; background: var(--border-2); margin: 2px 0; }
 
     /* ── Replace old card display ── */
     .replace-old-display {
@@ -1455,6 +1462,16 @@
     </svg>
     Replace card
   </div>
+  <div class="card-ctx-sep"></div>
+  <div class="card-ctx-item card-ctx-item--danger" id="card-ctx-remove">
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="2 4 4 4 14 4"/>
+      <path d="M5 4V2h6v2"/>
+      <path d="M6 7v5M10 7v5"/>
+      <path d="M3 4l1 9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-9"/>
+    </svg>
+    Remove card
+  </div>
 </div>
 
 <!-- ── Replace Card Modal ── -->
@@ -1489,6 +1506,36 @@
         <div class="sb-editor-actions" style="position:static;margin-top:0;">
           <button class="btn-primary" id="replace-card-save">Replace</button>
           <button class="btn-secondary" id="replace-card-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Remove Card Modal ── -->
+<div id="remove-card-backdrop" class="cat-popup-backdrop" style="display:none;" role="dialog" aria-modal="true" aria-label="Remove Card">
+  <div class="cat-popup" style="max-width:380px">
+    <div class="cat-popup-header">
+      <span class="cat-popup-title">Remove Card</span>
+      <button class="cat-popup-close" id="remove-card-close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M3 3l10 10M13 3L3 13"/>
+        </svg>
+      </button>
+    </div>
+    <div class="cat-popup-body">
+      <div class="sb-editor" style="border:none;padding:0;border-top:none;background:transparent;">
+        <div class="sb-editor-field">
+          <label>Removing</label>
+          <div class="replace-old-display" id="remove-old-display"></div>
+        </div>
+        <div class="sb-editor-field">
+          <label>Copies to remove</label>
+          <select id="remove-qty-select"></select>
+        </div>
+        <div class="sb-editor-actions" style="position:static;margin-top:0;">
+          <button class="btn-primary btn-danger" id="remove-card-save">Remove</button>
+          <button class="btn-secondary" id="remove-card-cancel">Cancel</button>
         </div>
       </div>
     </div>
@@ -3407,6 +3454,13 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     if (entry) openReplaceCardModal(entry);
   });
 
+  document.getElementById('card-ctx-remove').addEventListener('click', e => {
+    e.stopPropagation();
+    const entry = ctxMenuEntry;
+    closeCardContextMenu();
+    if (entry) openRemoveCardModal(entry);
+  });
+
   /* ── Replace Card ────────────────────────────────────────────────── */
   function replaceCardInRaw(text, oldName, oldHint, newName, newHint, qtyToReplace) {
     return text.split('\n').map(line => {
@@ -3649,6 +3703,91 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   document.getElementById('replace-card-close').addEventListener('click', closeReplaceCardModal);
   document.getElementById('replace-card-backdrop').addEventListener('click', function (e) {
     if (e.target === this) closeReplaceCardModal();
+  });
+
+  /* ── Remove Card ─────────────────────────────────────────────────── */
+  let currentRemoveEntry = null;
+
+  function removeCardFromRaw(text, name, hint, qtyToRemove) {
+    return text.split('\n').map(line => {
+      const s = line.trim();
+      if (!s || !/^\d/.test(s)) return line;
+      const m = s.match(/^(\d+)x?\s+(.+?)(\s*\((\d+|red|yellow|blue)\))?\s*$/i);
+      if (!m) return line;
+      const cardName = m[2].trim();
+      const rawHint = m[4] ? m[4].toLowerCase() : '';
+      const normalizedHint = (rawHint === '1' || rawHint === 'red')    ? 'red'
+                           : (rawHint === '2' || rawHint === 'yellow') ? 'yellow'
+                           : (rawHint === '3' || rawHint === 'blue')   ? 'blue'
+                           : '';
+      if (cardName.toLowerCase() !== name.toLowerCase()) return line;
+      if (normalizedHint !== (hint || '')) return line;
+      const totalQty = parseInt(m[1], 10);
+      const removing = Math.min(qtyToRemove, totalQty);
+      const remaining = totalQty - removing;
+      if (remaining <= 0) return null;
+      const hintStr = normalizedHint ? ` (${normalizedHint})` : '';
+      return `${remaining} ${cardName}${hintStr}`;
+    }).filter(line => line !== null).join('\n');
+  }
+
+  function openRemoveCardModal(entry) {
+    currentRemoveEntry = entry;
+    const hintStr = entry.hint ? ` (${entry.hint})` : '';
+    document.getElementById('remove-old-display').textContent = entry.name + hintStr + ' ×' + entry.qty;
+
+    const qtySelect = document.getElementById('remove-qty-select');
+    qtySelect.innerHTML = '';
+    for (let i = 1; i <= entry.qty; i++) {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = i === entry.qty ? `${i} (all)` : String(i);
+      qtySelect.appendChild(opt);
+    }
+    qtySelect.value = entry.qty;
+
+    document.getElementById('remove-card-backdrop').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeRemoveCardModal() {
+    document.getElementById('remove-card-backdrop').style.display = 'none';
+    document.body.style.overflow = '';
+    currentRemoveEntry = null;
+  }
+
+  document.getElementById('remove-card-save').addEventListener('click', () => {
+    if (!currentRemoveEntry) { closeRemoveCardModal(); return; }
+    const name = currentRemoveEntry.name;
+    const hint = currentRemoveEntry.hint || '';
+    const qtyToRemove = parseInt(document.getElementById('remove-qty-select').value, 10);
+
+    const decks = loadDecks();
+    const deck  = decks.find(d => d.id === currentDeckId);
+    if (!deck) { closeRemoveCardModal(); return; }
+
+    deck.decklist = removeCardFromRaw(deck.decklist, name, hint, qtyToRemove);
+
+    if (Array.isArray(deck.sideboardGuide)) {
+      deck.sideboardGuide = deck.sideboardGuide.map(m => m.splitSideboard
+        ? { ...m,
+            cardsOutFirstRaw:  removeCardFromRaw(m.cardsOutFirstRaw  || '', name, hint, qtyToRemove),
+            cardsOutSecondRaw: removeCardFromRaw(m.cardsOutSecondRaw || '', name, hint, qtyToRemove),
+          }
+        : { ...m, cardsOutRaw: removeCardFromRaw(m.cardsOutRaw || '', name, hint, qtyToRemove) }
+      );
+    }
+
+    deck.cardCount = parseDecklist(deck.decklist).reduce((s, e) => s + e.qty, 0);
+    saveDecks(decks);
+    closeRemoveCardModal();
+    reRenderCurrentDeck();
+  });
+
+  document.getElementById('remove-card-cancel').addEventListener('click', closeRemoveCardModal);
+  document.getElementById('remove-card-close').addEventListener('click', closeRemoveCardModal);
+  document.getElementById('remove-card-backdrop').addEventListener('click', function (e) {
+    if (e.target === this) closeRemoveCardModal();
   });
 
   /* ── Add Card Modal ──────────────────────────────────────────────── */
@@ -3980,6 +4119,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && document.getElementById('replace-card-backdrop').style.display !== 'none') {
       closeReplaceCardModal();
+    }
+    if (e.key === 'Escape' && document.getElementById('remove-card-backdrop').style.display !== 'none') {
+      closeRemoveCardModal();
     }
     if (e.key === 'Escape' && document.getElementById('add-card-backdrop').style.display !== 'none') {
       closeAddCardModal();
