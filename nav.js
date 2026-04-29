@@ -37,9 +37,6 @@
     /* variables */
     ':root{--nav-accent:#c4864a;--nav-bg:#1c1814;--nav-surface:#252018;--nav-border:#3a3025}' +
 
-    /* keyframes */
-    '@keyframes navSlideIn{0%{opacity:0;transform:translateX(-10px)}100%{opacity:1;transform:none}}' +
-
     /* app layout */
     '.app-layout{display:flex;min-height:100vh}' +
     '.page-content{flex:1;display:flex;flex-direction:column;min-width:0}' +
@@ -61,8 +58,7 @@
       'border-radius:2px;text-decoration:none;color:#9a8a76;' +
       'font-family:"DM Serif Text",Georgia,serif;font-size:0.82rem;font-weight:400;' +
       'transition:color 0.18s,background 0.18s,border-color 0.18s;' +
-      'border-left:2px solid transparent;' +
-      'opacity:0;animation:navSlideIn 0.35s ease forwards}' +
+      'border-left:2px solid transparent}' +
     '.sidebar-link:hover{color:#e8dfd0;background:rgba(232,223,208,0.05);border-left-color:rgba(196,134,74,0.35)}' +
     '.sidebar-link.active{color:var(--nav-accent);background:rgba(196,134,74,0.08);border-left-color:var(--nav-accent)}' +
     '.sidebar-link svg{flex-shrink:0;opacity:0.45;transition:opacity 0.18s}' +
@@ -171,17 +167,14 @@ if (/\/marathon-training(\/|$)/.test(p))      return 'marathon';
 
   function buildLinks(activePage) {
     var html = '';
-    var idx = 0;
     SECTIONS.forEach(function (section, i) {
       html += '<div class="sidebar-section"' +
         (i > 0 ? ' style="margin-top:0.25rem"' : '') + '>' +
         section.label + '</div>';
       section.links.forEach(function (link) {
         var cls = 'sidebar-link' + (link.key === activePage ? ' active' : '');
-        var delay = (0.06 + idx * 0.055).toFixed(3);
-        html += '<a class="' + cls + '" href="' + link.href + '" style="animation-delay:' + delay + 's">' +
+        html += '<a class="' + cls + '" href="' + link.href + '">' +
           link.icon + link.text + '</a>';
-        idx++;
       });
     });
     return html;
