@@ -2557,10 +2557,12 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const yPct = (yellow / total * 100).toFixed(1);
     const bPct = (100 - parseFloat(rPct) - parseFloat(yPct)).toFixed(1);
 
-    // Compute type draw rates
-    const deckSize = pairs.reduce((s, p) => s + p.entry.qty, 0);
+    // Compute type draw rates (arena cards — Equipment, Weapon, Off-Hand — are excluded)
+    const ARENA_TYPES = ['Equipment', 'Weapon', 'Off-Hand'];
+    const nonArenaPairs = pairs.filter(p => !p.card || !p.card.types.some(t => ARENA_TYPES.includes(t)));
+    const deckSize = nonArenaPairs.reduce((s, p) => s + p.entry.qty, 0);
     const typeCts = {};
-    for (const { entry, card } of pairs) {
+    for (const { entry, card } of nonArenaPairs) {
       if (!card) continue;
       for (const t of card.types) typeCts[t] = (typeCts[t] || 0) + entry.qty;
       if (card.types.includes('Action') && !card.types.includes('Attack'))
