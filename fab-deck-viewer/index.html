@@ -56,9 +56,7 @@
       background: rgba(28,24,20,0.93);
       backdrop-filter: blur(8px);
       display: flex; align-items: center; justify-content: center;
-      animation: fade-in 0.18s ease;
     }
-    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
     .loading-card {
       background: var(--surface);
@@ -429,7 +427,6 @@
       box-shadow: 0 8px 28px rgba(0,0,0,0.7);
       z-index: 9990;
       overflow: hidden;
-      animation: fade-in 0.1s ease;
     }
     .card-ctx-item {
       display: flex;
@@ -508,23 +505,9 @@
       gap: 0.75rem;
     }
 
-    @keyframes cardReveal {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: none; }
-    }
-
     .card-entry {
       position: relative;
-      animation: cardReveal 0.35s ease forwards;
     }
-    .card-entry:nth-child(2)   { animation-delay: 0.03s; }
-    .card-entry:nth-child(3)   { animation-delay: 0.06s; }
-    .card-entry:nth-child(4)   { animation-delay: 0.09s; }
-    .card-entry:nth-child(5)   { animation-delay: 0.12s; }
-    .card-entry:nth-child(6)   { animation-delay: 0.15s; }
-    .card-entry:nth-child(7)   { animation-delay: 0.18s; }
-    .card-entry:nth-child(8)   { animation-delay: 0.21s; }
-    .card-entry:nth-child(n+9) { animation-delay: 0.24s; }
 
     .card-frame {
       position: relative;
@@ -850,7 +833,6 @@
       backdrop-filter: blur(6px);
       display: flex; align-items: flex-start; justify-content: center;
       padding: 4vh 1rem 2rem;
-      animation: fade-in 0.18s ease;
       overflow-y: auto;
     }
     .cat-popup {
@@ -860,12 +842,7 @@
       border-radius: 3px;
       width: 100%; max-width: 860px;
       box-shadow: 0 24px 72px rgba(0,0,0,0.55);
-      animation: popupSlide 0.22s cubic-bezier(0.22,0.9,0.36,1) forwards;
       flex-shrink: 0;
-    }
-    @keyframes popupSlide {
-      from { opacity: 0; transform: translateY(18px) scale(0.97); }
-      to   { opacity: 1; transform: none; }
     }
     .cat-popup-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -1476,10 +1453,6 @@
     .mem-screen { display: none; }
     .mem-screen.active { display: block; }
 
-    @keyframes memCardReveal {
-      from { opacity: 0; transform: perspective(900px) rotateY(-22deg) scale(0.95); }
-      to   { opacity: 1; transform: perspective(900px) rotateY(0deg) scale(1); }
-    }
     .mem-memorize-wrap {
       display: flex; flex-direction: column; align-items: center;
       justify-content: center; min-height: 52vh;
@@ -1491,7 +1464,6 @@
       font-size: 0.78rem; color: var(--accent);
     }
     .mem-card-anim {
-      animation: memCardReveal 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
       display: flex; flex-direction: column; align-items: center; gap: 1rem;
     }
     .mem-card-img {
@@ -1504,10 +1476,6 @@
     }
     .mem-hint { margin-top: 1.25rem; font-size: 0.75rem; color: var(--muted-2); text-align: center; }
 
-    @keyframes memSlotFill {
-      from { opacity: 0; transform: scale(0.7) rotate(-8deg); }
-      to   { opacity: 1; transform: scale(1) rotate(0deg); }
-    }
     .mem-slots-wrap { overflow-x: auto; margin-bottom: 1.5rem; padding-bottom: 0.25rem; }
     .mem-slots {
       display: flex; gap: 0.5rem; min-width: max-content; padding: 0.5rem 0.25rem;
@@ -1522,7 +1490,6 @@
     .mem-slot.active { border-color: var(--accent); border-style: solid; }
     .mem-slot img {
       width: 100%; height: 100%; object-fit: cover; border-radius: 10px;
-      animation: memSlotFill 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
     }
     .mem-slot-badge {
       position: absolute; top: 3px; right: 3px; width: 20px; height: 20px;

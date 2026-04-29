@@ -256,12 +256,6 @@
       gap: 0.75rem;
     }
 
-    /* ── ANIMATION ── */
-    @keyframes cardIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: none; }
-    }
-
     /* ── PREP TILE ── */
     .prep-tile {
       display: block;
@@ -273,8 +267,6 @@
       overflow: hidden;
       border-top: 2px solid var(--border2);
       transition: border-color 0.2s, box-shadow 0.2s;
-      opacity: 0;
-      animation: cardIn 0.4s ease forwards;
       position: relative;
     }
     .prep-tile:hover {
@@ -285,11 +277,6 @@
     .prep-tile.tier-2 { border-top-color: var(--t2); }
     .prep-tile.tier-3 { border-top-color: var(--t3); }
     .prep-tile.tier-4 { border-top-color: var(--t4); }
-    .prep-tile:nth-child(2) { animation-delay: 0.05s; }
-    .prep-tile:nth-child(3) { animation-delay: 0.1s; }
-    .prep-tile:nth-child(4) { animation-delay: 0.15s; }
-    .prep-tile:nth-child(5) { animation-delay: 0.2s; }
-    .prep-tile:nth-child(6) { animation-delay: 0.25s; }
 
     .tile-body {
       padding: 1.1rem 1.25rem 0.9rem;

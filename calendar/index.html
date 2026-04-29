@@ -153,23 +153,11 @@
       font-family: 'DM Serif Text', Georgia, serif;
     }
 
-    @keyframes calReveal {
-      from { opacity: 0; transform: translateY(5px); }
-      to   { opacity: 1; transform: none; }
-    }
-
     /* Each calendar week is a wrapper containing the day cells + floating trip bars */
     .cal-week-wrapper {
       position: relative;
       margin-bottom: 3px;
-      opacity: 0;
-      animation: calReveal 0.35s ease-out forwards;
     }
-    .cal-week-wrapper:nth-child(2) { animation-delay: 0.04s; }
-    .cal-week-wrapper:nth-child(3) { animation-delay: 0.09s; }
-    .cal-week-wrapper:nth-child(4) { animation-delay: 0.14s; }
-    .cal-week-wrapper:nth-child(5) { animation-delay: 0.19s; }
-    .cal-week-wrapper:nth-child(6) { animation-delay: 0.24s; }
     .cal-week-days {
       display: grid;
       grid-template-columns: repeat(7, 1fr);

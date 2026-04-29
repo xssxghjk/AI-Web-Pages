@@ -251,11 +251,6 @@
       gap: 0.6rem;
     }
 
-    @keyframes tileReveal {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: none; }
-    }
-
     /* ── TRIP TILE ── */
     .trip-tile {
       display: flex;
@@ -268,13 +263,7 @@
       border-top: 2px solid var(--border2);
       padding: 1.1rem 1.25rem 1rem;
       transition: border-color 0.2s, box-shadow 0.2s;
-      opacity: 0;
-      animation: tileReveal 0.45s ease-out forwards;
     }
-    .trip-tile:nth-child(2n)   { animation-delay: 0.05s; }
-    .trip-tile:nth-child(3n)   { animation-delay: 0.1s; }
-    .trip-tile:nth-child(4n)   { animation-delay: 0.15s; }
-    .trip-tile:nth-child(5n)   { animation-delay: 0.2s; }
     .trip-tile:hover {
       box-shadow: 0 6px 28px rgba(0,0,0,0.45);
     }
