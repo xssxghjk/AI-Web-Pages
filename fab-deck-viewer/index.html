@@ -2483,13 +2483,13 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       if (hasPower) {
         const maxP = Math.max(...Object.values(stats.powerDist));
         const rows = powerKeys.filter(k => stats.powerDist[k]).map(k =>
-          hbarHtml(k, stats.powerDist[k], maxP, 'var(--red-c)')).join('');
+          hbarHtml(k, stats.powerDist[k], maxP, 'var(--red-c)', 'power', k)).join('');
         colsHtml += analysisSectionHtml('Attack Power', `<div class="hbar-list">${rows}</div>`);
       }
       if (hasDefense) {
         const maxD = Math.max(...Object.values(stats.defenseDist));
         const rows = defenseKeys.filter(k => stats.defenseDist[k]).map(k =>
-          hbarHtml(k, stats.defenseDist[k], maxD, 'var(--blue-c)')).join('');
+          hbarHtml(k, stats.defenseDist[k], maxD, 'var(--blue-c)', 'defense', k)).join('');
         colsHtml += analysisSectionHtml('Defense', `<div class="hbar-list">${rows}</div>`);
       }
       html += `<div class="analysis-cols">${colsHtml}</div>`;
@@ -2821,6 +2821,22 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     } else if (filterType === 'rarity') {
       pairs = currentAnalysisPairs.filter(p => p.card && p.card.rarity === filterKey);
       title = RARITY_LABELS[filterKey] || filterKey;
+    } else if (filterType === 'power') {
+      if (filterKey === '9+') {
+        pairs = currentAnalysisPairs.filter(p => p.card && p.card.power != null && p.card.power >= 9);
+      } else {
+        const val = parseInt(filterKey, 10);
+        pairs = currentAnalysisPairs.filter(p => p.card && p.card.power === val);
+      }
+      title = `Power ${filterKey}`;
+    } else if (filterType === 'defense') {
+      if (filterKey === '7+') {
+        pairs = currentAnalysisPairs.filter(p => p.card && p.card.defense != null && p.card.defense >= 7);
+      } else {
+        const val = parseInt(filterKey, 10);
+        pairs = currentAnalysisPairs.filter(p => p.card && p.card.defense === val);
+      }
+      title = `Defense ${filterKey}`;
     } else {
       return;
     }
