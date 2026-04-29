@@ -1312,10 +1312,16 @@
     }
     .sim-hand-inp:focus { border-color: var(--accent); }
     .sim-hand-display {
-      display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end; min-height: 66px;
+      display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end; min-height: 110px;
       padding: 0.75rem 1rem; background: var(--surface-2); border: 1px solid var(--border);
       border-radius: 2px; margin-top: 0.75rem;
     }
+    .sim-hand-card-wrap {
+      position: relative; flex-shrink: 0;
+      width: 72px; height: 100px; border-radius: 4px; overflow: hidden; cursor: default;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .sim-hand-card-wrap:hover { transform: translateY(-6px); box-shadow: 0 8px 22px rgba(0,0,0,0.45); }
     .sim-card-chip {
       width: 130px; min-height: 64px; border-radius: 3px; border: 2px solid;
       display: flex; flex-direction: column; padding: 0.5rem 0.6rem;
@@ -2660,10 +2666,20 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const display = document.getElementById('sim-hand-display');
       display.innerHTML = '';
       hand.forEach(c => {
-        const chip = document.createElement('div');
-        chip.className = 'sim-card-chip ' + c.color;
-        chip.innerHTML = `<span class="chip-name">${esc(c.name)}</span><span class="chip-pitch">Pitch ${c.pitch}</span>`;
-        display.appendChild(chip);
+        const badge = `<span class="sim-tc-badge ${c.color}">${c.pitch}</span>`;
+        const el = document.createElement('div');
+        if (c.imgUrl) {
+          el.className = 'sim-hand-card-wrap';
+          el.title = c.name;
+          el.innerHTML = `<img class="sim-tc-img" src="${esc(c.imgUrl)}" alt="${esc(c.name)}" loading="lazy" />${badge}`;
+        } else {
+          el.className = `sim-tc-placeholder ${c.color}`;
+          el.title = c.name;
+          el.innerHTML = `<span class="sim-tc-letter">${c.pitch}</span>${badge}`;
+          el.style.width = '72px';
+          el.style.height = '100px';
+        }
+        display.appendChild(el);
       });
       const tot = document.createElement('div');
       tot.className = 'sim-hand-total';
