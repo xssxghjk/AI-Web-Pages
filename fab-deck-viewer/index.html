@@ -1370,24 +1370,38 @@
     .sim-hand-empty { color: var(--muted-2); font-size: 0.8rem; align-self: center; font-style: italic; }
     .sim-turns-list {
       display: none; flex-direction: column; gap: 0.2rem;
-      max-height: 300px; overflow-y: auto; margin-top: 0.75rem;
+      max-height: 480px; overflow-y: auto; margin-top: 0.75rem;
     }
     .sim-turn-row {
-      display: flex; align-items: center; gap: 0.6rem;
-      padding: 0.4rem 0.65rem; background: var(--surface-2);
+      display: flex; align-items: flex-start; gap: 0.6rem;
+      padding: 0.5rem 0.65rem; background: var(--surface-2);
       border: 1px solid var(--border); border-radius: 2px; font-size: 0.78rem;
     }
-    .sim-turn-num { font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); min-width: 32px; }
-    .sim-turn-cards { display: flex; gap: 3px; flex: 1; flex-wrap: wrap; }
-    .sim-mini-chip {
-      width: 18px; height: 22px; border-radius: 2px; border: 1px solid;
-      display: flex; align-items: center; justify-content: center; font-size: 0.65rem;
+    .sim-turn-num { font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); min-width: 32px; padding-top: 0.35rem; }
+    .sim-turn-cards { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; align-items: flex-end; }
+    .sim-tc-wrap {
+      position: relative; flex-shrink: 0;
+      width: 46px; height: 64px; border-radius: 3px; overflow: hidden; cursor: default;
     }
-    .sim-mini-chip.red    { background: rgba(224,80,64,0.08);  border-color: var(--red-c);    color: var(--red-c); }
-    .sim-mini-chip.yellow { background: rgba(212,146,74,0.08); border-color: var(--yellow-c); color: var(--yellow-c); }
-    .sim-mini-chip.blue   { background: rgba(90,180,204,0.08); border-color: var(--blue-c);   color: var(--blue-c); }
-    .sim-turn-pitch { font-size: 0.8rem; min-width: 44px; text-align: right; color: var(--accent); }
-    .sim-turn-pitch-muted { font-size: 0.6rem; color: var(--muted); }
+    .sim-tc-img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+    .sim-tc-badge {
+      position: absolute; bottom: 2px; right: 2px;
+      width: 15px; height: 15px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.52rem; font-weight: 700; line-height: 1;
+    }
+    .sim-tc-badge.red    { background: var(--red-c);    color: #fff; }
+    .sim-tc-badge.yellow { background: var(--yellow-c); color: #1c1814; }
+    .sim-tc-badge.blue   { background: var(--blue-c);   color: #1c1814; }
+    .sim-tc-placeholder {
+      width: 46px; height: 64px; border-radius: 3px; border: 1px solid;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative;
+    }
+    .sim-tc-placeholder.red    { background: rgba(224,80,64,0.08);  border-color: var(--red-c);    color: var(--red-c); }
+    .sim-tc-placeholder.yellow { background: rgba(212,146,74,0.08); border-color: var(--yellow-c); color: var(--yellow-c); }
+    .sim-tc-placeholder.blue   { background: rgba(90,180,204,0.08); border-color: var(--blue-c);   color: var(--blue-c); }
+    .sim-tc-letter { font-size: 0.9rem; font-weight: 700; }
     .sim-stat-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem;
     }
@@ -2355,7 +2369,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       for (const { entry, card } of pairs) {
         if (!card || !['red','yellow','blue'].includes(card.color)) continue;
         const pitch = card.pitch != null ? card.pitch : (card.color === 'red' ? 1 : card.color === 'yellow' ? 2 : 3);
-        for (let i = 0; i < entry.qty; i++) deck.push({ name: card.name, color: card.color, pitch });
+        for (let i = 0; i < entry.qty; i++) deck.push({ name: card.name, color: card.color, pitch, imgUrl: card.imgUrl });
       }
       return deck;
     }
@@ -2418,11 +2432,19 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         const end  = Math.min(idx + hs2, deck.length);
         const hand = deck.slice(idx, end);
         idx = end; turn++;
-        const pitch = hand.reduce((s, c) => s + c.pitch, 0);
-        const row   = document.createElement('div');
+        const row = document.createElement('div');
         row.className = 'sim-turn-row';
-        const chips = hand.map(c => `<div class="sim-mini-chip ${c.color}" title="${esc(c.name)}">${c.pitch}</div>`).join('');
-        row.innerHTML = `<div class="sim-turn-num">T${turn}</div><div class="sim-turn-cards">${chips}</div><div class="sim-turn-pitch">${pitch}&nbsp;<span class="sim-turn-pitch-muted">res</span></div>`;
+        const cardsHtml = hand.map(c => {
+          const badge = `<span class="sim-tc-badge ${c.color}">${c.pitch}</span>`;
+          if (c.imgUrl) {
+            return `<div class="sim-tc-wrap" title="${esc(c.name)}">` +
+              `<img class="sim-tc-img" src="${esc(c.imgUrl)}" alt="${esc(c.name)}" loading="lazy" />` +
+              badge + `</div>`;
+          }
+          return `<div class="sim-tc-placeholder ${c.color}" title="${esc(c.name)}">` +
+            `<span class="sim-tc-letter">${c.pitch}</span>` + badge + `</div>`;
+        }).join('');
+        row.innerHTML = `<div class="sim-turn-num">T${turn}</div><div class="sim-turn-cards">${cardsHtml}</div>`;
         list.appendChild(row);
       }
       list.style.display = 'flex';

@@ -145,8 +145,6 @@
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
         { key: 'card-memory',      href: '../fab-card-memory/',    text: 'Card Memory',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="1.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="10" width="4.5" height="3" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="7.5" y="10" width="4.5" height="3" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>' },
-        { key: 'pitch-simulator',  href: '../fab-pitch-simulator/', text: 'Pitch Simulator',
-          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 12L6.5 2l2 5 2-2.5L12 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
         { key: 'marathon',         href: '../marathon-training/',  text: 'Marathon Training',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="3" r="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 12.5l1.5-4 1.5 2 1.5-2 1.5 4M7 5.5v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
       ]
@@ -169,7 +167,6 @@
     if (/\/trip(\/|$)/.test(p))                   return 'trips';  // trip detail
     if (/\/fab-deck-viewer(\/|$)/.test(p))        return 'deck-viewer';
     if (/\/fab-card-memory(\/|$)/.test(p))        return 'card-memory';
-    if (/\/fab-pitch-simulator(\/|$)/.test(p))    return 'pitch-simulator';
     if (/\/marathon-training(\/|$)/.test(p))      return 'marathon';
     if (/\/project-stats(\/|$)/.test(p))          return 'project-stats';
     return null;
