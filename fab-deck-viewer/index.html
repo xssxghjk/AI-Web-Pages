@@ -473,21 +473,6 @@
     }
 
     /* ── Stats bar ── */
-    .stats-bar {
-      display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: center;
-      padding: 0.75rem 1.25rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: 2px solid var(--accent);
-      border-radius: 2px;
-      font-size: 0.78rem; color: var(--muted);
-      margin-bottom: 1.75rem;
-      font-family: 'DM Serif Text', Georgia, serif;
-    }
-    .sb-item { display: flex; align-items: center; gap: 0.4rem; }
-    .sb-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .sb-val  { font-weight: 700; color: var(--text); }
-
     /* ── Card warn ── */
     .card-warn {
       display: none; font-size: 0.78rem; color: var(--muted-2);
@@ -1605,8 +1590,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       <div class="detail-head-date" id="detail-date"></div>
     </div>
 
-    <div class="stats-bar" id="stats-bar"></div>
-
     <div class="card-warn" id="card-warn"></div>
 
     <div class="tab-bar">
@@ -1894,17 +1877,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       (buckets[key] || buckets.other).push(p);
       counts[key] = (counts[key] || 0) + p.entry.qty;
     }
-
-    // Stats bar
-    const sb = document.getElementById('stats-bar');
-    sb.innerHTML =
-      `<div class="sb-item">Total <span class="sb-val" style="margin-left:.3rem">${total}</span>&nbsp;cards</div>` +
-      GROUPS
-        .filter(g => counts[g.key] > 0)
-        .map(g => `<div class="sb-item">
-          <div class="sb-dot" style="background:${g.color}"></div>
-          <span class="sb-val">${counts[g.key]}</span>&nbsp;${g.key === 'other' ? 'arena' : g.key}
-        </div>`).join('');
 
     // Card groups
     const groupsEl = document.getElementById('card-groups');
