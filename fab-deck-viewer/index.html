@@ -2010,7 +2010,12 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     </div>
 
     <div id="tab-sideboard" class="tab-panel" style="display:none">
+      <div class="sub-tab-bar" id="sb-sub-tab-bar">
+        <button class="sub-tab-btn active" id="sb-sub-tab-guide">Guide</button>
+        <button class="sub-tab-btn" id="sb-sub-tab-coverage">Coverage</button>
+      </div>
       <div id="sideboard-content"></div>
+      <div id="sideboard-heatmap" style="display:none"></div>
     </div>
 
     <div id="tab-memory" class="tab-panel" style="display:none">
@@ -2229,6 +2234,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   let currentAnalysisPairs = [];
   let currentAnalysisMatchupId = '';
   let analysisSubTab = 'numbers';
+  let sideboardSubTab = 'guide';
   let simHandSize = 4;
   let simDrDetails = false;
 
@@ -2284,6 +2290,12 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     document.getElementById('sub-tab-simulations').className = 'sub-tab-btn';
     document.getElementById('analysis-content').style.display = '';
     document.getElementById('analysis-simulator').style.display = 'none';
+    sideboardSubTab = 'guide';
+    document.getElementById('sb-sub-tab-guide').className = 'sub-tab-btn active';
+    document.getElementById('sb-sub-tab-coverage').className = 'sub-tab-btn';
+    document.getElementById('sb-sub-tab-bar').style.display = '';
+    document.getElementById('sideboard-content').style.display = '';
+    document.getElementById('sideboard-heatmap').style.display = 'none';
 
     renderCardGroups(pairs);
 
@@ -3272,22 +3284,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     }
     const overviewHtml = `<div class="sb-overview">${overviewParts.join('<span class="sb-overview-sep"> · </span>')}</div>`;
 
-    // Heatmap (only cards that appear in at least one matchup's cuts)
-    const heatmapRows = computeHeatmap(deckPairs, guide).filter(r => r.matchupsCut > 0);
-    let heatmapHtml = '';
-    if (heatmapRows.length > 0) {
-      const rowsHtml = heatmapRows.map(row => {
-        const pct = row.total > 0 ? (row.survivedMatchups / row.total * 100).toFixed(1) : 0;
-        const isCandidate = row.survivedMatchups <= 1;
-        return `<div class="sb-heatmap-row">
-          <div class="sb-heatmap-name">${esc(row.name)}</div>
-          <div class="sb-heatmap-track"><div class="sb-heatmap-fill" style="width:${pct}%"></div></div>
-          <div class="sb-heatmap-label${isCandidate ? ' sb-cut-candidate' : ''}">${row.survivedMatchups} / ${row.total} matchups</div>
-        </div>`;
-      }).join('');
-      heatmapHtml = `<div class="sb-heatmap"><div class="sb-heatmap-title">Card Coverage</div>${rowsHtml}</div>`;
-    }
-
     // Matchup rows
     const listHtml = guide.map(matchup => {
       const goFirstLabel = matchup.goFirst === 'first' ? '▸ Go First'
@@ -3307,7 +3303,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       </div>`;
     }).join('');
 
-    container.innerHTML = overviewHtml + heatmapHtml + `<div class="sb-matchup-list">${listHtml}</div>`;
+    // Restore guide sub-tab state
+    sideboardSubTab = 'guide';
+    document.getElementById('sb-sub-tab-guide').className = 'sub-tab-btn active';
+    document.getElementById('sb-sub-tab-coverage').className = 'sub-tab-btn';
+    document.getElementById('sb-sub-tab-bar').style.display = '';
+    container.style.display = '';
+    document.getElementById('sideboard-heatmap').style.display = 'none';
+
+    container.innerHTML = overviewHtml + `<div class="sb-matchup-list">${listHtml}</div>`;
 
     const actionsRow = document.createElement('div');
     actionsRow.className = 'sb-actions-row';
@@ -3346,6 +3350,25 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         }
       });
     });
+  }
+
+  function renderSideboardCoverage(deckPairs, guide) {
+    const heatmapEl = document.getElementById('sideboard-heatmap');
+    const heatmapRows = computeHeatmap(deckPairs, guide).filter(r => r.matchupsCut > 0);
+    if (heatmapRows.length === 0) {
+      heatmapEl.innerHTML = '<div class="empty-state"><div class="empty-state-title">No coverage data yet</div><div class="empty-state-sub">Add matchups with cards out to see coverage</div></div>';
+      return;
+    }
+    const rowsHtml = heatmapRows.map(row => {
+      const pct = row.total > 0 ? (row.survivedMatchups / row.total * 100).toFixed(1) : 0;
+      const isCandidate = row.survivedMatchups <= 1;
+      return `<div class="sb-heatmap-row">
+        <div class="sb-heatmap-name">${esc(row.name)}</div>
+        <div class="sb-heatmap-track"><div class="sb-heatmap-fill" style="width:${pct}%"></div></div>
+        <div class="sb-heatmap-label${isCandidate ? ' sb-cut-candidate' : ''}">${row.survivedMatchups} / ${row.total} matchups</div>
+      </div>`;
+    }).join('');
+    heatmapEl.innerHTML = `<div class="sb-heatmap"><div class="sb-heatmap-title">Card Coverage</div>${rowsHtml}</div>`;
   }
 
   function renderMatchupBody(bodyEl, matchup, deckPairs, deck) {
@@ -3475,7 +3498,14 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     </select>`;
 
     const container = document.getElementById('sideboard-content');
+    document.getElementById('sb-sub-tab-bar').style.display = 'none';
+    document.getElementById('sideboard-heatmap').style.display = 'none';
+    container.style.display = '';
     container.innerHTML = `
+      <button class="btn-ghost btn-back" id="sb-back-btn" type="button">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>
+        Matchups
+      </button>
       <div class="sb-editor">
         <div class="sb-editor-title">${existing ? 'Edit Matchup' : 'New Matchup'}</div>
         ${!existing ? `
@@ -3790,6 +3820,11 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       }
       renderSplitTabs();
       renderPicker();
+    });
+
+    document.getElementById('sb-back-btn').addEventListener('click', () => {
+      const latestDeck = loadDecks().find(d => d.id === deck.id) || deck;
+      renderSideboard(latestDeck, deckPairs);
     });
 
     document.getElementById('sb-cancel').addEventListener('click', () => {
@@ -4907,6 +4942,22 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   document.getElementById('sub-tab-numbers').addEventListener('click', () => switchAnalysisSubTab('numbers'));
   document.getElementById('sub-tab-simulations').addEventListener('click', () => switchAnalysisSubTab('simulations'));
+
+  /* ── Sideboard sub-tab switching ──────────────────────────────────── */
+  function switchSideboardSubTab(tab) {
+    sideboardSubTab = tab;
+    document.getElementById('sb-sub-tab-guide').className    = 'sub-tab-btn' + (tab === 'guide'    ? ' active' : '');
+    document.getElementById('sb-sub-tab-coverage').className = 'sub-tab-btn' + (tab === 'coverage' ? ' active' : '');
+    document.getElementById('sideboard-content').style.display  = tab === 'guide'    ? '' : 'none';
+    document.getElementById('sideboard-heatmap').style.display  = tab === 'coverage' ? '' : 'none';
+    if (tab === 'coverage') {
+      const deck = loadDecks().find(d => d.id === currentDeckId);
+      if (deck) renderSideboardCoverage(currentDeckPairs, getSideboardGuide(deck));
+    }
+  }
+
+  document.getElementById('sb-sub-tab-guide').addEventListener('click', () => switchSideboardSubTab('guide'));
+  document.getElementById('sb-sub-tab-coverage').addEventListener('click', () => switchSideboardSubTab('coverage'));
 
   /* ── Import handlers ──────────────────────────────────────────────── */
   function goToImport() {
