@@ -1234,6 +1234,40 @@
     .sb-split-out-label.first { color: var(--accent); }
     .sb-split-out-label.second { color: var(--blue-c); }
 
+    /* ── Import preset ── */
+    .sb-import-preset { display: flex; flex-direction: column; gap: 0.5rem; }
+    .sb-import-preset-btn {
+      align-self: flex-start;
+      background: none; border: 1px dashed var(--border-2);
+      color: var(--muted); border-radius: 2px;
+      font-family: 'DM Serif Text', Georgia, serif; font-style: italic;
+      font-size: 0.78rem; padding: 0.3rem 0.75rem;
+      cursor: pointer; transition: border-color 0.15s, color 0.15s;
+    }
+    .sb-import-preset-btn:hover, .sb-import-preset-btn.active {
+      border-color: var(--accent); color: var(--accent);
+    }
+    .sb-import-panel {
+      background: var(--surface-2); border: 1px solid var(--border-2);
+      border-radius: 2px; padding: 0.75rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .sb-import-row {
+      display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;
+    }
+    .sb-import-sel {
+      flex: 1; min-width: 0;
+      background: var(--surface); border: 1px solid var(--border-2);
+      color: var(--text); border-radius: 2px;
+      font-family: 'DM Serif Text', Georgia, serif; font-style: italic;
+      font-size: 0.8rem; padding: 0.35rem 0.5rem; cursor: pointer;
+    }
+    .sb-import-sel:disabled { opacity: 0.45; cursor: default; }
+    .sb-import-hint {
+      font-family: 'DM Serif Text', Georgia, serif; font-style: italic;
+      font-size: 0.72rem; color: var(--muted);
+    }
+
     @media (max-width: 600px) {
       .sb-matchup-head { gap: 0.4rem; padding: 0.65rem 0.9rem; }
       .sb-heatmap-row { grid-template-columns: 90px 1fr 80px; padding: 0.4rem 0.9rem; }
@@ -3347,6 +3381,18 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     container.innerHTML = `
       <div class="sb-editor">
         <div class="sb-editor-title">${existing ? 'Edit Matchup' : 'New Matchup'}</div>
+        ${!existing ? `
+        <div class="sb-import-preset" id="sb-import-preset">
+          <button class="sb-import-preset-btn" type="button" id="sb-import-btn">↑ Import preset…</button>
+          <div class="sb-import-panel" id="sb-import-panel" style="display:none">
+            <div class="sb-import-row">
+              <select class="sb-import-sel" id="sb-import-deck-sel"><option value="">— Deck —</option></select>
+              <select class="sb-import-sel" id="sb-import-matchup-sel" disabled><option value="">— Matchup —</option></select>
+              <button class="btn-secondary" type="button" id="sb-import-apply" disabled>Apply</button>
+            </div>
+            <div class="sb-import-hint" id="sb-import-hint"></div>
+          </div>
+        </div>` : ''}
         <div class="sb-editor-field">
           <label>Hero</label>
           <input type="text" id="sb-hero-input" value="${esc(existing ? existing.hero : '')}" placeholder="e.g. Kayo" autocomplete="off" />
@@ -3528,6 +3574,124 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     document.getElementById('sb-go-select').addEventListener('change', (e) => {
       selectedGoFirst = e.target.value || null;
     });
+
+    if (!existing) {
+      const importBtn = document.getElementById('sb-import-btn');
+      const importPanel = document.getElementById('sb-import-panel');
+      const importDeckSel = document.getElementById('sb-import-deck-sel');
+      const importMatchupSel = document.getElementById('sb-import-matchup-sel');
+      const importApplyBtn = document.getElementById('sb-import-apply');
+      const importHint = document.getElementById('sb-import-hint');
+
+      const allDecks = loadDecks();
+      const currentGuide = getSideboardGuide(deck);
+
+      if (currentGuide.length > 0) {
+        const opt = document.createElement('option');
+        opt.value = '__current__';
+        opt.textContent = (deck.name || 'This deck') + ' (same deck)';
+        importDeckSel.appendChild(opt);
+      }
+      for (const d of allDecks) {
+        if (d.id === deck.id) continue;
+        const g = getSideboardGuide(d);
+        if (!g.length) continue;
+        const opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = d.name || d.id;
+        importDeckSel.appendChild(opt);
+      }
+      if (importDeckSel.options.length === 1) {
+        importDeckSel.disabled = true;
+        importHint.textContent = 'No decks with matchups found.';
+      }
+
+      importBtn.addEventListener('click', () => {
+        const open = importPanel.style.display !== 'none';
+        importPanel.style.display = open ? 'none' : '';
+        importBtn.classList.toggle('active', !open);
+      });
+
+      importDeckSel.addEventListener('change', () => {
+        const selId = importDeckSel.value;
+        importMatchupSel.innerHTML = '<option value="">— Matchup —</option>';
+        importMatchupSel.disabled = true;
+        importApplyBtn.disabled = true;
+        importHint.textContent = '';
+        if (!selId) return;
+        const guide = selId === '__current__'
+          ? currentGuide
+          : getSideboardGuide(allDecks.find(d => d.id === selId) || {});
+        for (const m of guide) {
+          const opt = document.createElement('option');
+          opt.value = m.id;
+          opt.textContent = m.hero + ' (' + m.rating + ')';
+          importMatchupSel.appendChild(opt);
+        }
+        importMatchupSel.disabled = false;
+      });
+
+      importMatchupSel.addEventListener('change', () => {
+        importApplyBtn.disabled = !importMatchupSel.value;
+      });
+
+      importApplyBtn.addEventListener('click', () => {
+        const selDeckId = importDeckSel.value;
+        const selMatchupId = importMatchupSel.value;
+        if (!selDeckId || !selMatchupId) return;
+
+        const guide = selDeckId === '__current__'
+          ? currentGuide
+          : getSideboardGuide(allDecks.find(d => d.id === selDeckId) || {});
+        const src = guide.find(m => m.id === selMatchupId);
+        if (!src) return;
+
+        document.getElementById('sb-hero-input').value = src.hero;
+        document.getElementById('sb-rating-select').value = src.rating;
+        selectedRating = src.rating;
+        const goVal = src.goFirst || '';
+        document.getElementById('sb-go-select').value = goVal;
+        selectedGoFirst = goVal || null;
+        document.getElementById('sb-note').value = src.note || '';
+
+        isSplit = !!(src.splitSideboard);
+        document.getElementById('sb-split-toggle').checked = isSplit;
+
+        function mapCards(rawText) {
+          const result = {};
+          for (const c of parseDecklist(rawText || '')) {
+            const pair = deckPairs.find(p =>
+              p.entry.name.toLowerCase() === c.name.toLowerCase() &&
+              (p.entry.hint || '') === (c.hint || '')
+            );
+            if (pair) {
+              const key = pair.entry.name.toLowerCase() + '|' + (pair.entry.hint || '');
+              result[key] = Math.min(c.qty, pair.entry.qty);
+            }
+          }
+          return result;
+        }
+
+        for (const k of Object.keys(boardMapSingle)) delete boardMapSingle[k];
+        for (const k of Object.keys(boardMapFirst))  delete boardMapFirst[k];
+        for (const k of Object.keys(boardMapSecond)) delete boardMapSecond[k];
+
+        if (isSplit) {
+          Object.assign(boardMapFirst,  mapCards(src.cardsOutFirstRaw  || src.cardsOutRaw || ''));
+          Object.assign(boardMapSecond, mapCards(src.cardsOutSecondRaw || ''));
+          activeSplitTab = 'first';
+        } else {
+          Object.assign(boardMapSingle, mapCards(src.cardsOutRaw || ''));
+        }
+
+        importPanel.style.display = 'none';
+        importBtn.classList.remove('active');
+        importHint.textContent = '';
+
+        renderSplitTabs();
+        renderPicker();
+      });
+    }
 
     document.getElementById('sb-split-toggle').addEventListener('change', (e) => {
       isSplit = e.target.checked;
