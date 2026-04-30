@@ -3733,17 +3733,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         const src = guide.find(m => m.id === selMatchupId);
         if (!src) return;
 
-        document.getElementById('sb-hero-input').value = src.hero;
-        document.getElementById('sb-rating-select').value = src.rating;
-        selectedRating = src.rating;
-        const goVal = src.goFirst || '';
-        document.getElementById('sb-go-select').value = goVal;
-        selectedGoFirst = goVal || null;
-        document.getElementById('sb-note').value = src.note || '';
-
-        isSplit = !!(src.splitSideboard);
-        document.getElementById('sb-split-toggle').checked = isSplit;
-
         function mapCards(rawText) {
           const result = {};
           for (const c of parseDecklist(rawText || '')) {
