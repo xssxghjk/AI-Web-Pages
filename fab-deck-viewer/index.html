@@ -1807,6 +1807,8 @@
   <div class="page">
     <div class="page-header">
       <div class="page-header-title">My Decks</div>
+      <input type="file" id="file-import-input" accept=".json" style="display:none">
+      <button class="btn-secondary" id="btn-file-import" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">Import File</button>
       <button class="btn-primary" id="btn-go-import">+ Import Deck</button>
     </div>
 
@@ -1887,6 +1889,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         My Decks
       </button>
       <div style="flex:1"></div>
+      <button class="btn-secondary" id="btn-export-deck" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">Export</button>
       <button class="btn-danger" id="btn-delete-deck">Delete</button>
     </div>
 
@@ -4924,6 +4927,80 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     if (!row) return;
     e.preventDefault();
     openCategoryPopup(row.dataset.filterType, row.dataset.filterKey);
+  });
+
+  /* ── Deck export ──────────────────────────────────────────────────── */
+  function exportDeck(deck) {
+    const payload = {
+      format: 'fab-deck-viewer/v1',
+      name: deck.name,
+      decklist: deck.decklist,
+      sideboardGuide: getSideboardGuide(deck),
+    };
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = (deck.name || 'deck').replace(/[^a-zA-Z0-9 _-]/g, '').trim().replace(/\s+/g, '-') + '.fabdeck.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('btn-export-deck').addEventListener('click', () => {
+    if (!currentDeckId) return;
+    const deck = loadDecks().find(d => d.id === currentDeckId);
+    if (deck) exportDeck(deck);
+  });
+
+  /* ── Deck file import ─────────────────────────────────────────────── */
+  function importDeckFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = async function (e) {
+      let data;
+      try {
+        data = JSON.parse(e.target.result);
+      } catch {
+        alert('Could not parse file — make sure it is a valid .json export.');
+        return;
+      }
+      if (!data || typeof data.decklist !== 'string') {
+        alert('Invalid deck file: missing decklist.');
+        return;
+      }
+      const entries = parseDecklist(data.decklist);
+      if (!entries.length) {
+        alert('No card entries found in the imported file.');
+        return;
+      }
+      const cardCount = entries.reduce((s, e) => s + e.qty, 0);
+      const deck = {
+        id:           Date.now().toString(36) + Math.random().toString(36).slice(2),
+        name:         (typeof data.name === 'string' && data.name.trim()) ? data.name.trim() : 'Imported Deck',
+        decklist:     data.decklist,
+        cardCount,
+        savedAt:      new Date().toISOString(),
+        sideboardGuide: Array.isArray(data.sideboardGuide) ? data.sideboardGuide : [],
+      };
+      const decks = loadDecks();
+      decks.unshift(deck);
+      saveDecks(decks);
+      renderList();
+      await viewDeck(deck.id);
+    };
+    reader.readAsText(file);
+  }
+
+  document.getElementById('btn-file-import').addEventListener('click', () => {
+    document.getElementById('file-import-input').value = '';
+    document.getElementById('file-import-input').click();
+  });
+
+  document.getElementById('file-import-input').addEventListener('change', function () {
+    const file = this.files && this.files[0];
+    if (file) importDeckFromFile(file);
   });
 
   /* ── Init ─────────────────────────────────────────────────────────── */
