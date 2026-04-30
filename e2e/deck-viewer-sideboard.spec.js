@@ -164,6 +164,10 @@ test.describe('sideboard guide', () => {
     await seedDeck(page, deck);
     await openDeckSideboard(page);
 
+    // Switch to Coverage sub-tab
+    await page.click('#sb-sub-tab-coverage');
+    await page.waitForSelector('#sideboard-heatmap', { state: 'visible' });
+
     // Fry is cut in both matchups → survivedMatchups = 0 ≤ 1 → cut candidate
     const candidateRow = page.locator('.sb-heatmap-row', { hasText: 'Fry' });
     await expect(candidateRow.locator('.sb-cut-candidate')).toBeVisible();
