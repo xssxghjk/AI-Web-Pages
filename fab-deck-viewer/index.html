@@ -193,48 +193,63 @@
     .btn-back svg { opacity: 0.7; }
 
     /* ── Deck list ── */
-    .deck-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .deck-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.75rem;
+    }
 
     .deck-row {
-      display: flex; align-items: center; gap: 1rem;
-      padding: 0.9rem 1.25rem;
+      display: block;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-left: 3px solid transparent;
+      border-top: 2px solid var(--accent);
       border-radius: 2px;
+      overflow: hidden;
       cursor: pointer;
-      transition: border-color 0.15s, background 0.15s, border-left-color 0.15s;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .deck-row:hover {
+      box-shadow: 0 6px 28px rgba(0,0,0,0.45);
       border-color: var(--border-2);
-      border-left-color: var(--accent);
-      background: var(--surface-2);
     }
-    .deck-row-icon {
-      width: 36px; height: 36px; flex-shrink: 0;
-      background: rgba(196,134,74,0.06);
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--accent);
+    .deck-row-body {
+      padding: 1.1rem 1.25rem 0.9rem;
     }
-    .deck-row-body { flex: 1; min-width: 0; }
     .deck-row-name {
       font-family: 'Cormorant Garamond', Georgia, serif;
       font-style: italic;
-      font-size: 0.95rem; font-weight: 700;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-size: 1.05rem; font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 0.7rem;
     }
     .deck-row-meta {
-      margin-top: 0.2rem;
       font-size: 0.72rem; color: var(--muted);
       font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
     }
-    .deck-row-chevron {
-      color: var(--muted-2); font-size: 1.1rem; line-height: 1;
-      transition: color 0.15s;
+    .deck-row-cta {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 1.25rem;
+      border-top: 1px solid var(--border);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.78rem;
+      font-style: italic;
+      color: var(--muted);
+      transition: color 0.15s, background 0.15s;
     }
-    .deck-row:hover .deck-row-chevron { color: var(--accent); }
+    .deck-row:hover .deck-row-cta {
+      color: var(--muted-2);
+      background: rgba(232,223,208,0.04);
+    }
+    .deck-row-cta-arrow {
+      margin-left: auto;
+      font-size: 1rem;
+      transition: transform 0.15s;
+    }
+    .deck-row:hover .deck-row-cta-arrow { transform: translateX(3px); }
 
     /* ── Empty state ── */
     .empty-state {
@@ -580,6 +595,9 @@
     footer a:hover { color: var(--accent); }
 
     /* ── Mobile ── */
+    @media (max-width: 768px) {
+      .deck-list { grid-template-columns: 1fr; }
+    }
     @media (max-width: 600px) {
       .page { padding: 1.25rem 1rem 3rem; }
       .card-grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 0.5rem; }
@@ -2031,18 +2049,14 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const date  = new Date(deck.savedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
       row.innerHTML = `
-        <div class="deck-row-icon">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="1" y="2" width="11" height="14" rx="1.5"/>
-            <rect x="6" y="4" width="11" height="14" rx="1.5" fill="var(--surface)" stroke-width="1.4"/>
-            <path d="M8 9h5M8 12h3" stroke-width="1.3"/>
-          </svg>
-        </div>
         <div class="deck-row-body">
           <div class="deck-row-name">${esc(deck.name)}</div>
           <div class="deck-row-meta">${count}${date}</div>
         </div>
-        <div class="deck-row-chevron">›</div>
+        <div class="deck-row-cta">
+          View deck
+          <span class="deck-row-cta-arrow">→</span>
+        </div>
       `;
 
       row.addEventListener('click', () => viewDeck(deck.id));
