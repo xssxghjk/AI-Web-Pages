@@ -200,4 +200,30 @@ test.describe('sideboard guide', () => {
     await expect(page.locator('#sideboard-content')).not.toContainText('Kayo');
     await expect(page.locator('#sideboard-content')).toContainText('No sideboard guides yet');
   });
+
+  test('10: opening sideboard editor scrolls to the top of the page', async ({ page }) => {
+    const deck = {
+      ...SEED_DECK,
+      sideboardGuide: [
+        { id: 'kayo', hero: 'Kayo', rating: 'favoured', goFirst: 'first', note: '', cardsOutRaw: '2 Fry (red)' },
+      ],
+    };
+    await seedDeck(page, deck);
+    // Use a short viewport so the page is definitely scrollable
+    await page.setViewportSize({ width: 800, height: 300 });
+    await openDeckSideboard(page);
+
+    // Scroll down so we are not at the top
+    await page.evaluate(() => window.scrollTo(0, 500));
+    await page.waitForFunction(() => window.scrollY > 0);
+
+    // Open editor via edit button
+    await page.click('.sb-matchup-head');
+    await page.waitForSelector('.sb-matchup-edit-btn', { state: 'visible' });
+    await page.click('.sb-matchup-edit-btn');
+
+    // Page should scroll back to top
+    await page.waitForFunction(() => window.scrollY === 0);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  });
 });
