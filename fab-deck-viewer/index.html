@@ -1318,14 +1318,34 @@
     .sim-card-chip.blue   { background: rgba(90,180,204,0.08); border-color: var(--blue-c);   color: var(--blue-c); }
     /* Draw rates table */
     .sim-dr-table { display: flex; flex-direction: column; gap: 0.18rem; }
+    .sim-dr-outer { overflow-x: auto; }
     .sim-dr-row {
       display: flex; align-items: center; gap: 0.5rem;
       padding: 0.28rem 0.65rem; background: var(--surface-2);
       border: 1px solid var(--border); border-radius: 2px; font-size: 0.74rem;
+      min-width: max-content;
     }
-    .sim-dr-type  { flex: 1; color: var(--text); }
-    .sim-dr-count { min-width: 36px; text-align: right; color: var(--muted); font-size: 0.68rem; }
+    .sim-dr-type  { flex: 1; min-width: 110px; color: var(--text); }
+    .sim-dr-count { min-width: 48px; text-align: right; color: var(--muted); font-size: 0.68rem; }
     .sim-dr-avg   { min-width: 52px; text-align: right; color: var(--accent); font-weight: 700; font-size: 0.8rem; }
+    .sim-dr-header-row {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0 0.65rem 0.3rem; min-width: max-content;
+      font-size: 0.6rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted);
+    }
+    .sim-dr-header-row .sim-dr-type  { color: transparent; pointer-events: none; }
+    .sim-dr-header-row .sim-dr-count { color: transparent; pointer-events: none; }
+    .sim-dr-avg-head { min-width: 52px; text-align: right; }
+    .sim-dr-pct-head { min-width: 52px; text-align: right; }
+    .sim-dr-pct { min-width: 52px; text-align: right; font-size: 0.68rem; color: var(--muted); }
+    .sim-dr-detail-btn {
+      background: transparent; border: 1px solid var(--border-2); border-radius: 2px;
+      color: var(--muted); font-size: 0.56rem; letter-spacing: 0.07em; text-transform: uppercase;
+      font-style: normal; padding: 0.15rem 0.45rem; cursor: pointer; font-family: inherit;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .sim-dr-detail-btn:hover { color: var(--text); border-color: var(--text); }
+    .sim-dr-detail-btn.active { color: var(--accent); border-color: var(--accent); }
     .sim-hand-total { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 0.15rem; }
     .sim-ht-label { font-family: 'DM Serif Text', Georgia, serif; font-style: italic; font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
     .sim-ht-val   { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 900; font-size: 2rem; line-height: 1; color: var(--accent); }
@@ -2053,6 +2073,20 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   let currentAnalysisMatchupId = '';
   let analysisSubTab = 'numbers';
   let simHandSize = 4;
+  let simDrDetails = false;
+
+  function _comb(n, k) {
+    if (k < 0 || k > n) return 0;
+    if (k === 0 || k === n) return 1;
+    k = Math.min(k, n - k);
+    let c = 1;
+    for (let i = 0; i < k; i++) c = c * (n - i) / (i + 1);
+    return c;
+  }
+  function hypergeomPMF(N, K, n, k) {
+    if (N <= 0) return 0;
+    return _comb(K, k) * _comb(N - K, n - k) / _comb(N, n);
+  }
 
   const memState = {
     screen: 'setup',
@@ -2500,11 +2534,24 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     }
     const typeEntries = Object.entries(typeCts).sort((a, b) => b[1] - a[1]);
 
-    function drRowHtml(hs2) {
-      return typeEntries.map(([t, c]) => {
+    simDrDetails = localStorage.getItem('fab-sim-dr-details') === '1';
+
+    function drTableContentHtml(hs2) {
+      const pctHeaders = simDrDetails
+        ? [0,1,2,3,4].map(k => `<span class="sim-dr-pct-head">${k}×</span>`).join('')
+        : '';
+      const headerRow = `<div class="sim-dr-header-row"><span class="sim-dr-type">type</span><span class="sim-dr-count">count</span><span class="sim-dr-avg-head">avg/hand</span>${pctHeaders}</div>`;
+      const rows = typeEntries.map(([t, c]) => {
         const avg2 = deckSize > 0 ? (hs2 * c / deckSize).toFixed(2) : '—';
-        return `<div class="sim-dr-row"><span class="sim-dr-type">${esc(t)}</span><span class="sim-dr-count">${c} cards</span><span class="sim-dr-avg">${avg2}</span></div>`;
+        const pctCells = simDrDetails
+          ? [0,1,2,3,4].map(k => {
+              const p = hypergeomPMF(deckSize, c, hs2, k);
+              return `<span class="sim-dr-pct">${(p * 100).toFixed(1)}%</span>`;
+            }).join('')
+          : '';
+        return `<div class="sim-dr-row"><span class="sim-dr-type">${esc(t)}</span><span class="sim-dr-count">${c} cards</span><span class="sim-dr-avg">${avg2}</span>${pctCells}</div>`;
       }).join('');
+      return headerRow + `<div class="sim-dr-table">${rows}</div>`;
     }
 
     el.innerHTML = `
@@ -2515,13 +2562,13 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
       ${typeEntries.length > 0 ? `
       <div class="analysis-section">
-        <div class="analysis-head">Average Draw Rates</div>
+        <div class="analysis-head" style="display:flex;align-items:center;justify-content:space-between;">
+          Average Draw Rates
+          <button class="sim-dr-detail-btn${simDrDetails ? ' active' : ''}" id="sim-dr-detail-btn">${simDrDetails ? 'Hide Details' : 'Details'}</button>
+        </div>
         <div class="analysis-body">
           <p style="font-size:0.72rem;color:var(--muted);font-style:italic;margin-bottom:0.65rem;line-height:1.5;">Expected cards of each type per hand of <span id="sim-dr-hs">${hs}</span>. Updates with hand size.</p>
-          <div style="display:flex;justify-content:flex-end;gap:1rem;padding:0 0.65rem 0.3rem;font-size:0.6rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);">
-            <span style="min-width:52px;text-align:right;">avg/hand</span>
-          </div>
-          <div class="sim-dr-table" id="sim-dr-table">${drRowHtml(hs)}</div>
+          <div class="sim-dr-outer" id="sim-dr-outer">${drTableContentHtml(hs)}</div>
         </div>
       </div>` : ''}
 
@@ -2576,13 +2623,26 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     // Hand size live update
     document.getElementById('sim-hand-inp').addEventListener('input', function () {
       simHandSize = getHandSize();
-      const noteEl = document.getElementById('sim-turns-hand-note');
-      const hsEl   = document.getElementById('sim-dr-hs');
-      const drEl   = document.getElementById('sim-dr-table');
-      if (noteEl) noteEl.textContent = simHandSize;
-      if (hsEl)   hsEl.textContent   = simHandSize;
-      if (drEl)   drEl.innerHTML     = drRowHtml(simHandSize);
+      const noteEl  = document.getElementById('sim-turns-hand-note');
+      const hsEl    = document.getElementById('sim-dr-hs');
+      const outerEl = document.getElementById('sim-dr-outer');
+      if (noteEl)  noteEl.textContent = simHandSize;
+      if (hsEl)    hsEl.textContent   = simHandSize;
+      if (outerEl) outerEl.innerHTML  = drTableContentHtml(simHandSize);
     });
+
+    // Details toggle
+    const detailBtn = document.getElementById('sim-dr-detail-btn');
+    if (detailBtn) {
+      detailBtn.addEventListener('click', function () {
+        simDrDetails = !simDrDetails;
+        localStorage.setItem('fab-sim-dr-details', simDrDetails ? '1' : '0');
+        this.classList.toggle('active', simDrDetails);
+        this.textContent = simDrDetails ? 'Hide Details' : 'Details';
+        const outerEl = document.getElementById('sim-dr-outer');
+        if (outerEl) outerEl.innerHTML = drTableContentHtml(getHandSize());
+      });
+    }
 
     // Draw Hand
     document.getElementById('sim-btn-draw').addEventListener('click', function () {
