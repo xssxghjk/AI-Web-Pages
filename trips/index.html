@@ -247,77 +247,101 @@
     /* ── TILES GRID ── */
     .tiles-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 0.6rem;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.75rem;
     }
 
     /* ── TRIP TILE ── */
     .trip-tile {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+      display: block;
       text-decoration: none;
       color: inherit;
       background: var(--surface);
       border: 1px solid var(--border);
       border-top: 2px solid var(--border2);
-      padding: 1.1rem 1.25rem 1rem;
+      border-radius: 2px;
+      overflow: hidden;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .trip-tile:hover {
       box-shadow: 0 6px 28px rgba(0,0,0,0.45);
+      border-color: var(--border2);
     }
     .trip-tile.s-upcoming { border-top-color: var(--upcoming); }
     .trip-tile.s-ongoing  { border-top-color: var(--ongoing); }
     .trip-tile.s-past     { border-top-color: var(--past); }
     .trip-tile.s-planning { border-top-color: var(--planning); }
-    .trip-tile.s-upcoming:hover { border-color: var(--upcoming-border); border-top-color: var(--upcoming); }
-    .trip-tile.s-ongoing:hover  { border-color: var(--ongoing-border);  border-top-color: var(--ongoing); }
-    .trip-tile.s-past:hover     { border-color: var(--past-border);     border-top-color: var(--past); }
-    .trip-tile.s-planning:hover { border-color: var(--planning-border); border-top-color: var(--planning); }
 
-    .tile-left {
+    .tile-body {
+      padding: 1.1rem 1.25rem 0.9rem;
+    }
+    .tile-meta {
       display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-      flex: 1;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.6rem;
     }
-    .tile-title {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 1.1rem;
-      font-weight: 700;
+    .status-badge {
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.65rem;
       font-style: italic;
-      line-height: 1.2;
-      color: var(--text);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.5rem;
+      border-radius: 2px;
+      border: 1px solid;
     }
+    .status-badge.s-upcoming { color: var(--upcoming); background: var(--upcoming-bg); border-color: var(--upcoming-border); }
+    .status-badge.s-ongoing  { color: var(--ongoing);  background: var(--ongoing-bg);  border-color: var(--ongoing-border); }
+    .status-badge.s-past     { color: var(--past);     background: var(--past-bg);     border-color: var(--past-border); }
+    .status-badge.s-planning { color: var(--planning); background: var(--planning-bg); border-color: var(--planning-border); }
     .tile-fab-tag {
       font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.6rem;
+      font-size: 0.65rem;
       font-style: italic;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
+      padding: 0.15rem 0.5rem;
+      border-radius: 2px;
       color: var(--accent);
       background: var(--accent-dim);
       border: 1px solid rgba(196,134,74,0.25);
-      border-radius: 2px;
-      padding: 0.1rem 0.45rem;
-      align-self: flex-start;
+    }
+    .tile-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-style: italic;
+      line-height: 1.25;
+      color: var(--text);
+      margin-bottom: 0.7rem;
     }
 
-    .tile-countdown {
+    .tile-cta {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 1.25rem;
+      border-top: 1px solid var(--border);
       font-family: 'DM Serif Text', Georgia, serif;
       font-size: 0.78rem;
       font-style: italic;
-      white-space: nowrap;
-      flex-shrink: 0;
-      margin-top: auto;
-      padding-top: 0.35rem;
-      border-top: 1px solid var(--border);
+      color: var(--muted);
+      transition: color 0.15s, background 0.15s;
     }
-    .trip-tile.s-upcoming .tile-countdown { color: var(--upcoming); }
-    .trip-tile.s-ongoing  .tile-countdown { color: var(--ongoing); }
-    .trip-tile.s-past     .tile-countdown { color: var(--muted); }
-    .trip-tile.s-planning .tile-countdown { color: var(--planning); }
+    .trip-tile.s-upcoming .tile-cta { color: var(--upcoming); }
+    .trip-tile.s-ongoing  .tile-cta { color: var(--ongoing); }
+    .trip-tile.s-past     .tile-cta { color: var(--muted); }
+    .trip-tile.s-planning .tile-cta { color: var(--planning); }
+    .trip-tile:hover .tile-cta { background: rgba(232,223,208,0.04); }
+    .tile-cta-arrow {
+      margin-left: auto;
+      font-size: 1rem;
+      transition: transform 0.15s;
+      color: var(--muted2);
+    }
+    .trip-tile:hover .tile-cta-arrow { transform: translateX(3px); }
 
     /* ── CALENDAR LINK ── */
     .cal-link {
@@ -336,9 +360,10 @@
     .cal-link:hover { color: var(--text); }
 
     /* ── RESPONSIVE ── */
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
       .tiles-grid { grid-template-columns: 1fr; }
-      .hero { padding: 1.5rem 1.25rem 1.25rem; }
+      .hero { padding: 1.75rem 1.25rem 1.5rem; }
+      .filter-toggle-bar { padding: 0.55rem 1.25rem; }
     }
 
     /* ── FOOTER ── */
@@ -459,6 +484,7 @@
     function renderTile(t) {
       const countdown = daysUntil(t.startDate, t.endDate, t.status);
       const hasFab = t.tags && t.tags.includes('FaB');
+      const statusLabel = STATUS_LABELS[t.status] || t.status;
       return `
         <a
           class="trip-tile s-${esc(t.status)}"
@@ -467,11 +493,17 @@
           data-status="${esc(t.status)}"
           data-region="${esc(t.region.toLowerCase())}"
         >
-          <div class="tile-left">
+          <div class="tile-body">
+            <div class="tile-meta">
+              <span class="status-badge s-${esc(t.status)}">${esc(statusLabel)}</span>
+              ${hasFab ? '<span class="tile-fab-tag">FaB</span>' : ''}
+            </div>
             <div class="tile-title">${esc(t.title)}</div>
-            ${hasFab ? '<span class="tile-fab-tag">FaB</span>' : ''}
           </div>
-          <div class="tile-countdown">${esc(countdown)}</div>
+          <div class="tile-cta">
+            ${esc(countdown)}
+            <span class="tile-cta-arrow">→</span>
+          </div>
         </a>`;
     }
 
