@@ -2046,13 +2046,22 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   /* ── View routing ─────────────────────────────────────────────────── */
   let currentDeckId = null;
 
-  function showView(id) {
+  function showView(id, opts = {}) {
     document.querySelectorAll('.view').forEach(v => {
       v.style.display = 'none';
     });
     const el = document.getElementById(id);
     el.style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'instant' });
+    if (!opts.skipHistory) {
+      const state = { view: id };
+      if (id === 'view-detail') state.deckId = currentDeckId;
+      if (opts.replace) {
+        history.replaceState(state, '');
+      } else {
+        history.pushState(state, '');
+      }
+    }
   }
 
   /* ── Loading overlay ──────────────────────────────────────────────── */
@@ -2186,7 +2195,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   }
 
   /* ── Detail view ──────────────────────────────────────────────────── */
-  async function viewDeck(id) {
+  async function viewDeck(id, { skipHistory = false } = {}) {
     const deck = loadDecks().find(d => d.id === id);
     if (!deck) return;
     currentDeckId = id;
@@ -2199,7 +2208,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const pairs   = entries.map(e => ({ entry: e, card: lookup(e.name, e.hint) }));
       hideLoading();
       renderDetail(deck, pairs);
-      showView('view-detail');
+      showView('view-detail', { skipHistory });
     } catch (e) {
       hideLoading();
       alert('Error: ' + e.message);
@@ -3923,7 +3932,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const entries = parseDecklist(deck.decklist);
     const pairs   = entries.map(e => ({ entry: e, card: lookup(e.name, e.hint) }));
     renderDetail(deck, pairs);
-    showView('view-detail');
+    showView('view-detail', { skipHistory: true });
   }
 
   function closeReplaceCardModal() {
@@ -5127,9 +5136,24 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     if (file) importDeckFromFile(file);
   });
 
+  /* ── Popstate (browser back/forward) ──────────────────────────────── */
+  window.addEventListener('popstate', async (e) => {
+    const state = e.state;
+    if (!state || state.view === 'view-list') {
+      showView('view-list', { skipHistory: true });
+    } else if (state.view === 'view-import') {
+      document.getElementById('decklist').value  = '';
+      document.getElementById('deck-name').value = '';
+      document.getElementById('import-err').style.display = 'none';
+      showView('view-import', { skipHistory: true });
+    } else if (state.view === 'view-detail' && state.deckId) {
+      await viewDeck(state.deckId, { skipHistory: true });
+    }
+  });
+
   /* ── Init ─────────────────────────────────────────────────────────── */
   renderList();
-  showView('view-list');
+  showView('view-list', { replace: true });
 
 })();
 </script>
