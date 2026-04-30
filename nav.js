@@ -98,7 +98,30 @@
     '.mobile-nav-close{display:flex;align-items:center;justify-content:center;' +
       'width:32px;height:32px;border:none;background:none;cursor:pointer;' +
       'border-radius:3px;color:#58584e;transition:background 0.15s,color 0.15s}' +
-    '.mobile-nav-close:hover{background:rgba(255,255,252,0.06);color:#c8c4b4}';
+    '.mobile-nav-close:hover{background:rgba(255,255,252,0.06);color:#c8c4b4}' +
+
+    /* legal disclaimer strip */
+    '.nav-disclaimer{padding:0.85rem 1.5rem;font-size:0.67rem;font-style:italic;' +
+      'color:#4a4035;border-top:1px solid #2a2318;text-align:center;' +
+      'line-height:1.65;flex-shrink:0}' +
+    '.nav-disclaimer a{color:#6a5e50;text-decoration:none;border-bottom:1px solid #3a3025}' +
+    '.nav-disclaimer a:hover{color:#9a8a76}' +
+
+    /* storage notice banner */
+    '.nav-storage-notice{position:fixed;bottom:0;left:0;right:0;z-index:9000;' +
+      'background:#181410;border-top:1px solid #2e2820;' +
+      'padding:0.85rem 1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;' +
+      'font-size:0.72rem;color:#7a6e60;font-family:"DM Serif Text",Georgia,serif;' +
+      'box-shadow:0 -4px 24px rgba(0,0,0,0.45)}' +
+    '.nav-storage-notice p{margin:0;flex:1;min-width:180px;line-height:1.55}' +
+    '.nav-storage-notice a{color:#8a7e6e;border-bottom:1px solid #3a3025;text-decoration:none}' +
+    '.nav-storage-notice a:hover{color:#b5a48e}' +
+    '.nav-storage-notice-btn{flex-shrink:0;padding:0.4rem 1rem;' +
+      'background:rgba(196,134,74,0.12);border:1px solid rgba(196,134,74,0.3);' +
+      'color:#c4864a;border-radius:2px;cursor:pointer;font-size:0.7rem;' +
+      'font-family:"DM Serif Text",Georgia,serif;letter-spacing:0.04em;' +
+      'transition:background 0.15s,border-color 0.15s}' +
+    '.nav-storage-notice-btn:hover{background:rgba(196,134,74,0.22);border-color:rgba(196,134,74,0.5)}';
   document.head.appendChild(style);
 
   // ── Inject favicon ───────────────────────────────────────────────────────
@@ -218,6 +241,30 @@ if (/\/marathon-training(\/|$)/.test(p))      return 'marathon';
       pageContent.appendChild(document.body.firstChild);
     }
     pageContent.insertBefore(mobileHeader, pageContent.firstChild);
+    var disclaimer = document.createElement('div');
+    disclaimer.className = 'nav-disclaimer';
+    disclaimer.innerHTML = 'This is an unofficial fan site. Not affiliated with, endorsed by, or sponsored by Legend Story Studios. ' +
+      'Flesh and Blood and all related marks are trademarks of Legend Story Studios. &mdash; ' +
+      '<a href="' + NAV_BASE + 'privacy/">Privacy Policy</a>';
+    pageContent.appendChild(disclaimer);
+
+    // Storage notice banner (dismissed state persisted in localStorage)
+    if (!localStorage.getItem('nav_notice_v1')) {
+      var notice = document.createElement('div');
+      notice.className = 'nav-storage-notice';
+      notice.innerHTML =
+        '<p>This site stores data <strong style="color:#9a8a76;font-weight:normal">locally in your browser</strong> ' +
+        '(localStorage) to save things like decks, training logs, and UI preferences. ' +
+        'No cookies, no analytics, no data is ever sent to a server. ' +
+        '<a href="' + NAV_BASE + 'privacy/">Learn more</a></p>' +
+        '<button class="nav-storage-notice-btn" id="nav-notice-dismiss">Got it</button>';
+      document.body.appendChild(notice);
+      document.getElementById('nav-notice-dismiss').addEventListener('click', function () {
+        localStorage.setItem('nav_notice_v1', '1');
+        notice.remove();
+      });
+    }
+
     appLayout.appendChild(sidebar);
     appLayout.appendChild(pageContent);
     document.body.appendChild(appLayout);
