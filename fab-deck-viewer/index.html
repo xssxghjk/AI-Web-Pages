@@ -3421,6 +3421,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   }
 
   function openMatchupEditor(deck, deckPairs, matchupIdOrNull) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const guide = getSideboardGuide(deck);
     const existing = matchupIdOrNull ? guide.find(m => m.id === matchupIdOrNull) : null;
 
