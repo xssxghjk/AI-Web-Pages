@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — xssxghjk</title>
+  <script src="../nav.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0e0c0a;
+      --surface:  #141210;
+      --border:   #1e1c18;
+      --text:     #c8bfb0;
+      --muted:    #6a5e50;
+      --muted-2:  #3e3630;
+      --accent:   #c4864a;
+      --ink:      #e8dfd0;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); }
+
+    body {
+      font-family: "DM Serif Text", Georgia, serif;
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 3.5rem 2.5rem 2.75rem;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(160deg, #141210 0%, #0e0c0a 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 10% 50%, rgba(196,134,74,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.9rem;
+    }
+    .hero h1 {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 900;
+      color: var(--ink);
+      line-height: 1.1;
+      margin-bottom: 0.75rem;
+    }
+    .hero-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      max-width: 680px;
+      padding: 3rem 2.5rem 4rem;
+    }
+
+    @media (max-width: 600px) {
+      .hero { padding: 2rem 1.25rem 1.75rem; }
+      .content { padding: 2rem 1.25rem 3rem; }
+    }
+
+    .section {
+      margin-bottom: 2.75rem;
+    }
+
+    .section h2 {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section p {
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+
+    .section p:last-child { margin-bottom: 0; }
+
+    .section ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0.75rem;
+    }
+
+    .section ul li {
+      font-size: 0.88rem;
+      color: var(--text);
+      padding: 0.3rem 0 0.3rem 1.1rem;
+      position: relative;
+      border-bottom: 1px solid var(--border);
+    }
+    .section ul li:last-child { border-bottom: none; }
+
+    .section ul li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--muted-2);
+    }
+
+    .section ul li strong {
+      color: var(--ink);
+      font-weight: normal;
+    }
+
+    .pill {
+      display: inline-block;
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border-radius: 2px;
+      vertical-align: middle;
+      margin-left: 0.4rem;
+    }
+    .pill-none { background: rgba(80,200,120,0.1); color: #6ab88a; border: 1px solid rgba(80,200,120,0.2); }
+    .pill-local { background: rgba(196,134,74,0.1); color: #c4864a; border: 1px solid rgba(196,134,74,0.2); }
+
+    .updated {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 3rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+
+    footer {
+      padding: 1.5rem 2rem;
+      font-size: 0.75rem;
+      font-style: italic;
+      color: var(--muted-2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <div class="hero-eyebrow">Legal</div>
+    <h1>Privacy Policy</h1>
+    <p class="hero-sub">A hobby site with nothing to hide.</p>
+  </div>
+
+  <div class="content">
+
+    <div class="section">
+      <h2>The short version</h2>
+      <p>This site does not collect, store, or transmit any personal data. There are no cookies, no analytics trackers, no user accounts, and no third-party advertising. All data stays on your device.</p>
+    </div>
+
+    <div class="section">
+      <h2>What is stored and where</h2>
+      <p>Some pages save data in your browser's <strong>localStorage</strong> so that your work persists between visits. This data never leaves your device.</p>
+      <ul>
+        <li><strong>Saved decks</strong> — card lists and sideboard notes you build in the Deck Builder. <span class="pill pill-local">Local only</span></li>
+        <li><strong>Marathon training log</strong> — workout entries and plan data. <span class="pill pill-local">Local only</span></li>
+        <li><strong>Trip notes &amp; state</strong> — packing and checklist state on trip detail pages. <span class="pill pill-local">Local only</span></li>
+        <li><strong>UI preferences</strong> — things like selected chart view in Project Stats. <span class="pill pill-local">Local only</span></li>
+        <li><strong>Notice dismissed</strong> — whether you've dismissed the storage notice banner. <span class="pill pill-local">Local only</span></li>
+      </ul>
+      <p>You can clear all of this at any time from your browser's developer tools or site settings.</p>
+    </div>
+
+    <div class="section">
+      <h2>Cookies</h2>
+      <p>This site sets <strong>no cookies</strong> whatsoever — first-party or third-party. <span class="pill pill-none">None</span></p>
+    </div>
+
+    <div class="section">
+      <h2>Analytics &amp; tracking</h2>
+      <p>There is <strong>no analytics, telemetry, heatmapping, session recording, or any other tracking</strong> on this site. <span class="pill pill-none">None</span></p>
+    </div>
+
+    <div class="section">
+      <h2>Third parties</h2>
+      <p>This site loads fonts from <strong>Google Fonts</strong> (fonts.googleapis.com / fonts.gstatic.com). This means Google's servers receive your IP address as part of serving those font files. Google's privacy policy applies to that request.</p>
+      <p>The site is hosted via <strong>GitHub Pages</strong>. GitHub may log request metadata (IP address, browser, timestamp) as part of normal server operation. GitHub's privacy policy applies.</p>
+      <p>No other external services are used.</p>
+    </div>
+
+    <div class="section">
+      <h2>Children</h2>
+      <p>This site is not directed at children and does not knowingly collect any information from anyone.</p>
+    </div>
+
+    <div class="section">
+      <h2>Contact</h2>
+      <p>This is a personal hobby project. If you have questions, open an issue on <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">GitHub</a>.</p>
+    </div>
+
+    <p class="updated">Last updated: April 2026</p>
+
+  </div>
+
+  <footer>
+    <span id="page-version" style="opacity:0.65"></span>
+    <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
+  </footer>
+  <script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='v'+v.version}).catch(()=>{});</script>
+
+</body>
+</html>
