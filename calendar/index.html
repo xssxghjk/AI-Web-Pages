@@ -804,13 +804,16 @@
       const viewport = document.getElementById('cal-viewport');
       const oldGrid  = document.getElementById('cal-grid');
       const w = viewport.offsetWidth;
+      // On desktop (2-month view), slide by 1 month width so the animation
+      // only moves one month, not two.
+      const slideAmount = isDesktop() ? Math.round(w / 2) : w;
       const oldH = viewport.offsetHeight;
 
       const newGrid = document.createElement('div');
       newGrid.innerHTML = html;
       Object.assign(newGrid.style, {
         position: 'absolute', top: '0', left: '0', width: '100%',
-        transform: `translateX(${direction > 0 ? w : -w}px)`,
+        transform: `translateX(${direction > 0 ? slideAmount : -slideAmount}px)`,
       });
       viewport.appendChild(newGrid);
       const newH = newGrid.offsetHeight;
@@ -825,7 +828,7 @@
       oldGrid.style.transition = transition;
       newGrid.style.transition = transition;
       viewport.style.height    = `${newH}px`;
-      oldGrid.style.transform  = `translateX(${direction > 0 ? -w : w}px)`;
+      oldGrid.style.transform  = `translateX(${direction > 0 ? -slideAmount : slideAmount}px)`;
       newGrid.style.transform  = 'translateX(0)';
 
       newGrid.addEventListener('transitionend', () => {
@@ -1113,12 +1116,13 @@
         updateLegend(tripsThisMonth);
 
         const w = viewport.offsetWidth;
+        const slideAmount = isDesktop() ? Math.round(w / 2) : w;
         const oldH = viewport.offsetHeight;
         const newGrid = document.createElement('div');
         newGrid.innerHTML = html;
         Object.assign(newGrid.style, {
           position: 'absolute', top: '0', left: '0', width: '100%',
-          transform: `translateX(${direction > 0 ? w : -w}px)`,
+          transform: `translateX(${direction > 0 ? slideAmount : -slideAmount}px)`,
         });
         viewport.appendChild(newGrid);
         const newH = newGrid.offsetHeight;
@@ -1132,7 +1136,7 @@
         grid.style.transition = transition;
         newGrid.style.transition = transition;
         viewport.style.height   = `${newH}px`;
-        grid.style.transform    = `translateX(${direction > 0 ? -w : w}px)`;
+        grid.style.transform    = `translateX(${direction > 0 ? -slideAmount : slideAmount}px)`;
         newGrid.style.transform = 'translateX(0)';
 
         newGrid.addEventListener('transitionend', () => {
