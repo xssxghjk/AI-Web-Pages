@@ -2602,8 +2602,11 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const costKeys = ['0','1','2','3','4','5','6','7+'];
     const visibleCostKeys = costKeys.filter(k => stats.costDist[k]);
     if (visibleCostKeys.length > 0) {
-      const maxC = Math.max(...costKeys.map(k => stats.costDist[k] || 0));
-      const cols = costKeys.map(k => {
+      const minIdx = costKeys.indexOf(visibleCostKeys[0]);
+      const maxIdx = costKeys.indexOf(visibleCostKeys[visibleCostKeys.length - 1]);
+      const activeCostKeys = costKeys.slice(minIdx, maxIdx + 1);
+      const maxC = Math.max(...activeCostKeys.map(k => stats.costDist[k] || 0));
+      const cols = activeCostKeys.map(k => {
         const count = stats.costDist[k] || 0;
         const pct = maxC ? (count / maxC * 100).toFixed(1) : 0;
         return `<div class="vchart-col">
