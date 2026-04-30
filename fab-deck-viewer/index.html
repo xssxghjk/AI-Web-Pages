@@ -2718,7 +2718,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     simDrDetails = localStorage.getItem('fab-sim-dr-details') === '1';
 
     function drTableContentHtml(hs2) {
-      const cols = Array.from({length: hs2}, (_, k) => k);
+      const cols = Array.from({length: hs2 + 1}, (_, k) => k);
       const pctHeaders = simDrDetails
         ? cols.map(k => `<span class="sim-dr-pct-head">${k}×</span>`).join('')
         : '';
