@@ -151,22 +151,16 @@ test.describe('deck export / import', () => {
     fs.unlinkSync(tmpPath);
   });
 
-  test('importing a file without a decklist shows an alert', async ({ page }) => {
+  test('importing a file without a decklist shows an error toast', async ({ page }) => {
     await page.goto('/fab-deck-viewer/');
 
     const tmpPath = path.join(os.tmpdir(), 'test-bad-import.json');
     fs.writeFileSync(tmpPath, JSON.stringify({ name: 'No Decklist' }));
 
-    let alertMsg = '';
-    page.once('dialog', async dialog => {
-      alertMsg = dialog.message();
-      await dialog.accept();
-    });
-
     await page.locator('#file-import-input').setInputFiles(tmpPath);
-    await page.waitForTimeout(200);
+    await page.waitForSelector('#toast.toast-visible', { state: 'attached' });
 
-    expect(alertMsg).toContain('missing decklist');
+    await expect(page.locator('#toast')).toContainText('missing decklist');
 
     fs.unlinkSync(tmpPath);
   });

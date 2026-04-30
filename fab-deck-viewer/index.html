@@ -376,6 +376,56 @@
       font-family: 'DM Serif Text', Georgia, serif;
     }
 
+    /* ── Toast notification ── */
+    .toast {
+      position: fixed; top: 1.25rem; right: 1.25rem; z-index: 999;
+      display: flex; align-items: center; gap: 0.6rem;
+      background: var(--surface); border: 1px solid var(--border-2);
+      border-left: 3px solid var(--accent);
+      border-radius: 2px;
+      padding: 0.7rem 1rem;
+      font-size: 0.82rem; color: var(--text);
+      box-shadow: 0 8px 32px rgba(28,24,20,0.45);
+      pointer-events: none;
+      opacity: 0; transform: translateX(12px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      max-width: 320px;
+    }
+    .toast.toast-error { border-left-color: var(--red-c); }
+    .toast.toast-visible { opacity: 1; transform: translateX(0); }
+    .toast-icon { flex-shrink: 0; }
+
+    /* ── Delete confirmation modal ── */
+    .delete-confirm-body {
+      display: flex; flex-direction: column; gap: 1.1rem;
+      padding: 1.25rem 0 0;
+    }
+    .delete-confirm-deck-name {
+      font-size: 1rem; font-style: italic; color: var(--text);
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 2px; padding: 0.5rem 0.75rem;
+      word-break: break-word;
+    }
+    .delete-confirm-warning {
+      font-size: 0.82rem; color: var(--muted-2); line-height: 1.55;
+    }
+    .delete-confirm-check {
+      display: flex; align-items: flex-start; gap: 0.65rem;
+      cursor: pointer; user-select: none;
+    }
+    .delete-confirm-check input[type="checkbox"] {
+      flex-shrink: 0; margin-top: 2px;
+      width: 15px; height: 15px; accent-color: var(--red-c);
+      cursor: pointer;
+    }
+    .delete-confirm-check span {
+      font-size: 0.82rem; color: var(--text); line-height: 1.5;
+    }
+    .delete-confirm-actions {
+      display: flex; gap: 0.75rem; flex-wrap: wrap;
+      padding-top: 0.25rem;
+    }
+
     /* ── Card autocomplete ── */
     .card-ac-wrap { position: relative; }
     .card-ac-list {
@@ -1756,6 +1806,40 @@
         <div class="sb-editor-actions" style="position:static;margin-top:0;">
           <button class="btn-primary btn-danger" id="remove-card-save">Remove</button>
           <button class="btn-secondary" id="remove-card-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast Notification ── -->
+<div id="toast" class="toast" role="status" aria-live="polite">
+  <span class="toast-icon" id="toast-icon"></span>
+  <span id="toast-msg"></span>
+</div>
+
+<!-- ── Delete Deck Confirmation Modal ── -->
+<div id="delete-deck-backdrop" class="cat-popup-backdrop" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="delete-deck-title">
+  <div class="cat-popup" style="max-width:400px">
+    <div class="cat-popup-header">
+      <span class="cat-popup-title" id="delete-deck-title">Delete Deck</span>
+      <button class="cat-popup-close" id="delete-deck-close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M3 3l10 10M13 3L3 13"/>
+        </svg>
+      </button>
+    </div>
+    <div class="cat-popup-body">
+      <div class="delete-confirm-body">
+        <div class="delete-confirm-deck-name" id="delete-deck-name-display"></div>
+        <p class="delete-confirm-warning">This will permanently remove the deck and its entire sideboard guide. This cannot be undone.</p>
+        <label class="delete-confirm-check">
+          <input type="checkbox" id="delete-confirm-checkbox">
+          <span>I understand this deck will be permanently deleted</span>
+        </label>
+        <div class="delete-confirm-actions">
+          <button class="btn-primary btn-danger" id="delete-deck-confirm" disabled>Delete Deck</button>
+          <button class="btn-secondary" id="delete-deck-cancel">Cancel</button>
         </div>
       </div>
     </div>
@@ -4884,14 +4968,58 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     showView('view-list');
   });
 
-  document.getElementById('btn-delete-deck').addEventListener('click', () => {
+  /* ── Toast utility ─────────────────────────────────────────────────── */
+  let toastTimer = null;
+  function showToast(msg, isError = false) {
+    const el = document.getElementById('toast');
+    const msgEl = document.getElementById('toast-msg');
+    const iconEl = document.getElementById('toast-icon');
+    clearTimeout(toastTimer);
+    el.classList.remove('toast-visible', 'toast-error');
+    msgEl.textContent = msg;
+    iconEl.innerHTML = isError
+      ? '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3M8 11v.5"/></svg>'
+      : '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M5.5 8l2 2 3-3"/></svg>';
+    if (isError) el.classList.add('toast-error');
+    void el.offsetWidth;
+    el.classList.add('toast-visible');
+    toastTimer = setTimeout(() => el.classList.remove('toast-visible'), 3200);
+  }
+
+  /* ── Delete deck modal ──────────────────────────────────────────────── */
+  function openDeleteModal() {
+    if (!currentDeckId) return;
+    const deck = loadDecks().find(d => d.id === currentDeckId);
+    if (!deck) return;
+    document.getElementById('delete-deck-name-display').textContent = deck.name || 'Untitled Deck';
+    document.getElementById('delete-confirm-checkbox').checked = false;
+    document.getElementById('delete-deck-confirm').disabled = true;
+    document.getElementById('delete-deck-backdrop').style.display = 'flex';
+  }
+  function closeDeleteModal() {
+    document.getElementById('delete-deck-backdrop').style.display = 'none';
+  }
+
+  document.getElementById('delete-confirm-checkbox').addEventListener('change', function () {
+    document.getElementById('delete-deck-confirm').disabled = !this.checked;
+  });
+  document.getElementById('delete-deck-close').addEventListener('click', closeDeleteModal);
+  document.getElementById('delete-deck-cancel').addEventListener('click', closeDeleteModal);
+  document.getElementById('delete-deck-backdrop').addEventListener('click', function (e) {
+    if (e.target === this) closeDeleteModal();
+  });
+  document.getElementById('delete-deck-confirm').addEventListener('click', () => {
     if (!currentDeckId) return;
     const decks = loadDecks().filter(d => d.id !== currentDeckId);
     saveDecks(decks);
     currentDeckId = null;
     renderList();
+    closeDeleteModal();
     showView('view-list');
+    showToast('Deck deleted.');
   });
+
+  document.getElementById('btn-delete-deck').addEventListener('click', openDeleteModal);
 
   /* ── Category popup handlers ─────────────────────────────────────── */
   document.getElementById('cat-popup-close').addEventListener('click', closeCategoryPopup);
@@ -4912,6 +5040,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     }
     if (e.key === 'Escape' && document.getElementById('category-popup').style.display !== 'none') {
       closeCategoryPopup();
+    }
+    if (e.key === 'Escape' && document.getElementById('delete-deck-backdrop').style.display !== 'none') {
+      closeDeleteModal();
     }
   });
 
@@ -4952,7 +5083,10 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   document.getElementById('btn-export-deck').addEventListener('click', () => {
     if (!currentDeckId) return;
     const deck = loadDecks().find(d => d.id === currentDeckId);
-    if (deck) exportDeck(deck);
+    if (deck) {
+      exportDeck(deck);
+      showToast('Deck exported — check your downloads.');
+    }
   });
 
   /* ── Deck file import ─────────────────────────────────────────────── */
@@ -4963,16 +5097,16 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       try {
         data = JSON.parse(e.target.result);
       } catch {
-        alert('Could not parse file — make sure it is a valid .json export.');
+        showToast('Could not parse file — make sure it is a valid .json export.', true);
         return;
       }
       if (!data || typeof data.decklist !== 'string') {
-        alert('Invalid deck file: missing decklist.');
+        showToast('Invalid deck file: missing decklist.', true);
         return;
       }
       const entries = parseDecklist(data.decklist);
       if (!entries.length) {
-        alert('No card entries found in the imported file.');
+        showToast('No card entries found in the imported file.', true);
         return;
       }
       const cardCount = entries.reduce((s, e) => s + e.qty, 0);
@@ -4989,6 +5123,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       saveDecks(decks);
       renderList();
       await viewDeck(deck.id);
+      showToast('Deck imported successfully.');
     };
     reader.readAsText(file);
   }
