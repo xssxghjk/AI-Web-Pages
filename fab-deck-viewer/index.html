@@ -1294,6 +1294,19 @@
       transition: border-color 0.15s;
     }
     .sim-hand-inp:focus { border-color: var(--accent); }
+    .sim-dc-group {
+      display: flex; border: 1px solid var(--border-2); border-radius: 2px; overflow: hidden;
+    }
+    .sim-dc-btn {
+      background: var(--surface-2); color: var(--muted);
+      border: none; border-right: 1px solid var(--border-2);
+      padding: 0.32rem 0.85rem;
+      font-family: 'DM Serif Text', Georgia, serif; font-size: 0.88rem;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .sim-dc-btn:last-child { border-right: none; }
+    .sim-dc-btn:hover:not(.active) { background: var(--border); color: var(--text); }
+    .sim-dc-btn.active { background: var(--accent); color: #fff; }
     .sim-hand-display {
       display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end; min-height: 110px;
       padding: 0.75rem 1rem; background: var(--surface-2); border: 1px solid var(--border);
@@ -2505,9 +2518,18 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   function renderSimulator(pairs) {
     const el = document.getElementById('analysis-simulator');
 
-    // Preserve hand size across re-renders
-    const existingInp = document.getElementById('sim-hand-inp');
-    if (existingInp) simHandSize = Math.max(1, Math.min(10, parseInt(existingInp.value, 10) || simHandSize));
+    // Preserve draw count across re-renders; on first render load from per-deck localStorage
+    const existingDcBtns = document.getElementById('sim-draw-count-btns');
+    if (existingDcBtns) {
+      const activeBtn = existingDcBtns.querySelector('.sim-dc-btn.active');
+      if (activeBtn) simHandSize = parseInt(activeBtn.dataset.val, 10);
+    } else if (currentDeckId) {
+      const saved = localStorage.getItem('fab-draw-count-' + currentDeckId);
+      const savedNum = parseInt(saved, 10);
+      if ([3, 4, 5].includes(savedNum)) simHandSize = savedNum;
+      else simHandSize = 4;
+    }
+    if (![3, 4, 5].includes(simHandSize)) simHandSize = 4;
 
     const red    = pairs.filter(p => p.card && p.card.color === 'red').reduce((s, p) => s + p.entry.qty, 0);
     const yellow = pairs.filter(p => p.card && p.card.color === 'yellow').reduce((s, p) => s + p.entry.qty, 0);
@@ -2556,8 +2578,12 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     el.innerHTML = `
       <div class="sim-hand-row" style="margin-bottom:0.85rem;">
-        <label class="sim-hand-label" for="sim-hand-inp">Hand Size</label>
-        <input type="number" class="sim-hand-inp" id="sim-hand-inp" min="1" max="10" value="${hs}" />
+        <label class="sim-hand-label">Cards Drawn</label>
+        <div class="sim-dc-group" id="sim-draw-count-btns">
+          <button class="sim-dc-btn${hs === 3 ? ' active' : ''}" data-val="3">3</button>
+          <button class="sim-dc-btn${hs === 4 ? ' active' : ''}" data-val="4">4</button>
+          <button class="sim-dc-btn${hs === 5 ? ' active' : ''}" data-val="5">5</button>
+        </div>
       </div>
 
       ${typeEntries.length > 0 ? `
@@ -2616,13 +2642,22 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       return arr;
     }
     function getHandSize() {
-      const inp = document.getElementById('sim-hand-inp');
-      return Math.max(1, Math.min(total, parseInt(inp ? inp.value : hs, 10) || hs));
+      const btns = document.getElementById('sim-draw-count-btns');
+      if (btns) {
+        const active = btns.querySelector('.sim-dc-btn.active');
+        if (active) return Math.min(total, parseInt(active.dataset.val, 10));
+      }
+      return Math.min(total, simHandSize);
     }
 
-    // Hand size live update
-    document.getElementById('sim-hand-inp').addEventListener('input', function () {
-      simHandSize = getHandSize();
+    // Draw count button group
+    document.getElementById('sim-draw-count-btns').addEventListener('click', function (e) {
+      const btn = e.target.closest('.sim-dc-btn');
+      if (!btn) return;
+      this.querySelectorAll('.sim-dc-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      simHandSize = parseInt(btn.dataset.val, 10);
+      if (currentDeckId) localStorage.setItem('fab-draw-count-' + currentDeckId, simHandSize);
       const noteEl  = document.getElementById('sim-turns-hand-note');
       const hsEl    = document.getElementById('sim-dr-hs');
       const outerEl = document.getElementById('sim-dr-outer');
