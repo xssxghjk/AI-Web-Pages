@@ -2573,14 +2573,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     simDrDetails = localStorage.getItem('fab-sim-dr-details') === '1';
 
     function drTableContentHtml(hs2) {
+      const cols = Array.from({length: hs2}, (_, k) => k);
       const pctHeaders = simDrDetails
-        ? [0,1,2,3,4].map(k => `<span class="sim-dr-pct-head">${k}×</span>`).join('')
+        ? cols.map(k => `<span class="sim-dr-pct-head">${k}×</span>`).join('')
         : '';
       const headerRow = `<div class="sim-dr-header-row"><span class="sim-dr-type">type</span><span class="sim-dr-count">count</span><span class="sim-dr-avg-head">avg/hand</span>${pctHeaders}</div>`;
       const rows = typeEntries.map(([t, c]) => {
         const avg2 = deckSize > 0 ? (hs2 * c / deckSize).toFixed(2) : '—';
         const pctCells = simDrDetails
-          ? [0,1,2,3,4].map(k => {
+          ? cols.map(k => {
               const p = hypergeomPMF(deckSize, c, hs2, k);
               return `<span class="sim-dr-pct">${(p * 100).toFixed(1)}%</span>`;
             }).join('')
@@ -2592,7 +2593,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     el.innerHTML = `
       <div class="sim-hand-row" style="margin-bottom:0.85rem;">
-        <label class="sim-hand-label">Cards Drawn</label>
+        <label class="sim-hand-label">Intellect</label>
         <div class="sim-dc-group" id="sim-draw-count-btns">
           <button class="sim-dc-btn${hs === 3 ? ' active' : ''}" data-val="3">3</button>
           <button class="sim-dc-btn${hs === 4 ? ' active' : ''}" data-val="4">4</button>
@@ -2696,8 +2697,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     // Draw Hand
     document.getElementById('sim-btn-draw').addEventListener('click', function () {
       const hand    = simShuffle(buildDeck()).slice(0, getHandSize());
-      const ptotal  = hand.reduce((s, c) => s + c.pitch, 0);
-      const pavg    = (ptotal / hand.length).toFixed(1);
       const display = document.getElementById('sim-hand-display');
       display.innerHTML = '';
       hand.forEach(c => {
@@ -2716,10 +2715,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         }
         display.appendChild(el);
       });
-      const tot = document.createElement('div');
-      tot.className = 'sim-hand-total';
-      tot.innerHTML = `<div class="sim-ht-label">Total</div><div class="sim-ht-val">${ptotal}</div><div class="sim-ht-sub">avg ${pavg}/card</div>`;
-      display.appendChild(tot);
     });
 
     document.getElementById('sim-btn-draw-clear').addEventListener('click', function () {
