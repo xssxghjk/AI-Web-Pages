@@ -3520,19 +3520,38 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       return h;
     };
 
+    // Per-matchup deck count validation
+    const { format, deckCards } = detectFormat(deckPairs);
+    const pitchCut = raw => parseDecklist(raw || '').filter(c => !isArena(c)).reduce((s, c) => s + c.qty, 0);
+    const countWarnHtml = (remaining, label) => {
+      let msg = '';
+      if (format === 'cc' && remaining < 60) {
+        msg = `${remaining} deck cards remaining — CC needs at least 60 (missing ${60 - remaining})`;
+      } else if (format === 'sage' && remaining !== 40) {
+        const diff = 40 - remaining;
+        msg = `${remaining} deck cards remaining — SAGE needs exactly 40 (${diff > 0 ? `missing ${diff}` : `${-diff} too many`})`;
+      }
+      if (!msg) return '';
+      const prefix = label ? `${label}: ` : '';
+      return `<div class="sb-equip-warn"><span class="sb-equip-warn-icon">⚠</span><span class="sb-equip-warn-label">${prefix}${msg}</span></div>`;
+    };
+
     if (matchup.splitSideboard) {
       const firstCuts = parseDecklist(matchup.cardsOutFirstRaw || '');
       const secondCuts = parseDecklist(matchup.cardsOutSecondRaw || '');
-      if (firstCuts.length > 0 || secondCuts.length > 0) {
+      const firstWarn = countWarnHtml(deckCards - pitchCut(matchup.cardsOutFirstRaw), 'Go First');
+      const secondWarn = countWarnHtml(deckCards - pitchCut(matchup.cardsOutSecondRaw), 'Go Second');
+      if (firstCuts.length > 0 || secondCuts.length > 0 || firstWarn || secondWarn) {
         html += `<div class="sb-body-section">
-          <div class="sb-split-out-label first">▸ Go First — Out</div>${renderOutCuts(firstCuts)}
-          <div class="sb-split-out-label second" style="margin-top:0.75rem">▸ Go Second — Out</div>${renderOutCuts(secondCuts)}
+          <div class="sb-split-out-label first">▸ Go First — Out</div>${renderOutCuts(firstCuts)}${firstWarn}
+          <div class="sb-split-out-label second" style="margin-top:0.75rem">▸ Go Second — Out</div>${renderOutCuts(secondCuts)}${secondWarn}
         </div>`;
       }
     } else {
       const cuts = parseDecklist(matchup.cardsOutRaw || '');
-      if (cuts.length > 0) {
-        html += `<div class="sb-body-section"><div class="sb-body-label">Out</div>${renderOutCuts(cuts)}</div>`;
+      const warn = countWarnHtml(deckCards - pitchCut(matchup.cardsOutRaw), null);
+      if (cuts.length > 0 || warn) {
+        html += `<div class="sb-body-section"><div class="sb-body-label">Out</div>${renderOutCuts(cuts)}${warn}</div>`;
       }
     }
 
@@ -3540,35 +3559,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       html += `<div class="sb-body-section"><div class="sb-body-label">Gameplan</div><div class="sb-note">${esc(matchup.note)}</div></div>`;
     }
 
-    // Per-matchup deck count validation
-    const { format, deckCards } = detectFormat(deckPairs);
-    const pitchCut = raw => parseDecklist(raw || '').filter(c => !isArena(c)).reduce((s, c) => s + c.qty, 0);
-    const sbWarnLines = [];
-    if (matchup.splitSideboard) {
-      const firstRemaining = deckCards - pitchCut(matchup.cardsOutFirstRaw);
-      const secondRemaining = deckCards - pitchCut(matchup.cardsOutSecondRaw);
-      for (const [label, remaining] of [['Go First', firstRemaining], ['Go Second', secondRemaining]]) {
-        if (format === 'cc' && remaining < 60) {
-          sbWarnLines.push(`${label}: ${remaining} deck cards remaining — CC needs at least 60 (missing ${60 - remaining})`);
-        } else if (format === 'sage' && remaining !== 40) {
-          const diff = 40 - remaining;
-          sbWarnLines.push(`${label}: ${remaining} deck cards remaining — SAGE needs exactly 40 (${diff > 0 ? `missing ${diff}` : `${-diff} too many`})`);
-        }
-      }
-    } else {
-      const remaining = deckCards - pitchCut(matchup.cardsOutRaw);
-      if (format === 'cc' && remaining < 60) {
-        sbWarnLines.push(`${remaining} deck cards remaining — CC needs at least 60 (missing ${60 - remaining})`);
-      } else if (format === 'sage' && remaining !== 40) {
-        const diff = 40 - remaining;
-        sbWarnLines.push(`${remaining} deck cards remaining — SAGE needs exactly 40 (${diff > 0 ? `missing ${diff}` : `${-diff} too many`})`);
-      }
-    }
-    const sbWarnHtml = sbWarnLines.map(w =>
-      `<div class="sb-equip-warn"><span class="sb-equip-warn-icon">⚠</span><span class="sb-equip-warn-label">${w}</span></div>`
-    ).join('');
-
-    bodyEl.innerHTML = sbWarnHtml + html;
+    bodyEl.innerHTML = html;
 
     if (deck) {
       const editBtn = document.createElement('button');
