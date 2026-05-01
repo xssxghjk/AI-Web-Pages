@@ -1874,6 +1874,13 @@
             <option value="3" selected>3</option>
           </select>
         </div>
+        <div class="sb-editor-field">
+          <label>Sideboards</label>
+          <div class="sb-split-toggle-row">
+            <input type="checkbox" class="sb-split-check" id="add-card-all-sb" />
+            <label for="add-card-all-sb" class="sb-split-check-label">Add to all sideboard matchups as a cut</label>
+          </div>
+        </div>
         <div class="err" id="add-card-err"></div>
         <div class="sb-editor-actions" style="position:static;margin-top:0;">
           <button class="btn-primary" id="add-card-save">Add to Deck</button>
@@ -4239,6 +4246,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     addCardNewEntry = null;
     document.getElementById('add-card-name').value = '';
     document.getElementById('add-card-qty').value = '1';
+    document.getElementById('add-card-all-sb').checked = false;
     document.getElementById('add-card-err').style.display = 'none';
     document.getElementById('add-card-backdrop').style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -4424,10 +4432,52 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     }
 
     deck.cardCount = parseDecklist(deck.decklist).reduce((s, e) => s + e.qty, 0);
+
+    if (document.getElementById('add-card-all-sb').checked && Array.isArray(deck.sideboardGuide)) {
+      const hintStr = newHint ? ` (${newHint})` : '';
+      const newLine = `${qty} ${newName}${hintStr}`;
+      deck.sideboardGuide = deck.sideboardGuide.map(m => {
+        if (m.splitSideboard) {
+          return { ...m,
+            cardsOutFirstRaw:  appendToRaw(m.cardsOutFirstRaw  || '', newName, newHint, qty),
+            cardsOutSecondRaw: appendToRaw(m.cardsOutSecondRaw || '', newName, newHint, qty),
+          };
+        }
+        return { ...m, cardsOutRaw: appendToRaw(m.cardsOutRaw || '', newName, newHint, qty) };
+      });
+    }
+
     saveDecks(decks);
     closeAddCardModal();
     reRenderCurrentDeck();
   });
+
+  function appendToRaw(raw, name, hint, qty) {
+    const lines = raw ? raw.split('\n') : [];
+    const key = name.toLowerCase() + '|' + (hint || '');
+    let found = false;
+    const updated = lines.map(line => {
+      const s = line.trim();
+      if (!s || !/^\d/.test(s)) return line;
+      const m = s.match(/^(\d+)x?\s+(.+?)(\s*\((\d+|red|yellow|blue)\))?\s*$/i);
+      if (!m) return line;
+      const n = m[2].trim();
+      const rawHint = m[4] ? m[4].toLowerCase() : '';
+      const normalizedHint = (rawHint === '1' || rawHint === 'red')    ? 'red'
+                           : (rawHint === '2' || rawHint === 'yellow') ? 'yellow'
+                           : (rawHint === '3' || rawHint === 'blue')   ? 'blue'
+                           : '';
+      if (n.toLowerCase() + '|' + normalizedHint !== key) return line;
+      found = true;
+      const hintStr = normalizedHint ? ` (${normalizedHint})` : '';
+      return `${parseInt(m[1], 10) + qty} ${n}${hintStr}`;
+    });
+    if (!found) {
+      const hintStr = hint ? ` (${hint})` : '';
+      updated.push(`${qty} ${name}${hintStr}`);
+    }
+    return updated.join('\n');
+  }
 
   /* ── Tab switching ────────────────────────────────────────────────── */
   document.getElementById('tab-btn-decklist').addEventListener('click', () => {
