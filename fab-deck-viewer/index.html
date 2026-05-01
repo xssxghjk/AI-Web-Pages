@@ -4009,12 +4009,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       }
 
       let matchupObj;
+      const { format: deckFmt, deckCards: deckCardCount } = detectFormat(deckPairs);
+      const deckCountWarns = deckCountWarnings(deckFmt, deckCardCount);
+
       if (isSplit) {
         const cardsOutFirstRaw = serializeBoardMap(boardMapFirst);
         const cardsOutSecondRaw = serializeBoardMap(boardMapSecond);
         const totalQty = parseDecklist(cardsOutFirstRaw).reduce((s, c) => s + c.qty, 0)
                        + parseDecklist(cardsOutSecondRaw).reduce((s, c) => s + c.qty, 0);
-        const saveWarns = [];
+        const saveWarns = [...deckCountWarns];
         if (totalQty > 160) saveWarns.push(`Total cuts (${totalQty}) is unusually high`);
         for (const w of equipSlotWarningsFromRaw(cardsOutFirstRaw, deckPairs)) saveWarns.push(`Go First: ${w}`);
         for (const w of equipSlotWarningsFromRaw(cardsOutSecondRaw, deckPairs)) saveWarns.push(`Go Second: ${w}`);
@@ -4026,7 +4029,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       } else {
         const cardsOutRaw = serializeBoardMap(boardMapSingle);
         const totalQty = parseDecklist(cardsOutRaw).reduce((s, c) => s + c.qty, 0);
-        const saveWarns = [];
+        const saveWarns = [...deckCountWarns];
         if (totalQty > 80) saveWarns.push(`Total cuts (${totalQty}) exceeds 80`);
         for (const w of equipSlotWarningsFromRaw(cardsOutRaw, deckPairs)) saveWarns.push(w);
         if (saveWarns.length) {
