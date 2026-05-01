@@ -2206,6 +2206,25 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     return null;
   }
 
+  /* ── Format detection (CC vs SAGE) ──────────────────────────────── */
+  function detectFormat(pairs) {
+    const deckCards = pairs.reduce((s, p) => p.card && p.card.color ? s + p.entry.qty : s, 0);
+    return { format: deckCards >= 50 ? 'cc' : 'sage', deckCards };
+  }
+
+  function deckCountWarnings(format, deckCards) {
+    if (format === 'cc' && deckCards < 60) {
+      const n = 60 - deckCards;
+      return [`Classic Constructed deck has ${deckCards} deck card${deckCards !== 1 ? 's' : ''} — needs at least 60 (missing ${n})`];
+    }
+    if (format === 'sage' && deckCards !== 40) {
+      const diff = 40 - deckCards;
+      const detail = diff > 0 ? `missing ${diff}` : `${-diff} too many`;
+      return [`Silver Age deck has ${deckCards} deck card${deckCards !== 1 ? 's' : ''} — needs exactly 40 (${detail})`];
+    }
+    return [];
+  }
+
   /* ── Equipment completeness check ────────────────────────────────── */
   function getMissingEquipment(pairs) {
     const types = new Set();
@@ -2246,20 +2265,26 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const count = deck.cardCount ? `${deck.cardCount} cards · ` : '';
       const date  = new Date(deck.savedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
+      let formatLabel = '';
       let equipWarnHtml = '';
       if (db) {
         const entries = parseDecklist(deck.decklist);
         const pairs = entries.map(e => ({ entry: e, card: lookup(e.name, e.hint) }));
-        const missing = getMissingEquipment(pairs);
-        if (missing.length > 0) {
-          equipWarnHtml = `<div class="deck-row-equip-warn" title="Missing equipment: ${missing.join(', ')}">⚠ Missing: ${missing.join(', ')}</div>`;
+        const { format, deckCards } = detectFormat(pairs);
+        formatLabel = format === 'cc' ? 'CC · ' : 'SAGE · ';
+        const rowWarns = [];
+        const missingEquip = getMissingEquipment(pairs);
+        if (missingEquip.length > 0) rowWarns.push(`⚠ Missing: ${missingEquip.join(', ')}`);
+        for (const w of deckCountWarnings(format, deckCards)) rowWarns.push(`⚠ ${w}`);
+        if (rowWarns.length > 0) {
+          equipWarnHtml = rowWarns.map(w => `<div class="deck-row-equip-warn">${w}</div>`).join('');
         }
       }
 
       row.innerHTML = `
         <div class="deck-row-body">
           <div class="deck-row-name">${esc(deck.name)}</div>
-          <div class="deck-row-meta">${count}${date}</div>
+          <div class="deck-row-meta">${formatLabel}${count}${date}</div>
           ${equipWarnHtml}
         </div>
         <div class="deck-row-cta">
@@ -2373,11 +2398,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     renderCardGroups(pairs);
 
-    // Missing card warning (always based on full pairs)
+    // Warnings: missing db entries + format/deck-count validation
+    const { format, deckCards } = detectFormat(pairs);
     const missing = pairs.filter(p => !p.card).map(p => p.entry.name);
     const warn = document.getElementById('card-warn');
-    if (missing.length) {
-      warn.textContent = `Not found in database: ${missing.join(', ')}`;
+    const warnings = [];
+    if (missing.length) warnings.push(`Not found in database: ${missing.map(esc).join(', ')}`);
+    for (const w of deckCountWarnings(format, deckCards)) warnings.push(w);
+    if (warnings.length) {
+      warn.innerHTML = warnings.map(w => `<div>${w}</div>`).join('');
       warn.style.display = '';
     } else {
       warn.style.display = 'none';
@@ -3511,7 +3540,35 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       html += `<div class="sb-body-section"><div class="sb-body-label">Gameplan</div><div class="sb-note">${esc(matchup.note)}</div></div>`;
     }
 
-    bodyEl.innerHTML = html;
+    // Per-matchup deck count validation
+    const { format, deckCards } = detectFormat(deckPairs);
+    const pitchCut = raw => parseDecklist(raw || '').filter(c => !isArena(c)).reduce((s, c) => s + c.qty, 0);
+    const sbWarnLines = [];
+    if (matchup.splitSideboard) {
+      const firstRemaining = deckCards - pitchCut(matchup.cardsOutFirstRaw);
+      const secondRemaining = deckCards - pitchCut(matchup.cardsOutSecondRaw);
+      for (const [label, remaining] of [['Go First', firstRemaining], ['Go Second', secondRemaining]]) {
+        if (format === 'cc' && remaining < 60) {
+          sbWarnLines.push(`${label}: ${remaining} deck cards remaining — CC needs at least 60 (missing ${60 - remaining})`);
+        } else if (format === 'sage' && remaining !== 40) {
+          const diff = 40 - remaining;
+          sbWarnLines.push(`${label}: ${remaining} deck cards remaining — SAGE needs exactly 40 (${diff > 0 ? `missing ${diff}` : `${-diff} too many`})`);
+        }
+      }
+    } else {
+      const remaining = deckCards - pitchCut(matchup.cardsOutRaw);
+      if (format === 'cc' && remaining < 60) {
+        sbWarnLines.push(`${remaining} deck cards remaining — CC needs at least 60 (missing ${60 - remaining})`);
+      } else if (format === 'sage' && remaining !== 40) {
+        const diff = 40 - remaining;
+        sbWarnLines.push(`${remaining} deck cards remaining — SAGE needs exactly 40 (${diff > 0 ? `missing ${diff}` : `${-diff} too many`})`);
+      }
+    }
+    const sbWarnHtml = sbWarnLines.map(w =>
+      `<div class="sb-equip-warn"><span class="sb-equip-warn-icon">⚠</span><span class="sb-equip-warn-label">${w}</span></div>`
+    ).join('');
+
+    bodyEl.innerHTML = sbWarnHtml + html;
 
     if (deck) {
       const editBtn = document.createElement('button');
