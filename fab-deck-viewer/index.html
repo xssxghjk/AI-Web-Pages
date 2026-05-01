@@ -3518,8 +3518,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           <button class="sb-import-preset-btn" type="button" id="sb-import-btn">↑ Import preset…</button>
           <div class="sb-import-panel" id="sb-import-panel" style="display:none">
             <div class="sb-import-row">
-              <select class="sb-import-sel" id="sb-import-deck-sel"><option value="">— Deck —</option></select>
-              <select class="sb-import-sel" id="sb-import-matchup-sel" disabled><option value="">— Matchup —</option></select>
+              <select class="sb-import-sel" id="sb-import-matchup-sel"><option value="">— Matchup —</option></select>
               <button class="btn-secondary" type="button" id="sb-import-apply" disabled>Apply</button>
             </div>
             <div class="sb-import-hint" id="sb-import-hint"></div>
@@ -3710,32 +3709,22 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     if (!existing) {
       const importBtn = document.getElementById('sb-import-btn');
       const importPanel = document.getElementById('sb-import-panel');
-      const importDeckSel = document.getElementById('sb-import-deck-sel');
       const importMatchupSel = document.getElementById('sb-import-matchup-sel');
       const importApplyBtn = document.getElementById('sb-import-apply');
       const importHint = document.getElementById('sb-import-hint');
 
-      const allDecks = loadDecks();
       const currentGuide = getSideboardGuide(deck);
 
       if (currentGuide.length > 0) {
-        const opt = document.createElement('option');
-        opt.value = '__current__';
-        opt.textContent = (deck.name || 'This deck') + ' (same deck)';
-        importDeckSel.appendChild(opt);
-      }
-      for (const d of allDecks) {
-        if (d.id === deck.id) continue;
-        const g = getSideboardGuide(d);
-        if (!g.length) continue;
-        const opt = document.createElement('option');
-        opt.value = d.id;
-        opt.textContent = d.name || d.id;
-        importDeckSel.appendChild(opt);
-      }
-      if (importDeckSel.options.length === 1) {
-        importDeckSel.disabled = true;
-        importHint.textContent = 'No decks with matchups found.';
+        for (const m of currentGuide) {
+          const opt = document.createElement('option');
+          opt.value = m.id;
+          opt.textContent = m.hero + ' (' + m.rating + ')';
+          importMatchupSel.appendChild(opt);
+        }
+      } else {
+        importMatchupSel.disabled = true;
+        importHint.textContent = 'No matchups found for this deck.';
       }
 
       importBtn.addEventListener('click', () => {
@@ -3744,38 +3733,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         importBtn.classList.toggle('active', !open);
       });
 
-      importDeckSel.addEventListener('change', () => {
-        const selId = importDeckSel.value;
-        importMatchupSel.innerHTML = '<option value="">— Matchup —</option>';
-        importMatchupSel.disabled = true;
-        importApplyBtn.disabled = true;
-        importHint.textContent = '';
-        if (!selId) return;
-        const guide = selId === '__current__'
-          ? currentGuide
-          : getSideboardGuide(allDecks.find(d => d.id === selId) || {});
-        for (const m of guide) {
-          const opt = document.createElement('option');
-          opt.value = m.id;
-          opt.textContent = m.hero + ' (' + m.rating + ')';
-          importMatchupSel.appendChild(opt);
-        }
-        importMatchupSel.disabled = false;
-      });
-
       importMatchupSel.addEventListener('change', () => {
         importApplyBtn.disabled = !importMatchupSel.value;
       });
 
       importApplyBtn.addEventListener('click', () => {
-        const selDeckId = importDeckSel.value;
         const selMatchupId = importMatchupSel.value;
-        if (!selDeckId || !selMatchupId) return;
+        if (!selMatchupId) return;
 
-        const guide = selDeckId === '__current__'
-          ? currentGuide
-          : getSideboardGuide(allDecks.find(d => d.id === selDeckId) || {});
-        const src = guide.find(m => m.id === selMatchupId);
+        const src = currentGuide.find(m => m.id === selMatchupId);
         if (!src) return;
 
         function mapCards(rawText) {
