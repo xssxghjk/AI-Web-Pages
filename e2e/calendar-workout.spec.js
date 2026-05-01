@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 // planStart = Monday 2026-01-05 → week1Sun = 2026-01-04 (Sunday)
 // April 8, 2026 = week1Sun + 94 days = week 13, d=3 (Wed) → not in REST_DAYS[13]=[1,5]
-// April 8 is a known past workout day relative to today (2026-04-17)
+// April 8 is a known past workout day; the dot-position test navigates to April if needed
 const PLAN_START = '2026-01-05';
 const PAST_WORKOUT_DATE = '2026-04-08';
 
@@ -104,8 +104,21 @@ test.describe('workout dot position', () => {
 
     await page.goto('/calendar/');
 
+    // Navigate backwards until the month of PAST_WORKOUT_DATE is visible in the header
+    const dateParts = PAST_WORKOUT_DATE.split('-');
+    const targetYear = dateParts[0];
+    const targetMonthName = ['January','February','March','April','May','June',
+      'July','August','September','October','November','December'][parseInt(dateParts[1]) - 1];
+
+    for (let i = 0; i < 12; i++) {
+      const label = await page.textContent('#cal-month-label');
+      if (label.includes(targetMonthName) && label.includes(targetYear)) break;
+      await page.click('#cal-prev');
+      await page.waitForTimeout(400);
+    }
+
     const result = await page.evaluate(() => {
-      const dot = document.querySelector('.workout-dot');
+      const dot = document.querySelector('.cal-day .workout-dot');
       if (!dot) return null;
       const cell = dot.closest('.cal-day');
       if (!cell) return null;
