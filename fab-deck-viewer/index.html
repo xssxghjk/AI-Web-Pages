@@ -966,6 +966,40 @@
     }
     .sb-overview-sep { color: var(--border-2); }
 
+    .sb-equip-warn {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem;
+      padding: 0.6rem 1rem;
+      background: rgba(196,134,74,0.07);
+      border: 1px solid rgba(196,134,74,0.3);
+      border-left: 3px solid #c4864a;
+      border-radius: 2px;
+      font-size: 0.76rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      color: var(--muted-2);
+      margin-bottom: 0.85rem;
+    }
+    .sb-equip-warn-icon { font-size: 0.85rem; color: #c4864a; flex-shrink: 0; }
+    .sb-equip-warn-label { color: var(--muted); font-style: italic; flex-shrink: 0; }
+    .sb-equip-warn-slot {
+      display: inline-flex; align-items: center;
+      padding: 1px 7px; border-radius: 2px;
+      background: rgba(196,134,74,0.15);
+      border: 1px solid rgba(196,134,74,0.35);
+      color: #c4864a;
+      font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.03em; text-transform: uppercase;
+      font-style: normal;
+    }
+
+    .deck-row-equip-warn {
+      font-size: 0.68rem;
+      color: #c4864a;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      margin-top: 0.4rem;
+      opacity: 0.9;
+    }
+
     .sb-rating-badge {
       display: inline-flex; align-items: center;
       padding: 1px 7px; border-radius: 2px;
@@ -2172,6 +2206,26 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     return null;
   }
 
+  /* ── Equipment completeness check ────────────────────────────────── */
+  function getMissingEquipment(pairs) {
+    const types = new Set();
+    for (const { card } of pairs) {
+      if (card) for (const t of card.types) types.add(t);
+    }
+    const missing = [];
+    for (const slot of ['Head', 'Arms', 'Chest', 'Legs']) {
+      if (!types.has(slot)) missing.push(slot);
+    }
+    const has2H = types.has('2H');
+    const has1H = types.has('1H');
+    const hasOffHand = types.has('Off-Hand');
+    if (!has2H) {
+      if (!has1H) missing.push('Weapon');
+      if (!hasOffHand) missing.push('Off-Hand');
+    }
+    return missing;
+  }
+
   /* ── List view ────────────────────────────────────────────────────── */
   function renderList() {
     const decks  = loadDecks();
@@ -2192,10 +2246,21 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const count = deck.cardCount ? `${deck.cardCount} cards · ` : '';
       const date  = new Date(deck.savedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
+      let equipWarnHtml = '';
+      if (db) {
+        const entries = parseDecklist(deck.decklist);
+        const pairs = entries.map(e => ({ entry: e, card: lookup(e.name, e.hint) }));
+        const missing = getMissingEquipment(pairs);
+        if (missing.length > 0) {
+          equipWarnHtml = `<div class="deck-row-equip-warn" title="Missing equipment: ${missing.join(', ')}">⚠ Missing: ${missing.join(', ')}</div>`;
+        }
+      }
+
       row.innerHTML = `
         <div class="deck-row-body">
           <div class="deck-row-name">${esc(deck.name)}</div>
           <div class="deck-row-meta">${count}${date}</div>
+          ${equipWarnHtml}
         </div>
         <div class="deck-row-cta">
           View deck
@@ -3270,8 +3335,14 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const guide = getSideboardGuide(deck);
     const container = document.getElementById('sideboard-content');
 
+    // Equipment warning (always shown)
+    const missingEquip = getMissingEquipment(deckPairs);
+    const equipWarnHtml = missingEquip.length > 0
+      ? `<div class="sb-equip-warn"><span class="sb-equip-warn-icon">⚠</span><span class="sb-equip-warn-label">Missing equipment:</span> ${missingEquip.map(s => `<span class="sb-equip-warn-slot">${esc(s)}</span>`).join('')}</div>`
+      : '';
+
     if (guide.length === 0) {
-      container.innerHTML = `
+      container.innerHTML = equipWarnHtml + `
         <div class="empty-state">
           <div class="empty-state-title">No sideboard guides yet</div>
           <div class="empty-state-sub">Add a matchup to start building your guide</div>
@@ -3323,7 +3394,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     container.style.display = '';
     document.getElementById('sideboard-heatmap').style.display = 'none';
 
-    container.innerHTML = overviewHtml + `<div class="sb-matchup-list">${listHtml}</div>`;
+    container.innerHTML = equipWarnHtml + overviewHtml + `<div class="sb-matchup-list">${listHtml}</div>`;
 
     const actionsRow = document.createElement('div');
     actionsRow.className = 'sb-actions-row';
