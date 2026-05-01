@@ -429,8 +429,10 @@
   <footer>
     <span id="page-version" style="opacity:0.65"></span>
     <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
+    <span id="storage-size"></span>
   </footer>
   <script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='v'+v.version}).catch(()=>{});</script>
+<script>(function(){var u=0;try{for(var k in localStorage){if(Object.prototype.hasOwnProperty.call(localStorage,k))u+=(k.length+localStorage[k].length)*2}}catch(e){}var kb=(u/1024).toFixed(1),pct=+(u/(5*1024*1024)*100).toFixed(1),el=document.getElementById('storage-size');if(el){el.textContent='Storage: '+kb+' KB / 5 MB';el.style.opacity=0.65;el.title=pct+'% used';if(pct>90)el.style.color='#f87171';else if(pct>70)el.style.color='#fbbf24';}})();</script>
 
   <script src="trips.js"></script>
   <script>
