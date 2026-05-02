@@ -257,6 +257,24 @@ test.describe('sideboard guide', () => {
     await page.click('#sb-save');
     await expect(page.locator('.sb-matchup-row')).toContainText('Kayo');
   });
+
+  test('18: save warning includes "Not found in database" when deck cards are unknown', async ({ page }) => {
+    // Empty DB means all deck cards (Fry, Sink Below, Pummel) are unrecognised
+    await seedDeck(page, SEED_DECK);
+    await openDeckSideboard(page);
+
+    await page.click('text=+ Add matchup');
+    await page.fill('#sb-hero-input', 'Kayo');
+
+    // First click: warning includes the not-found message
+    await page.click('#sb-save');
+    await expect(page.locator('#sb-warn')).toBeVisible();
+    await expect(page.locator('#sb-warn')).toContainText('Not found in database');
+
+    // Second click: save proceeds despite warnings
+    await page.click('#sb-save');
+    await expect(page.locator('.sb-matchup-row')).toContainText('Kayo');
+  });
 });
 
 test.describe('weapon setup validation', () => {
@@ -319,5 +337,44 @@ test.describe('weapon setup validation', () => {
     await openDeckSideboard(page);
     await expect(page.locator('.sb-equip-warn')).toBeVisible();
     await expect(page.locator('.sb-equip-warn')).toContainText('Off-Hand');
+  });
+});
+
+test.describe('sideboard save — valid deck skips warnings', () => {
+  // A CC-format deck with all 60 colored cards found in DB and complete equipment
+  const VALID_DB = JSON.stringify([
+    { name: 'DeckCard', color: 'red', types: [], pitch: '1', cost: '0', power: '4', defense: '3', printings: [], card_keywords: [] },
+    { name: 'Helm',       color: '', types: ['Head'],  pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'Vambraces',  color: '', types: ['Arms'],  pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'Chestplate', color: '', types: ['Chest'], pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'Greaves',    color: '', types: ['Legs'],  pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'BigBlade',   color: '', types: ['2H'],    pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+  ]);
+
+  const VALID_DECK = {
+    id: 'valid-deck',
+    name: 'Valid CC Deck',
+    decklist: '60 DeckCard (red)\n1 Helm\n1 Vambraces\n1 Chestplate\n1 Greaves\n1 BigBlade',
+    cardCount: 65,
+    savedAt: new Date().toISOString(),
+    sideboardGuide: [],
+  };
+
+  test('17: valid deck saves on first click without any warning', async ({ page }) => {
+    await page.route('**/card.json', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: VALID_DB,
+    }));
+    await seedDeck(page, VALID_DECK);
+    await openDeckSideboard(page);
+
+    await page.click('text=+ Add matchup');
+    await page.fill('#sb-hero-input', 'Kayo');
+
+    // Single click should save immediately — no warning step needed
+    await page.click('#sb-save');
+    await expect(page.locator('#sb-warn')).not.toBeVisible();
+    await expect(page.locator('.sb-matchup-row')).toContainText('Kayo');
   });
 });
