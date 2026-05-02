@@ -88,6 +88,10 @@ test.describe('sideboard guide', () => {
     await fryRow.locator('.sb-picker-minus').click();
     await fryRow.locator('.sb-picker-minus').click();
 
+    // First click: warnings appear (mocked empty card DB triggers deck-count and equipment warnings)
+    await page.click('#sb-save');
+    await expect(page.locator('#sb-warn')).toBeVisible();
+    // Second click: save proceeds despite warnings
     await page.click('#sb-save');
 
     await expect(page.locator('.sb-matchup-row')).toContainText('Kayo');
@@ -128,6 +132,9 @@ test.describe('sideboard guide', () => {
     await page.waitForSelector('.sb-matchup-edit-btn', { state: 'visible' });
     await page.click('.sb-matchup-edit-btn');
     await page.fill('#sb-hero-input', 'Ira');
+    // First click: warnings; second click: save anyway
+    await page.click('#sb-save');
+    await expect(page.locator('#sb-warn')).toBeVisible();
     await page.click('#sb-save');
 
     await expect(page.locator('.sb-matchup-row')).toContainText('Ira');
@@ -229,5 +236,25 @@ test.describe('sideboard guide', () => {
     // Page should scroll back to top
     await page.waitForFunction(() => window.scrollY === 0);
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  });
+
+  test('11: save with warnings shows inline warning and toast, requires second click to save', async ({ page }) => {
+    await seedDeck(page, SEED_DECK);
+    await openDeckSideboard(page);
+
+    await page.click('text=+ Add matchup');
+    await page.fill('#sb-hero-input', 'Kayo');
+
+    // First click: warnings are shown, save is blocked
+    await page.click('#sb-save');
+    await expect(page.locator('#sb-warn')).toBeVisible();
+    // Warning text includes "Click Save again"
+    await expect(page.locator('#sb-warn')).toContainText('Click Save again');
+    // Editor stays open (no matchup row yet)
+    await expect(page.locator('.sb-matchup-row')).not.toBeVisible();
+
+    // Second click: save proceeds
+    await page.click('#sb-save');
+    await expect(page.locator('.sb-matchup-row')).toContainText('Kayo');
   });
 });
