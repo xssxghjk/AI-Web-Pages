@@ -3994,7 +3994,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const deckCountWarns = deckCountWarnings(deckFmt, deckCardCount);
       const missingEquip = getMissingEquipment(deckPairs);
       const arenaEquipWarns = missingEquip.length > 0 ? [`Missing equipment: ${missingEquip.join(', ')}`] : [];
-      const saveWarns = [...deckCountWarns, ...arenaEquipWarns];
+      const missingFromDb = deckPairs.filter(p => !p.card).map(p => p.entry.name);
+      const dbWarn = missingFromDb.length > 0 ? [`Not found in database: ${missingFromDb.join(', ')}`] : [];
+      const saveWarns = [...dbWarn, ...deckCountWarns, ...arenaEquipWarns];
 
       let matchupObj;
       if (isSplit) {
