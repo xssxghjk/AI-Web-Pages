@@ -2080,7 +2080,7 @@ function timerTick() {
   if (!timerState || timerState.paused) return;
   timerState.timeLeft--;
 
-  if (timerState.timeLeft === 3) playBeep('warn');
+  if (timerState.timeLeft === 15) playBeep('warn');
 
   if (timerState.timeLeft <= 0) {
     if (timerState.phase === 'run') {
@@ -2161,7 +2161,7 @@ function playBeep(type) {
     const t = ctx.currentTime;
     if (type === 'run')  { tone(880, t, 0.12); tone(1100, t + 0.15, 0.18); }
     else if (type === 'walk') { tone(440, t, 0.4); }
-    else if (type === 'warn') { tone(660, t, 0.07, 0.15); tone(660, t + 0.12, 0.07, 0.15); tone(660, t + 0.24, 0.07, 0.15); }
+    else if (type === 'warn') { tone(550, t, 0.1, 0.2); tone(730, t + 0.18, 0.1, 0.2); tone(920, t + 0.36, 0.18, 0.25); }
     else if (type === 'done') { tone(660, t, 0.15); tone(880, t + 0.2, 0.15); tone(1100, t + 0.4, 0.35); }
   } catch(e) {}
 }
