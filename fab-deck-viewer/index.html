@@ -2253,32 +2253,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     return missing;
   }
 
-  function equipSlotWarningsFromRaw(cutsRaw, deckPairs) {
-    const typesByKey = {};
-    for (const p of deckPairs) {
-      if (p.card && p.card.types) {
-        typesByKey[p.entry.name.toLowerCase() + '|' + (p.entry.hint || '')] = p.card.types;
-      }
-    }
-    const slotCounts = {};
-    let count1H = 0;
-    for (const c of parseDecklist(cutsRaw || '')) {
-      const types = typesByKey[c.name.toLowerCase() + '|' + (c.hint || '')] || [];
-      for (const t of types) {
-        if (['Head', 'Arms', 'Chest', 'Legs', '2H', 'Off-Hand'].includes(t)) {
-          slotCounts[t] = (slotCounts[t] || 0) + c.qty;
-        }
-        if (t === '1H') count1H += c.qty;
-      }
-    }
-    const warnings = [];
-    for (const slot of ['Head', 'Arms', 'Chest', 'Legs', '2H', 'Off-Hand']) {
-      if (slotCounts[slot] > 1) warnings.push(`${slotCounts[slot]}× ${slot} boarded out (max 1)`);
-    }
-    if (count1H >= 3) warnings.push(`${count1H}× 1H weapons boarded out (max 2)`);
-    return warnings;
-  }
-
   /* ── List view ────────────────────────────────────────────────────── */
   function renderList() {
     const decks  = loadDecks();
@@ -3570,20 +3544,27 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       return `<div class="sb-equip-warn"><span class="sb-equip-warn-icon">⚠</span><span class="sb-equip-warn-label">${prefix}${msg}</span></div>`;
     };
 
-    const equipWarnHtml = (cutsRaw, label) => {
-      const warnings = equipSlotWarningsFromRaw(cutsRaw, deckPairs);
-      if (!warnings.length) return '';
+    const arenaEquipWarnHtml = (cutsRaw, label) => {
+      const cutMap = {};
+      for (const c of parseDecklist(cutsRaw || '')) {
+        cutMap[c.name.toLowerCase() + '|' + (c.hint || '')] = c.qty;
+      }
+      const remainingPairs = deckPairs.map(p => {
+        const key = p.entry.name.toLowerCase() + '|' + (p.entry.hint || '');
+        const cut = cutMap[key] || 0;
+        return { ...p, entry: { ...p.entry, qty: Math.max(0, p.entry.qty - cut) } };
+      }).filter(p => p.entry.qty > 0);
+      const missing = getMissingEquipment(remainingPairs);
+      if (!missing.length) return '';
       const prefix = label ? `${label}: ` : '';
-      return warnings.map(w =>
-        `<div class="sb-equip-warn"><span class="sb-equip-warn-icon">⚠</span><span class="sb-equip-warn-label">${prefix}${esc(w)}</span></div>`
-      ).join('');
+      return `<div class="sb-equip-warn"><span class="sb-equip-warn-icon">⚠</span><span class="sb-equip-warn-label">${prefix}Missing equipment: ${missing.map(esc).join(', ')}</span></div>`;
     };
 
     if (matchup.splitSideboard) {
       const firstCuts = parseDecklist(matchup.cardsOutFirstRaw || '');
       const secondCuts = parseDecklist(matchup.cardsOutSecondRaw || '');
-      const firstWarn = countWarnHtml(deckCards - pitchCut(matchup.cardsOutFirstRaw), 'Go First') + equipWarnHtml(matchup.cardsOutFirstRaw || '', 'Go First');
-      const secondWarn = countWarnHtml(deckCards - pitchCut(matchup.cardsOutSecondRaw), 'Go Second') + equipWarnHtml(matchup.cardsOutSecondRaw || '', 'Go Second');
+      const firstWarn = countWarnHtml(deckCards - pitchCut(matchup.cardsOutFirstRaw), 'Go First') + arenaEquipWarnHtml(matchup.cardsOutFirstRaw || '', 'Go First');
+      const secondWarn = countWarnHtml(deckCards - pitchCut(matchup.cardsOutSecondRaw), 'Go Second') + arenaEquipWarnHtml(matchup.cardsOutSecondRaw || '', 'Go Second');
       if (firstCuts.length > 0 || secondCuts.length > 0 || firstWarn || secondWarn) {
         html += `<div class="sb-body-section">
           <div class="sb-split-out-label first">▸ Go First — Out</div>${renderOutCuts(firstCuts)}${firstWarn}
@@ -3592,7 +3573,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       }
     } else {
       const cuts = parseDecklist(matchup.cardsOutRaw || '');
-      const warn = countWarnHtml(deckCards - pitchCut(matchup.cardsOutRaw), null) + equipWarnHtml(matchup.cardsOutRaw || '', null);
+      const warn = countWarnHtml(deckCards - pitchCut(matchup.cardsOutRaw), null) + arenaEquipWarnHtml(matchup.cardsOutRaw || '', null);
       if (cuts.length > 0 || warn) {
         html += `<div class="sb-body-section"><div class="sb-body-label">Out</div>${renderOutCuts(cuts)}${warn}</div>`;
       }
@@ -4011,16 +3992,16 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       let matchupObj;
       const { format: deckFmt, deckCards: deckCardCount } = detectFormat(deckPairs);
       const deckCountWarns = deckCountWarnings(deckFmt, deckCardCount);
+      const missingEquip = getMissingEquipment(deckPairs);
+      const arenaEquipWarns = missingEquip.length > 0 ? [`Missing equipment: ${missingEquip.join(', ')}`] : [];
 
       if (isSplit) {
         const cardsOutFirstRaw = serializeBoardMap(boardMapFirst);
         const cardsOutSecondRaw = serializeBoardMap(boardMapSecond);
         const totalQty = parseDecklist(cardsOutFirstRaw).reduce((s, c) => s + c.qty, 0)
                        + parseDecklist(cardsOutSecondRaw).reduce((s, c) => s + c.qty, 0);
-        const saveWarns = [...deckCountWarns];
+        const saveWarns = [...deckCountWarns, ...arenaEquipWarns];
         if (totalQty > 160) saveWarns.push(`Total cuts (${totalQty}) is unusually high`);
-        for (const w of equipSlotWarningsFromRaw(cardsOutFirstRaw, deckPairs)) saveWarns.push(`Go First: ${w}`);
-        for (const w of equipSlotWarningsFromRaw(cardsOutSecondRaw, deckPairs)) saveWarns.push(`Go Second: ${w}`);
         if (saveWarns.length) {
           warnEl.innerHTML = saveWarns.map(w => `<div>⚠ ${esc(w)}</div>`).join('');
           warnEl.style.display = '';
@@ -4029,9 +4010,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       } else {
         const cardsOutRaw = serializeBoardMap(boardMapSingle);
         const totalQty = parseDecklist(cardsOutRaw).reduce((s, c) => s + c.qty, 0);
-        const saveWarns = [...deckCountWarns];
+        const saveWarns = [...deckCountWarns, ...arenaEquipWarns];
         if (totalQty > 80) saveWarns.push(`Total cuts (${totalQty}) exceeds 80`);
-        for (const w of equipSlotWarningsFromRaw(cardsOutRaw, deckPairs)) saveWarns.push(w);
         if (saveWarns.length) {
           warnEl.innerHTML = saveWarns.map(w => `<div>⚠ ${esc(w)}</div>`).join('');
           warnEl.style.display = '';
