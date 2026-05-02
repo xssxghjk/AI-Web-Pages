@@ -3968,11 +3968,12 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const hero = document.getElementById('sb-hero-input').value.trim();
       const note = document.getElementById('sb-note').value.trim();
       const warnEl = document.getElementById('sb-warn');
+      const saveBtn = document.getElementById('sb-save');
       warnEl.style.display = 'none';
 
       if (!hero) {
         warnEl.textContent = 'Hero name is required.';
-        warnEl.style.display = '';
+        warnEl.style.display = 'block';
         return;
       }
 
@@ -3989,35 +3990,38 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         while (latestGuide.some(m => m.id === matchupId)) matchupId = `${base}-${suffix++}`;
       }
 
-      let matchupObj;
       const { format: deckFmt, deckCards: deckCardCount } = detectFormat(deckPairs);
       const deckCountWarns = deckCountWarnings(deckFmt, deckCardCount);
       const missingEquip = getMissingEquipment(deckPairs);
       const arenaEquipWarns = missingEquip.length > 0 ? [`Missing equipment: ${missingEquip.join(', ')}`] : [];
+      const saveWarns = [...deckCountWarns, ...arenaEquipWarns];
 
+      let matchupObj;
       if (isSplit) {
         const cardsOutFirstRaw = serializeBoardMap(boardMapFirst);
         const cardsOutSecondRaw = serializeBoardMap(boardMapSecond);
         const totalQty = parseDecklist(cardsOutFirstRaw).reduce((s, c) => s + c.qty, 0)
                        + parseDecklist(cardsOutSecondRaw).reduce((s, c) => s + c.qty, 0);
-        const saveWarns = [...deckCountWarns, ...arenaEquipWarns];
         if (totalQty > 160) saveWarns.push(`Total cuts (${totalQty}) is unusually high`);
-        if (saveWarns.length) {
-          warnEl.innerHTML = saveWarns.map(w => `<div>⚠ ${esc(w)}</div>`).join('');
-          warnEl.style.display = '';
-        }
         matchupObj = { id: matchupId, hero, rating: selectedRating, goFirst: selectedGoFirst, note, splitSideboard: true, cardsOutFirstRaw, cardsOutSecondRaw };
       } else {
         const cardsOutRaw = serializeBoardMap(boardMapSingle);
         const totalQty = parseDecklist(cardsOutRaw).reduce((s, c) => s + c.qty, 0);
-        const saveWarns = [...deckCountWarns, ...arenaEquipWarns];
         if (totalQty > 80) saveWarns.push(`Total cuts (${totalQty}) exceeds 80`);
-        if (saveWarns.length) {
-          warnEl.innerHTML = saveWarns.map(w => `<div>⚠ ${esc(w)}</div>`).join('');
-          warnEl.style.display = '';
-        }
         matchupObj = { id: matchupId, hero, rating: selectedRating, goFirst: selectedGoFirst, note, cardsOutRaw };
       }
+
+      const alreadyWarned = saveBtn.dataset.warned === '1';
+      if (saveWarns.length && !alreadyWarned) {
+        warnEl.innerHTML = saveWarns.map(w => `<div>⚠ ${esc(w)}</div>`).join('')
+          + `<div style="margin-top:0.5em;opacity:0.7;font-style:italic;">Click Save again to proceed anyway.</div>`;
+        warnEl.style.display = 'block';
+        showToast(saveWarns.length === 1 ? saveWarns[0] : `${saveWarns.length} warnings — review before saving`, true);
+        saveBtn.dataset.warned = '1';
+        return;
+      }
+
+      delete saveBtn.dataset.warned;
 
       const newGuide = existing
         ? latestGuide.map(m => m.id === existing.id ? matchupObj : m)
