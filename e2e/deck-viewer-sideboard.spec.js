@@ -258,3 +258,66 @@ test.describe('sideboard guide', () => {
     await expect(page.locator('.sb-matchup-row')).toContainText('Kayo');
   });
 });
+
+test.describe('weapon setup validation', () => {
+  const WEAPON_DB = JSON.stringify([
+    { name: 'Helm',       color: '', types: ['Head'],     pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'Vambraces',  color: '', types: ['Arms'],     pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'Chestplate', color: '', types: ['Chest'],    pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'Greaves',    color: '', types: ['Legs'],     pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'BigBlade',   color: '', types: ['2H'],       pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'MainSword',  color: '', types: ['1H'],       pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'OffSword',   color: '', types: ['1H'],       pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'Shield',     color: '', types: ['Off-Hand'], pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+  ]);
+
+  const FULL_ARMOR = '1 Helm\n1 Vambraces\n1 Chestplate\n1 Greaves\n';
+
+  const makeWeaponDeck = (weaponLines) => ({
+    id: 'weapon-test-deck',
+    name: 'Weapon Test Deck',
+    decklist: FULL_ARMOR + weaponLines,
+    cardCount: 0,
+    savedAt: new Date().toISOString(),
+    sideboardGuide: [],
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/card.json', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: WEAPON_DB,
+    }));
+  });
+
+  test('12: 2H weapon — no weapon warning in sideboard', async ({ page }) => {
+    await seedDeck(page, makeWeaponDeck('1 BigBlade'));
+    await openDeckSideboard(page);
+    await expect(page.locator('.sb-equip-warn')).not.toBeVisible();
+  });
+
+  test('13: two different 1H weapons — no weapon warning in sideboard', async ({ page }) => {
+    await seedDeck(page, makeWeaponDeck('1 MainSword\n1 OffSword'));
+    await openDeckSideboard(page);
+    await expect(page.locator('.sb-equip-warn')).not.toBeVisible();
+  });
+
+  test('14: same 1H weapon × 2 (qty 2) — no weapon warning in sideboard', async ({ page }) => {
+    await seedDeck(page, makeWeaponDeck('2 MainSword'));
+    await openDeckSideboard(page);
+    await expect(page.locator('.sb-equip-warn')).not.toBeVisible();
+  });
+
+  test('15: 1H weapon + Off-Hand — no weapon warning in sideboard', async ({ page }) => {
+    await seedDeck(page, makeWeaponDeck('1 MainSword\n1 Shield'));
+    await openDeckSideboard(page);
+    await expect(page.locator('.sb-equip-warn')).not.toBeVisible();
+  });
+
+  test('16: single 1H weapon only — warns about missing Off-Hand', async ({ page }) => {
+    await seedDeck(page, makeWeaponDeck('1 MainSword'));
+    await openDeckSideboard(page);
+    await expect(page.locator('.sb-equip-warn')).toBeVisible();
+    await expect(page.locator('.sb-equip-warn')).toContainText('Off-Hand');
+  });
+});
