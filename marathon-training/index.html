@@ -490,6 +490,8 @@
     .wp-dot { width: 28px; height: 28px; font-size: 13px; }
     .wp-day-icon { font-size: 14px; }
     .wp-day-label { font-size: 9px; }
+    .checkin-buttons { display: grid; grid-template-columns: 1fr 1fr; }
+    .btn-checkin { flex: none; min-width: 0; }
   }
 
   .hidden { display: none !important; }
@@ -499,20 +501,20 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    margin: 0 -4px;
-    padding: 0 4px;
+    width: 100%;
   }
   .week-grid-scroll::-webkit-scrollbar { display: none; }
 
   /* Responsive */
   @media (max-width: 700px) {
-    .week-grid { grid-template-columns: repeat(7, minmax(56px, 1fr)); gap: 4px; }
+    .week-grid { grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .wp-grid { grid-template-columns: repeat(7, 1fr); gap: 4px; }
     .day-cell { padding: 6px 4px; min-height: 75px; }
     .day-name { font-size: 9px; }
     .day-date { font-size: 10px; }
     .day-workout-short { font-size: 9px; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .main { padding: 12px; }
+    .main { padding: 12px; overflow-x: hidden; }
     .modal-actions { grid-template-columns: 1fr; }
     .card { margin-bottom: 20px; }
   }
