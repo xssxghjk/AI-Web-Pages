@@ -4050,7 +4050,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         for (const m of currentGuide) {
           const opt = document.createElement('option');
           opt.value = m.id;
-          opt.textContent = m.hero + ' (' + m.rating + ')';
+          opt.textContent = m.hero;
           importMatchupSel.appendChild(opt);
         }
       } else {
@@ -4998,10 +4998,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     }, 0);
 
     const matchupOpts = guide.map(m => {
-      const ratingLabel = m.rating
-        ? m.rating.charAt(0).toUpperCase() + m.rating.slice(1).replace(/-/g, ' ')
-        : '';
-      return `<option value="${esc(m.id)}">vs ${esc(m.hero)}${ratingLabel ? ' — ' + ratingLabel : ''}</option>`;
+      return `<option value="${esc(m.id)}">vs ${esc(m.hero)}</option>`;
     }).join('');
 
     const savedCount = Math.min(memState.cardCount, maxCards) || Math.min(10, maxCards);
