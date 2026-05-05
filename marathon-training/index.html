@@ -35,6 +35,7 @@
     --phase4:   #c4864a;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { overflow-x: hidden; }
   body {
     font-family: 'DM Serif Text', Georgia, serif;
     background: var(--bg);
@@ -43,6 +44,7 @@
     font-size: 14px;
     line-height: 1.55;
     position: relative;
+    overflow-x: hidden;
   }
   body::before {
     content: '';
@@ -273,7 +275,7 @@
   .week-completion { font-size: 12px; color: var(--text2); }
   .week-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(56px, 1fr));
     gap: 6px;
   }
   .day-cell {
@@ -438,7 +440,7 @@
   /* Week Progress Tab */
   .wp-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(52px, 1fr));
     gap: 8px;
     margin-bottom: 16px;
   }
@@ -451,6 +453,8 @@
     border-radius: 10px;
     border: 1px solid transparent;
     transition: background 0.15s;
+    overflow: hidden;
+    min-width: 0;
   }
   .wp-day[onclick]:hover { background: rgba(196,134,74,0.06); }
   .wp-day-today {
@@ -459,7 +463,7 @@
   }
   .wp-day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text2); }
   .wp-day-icon { font-size: 16px; }
-  .wp-day-label { font-size: 10px; text-align: center; color: var(--text2); line-height: 1.3; }
+  .wp-day-label { font-size: 10px; text-align: center; color: var(--text2); line-height: 1.3; word-break: break-word; overflow-wrap: anywhere; }
   .wp-day-date { font-size: 10px; color: var(--muted-2); }
   .wp-dot {
     width: 36px;
@@ -502,7 +506,7 @@
 
   /* Responsive */
   @media (max-width: 700px) {
-    .week-grid { grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .week-grid { grid-template-columns: repeat(7, minmax(56px, 1fr)); gap: 4px; }
     .day-cell { padding: 6px 4px; min-height: 75px; }
     .day-name { font-size: 9px; }
     .day-date { font-size: 10px; }
@@ -1750,7 +1754,7 @@ function renderWeekProgress() {
         </div>
         <span style="font-size:13px;font-weight:700;color:${pct === 100 ? 'var(--success)' : 'var(--text2)'};">${pct}% complete</span>
       </div>
-      <div class="wp-grid">${dotsHtml}</div>
+      <div class="week-grid-scroll"><div class="wp-grid">${dotsHtml}</div></div>
       <div class="wp-legend">
         <span class="wp-legend-item"><span class="wp-dot wp-done" style="width:12px;height:12px;font-size:0;display:inline-block;"></span> Done</span>
         <span class="wp-legend-item"><span class="wp-dot wp-today" style="width:12px;height:12px;font-size:0;display:inline-block;"></span> Today</span>
