@@ -1035,7 +1035,7 @@ function saveMorning() {
   if (!focusEl) return;
   var intentionEl = document.getElementById('field-intention');
   var goalConnections = Array.prototype.slice.call(
-    document.querySelectorAll('.goal-checkbox:checked')
+    document.getElementById('main').querySelectorAll('.goal-checkbox:checked')
   ).map(function(cb) { return cb.value; });
 
   setEntry(currentDate, 'morning', {
