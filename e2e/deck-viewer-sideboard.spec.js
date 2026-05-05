@@ -447,4 +447,41 @@ test.describe('sideboard save — post-cut warnings', () => {
     await page.click('#sb-save');
     await expect(page.locator('.sb-matchup-row')).toContainText('Ira');
   });
+
+  test('21: warning indicator is visible on matchup row before expanding', async ({ page }) => {
+    // Save a matchup with a post-cut count warning (59 cards after cut)
+    const deck = {
+      id: 'post-cut-deck',
+      name: 'Post Cut Test Deck',
+      decklist: '60 DeckCard (red)\n1 Helm\n1 Vambraces\n1 Chestplate\n1 Greaves\n1 MainSword\n1 Shield',
+      cardCount: 66,
+      savedAt: new Date().toISOString(),
+      sideboardGuide: [
+        { id: 'kayo', hero: 'Kayo', rating: 'favoured', goFirst: 'first', note: '', cardsOutRaw: '1 DeckCard (red)' },
+      ],
+    };
+    await seedDeck(page, deck);
+    await openDeckSideboard(page);
+
+    // Warning indicator should be visible in the collapsed row header
+    const row = page.locator('.sb-matchup-row', { hasText: 'Kayo' });
+    await expect(row.locator('.sb-matchup-warn-indicator')).toBeVisible();
+
+    // A matchup with no cuts should not show the indicator
+    const deck2 = {
+      id: 'clean-deck',
+      name: 'Clean Deck',
+      decklist: '60 DeckCard (red)\n1 Helm\n1 Vambraces\n1 Chestplate\n1 Greaves\n1 MainSword\n1 Shield',
+      cardCount: 66,
+      savedAt: new Date().toISOString(),
+      sideboardGuide: [
+        { id: 'kayo', hero: 'Kayo', rating: 'favoured', goFirst: 'first', note: '', cardsOutRaw: '' },
+      ],
+    };
+    await seedDeck(page, deck2);
+    await openDeckSideboard(page);
+
+    const cleanRow = page.locator('.sb-matchup-row', { hasText: 'Kayo' });
+    await expect(cleanRow.locator('.sb-matchup-warn-indicator')).not.toBeVisible();
+  });
 });

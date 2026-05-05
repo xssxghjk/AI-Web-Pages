@@ -1047,6 +1047,9 @@
       font-size: 0.72rem; color: var(--muted);
       font-family: 'DM Serif Text', Georgia, serif;
     }
+    .sb-matchup-warn-indicator {
+      font-size: 0.75rem; color: #c4864a; flex-shrink: 0; opacity: 0.9;
+    }
     .sb-chevron {
       color: var(--muted-2); font-size: 1.1rem; line-height: 1;
       transition: transform 0.2s, color 0.15s; margin-left: auto; flex-shrink: 0;
@@ -3368,6 +3371,37 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     });
   }
 
+  function matchupHasWarnings(matchup, deckPairs) {
+    const cardLookup = {};
+    for (const p of deckPairs) {
+      cardLookup[p.entry.name.toLowerCase() + '|' + (p.entry.hint || '')] = p.card;
+    }
+    const isArena = c => {
+      const card = cardLookup[c.name.toLowerCase() + '|' + (c.hint || '')];
+      return !card || !card.color;
+    };
+    const { format, deckCards } = detectFormat(deckPairs);
+    const pitchCut = raw => parseDecklist(raw || '').filter(c => !isArena(c)).reduce((s, c) => s + c.qty, 0);
+    const hasCountWarn = remaining => (format === 'cc' && remaining < 60) || (format === 'sage' && remaining !== 40);
+    const hasEquipWarn = cutsRaw => {
+      const cutMap = {};
+      for (const c of parseDecklist(cutsRaw || '')) cutMap[c.name.toLowerCase() + '|' + (c.hint || '')] = c.qty;
+      const remaining = deckPairs.map(p => {
+        const key = p.entry.name.toLowerCase() + '|' + (p.entry.hint || '');
+        const cut = cutMap[key] || 0;
+        return { ...p, entry: { ...p.entry, qty: Math.max(0, p.entry.qty - cut) } };
+      }).filter(p => p.entry.qty > 0);
+      return getMissingEquipment(remaining).length > 0;
+    };
+    if (matchup.splitSideboard) {
+      const f = matchup.cardsOutFirstRaw || '';
+      const s = matchup.cardsOutSecondRaw || '';
+      return hasCountWarn(deckCards - pitchCut(f)) || hasCountWarn(deckCards - pitchCut(s)) ||
+             hasEquipWarn(f) || hasEquipWarn(s);
+    }
+    return hasCountWarn(deckCards - pitchCut(matchup.cardsOutRaw)) || hasEquipWarn(matchup.cardsOutRaw || '');
+  }
+
   function renderSideboard(deck, deckPairs) {
     const guide = getSideboardGuide(deck);
     const container = document.getElementById('sideboard-content');
@@ -3412,12 +3446,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const goFirstClass = matchup.goFirst === 'first' ? 'sb-go-first'
                          : matchup.goFirst === 'second' ? 'sb-go-second'
                          : 'sb-go-either';
+      const warnIndicator = matchupHasWarnings(matchup, deckPairs)
+        ? `<span class="sb-matchup-warn-indicator" title="This matchup has sideboard warnings">⚠</span>`
+        : '';
       return `<div class="sb-matchup-row" data-id="${esc(matchup.id)}">
         <div class="sb-matchup-head">
           <span class="sb-matchup-hero">${esc(matchup.hero)}</span>
           <span class="sb-rating-badge sb-rating-${matchup.rating}">${matchup.rating}</span>
           <span class="sb-go-indicator ${goFirstClass}">${goFirstLabel}</span>
-          <span class="sb-chevron">›</span>
+          ${warnIndicator}<span class="sb-chevron">›</span>
         </div>
         <div class="sb-matchup-body"><div class="sb-matchup-body-inner"></div></div>
       </div>`;
