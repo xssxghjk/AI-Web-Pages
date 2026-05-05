@@ -109,6 +109,7 @@
   .btn-danger:hover { background: var(--danger); color: #fff; }
   .btn-success { background: var(--success); color: #fff; }
   .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
 
   /* Nav Tabs */
   .nav-tabs {
@@ -817,9 +818,16 @@
 
   <!-- CALENDAR TAB -->
   <div id="tab-calendar" class="hidden">
-    <div class="section-header">
-      <div class="section-title">Week Progress</div>
-      <div class="section-sub" id="calendarSub">Current training week</div>
+    <div class="section-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div class="section-title">Week Progress</div>
+        <div class="section-sub" id="calendarSub">Current training week</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;padding-top:4px;">
+        <button class="btn btn-ghost btn-sm" id="btnPrevWeek" onclick="navCalendarWeek(-1)">&#8592; Prev</button>
+        <button class="btn btn-ghost btn-sm" id="btnTodayWeek" onclick="resetCalendarWeek()">Today</button>
+        <button class="btn btn-ghost btn-sm" id="btnNextWeek" onclick="navCalendarWeek(1)">Next &#8594;</button>
+      </div>
     </div>
     <div id="weekProgress"></div>
   </div>
@@ -1318,6 +1326,21 @@ function setDayData(dateStr, obj) {
 // ============================================================
 // MODAL STATE
 // ============================================================
+let calendarWeek = null;
+
+function navCalendarWeek(delta) {
+  const wd = getWeekDayForDate(today());
+  if (calendarWeek === null) calendarWeek = wd ? wd.weekNum : 1;
+  calendarWeek = Math.max(1, Math.min(20, calendarWeek + delta));
+  renderWeekProgress();
+}
+
+function resetCalendarWeek() {
+  calendarWeek = null;
+  renderWeekProgress();
+}
+
+// ============================================================
 let modalDate = null;
 let modalStatus = null;
 
@@ -1640,19 +1663,29 @@ function renderWeekProgress() {
   const wd = getWeekDayForDate(t);
   const container = document.getElementById('weekProgress');
 
-  if (!wd) {
+  const currentWeekNum = wd ? wd.weekNum : null;
+  const weekNum = calendarWeek !== null ? calendarWeek : (currentWeekNum || 1);
+
+  if (!wd && calendarWeek === null) {
     container.innerHTML = '<div class="card"><div class="card-title">No active training week</div></div>';
     return;
   }
 
-  const { weekNum } = wd;
   const phase = getPhase(weekNum);
   const pct = getWeekCompletion(weekNum);
   const weekStart = getDateForWeekDay(weekNum, 1);
   const weekEnd = getDateForWeekDay(weekNum, 6);
+  const isCurrentWeek = currentWeekNum === weekNum;
 
   document.getElementById('calendarSub').textContent =
     `Week ${weekNum} of 20 — ${formatDate(weekStart)} to ${formatDate(weekEnd)}`;
+
+  const btnPrev = document.getElementById('btnPrevWeek');
+  const btnNext = document.getElementById('btnNextWeek');
+  const btnToday = document.getElementById('btnTodayWeek');
+  if (btnPrev) btnPrev.disabled = weekNum <= 1;
+  if (btnNext) btnNext.disabled = weekNum >= 20;
+  if (btnToday) btnToday.style.opacity = isCurrentWeek ? '0.4' : '1';
 
   let dotsHtml = '';
   for (let d = 0; d < 7; d++) {
