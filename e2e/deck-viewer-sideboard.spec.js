@@ -378,3 +378,73 @@ test.describe('sideboard save — valid deck skips warnings', () => {
     await expect(page.locator('.sb-matchup-row')).toContainText('Kayo');
   });
 });
+
+test.describe('sideboard save — post-cut warnings', () => {
+  const POST_CUT_DB = JSON.stringify([
+    { name: 'DeckCard', color: 'red', types: [], pitch: '1', cost: '0', power: '4', defense: '3', printings: [], card_keywords: [] },
+    { name: 'Helm',       color: '', types: ['Head'],     pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'Vambraces',  color: '', types: ['Arms'],     pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'Chestplate', color: '', types: ['Chest'],    pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'Greaves',    color: '', types: ['Legs'],     pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'MainSword',  color: '', types: ['1H'],       pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+    { name: 'Shield',     color: '', types: ['Off-Hand'], pitch: '', cost: '', power: '', defense: '', printings: [], card_keywords: [] },
+  ]);
+
+  const POST_CUT_DECK = {
+    id: 'post-cut-deck',
+    name: 'Post Cut Test Deck',
+    decklist: '60 DeckCard (red)\n1 Helm\n1 Vambraces\n1 Chestplate\n1 Greaves\n1 MainSword\n1 Shield',
+    cardCount: 66,
+    savedAt: new Date().toISOString(),
+    sideboardGuide: [],
+  };
+
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/card.json', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: POST_CUT_DB,
+    }));
+    await seedDeck(page, POST_CUT_DECK);
+  });
+
+  test('19: cutting deck cards below 60 warns before saving', async ({ page }) => {
+    await openDeckSideboard(page);
+    await page.click('text=+ Add matchup');
+    await page.fill('#sb-hero-input', 'Kayo');
+
+    // Cut 1 DeckCard — leaves 59 pitch cards in a CC deck (below 60)
+    const deckCardRow = page.locator('.sb-picker-row', { hasText: 'DeckCard' });
+    await deckCardRow.locator('.sb-picker-minus').click();
+
+    // First click: post-cut count warning shown, save blocked
+    await page.click('#sb-save');
+    await expect(page.locator('#sb-warn')).toBeVisible();
+    await expect(page.locator('#sb-warn')).toContainText('After cuts');
+    await expect(page.locator('.sb-matchup-row')).not.toBeVisible();
+
+    // Second click: save proceeds
+    await page.click('#sb-save');
+    await expect(page.locator('.sb-matchup-row')).toContainText('Kayo');
+  });
+
+  test('20: cutting equipment that invalidates weapon setup warns before saving', async ({ page }) => {
+    await openDeckSideboard(page);
+    await page.click('text=+ Add matchup');
+    await page.fill('#sb-hero-input', 'Ira');
+
+    // Cut Shield (Off-Hand) — leaves single 1H MainSword with no Off-Hand
+    const shieldRow = page.locator('.sb-picker-row', { hasText: 'Shield' });
+    await shieldRow.locator('.sb-picker-minus').click();
+
+    // First click: post-cut equipment warning shown, save blocked
+    await page.click('#sb-save');
+    await expect(page.locator('#sb-warn')).toBeVisible();
+    await expect(page.locator('#sb-warn')).toContainText('After cuts');
+    await expect(page.locator('.sb-matchup-row')).not.toBeVisible();
+
+    // Second click: save proceeds
+    await page.click('#sb-save');
+    await expect(page.locator('.sb-matchup-row')).toContainText('Ira');
+  });
+});

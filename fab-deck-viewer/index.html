@@ -3998,6 +3998,39 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const dbWarn = missingFromDb.length > 0 ? [`Not found in database: ${missingFromDb.join(', ')}`] : [];
       const saveWarns = [...dbWarn, ...deckCountWarns, ...arenaEquipWarns];
 
+      // Build lookup for post-cut validation (classifies cuts as pitch vs arena)
+      const pairByKey = {};
+      for (const p of deckPairs) pairByKey[p.entry.name.toLowerCase() + '|' + (p.entry.hint || '')] = p;
+
+      const addPostCutWarns = (cutsRaw, label) => {
+        const parsed = parseDecklist(cutsRaw || '');
+        const cutMap = {};
+        for (const c of parsed) cutMap[c.name.toLowerCase() + '|' + (c.hint || '')] = c.qty;
+        const pfx = label ? `${label}: ` : '';
+        if (!deckCountWarns.length) {
+          const pitchCuts = parsed.filter(c => {
+            const p = pairByKey[c.name.toLowerCase() + '|' + (c.hint || '')];
+            return p && p.card && p.card.color;
+          }).reduce((s, c) => s + c.qty, 0);
+          const remaining = deckCardCount - pitchCuts;
+          if (deckFmt === 'cc' && remaining < 60) {
+            saveWarns.push(`${pfx}After cuts: ${remaining} deck cards remaining — needs at least 60 (missing ${60 - remaining})`);
+          } else if (deckFmt === 'sage' && remaining !== 40) {
+            const diff = 40 - remaining;
+            saveWarns.push(`${pfx}After cuts: ${remaining} deck cards remaining — needs exactly 40 (${diff > 0 ? `missing ${diff}` : `${-diff} too many`})`);
+          }
+        }
+        if (!arenaEquipWarns.length) {
+          const rem = deckPairs.map(p => {
+            const key = p.entry.name.toLowerCase() + '|' + (p.entry.hint || '');
+            const cut = cutMap[key] || 0;
+            return { ...p, entry: { ...p.entry, qty: Math.max(0, p.entry.qty - cut) } };
+          }).filter(p => p.entry.qty > 0);
+          const missing = getMissingEquipment(rem);
+          if (missing.length) saveWarns.push(`${pfx}After cuts: Missing equipment: ${missing.join(', ')}`);
+        }
+      };
+
       let matchupObj;
       if (isSplit) {
         const cardsOutFirstRaw = serializeBoardMap(boardMapFirst);
@@ -4005,11 +4038,14 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         const totalQty = parseDecklist(cardsOutFirstRaw).reduce((s, c) => s + c.qty, 0)
                        + parseDecklist(cardsOutSecondRaw).reduce((s, c) => s + c.qty, 0);
         if (totalQty > 160) saveWarns.push(`Total cuts (${totalQty}) is unusually high`);
+        addPostCutWarns(cardsOutFirstRaw, 'Go First');
+        addPostCutWarns(cardsOutSecondRaw, 'Go Second');
         matchupObj = { id: matchupId, hero, rating: selectedRating, goFirst: selectedGoFirst, note, splitSideboard: true, cardsOutFirstRaw, cardsOutSecondRaw };
       } else {
         const cardsOutRaw = serializeBoardMap(boardMapSingle);
         const totalQty = parseDecklist(cardsOutRaw).reduce((s, c) => s + c.qty, 0);
         if (totalQty > 80) saveWarns.push(`Total cuts (${totalQty}) exceeds 80`);
+        addPostCutWarns(cardsOutRaw, null);
         matchupObj = { id: matchupId, hero, rating: selectedRating, goFirst: selectedGoFirst, note, cardsOutRaw };
       }
 
