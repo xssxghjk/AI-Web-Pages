@@ -1194,13 +1194,15 @@
       text-transform: uppercase; color: var(--accent);
       background: var(--surface-2); border-bottom: 1px solid var(--border);
     }
+    .sb-heatmap-item { border-bottom: 1px solid var(--border); }
+    .sb-heatmap-item:last-child { border-bottom: none; }
     .sb-heatmap-row {
       display: grid; grid-template-columns: 140px 1fr 120px;
       align-items: center; gap: 0.65rem;
       padding: 0.45rem 1.25rem;
-      border-bottom: 1px solid var(--border);
+      cursor: pointer;
     }
-    .sb-heatmap-row:last-child { border-bottom: none; }
+    .sb-heatmap-row:hover { background: var(--surface-2); }
     .sb-heatmap-name {
       font-family: 'DM Serif Text', Georgia, serif; font-size: 0.75rem;
       color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -1214,6 +1216,20 @@
       color: var(--muted); text-align: right;
     }
     .sb-cut-candidate { color: #d97706; font-weight: 600; }
+    .sb-heatmap-detail {
+      display: none; padding: 0 1.25rem 0.65rem;
+    }
+    .sb-heatmap-detail.open { display: block; }
+    .sb-heatmap-detail-label {
+      font-family: 'DM Serif Text', Georgia, serif; font-size: 0.62rem;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+    .sb-heatmap-chip {
+      display: inline-block; padding: 0.15rem 0.55rem;
+      background: var(--surface-2); border: 1px solid var(--border); border-radius: 1px;
+      font-size: 0.67rem; color: var(--text); margin: 0.15rem 0.2rem 0.1rem 0;
+    }
 
     /* ── Sideboard Editor ── */
     .sb-editor {
@@ -3201,6 +3217,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   function computeHeatmap(deckPairs, guide) {
     const total = guide.length;
     const cutCounts = {};
+    const cutMatchups = {};
     for (const matchup of guide) {
       const raws = matchup.splitSideboard
         ? [matchup.cardsOutFirstRaw || '', matchup.cardsOutSecondRaw || '']
@@ -3211,6 +3228,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           const key = name.toLowerCase();
           if (!seen.has(key)) {
             cutCounts[key] = (cutCounts[key] || 0) + 1;
+            if (!cutMatchups[key]) cutMatchups[key] = [];
+            cutMatchups[key].push(matchup.hero);
             seen.add(key);
           }
         }
@@ -3224,7 +3243,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       seen.add(key);
       const matchupsCut = cutCounts[key] || 0;
       const survivedMatchups = total - matchupsCut;
-      rows.push({ name: entry.name, matchupsCut, survivedMatchups, total });
+      rows.push({ name: entry.name, matchupsCut, survivedMatchups, total, matchupsUsedIn: cutMatchups[key] || [] });
     }
     rows.sort((a, b) => a.survivedMatchups - b.survivedMatchups);
     return rows;
@@ -3623,16 +3642,31 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       heatmapEl.innerHTML = '<div class="empty-state"><div class="empty-state-title">No coverage data yet</div><div class="empty-state-sub">Add matchups with cards out to see coverage</div></div>';
       return;
     }
-    const rowsHtml = heatmapRows.map(row => {
+    const itemsHtml = heatmapRows.map(row => {
       const pct = row.total > 0 ? (row.survivedMatchups / row.total * 100).toFixed(1) : 0;
       const isCandidate = row.survivedMatchups <= 1;
-      return `<div class="sb-heatmap-row">
-        <div class="sb-heatmap-name">${esc(row.name)}</div>
-        <div class="sb-heatmap-track"><div class="sb-heatmap-fill" style="width:${pct}%"></div></div>
-        <div class="sb-heatmap-label${isCandidate ? ' sb-cut-candidate' : ''}">${row.survivedMatchups} / ${row.total} matchups</div>
+      const chipsHtml = row.matchupsUsedIn.map(h => `<span class="sb-heatmap-chip">${esc(h)}</span>`).join('');
+      return `<div class="sb-heatmap-item">
+        <div class="sb-heatmap-row">
+          <div class="sb-heatmap-name">${esc(row.name)}</div>
+          <div class="sb-heatmap-track"><div class="sb-heatmap-fill" style="width:${pct}%"></div></div>
+          <div class="sb-heatmap-label${isCandidate ? ' sb-cut-candidate' : ''}">${row.survivedMatchups} / ${row.total} matchups</div>
+        </div>
+        <div class="sb-heatmap-detail">
+          <div class="sb-heatmap-detail-label">Cut in</div>
+          ${chipsHtml}
+        </div>
       </div>`;
     }).join('');
-    heatmapEl.innerHTML = `<div class="sb-heatmap"><div class="sb-heatmap-title">Card Coverage</div>${rowsHtml}</div>`;
+    heatmapEl.innerHTML = `<div class="sb-heatmap"><div class="sb-heatmap-title">Card Coverage</div>${itemsHtml}</div>`;
+    heatmapEl.querySelector('.sb-heatmap').addEventListener('click', e => {
+      const row = e.target.closest('.sb-heatmap-row');
+      if (!row) return;
+      const detail = row.nextElementSibling;
+      if (detail && detail.classList.contains('sb-heatmap-detail')) {
+        detail.classList.toggle('open');
+      }
+    });
   }
 
   function renderMatchupBody(bodyEl, matchup, deckPairs, deck) {
