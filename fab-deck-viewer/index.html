@@ -3216,8 +3216,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   function computeHeatmap(deckPairs, guide) {
     const total = guide.length;
+    const allHeroes = guide.map(m => m.hero);
     const cutCounts = {};
-    const cutMatchups = {};
+    const cutHeroSets = {};
     for (const matchup of guide) {
       const raws = matchup.splitSideboard
         ? [matchup.cardsOutFirstRaw || '', matchup.cardsOutSecondRaw || '']
@@ -3228,8 +3229,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           const key = name.toLowerCase();
           if (!seen.has(key)) {
             cutCounts[key] = (cutCounts[key] || 0) + 1;
-            if (!cutMatchups[key]) cutMatchups[key] = [];
-            cutMatchups[key].push(matchup.hero);
+            if (!cutHeroSets[key]) cutHeroSets[key] = new Set();
+            cutHeroSets[key].add(matchup.hero);
             seen.add(key);
           }
         }
@@ -3243,7 +3244,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       seen.add(key);
       const matchupsCut = cutCounts[key] || 0;
       const survivedMatchups = total - matchupsCut;
-      rows.push({ name: entry.name, matchupsCut, survivedMatchups, total, matchupsUsedIn: cutMatchups[key] || [] });
+      const cutSet = cutHeroSets[key] || new Set();
+      const matchupsUsedIn = allHeroes.filter(h => !cutSet.has(h));
+      rows.push({ name: entry.name, matchupsCut, survivedMatchups, total, matchupsUsedIn });
     }
     rows.sort((a, b) => a.survivedMatchups - b.survivedMatchups);
     return rows;
@@ -3653,7 +3656,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           <div class="sb-heatmap-label${isCandidate ? ' sb-cut-candidate' : ''}">${row.survivedMatchups} / ${row.total} matchups</div>
         </div>
         <div class="sb-heatmap-detail">
-          <div class="sb-heatmap-detail-label">Cut in</div>
+          <div class="sb-heatmap-detail-label">Used in</div>
           ${chipsHtml}
         </div>
       </div>`;

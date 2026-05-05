@@ -186,6 +186,7 @@ test.describe('sideboard guide', () => {
       sideboardGuide: [
         { id: 'kayo',      hero: 'Kayo',      rating: 'favoured', goFirst: null, note: '', cardsOutRaw: '3 Fry (red)' },
         { id: 'dorinthea', hero: 'Dorinthea', rating: 'even',     goFirst: null, note: '', cardsOutRaw: '3 Fry (red)' },
+        { id: 'rhinar',    hero: 'Rhinar',    rating: 'favoured', goFirst: null, note: '', cardsOutRaw: '' },
       ],
     };
     await seedDeck(page, deck);
@@ -198,11 +199,13 @@ test.describe('sideboard guide', () => {
     const detail = page.locator('.sb-heatmap-item', { hasText: 'Fry' }).locator('.sb-heatmap-detail');
     await expect(detail).not.toBeVisible();
 
-    // Click the row to expand
+    // Click the row to expand — detail shows matchups where Fry is used (not cut)
     await page.locator('.sb-heatmap-row', { hasText: 'Fry' }).click();
     await expect(detail).toBeVisible();
-    await expect(detail).toContainText('Kayo');
-    await expect(detail).toContainText('Dorinthea');
+    await expect(detail).toContainText('Used in');
+    await expect(detail).toContainText('Rhinar');
+    await expect(detail).not.toContainText('Kayo');
+    await expect(detail).not.toContainText('Dorinthea');
 
     // Click again to collapse
     await page.locator('.sb-heatmap-row', { hasText: 'Fry' }).click();
