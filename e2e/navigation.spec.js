@@ -71,3 +71,11 @@ test('project stats page loads', async ({ page }) => {
   await expect(page).toHaveTitle(/Project Stats/);
   await expect(page.locator('h1')).toContainText('Project Stats');
 });
+
+test('journal page loads', async ({ page }) => {
+  await page.goto('/journal/');
+  await expect(page).toHaveTitle(/Journal/);
+  const sidebarVisible = await page.locator('.sidebar').isVisible();
+  const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();
+  expect(sidebarVisible || hamburgerVisible).toBe(true);
+});
