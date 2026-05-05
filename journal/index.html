@@ -1209,7 +1209,7 @@ function setProgress(goalId, value) {
   if (bar)   bar.style.width = clamped + '%';
   if (pct)   pct.textContent = clamped + '%';
   if (input) input.value = clamped;
-  scheduleEveningSave();
+  if (activeTab === 'evening') scheduleEveningSave();
 }
 
 function toggleGoalComplete(goalId, checked) {
@@ -1320,6 +1320,19 @@ function renderGoalCard(goal) {
   var createdMeta = goal.createdAt
     ? '<span class="goal-meta-item">Created ' + formatDateShort(goal.createdAt.slice(0, 10)) + '</span>' : '';
 
+  var progressControls = isActive
+    ? '<div class="progress-controls" style="margin-top:8px">' +
+        '<button class="prog-btn" onclick="adjustProgress(\'' + id + '\',-10)">&minus;10</button>' +
+        '<button class="prog-btn" onclick="adjustProgress(\'' + id + '\',-5)">&minus;5</button>' +
+        '<button class="prog-btn" onclick="adjustProgress(\'' + id + '\',-1)">&minus;1</button>' +
+        '<input class="prog-input" type="number" min="0" max="100" value="' + pct + '" id="prog-input-' + id + '"' +
+          ' onchange="setProgress(\'' + id + '\',this.value)" oninput="setProgress(\'' + id + '\',this.value)">' +
+        '<button class="prog-btn" onclick="adjustProgress(\'' + id + '\',1)">+1</button>' +
+        '<button class="prog-btn" onclick="adjustProgress(\'' + id + '\',5)">+5</button>' +
+        '<button class="prog-btn" onclick="adjustProgress(\'' + id + '\',10)">+10</button>' +
+      '</div>'
+    : '';
+
   return '<div class="goal-card' + (isDone ? ' goal-completed' : '') + (isArch ? ' goal-archived' : '') + '">' +
     '<div class="goal-card-top">' +
       '<div class="goal-badges">' + typeBadge + catBadge + '</div>' +
@@ -1329,10 +1342,11 @@ function renderGoalCard(goal) {
     (goal.description ? '<p class="goal-description">' + escHtml(goal.description) + '</p>' : '') +
     '<div class="goal-progress-section">' +
       '<div class="progress-bar-wrap">' +
-        '<div class="progress-bar-fill" style="width:' + pct + '%"></div>' +
+        '<div class="progress-bar-fill" id="prog-bar-' + id + '" style="width:' + pct + '%"></div>' +
       '</div>' +
-      '<span class="progress-pct">' + pct + '%</span>' +
+      '<span class="progress-pct" id="prog-pct-' + id + '">' + pct + '%</span>' +
     '</div>' +
+    progressControls +
     '<div class="goal-meta">' + targetMeta + createdMeta +
       '<span class="goal-meta-item">' + connCount + ' journal ' + (connCount === 1 ? 'entry' : 'entries') + '</span>' +
     '</div>' +
