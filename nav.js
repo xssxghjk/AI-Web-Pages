@@ -162,8 +162,10 @@
       links: [
         { key: 'deck-viewer',      href: '../fab-deck-viewer/',    text: 'Deck Builder',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
-{ key: 'marathon',         href: '../marathon-training/',  text: 'Marathon Training',
+        { key: 'marathon',         href: '../marathon-training/',  text: 'Marathon Training',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="3" r="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 12.5l1.5-4 1.5 2 1.5-2 1.5 4M7 5.5v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+        { key: 'journal',          href: '../journal/',            text: 'Journal',
+          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="1.5" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 4.5h4M5 7h4M5 9.5h2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M2.5 3.5h-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
       ]
     },
     {
@@ -183,7 +185,8 @@
     if (/\/trips(\/|$)/.test(p))                  return 'trips';
     if (/\/trip(\/|$)/.test(p))                   return 'trips';  // trip detail
     if (/\/fab-deck-viewer(\/|$)/.test(p))        return 'deck-viewer';
-if (/\/marathon-training(\/|$)/.test(p))      return 'marathon';
+    if (/\/marathon-training(\/|$)/.test(p))      return 'marathon';
+    if (/\/journal(\/|$)/.test(p))                return 'journal';
     if (/\/project-stats(\/|$)/.test(p))          return 'project-stats';
     return null;
   }
