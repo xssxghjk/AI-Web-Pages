@@ -894,6 +894,73 @@
       outline-offset: 1px;
     }
 
+    /* ── Clickable metric tiles ── */
+    .metric-tile--clickable {
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .metric-tile--clickable:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .metric-tile--clickable:hover .metric-val {
+      color: var(--accent);
+    }
+    .metric-tile--clickable:focus-visible {
+      outline: 1px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    /* ── Clickable pitch segments & legends ── */
+    .pitch-seg-piece--clickable {
+      cursor: pointer;
+      transition: filter 0.15s;
+    }
+    .pitch-seg-piece--clickable:hover { filter: brightness(1.18); }
+    .pitch-seg-piece--clickable:focus-visible {
+      outline: 2px solid var(--text);
+      outline-offset: 1px;
+    }
+    .pitch-seg-legend--clickable {
+      cursor: pointer;
+      border-radius: 2px;
+      padding: 1px 4px;
+      margin: -1px -4px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .pitch-seg-legend--clickable:hover { background: var(--accent-dim); color: var(--accent); }
+    .pitch-seg-legend--clickable:focus-visible {
+      outline: 1px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    /* ── Clickable cost curve columns ── */
+    .vchart-col--clickable {
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background 0.15s;
+    }
+    .vchart-col--clickable:hover { background: var(--accent-dim); }
+    .vchart-col--clickable:hover .vchart-fill { background: var(--accent); filter: brightness(1.2); }
+    .vchart-col--clickable:hover .vchart-label { color: var(--accent); }
+    .vchart-col--clickable:focus-visible {
+      outline: 1px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    /* ── Clickable sim draw-rate rows ── */
+    .sim-dr-row--clickable {
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background 0.15s;
+    }
+    .sim-dr-row--clickable:hover { background: var(--accent-dim); }
+    .sim-dr-row--clickable:hover .sim-dr-type { color: var(--accent); }
+    .sim-dr-row--clickable:focus-visible {
+      outline: 1px solid var(--accent);
+      outline-offset: 1px;
+    }
+
     /* ── Category popup ── */
     .cat-popup-backdrop {
       position: fixed; inset: 0; z-index: 300;
@@ -2683,11 +2750,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const avgPower   = stats.powerCards   ? (stats.powerSum   / stats.powerCards).toFixed(2)   : '—';
     const avgDefense = stats.defenseCards ? (stats.defenseSum / stats.defenseCards).toFixed(2) : '—';
 
+    const metricTile = (label, val, sub, filterType) => {
+      const clickable = val !== '—' ? ` metric-tile--clickable" data-filter-type="${filterType}" tabindex="0" role="button"` : `"`;
+      return `<div class="metric-tile${clickable}><div class="metric-label">${label}</div><div class="metric-val">${val}</div><div class="metric-sub">${sub}</div></div>`;
+    };
     html += analysisSectionHtml('Key Metrics', `<div class="metric-grid">
-      <div class="metric-tile"><div class="metric-label">Avg Pitch</div><div class="metric-val">${avgPitch}</div><div class="metric-sub">${stats.pitchCards} pitched cards</div></div>
-      <div class="metric-tile"><div class="metric-label">Avg Cost</div><div class="metric-val">${avgCost}</div><div class="metric-sub">${stats.costCards} costed cards</div></div>
-      <div class="metric-tile"><div class="metric-label">Avg Power</div><div class="metric-val">${avgPower}</div><div class="metric-sub">${stats.powerCards} attack cards</div></div>
-      <div class="metric-tile"><div class="metric-label">Avg Defense</div><div class="metric-val">${avgDefense}</div><div class="metric-sub">${stats.defenseCards} defensive cards</div></div>
+      ${metricTile('Avg Pitch',   avgPitch,   `${stats.pitchCards} pitched cards`,    'has-pitch')}
+      ${metricTile('Avg Cost',    avgCost,    `${stats.costCards} costed cards`,      'has-cost')}
+      ${metricTile('Avg Power',   avgPower,   `${stats.powerCards} attack cards`,     'has-power')}
+      ${metricTile('Avg Defense', avgDefense, `${stats.defenseCards} defensive cards`,'has-defense')}
     </div>`);
 
     // ── Pitch Distribution ──
@@ -2697,18 +2768,18 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const rPct = Math.round(red    / pitchTotal * 100);
       const yPct = Math.round(yellow / pitchTotal * 100);
       const bPct = 100 - rPct - yPct;
-      const segPiece = (count, flex, bg, textCol, pct) => count > 0
-        ? `<div class="pitch-seg-piece" style="flex:${flex};background:${bg};color:${textCol}">${pct > 9 ? pct + '%' : ''}</div>` : '';
+      const segPiece = (count, flex, bg, textCol, pct, color) => count > 0
+        ? `<div class="pitch-seg-piece pitch-seg-piece--clickable" style="flex:${flex};background:${bg};color:${textCol}" data-filter-type="pitch-color" data-filter-key="${color}" tabindex="0" role="button" aria-label="${color} cards">${pct > 9 ? pct + '%' : ''}</div>` : '';
       html += analysisSectionHtml('Pitch Distribution', `
         <div class="pitch-seg">
-          ${segPiece(red,    red,    'var(--red-c)',    '#fff',     rPct)}
-          ${segPiece(yellow, yellow, 'var(--yellow-c)', '#2c1810',  yPct)}
-          ${segPiece(blue,   blue,   'var(--blue-c)',   '#fff',     bPct)}
+          ${segPiece(red,    red,    'var(--red-c)',    '#fff',     rPct,  'red')}
+          ${segPiece(yellow, yellow, 'var(--yellow-c)', '#2c1810',  yPct,  'yellow')}
+          ${segPiece(blue,   blue,   'var(--blue-c)',   '#fff',     bPct,  'blue')}
         </div>
         <div class="pitch-seg-labels">
-          ${red    > 0 ? `<div class="pitch-seg-legend"><div class="pitch-seg-dot" style="background:var(--red-c)"></div>Red (pitch 1) &mdash; ${red} cards</div>` : ''}
-          ${yellow > 0 ? `<div class="pitch-seg-legend"><div class="pitch-seg-dot" style="background:var(--yellow-c)"></div>Yellow (pitch 2) &mdash; ${yellow} cards</div>` : ''}
-          ${blue   > 0 ? `<div class="pitch-seg-legend"><div class="pitch-seg-dot" style="background:var(--blue-c)"></div>Blue (pitch 3) &mdash; ${blue} cards</div>` : ''}
+          ${red    > 0 ? `<div class="pitch-seg-legend pitch-seg-legend--clickable" data-filter-type="pitch-color" data-filter-key="red"    tabindex="0" role="button"><div class="pitch-seg-dot" style="background:var(--red-c)"></div>Red (pitch 1) &mdash; ${red} cards</div>` : ''}
+          ${yellow > 0 ? `<div class="pitch-seg-legend pitch-seg-legend--clickable" data-filter-type="pitch-color" data-filter-key="yellow" tabindex="0" role="button"><div class="pitch-seg-dot" style="background:var(--yellow-c)"></div>Yellow (pitch 2) &mdash; ${yellow} cards</div>` : ''}
+          ${blue   > 0 ? `<div class="pitch-seg-legend pitch-seg-legend--clickable" data-filter-type="pitch-color" data-filter-key="blue"   tabindex="0" role="button"><div class="pitch-seg-dot" style="background:var(--blue-c)"></div>Blue (pitch 3) &mdash; ${blue} cards</div>` : ''}
         </div>`);
     }
 
@@ -2723,7 +2794,10 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const cols = activeCostKeys.map(k => {
         const count = stats.costDist[k] || 0;
         const pct = maxC ? (count / maxC * 100).toFixed(1) : 0;
-        return `<div class="vchart-col">
+        const clickable = count > 0
+          ? ` vchart-col--clickable" data-filter-type="cost" data-filter-key="${esc(k)}" tabindex="0" role="button" aria-label="Cost ${k}`
+          : ``;
+        return `<div class="vchart-col${clickable}">
           <div class="vchart-fill-wrap"><div class="vchart-fill" data-h="${pct}" style="height:0%"></div></div>
           <div class="vchart-label">${k}</div>
           <div class="vchart-count">${count > 0 ? count : ''}</div>
@@ -2845,7 +2919,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
               return `<span class="sim-dr-pct">${(p * 100).toFixed(1)}%</span>`;
             }).join('')
           : '';
-        return `<div class="sim-dr-row"><span class="sim-dr-type">${esc(t)}</span><span class="sim-dr-count">${c} cards</span><span class="sim-dr-avg">${avg2}</span>${pctCells}</div>`;
+        return `<div class="sim-dr-row sim-dr-row--clickable" data-filter-type="sim-type" data-filter-key="${esc(t)}" tabindex="0" role="button"><span class="sim-dr-type">${esc(t)}</span><span class="sim-dr-count">${c} cards</span><span class="sim-dr-avg">${avg2}</span>${pctCells}</div>`;
       }).join('');
       return headerRow + `<div class="sim-dr-table">${rows}</div>`;
     }
@@ -3049,6 +3123,39 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         pairs = currentAnalysisPairs.filter(p => p.card && p.card.defense === val);
       }
       title = `Defense ${filterKey}`;
+    } else if (filterType === 'pitch-color') {
+      pairs = currentAnalysisPairs.filter(p => p.card && p.card.color === filterKey);
+      const colorLabel = filterKey.charAt(0).toUpperCase() + filterKey.slice(1);
+      const pitchVal = filterKey === 'red' ? 1 : filterKey === 'yellow' ? 2 : 3;
+      title = `${colorLabel} (Pitch ${pitchVal})`;
+    } else if (filterType === 'cost') {
+      if (filterKey === '7+') {
+        pairs = currentAnalysisPairs.filter(p => p.card && p.card.cost != null && p.card.cost >= 7);
+      } else {
+        const val = parseInt(filterKey, 10);
+        pairs = currentAnalysisPairs.filter(p => p.card && p.card.cost === val);
+      }
+      title = `Cost ${filterKey}`;
+    } else if (filterType === 'has-pitch') {
+      pairs = currentAnalysisPairs.filter(p => p.card && p.card.pitch != null);
+      title = 'Pitched Cards';
+    } else if (filterType === 'has-cost') {
+      pairs = currentAnalysisPairs.filter(p => p.card && p.card.cost != null);
+      title = 'Costed Cards';
+    } else if (filterType === 'has-power') {
+      pairs = currentAnalysisPairs.filter(p => p.card && p.card.power != null);
+      title = 'Attack Cards';
+    } else if (filterType === 'has-defense') {
+      pairs = currentAnalysisPairs.filter(p => p.card && p.card.defense != null);
+      title = 'Defensive Cards';
+    } else if (filterType === 'sim-type') {
+      const ARENA_TYPES = ['Equipment', 'Weapon', 'Off-Hand'];
+      if (filterKey === 'Non-Attack Action') {
+        pairs = currentAnalysisPairs.filter(p => p.card && !p.card.types.some(t => ARENA_TYPES.includes(t)) && p.card.types.includes('Action') && !p.card.types.includes('Attack'));
+      } else {
+        pairs = currentAnalysisPairs.filter(p => p.card && !p.card.types.some(t => ARENA_TYPES.includes(t)) && p.card.types.includes(filterKey));
+      }
+      title = filterKey;
     } else {
       return;
     }
@@ -5348,19 +5455,23 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     }
   });
 
-  document.getElementById('analysis-content').addEventListener('click', function(e) {
-    const row = e.target.closest('.hbar-row--clickable');
-    if (!row) return;
-    openCategoryPopup(row.dataset.filterType, row.dataset.filterKey);
-  });
-
-  document.getElementById('analysis-content').addEventListener('keydown', function(e) {
+  function handleAnalysisClick(e) {
+    const el = e.target.closest('[data-filter-type]');
+    if (!el) return;
+    openCategoryPopup(el.dataset.filterType, el.dataset.filterKey);
+  }
+  function handleAnalysisKeydown(e) {
     if (e.key !== 'Enter' && e.key !== ' ') return;
-    const row = e.target.closest('.hbar-row--clickable');
-    if (!row) return;
+    const el = e.target.closest('[data-filter-type]');
+    if (!el) return;
     e.preventDefault();
-    openCategoryPopup(row.dataset.filterType, row.dataset.filterKey);
-  });
+    openCategoryPopup(el.dataset.filterType, el.dataset.filterKey);
+  }
+
+  document.getElementById('analysis-content').addEventListener('click', handleAnalysisClick);
+  document.getElementById('analysis-content').addEventListener('keydown', handleAnalysisKeydown);
+  document.getElementById('analysis-simulator').addEventListener('click', handleAnalysisClick);
+  document.getElementById('analysis-simulator').addEventListener('keydown', handleAnalysisKeydown);
 
   /* ── Deck export ──────────────────────────────────────────────────── */
   function exportDeck(deck) {
