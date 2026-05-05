@@ -180,6 +180,35 @@ test.describe('sideboard guide', () => {
     await expect(candidateRow.locator('.sb-cut-candidate')).toBeVisible();
   });
 
+  test('12: clicking a coverage row expands matchup list', async ({ page }) => {
+    const deck = {
+      ...SEED_DECK,
+      sideboardGuide: [
+        { id: 'kayo',      hero: 'Kayo',      rating: 'favoured', goFirst: null, note: '', cardsOutRaw: '3 Fry (red)' },
+        { id: 'dorinthea', hero: 'Dorinthea', rating: 'even',     goFirst: null, note: '', cardsOutRaw: '3 Fry (red)' },
+      ],
+    };
+    await seedDeck(page, deck);
+    await openDeckSideboard(page);
+
+    await page.click('#sb-sub-tab-coverage');
+    await page.waitForSelector('#sideboard-heatmap', { state: 'visible' });
+
+    // Detail section hidden before clicking
+    const detail = page.locator('.sb-heatmap-item', { hasText: 'Fry' }).locator('.sb-heatmap-detail');
+    await expect(detail).not.toBeVisible();
+
+    // Click the row to expand
+    await page.locator('.sb-heatmap-row', { hasText: 'Fry' }).click();
+    await expect(detail).toBeVisible();
+    await expect(detail).toContainText('Kayo');
+    await expect(detail).toContainText('Dorinthea');
+
+    // Click again to collapse
+    await page.locator('.sb-heatmap-row', { hasText: 'Fry' }).click();
+    await expect(detail).not.toBeVisible();
+  });
+
   test('9: export PDF button is visible when guide has matchups', async ({ page }) => {
     const deck = {
       ...SEED_DECK,
