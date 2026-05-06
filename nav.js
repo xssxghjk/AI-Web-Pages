@@ -121,7 +121,21 @@
       'color:#c4864a;border-radius:2px;cursor:pointer;font-size:0.7rem;' +
       'font-family:"DM Serif Text",Georgia,serif;letter-spacing:0.04em;' +
       'transition:background 0.15s,border-color 0.15s}' +
-    '.nav-storage-notice-btn:hover{background:rgba(196,134,74,0.22);border-color:rgba(196,134,74,0.5)}';
+    '.nav-storage-notice-btn:hover{background:rgba(196,134,74,0.22);border-color:rgba(196,134,74,0.5)}' +
+
+    /* morning routine reminder */
+    '.nav-morning-reminder{background:#1c1814;border-bottom:1px solid rgba(196,134,74,0.28);' +
+      'padding:0.55rem 1.25rem;display:flex;align-items:center;gap:1rem;' +
+      'font-size:0.72rem;color:#9a8a76;font-family:"DM Serif Text",Georgia,serif;line-height:1.4}' +
+    '.nav-morning-reminder p{margin:0;flex:1;min-width:0}' +
+    '.nav-morning-reminder-link{color:#c4864a;text-decoration:none;' +
+      'border-bottom:1px solid rgba(196,134,74,0.4);transition:color 0.15s,border-color 0.15s;white-space:nowrap}' +
+    '.nav-morning-reminder-link:hover{color:#d4a47a;border-bottom-color:rgba(196,134,74,0.7)}' +
+    '.nav-morning-reminder-dismiss{flex-shrink:0;background:none;border:1px solid #3a3025;' +
+      'color:#5a5040;cursor:pointer;padding:0.2rem 0.55rem;border-radius:2px;' +
+      'font-family:"DM Serif Text",Georgia,serif;font-size:0.75rem;' +
+      'transition:border-color 0.15s,color 0.15s;line-height:1}' +
+    '.nav-morning-reminder-dismiss:hover{border-color:#5a5040;color:#9a8a76}';
   document.head.appendChild(style);
 
   // ── Inject favicon ───────────────────────────────────────────────────────
@@ -272,6 +286,9 @@
     appLayout.appendChild(pageContent);
     document.body.appendChild(appLayout);
 
+    // Morning routine reminder
+    checkMorningReminder(pageContent);
+
     // Mobile nav overlay (backdrop)
     var overlay = document.createElement('div');
     overlay.className = 'mobile-nav-overlay';
@@ -322,6 +339,64 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') closeNav();
     });
+  }
+
+  // ── Morning Routine Reminder ─────────────────────────────────────────────
+  function checkMorningReminder(container) {
+    var d = new Date();
+    function p2(n) { return n < 10 ? '0' + n : '' + n; }
+    var today = d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+    var dismissKey = 'nav_morning_r_' + today;
+    if (sessionStorage.getItem(dismissKey)) return;
+
+    var hasActive = false;
+    try {
+      var g = JSON.parse(localStorage.getItem('journal_goals') || '{}');
+      hasActive = Object.keys(g).some(function(k) { return g[k] && g[k].status === 'active'; });
+    } catch (e) {}
+    if (!hasActive) return;
+
+    var hasMorning = false;
+    try {
+      var en = JSON.parse(localStorage.getItem('journal_entries') || '{}');
+      hasMorning = !!(en[today] && en[today].morning);
+    } catch (e) {}
+    if (hasMorning) return;
+
+    var banner = document.createElement('div');
+    banner.className = 'nav-morning-reminder';
+    banner.id = 'nav-morning-reminder';
+    banner.innerHTML =
+      '<p><span style="opacity:0.65;margin-right:0.35em">&#9728;</span>' +
+      'Morning routine not yet started &mdash; ' +
+      '<a class="nav-morning-reminder-link" href="' + NAV_BASE + 'journal/">Open Journal</a></p>' +
+      '<button class="nav-morning-reminder-dismiss" aria-label="Dismiss">&times;</button>';
+
+    var mh = container.querySelector('.mobile-header');
+    if (mh && mh.nextSibling) {
+      container.insertBefore(banner, mh.nextSibling);
+    } else {
+      container.insertBefore(banner, container.firstChild);
+    }
+
+    banner.querySelector('.nav-morning-reminder-dismiss').addEventListener('click', function() {
+      sessionStorage.setItem(dismissKey, '1');
+      banner.remove();
+    });
+
+    var poll = setInterval(function() {
+      try {
+        if (sessionStorage.getItem(dismissKey) || !document.getElementById('nav-morning-reminder')) {
+          clearInterval(poll);
+          return;
+        }
+        var en2 = JSON.parse(localStorage.getItem('journal_entries') || '{}');
+        if (en2[today] && en2[today].morning) {
+          banner.remove();
+          clearInterval(poll);
+        }
+      } catch (e) { clearInterval(poll); }
+    }, 5000);
   }
 
   if (document.readyState === 'loading') {
