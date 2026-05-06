@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bouldering Tracker</title>
+<script src="../nav.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:      #1c1814;
+    --surface: #252018;
+    --surf2:   #2e2820;
+    --border:  #3a3025;
+    --bord2:   #4a4030;
+    --accent:  #c4864a;
+    --text:    #e8dfd0;
+    --text2:   #9a8a76;
+    --muted:   #7a6e60;
+    --muted2:  #5a5040;
+    --g1: #4ec994; --g2: #7abe6e; --g3: #b0c44a;
+    --g4: #e8b840; --g5: #e87838; --g6: #d84828; --g7: #c43038;
+  }
+  html { overflow-x: hidden; }
+  body {
+    font-family: 'DM Serif Text', Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.55;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: radial-gradient(circle, rgba(232,223,208,0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .app-header, .nav-tabs, .main, .app-footer, .confirm-overlay, #toast {
+    position: relative; z-index: 1;
+  }
+
+  /* ── HEADER ── */
+  .app-header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--text);
+    padding: 14px 20px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    overflow: hidden;
+  }
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 12px;
+  }
+  .app-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 22px;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: -0.01em;
+  }
+  .app-title span { color: var(--accent); }
+  .header-sub {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-style: italic;
+    margin-top: 1px;
+  }
+  .grade-spectrum {
+    display: flex;
+    height: 3px;
+    width: 100%;
+  }
+  .grade-spectrum span { flex: 1; }
+
+  /* ── TABS ── */
+  .nav-tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    display: flex;
+    position: sticky;
+    top: 60px;
+    z-index: 99;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 10px 16px;
+    font-family: 'DM Serif Text', Georgia, serif;
+    font-size: 13px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    margin-bottom: -1px;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── MAIN ── */
+  .main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    padding: 8px 16px;
+    border: 1px solid;
+    cursor: pointer;
+    font-family: 'DM Serif Text', Georgia, serif;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    transition: all 0.15s;
+    border-radius: 0;
+    line-height: 1.4;
+  }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #1c1814; font-weight: 600; }
+  .btn-primary:hover { background: #d4965a; border-color: #d4965a; }
+  .btn-ghost { background: transparent; border-color: var(--bord2); color: var(--text2); }
+  .btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+  .btn-danger { background: transparent; border-color: rgba(196,72,56,0.4); color: #c44840; }
+  .btn-danger:hover { background: rgba(196,72,56,0.08); border-color: rgba(196,72,56,0.7); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 16px;
+    font-weight: 700;
+    font-style: italic;
+  }
+  .section-sub { font-size: 11px; color: var(--muted); font-style: italic; }
+
+  /* ── SUMMARY CARDS ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.3s ease both;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, rgba(196,134,74,0.06), transparent 70%);
+    pointer-events: none;
+  }
+  .stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+  .stat-value.large { font-size: 36px; }
+  .stat-sub { font-size: 11px; color: var(--text2); margin-top: 5px; }
+  .trend-up   { color: #4ec994; margin-left: 3px; }
+  .trend-down { color: #d84828; margin-left: 3px; }
+  .trend-flat { color: var(--muted); margin-left: 3px; }
+
+  /* ── CHARTS ── */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 640px) { .charts-row { grid-template-columns: 1fr; } }
+  .chart-section { margin-bottom: 0; }
+  .chart-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 12px 14px 8px;
+  }
+  .chart-canvas {
+    width: 100%;
+    height: 150px;
+    display: block;
+  }
+
+  /* ── VELOCITY ── */
+  .velocity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .velocity-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 14px;
+    animation: fadeUp 0.3s ease both;
+  }
+  .vc-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 8px;
+  }
+  .vc-row { display: flex; align-items: center; gap: 10px; }
+  .vc-val { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; }
+  .vc-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    padding: 2px 6px;
+    font-weight: 700;
+  }
+  .vc-badge.pos  { background: rgba(78,201,148,0.12); border: 1px solid rgba(78,201,148,0.25); color: #4ec994; }
+  .vc-badge.neg  { background: rgba(216,72,40,0.10);  border: 1px solid rgba(216,72,40,0.25);  color: #d84828; }
+  .vc-badge.flat { background: rgba(90,80,64,0.15);   border: 1px solid var(--border);          color: var(--muted); }
+  .vc-sub { font-size: 11px; color: var(--muted2); margin-top: 5px; }
+
+  /* ── GRADE TABLE ── */
+  .grade-section { margin-bottom: 28px; }
+  .grade-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .grade-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-family: 'DM Serif Text', Georgia, serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--surf2);
+  }
+  .grade-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(58,48,37,0.35);
+    vertical-align: middle;
+  }
+  .grade-table tr:last-child td { border-bottom: none; }
+  .grade-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 12px;
+    color: #111;
+    flex-shrink: 0;
+  }
+  .grade-bar-bg {
+    width: 100%;
+    max-width: 120px;
+    height: 5px;
+    background: var(--bord2);
+    overflow: hidden;
+  }
+  .grade-bar-fill { height: 100%; transition: width 0.6s ease; }
+  .mono { font-family: 'Space Mono', monospace; font-size: 12px; }
+
+  /* ── SETTINGS ── */
+  .settings-toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    user-select: none;
+    margin-bottom: 6px;
+  }
+  .settings-toggle .arr { transition: transform 0.2s; display: inline-block; }
+  .settings-toggle.open .arr { transform: rotate(90deg); }
+  .settings-body { display: none; padding: 12px 0 4px; }
+  .settings-body.open { display: block; }
+  .gym-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  @media (max-width: 500px) { .gym-grid { grid-template-columns: repeat(4, 1fr); } }
+  .gym-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .gym-lbl {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .gym-input {
+    width: 100%;
+    background: var(--surf2);
+    border: 1px solid var(--bord2);
+    color: var(--text);
+    padding: 5px 4px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    text-align: center;
+    outline: none;
+    border-radius: 0;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .gym-input:focus { border-color: var(--accent); }
+  .gym-input::-webkit-outer-spin-button,
+  .gym-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  /* ── LOG FORM ── */
+  .log-form { max-width: 680px; }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1/-1; }
+  .form-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .form-input {
+    background: var(--surf2);
+    border: 1px solid var(--bord2);
+    color: var(--text);
+    padding: 8px 10px;
+    font-family: 'DM Serif Text', Georgia, serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+    border-radius: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-input::placeholder { color: var(--muted2); }
+  textarea.form-input { resize: vertical; min-height: 72px; }
+  input[type="number"].form-input::-webkit-outer-spin-button,
+  input[type="number"].form-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="date"].form-input::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
+
+  /* ── GRADE COUNTERS ── */
+  .counters-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 15px;
+    font-weight: 700;
+    font-style: italic;
+    margin-bottom: 4px;
+  }
+  .counters-hint { font-size: 11px; color: var(--muted); font-style: italic; margin-bottom: 12px; }
+  .counters-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 600px) { .counters-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 380px) { .counters-grid { grid-template-columns: repeat(3, 1fr); } }
+  .gc {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    background: var(--surf2);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--gc, var(--bord2));
+    padding: 10px 6px 12px;
+    user-select: none;
+  }
+  .gc-lbl {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--gc, var(--text2));
+    line-height: 1;
+  }
+  .gc-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--muted2);
+    line-height: 1;
+    transition: color 0.15s;
+    min-width: 32px;
+    text-align: center;
+  }
+  .gc-num.has-count { color: var(--gc, var(--accent)); }
+  .gc-row { display: flex; gap: 4px; }
+  .gc-btn {
+    width: 28px;
+    height: 28px;
+    background: var(--surface);
+    border: 1px solid var(--bord2);
+    color: var(--text2);
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.1s;
+    border-radius: 0;
+    line-height: 1;
+    font-family: 'Space Mono', monospace;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .gc-btn:hover { background: var(--bord2); color: var(--text); }
+  .gc-btn:active { transform: scale(0.9); }
+  .gc-btn.gc-plus:hover {
+    background: var(--gc, var(--accent));
+    border-color: var(--gc, var(--accent));
+    color: #111;
+  }
+
+  /* ── SESSION TOTAL PREVIEW ── */
+  .session-preview {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .preview-item { display: flex; flex-direction: column; gap: 1px; }
+  .preview-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted2); font-style: italic; }
+  .preview-val { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; }
+  .preview-grades { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+  .preview-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    transition: transform 0.15s;
+  }
+
+  /* ── HISTORY ── */
+  .session-list { display: flex; flex-direction: column; gap: 8px; }
+  .session-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--bord2);
+    padding: 12px 16px;
+    transition: border-left-color 0.2s;
+    animation: fadeUp 0.3s ease both;
+  }
+  .session-card:hover { border-left-color: var(--accent); }
+  .sc-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 9px;
+  }
+  .sc-date { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; }
+  .sc-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .sc-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .sc-grades { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+  .sc-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: var(--surf2);
+    border: 1px solid var(--bord2);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+  }
+  .sc-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .sc-notes { font-size: 12px; color: var(--text2); font-style: italic; line-height: 1.4; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 56px 20px;
+    color: var(--muted2);
+  }
+  .empty-icon { font-size: 38px; margin-bottom: 10px; opacity: 0.35; }
+  .empty-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 17px;
+    font-style: italic;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+  .empty-text { font-size: 12px; }
+
+  /* ── IO ── */
+  .io-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* ── FOOTER ── */
+  .app-footer {
+    border-top: 1px solid var(--border);
+    padding: 12px 20px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted2);
+    position: relative; z-index: 1;
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    z-index: 9999;
+    background: var(--surface);
+    border: 1px solid var(--bord2);
+    border-left: 3px solid var(--accent);
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--text);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    max-width: 260px;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ── CONFIRM ── */
+  .confirm-overlay {
+    position: fixed; inset: 0;
+    z-index: 1000;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .confirm-overlay.open { display: flex; }
+  .confirm-box {
+    background: var(--surface);
+    border: 1px solid var(--bord2);
+    padding: 24px;
+    max-width: 320px;
+    width: 90%;
+  }
+  .confirm-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 16px;
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+  .confirm-text { font-size: 13px; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
+  .confirm-btns { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* ── ANIMATION ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .stat-card:nth-child(1) { animation-delay: 0.04s; }
+  .stat-card:nth-child(2) { animation-delay: 0.08s; }
+  .stat-card:nth-child(3) { animation-delay: 0.12s; }
+  .stat-card:nth-child(4) { animation-delay: 0.16s; }
+
+  /* ── ERROR ── */
+  .form-error {
+    font-size: 12px;
+    color: #c44840;
+    display: none;
+    margin-left: 8px;
+  }
+  .form-error.show { display: inline; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div>
+      <h1 class="app-title">Bouldering <span>Tracker</span></h1>
+      <div class="header-sub">Session Log &amp; Progress Analytics</div>
+    </div>
+    <button class="btn btn-primary" id="quick-log-btn">+ Log Session</button>
+  </div>
+  <div class="grade-spectrum" aria-hidden="true">
+    <span style="background:var(--g1)"></span>
+    <span style="background:var(--g2)"></span>
+    <span style="background:var(--g3)"></span>
+    <span style="background:var(--g4)"></span>
+    <span style="background:var(--g5)"></span>
+    <span style="background:var(--g6)"></span>
+    <span style="background:var(--g7)"></span>
+  </div>
+</header>
+
+<nav class="nav-tabs" id="nav-tabs">
+  <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+  <button class="tab-btn" data-tab="log">Log Session</button>
+  <button class="tab-btn" data-tab="history">History</button>
+</nav>
+
+<main class="main">
+
+  <!-- ── DASHBOARD ── -->
+  <div id="tab-dashboard" class="tab-panel active">
+
+    <div class="cards-grid" id="summary-cards">
+      <!-- rendered by JS -->
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-section">
+        <div class="section-header">
+          <span class="section-title">Session Volume</span>
+          <span class="section-sub">climbs per session</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="volume-chart" class="chart-canvas"></canvas>
+        </div>
+      </div>
+      <div class="chart-section">
+        <div class="section-header">
+          <span class="section-title">Difficulty Trend</span>
+          <span class="section-sub">weighted avg grade</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="diff-chart" class="chart-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header" style="margin-bottom:10px">
+      <span class="section-title">Improvement Velocity</span>
+      <span class="section-sub">last 4 weeks vs all-time avg</span>
+    </div>
+    <div class="velocity-grid" id="velocity-cards">
+      <!-- rendered by JS -->
+    </div>
+
+    <div class="grade-section">
+      <div class="section-header">
+        <span class="section-title">Grade Breakdown</span>
+        <span class="section-sub">all-time sends by difficulty</span>
+      </div>
+      <table class="grade-table" id="grade-table">
+        <!-- rendered by JS -->
+      </table>
+    </div>
+
+    <div style="margin-bottom:20px">
+      <div class="settings-toggle" id="gym-toggle">
+        <span class="arr">&#9656;</span>
+        Gym Settings — configure problems per grade for completion rate tracking
+      </div>
+      <div class="settings-body" id="gym-body">
+        <p style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:10px;line-height:1.55">
+          Enter the approximate number of set problems per grade in your gym.
+          Leave a field blank to skip completion rate for that grade.
+        </p>
+        <div class="gym-grid" id="gym-grid">
+          <!-- rendered by JS -->
+        </div>
+        <button class="btn btn-ghost btn-sm" id="save-gym-btn">Save Gym Settings</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+    <div class="section-header">
+      <span class="section-title" style="font-size:14px">Data</span>
+      <span class="section-sub">export or import your sessions</span>
+    </div>
+    <div class="io-row">
+      <button class="btn btn-ghost btn-sm" id="export-btn">Export JSON</button>
+      <label class="btn btn-ghost btn-sm" style="cursor:pointer">
+        Import JSON
+        <input type="file" accept=".json" id="import-file" style="display:none">
+      </label>
+    </div>
+
+  </div>
+
+  <!-- ── LOG SESSION ── -->
+  <div id="tab-log" class="tab-panel">
+    <div class="log-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="log-date">Date</label>
+          <input type="date" class="form-input" id="log-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="log-duration">Duration (minutes, optional)</label>
+          <input type="number" class="form-input" id="log-duration" placeholder="90" min="1" max="600">
+        </div>
+      </div>
+
+      <div class="counters-title">Climbs by Grade</div>
+      <div class="counters-hint">Tap + for each climb completed at that difficulty</div>
+      <div class="counters-grid" id="counters-grid">
+        <!-- rendered by JS -->
+      </div>
+
+      <div class="session-preview" id="session-preview">
+        <div class="preview-item">
+          <div class="preview-label">Total Climbs</div>
+          <div class="preview-val" id="preview-total">0</div>
+        </div>
+        <div class="preview-item">
+          <div class="preview-label">Avg Grade</div>
+          <div class="preview-val" id="preview-avg">—</div>
+        </div>
+        <div class="preview-item">
+          <div class="preview-label">Hardest</div>
+          <div class="preview-val" id="preview-pr">—</div>
+        </div>
+        <div class="preview-item">
+          <div class="preview-label">Grade Mix</div>
+          <div class="preview-grades" id="preview-grades"></div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label" for="log-notes">Notes</label>
+        <textarea class="form-input" id="log-notes" placeholder="How did the session feel? Anything noteworthy..."></textarea>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" id="save-btn">Save Session</button>
+        <button class="btn btn-ghost" id="reset-btn">Reset</button>
+        <span class="form-error" id="form-error"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HISTORY ── -->
+  <div id="tab-history" class="tab-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="section-title">Session History</div>
+      <span id="hist-count" style="font-size:12px;color:var(--muted)"></span>
+    </div>
+    <div class="session-list" id="session-list">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+</main>
+
+<footer class="app-footer">
+  <span id="footer-ver"></span>
+</footer>
+
+<!-- Confirm dialog -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title">Delete Session</div>
+    <div class="confirm-text">This session will be permanently removed. This cannot be undone.</div>
+    <div class="confirm-btns">
+      <button class="btn btn-ghost btn-sm" id="confirm-cancel">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="confirm-ok">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Constants ─────────────────────────────────────────────────────────────
+const SK = 'bouldering_sessions';
+const GK = 'bouldering_settings';
+const GRADES = [1, 2, 3, 4, 5, 6, 7];
+const GC = {
+  1: '#4ec994', 2: '#7abe6e', 3: '#b0c44a',
+  4: '#e8b840', 5: '#e87838', 6: '#d84828', 7: '#c43038'
+};
+const GRGBA = {
+  1: 'rgba(78,201,148,', 2: 'rgba(122,190,110,', 3: 'rgba(176,196,74,',
+  4: 'rgba(232,184,64,', 5: 'rgba(232,120,56,',  6: 'rgba(216,72,40,',  7: 'rgba(196,48,56,'
+};
+
+// ── Storage ───────────────────────────────────────────────────────────────
+function loadSessions() {
+  try { return JSON.parse(localStorage.getItem(SK) || '[]'); } catch { return []; }
+}
+function saveSessions(s) { localStorage.setItem(SK, JSON.stringify(s)); }
+function loadSettings() {
+  try { return JSON.parse(localStorage.getItem(GK) || '{}'); } catch { return {}; }
+}
+function saveSettings(s) { localStorage.setItem(GK, JSON.stringify(s)); }
+
+// ── Analytics helpers ──────────────────────────────────────────────────────
+function totalClimbs(s) {
+  return GRADES.reduce((n, g) => n + (s.grades[g] || 0), 0);
+}
+function weightedAvg(s) {
+  let n = 0, pts = 0;
+  GRADES.forEach(g => { const c = s.grades[g] || 0; n += c; pts += c * g; });
+  return n > 0 ? pts / n : 0;
+}
+function hardestGrade(s) {
+  for (let g = 7; g >= 1; g--) if ((s.grades[g] || 0) > 0) return g;
+  return 0;
+}
+function globalPR(sessions) {
+  let max = 0;
+  sessions.forEach(s => { const h = hardestGrade(s); if (h > max) max = h; });
+  return max || null;
+}
+function prDate(sessions) {
+  const pr = globalPR(sessions);
+  if (!pr) return null;
+  for (let i = sessions.length - 1; i >= 0; i--) {
+    if ((sessions[i].grades[pr] || 0) > 0) return sessions[i].date;
+  }
+  return null;
+}
+function thisMonthSessions(sessions) {
+  const d = new Date();
+  const pfx = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  return sessions.filter(s => s.date.startsWith(pfx));
+}
+function last4wSessions(sessions) {
+  const cut = new Date(); cut.setDate(cut.getDate() - 28);
+  const iso = cut.toISOString().slice(0, 10);
+  return sessions.filter(s => s.date >= iso);
+}
+function avgDiff(list) {
+  if (!list.length) return 0;
+  return Math.round(list.reduce((s, sess) => s + weightedAvg(sess), 0) / list.length * 10) / 10;
+}
+function avgVol(list) {
+  if (!list.length) return 0;
+  return Math.round(list.reduce((s, sess) => s + totalClimbs(sess), 0) / list.length);
+}
+function sessPerWeek(list) {
+  if (!list.length) return 0;
+  const span = Math.max(1, Math.ceil((Date.now() - new Date(list[0].date + 'T12:00:00')) / (7 * 86400000)));
+  return Math.round((list.length / span) * 10) / 10;
+}
+function pctChange(a, b) {
+  if (!a || !b) return null;
+  return Math.round(((a - b) / b) * 100);
+}
+
+// ── Date helpers ───────────────────────────────────────────────────────────
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function fmtDate(str) {
+  const d = new Date(str + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function relDate(str) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(str + 'T12:00:00');
+  const n = Math.round((today - d) / 86400000);
+  if (n === 0) return 'today';
+  if (n === 1) return 'yesterday';
+  return n + ' days ago';
+}
+
+// ── Charts ─────────────────────────────────────────────────────────────────
+function setupCanvas(canvas) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) return null;
+  canvas.width  = rect.width  * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return { ctx, w: rect.width, h: rect.height };
+}
+function chartEmpty(ctx, w, h, msg) {
+  ctx.fillStyle = '#4a4030';
+  ctx.font = '11px "DM Serif Text"';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(msg, w / 2, h / 2);
+}
+
+function drawVolumeChart(canvas, sessions) {
+  const r = setupCanvas(canvas);
+  if (!r) return;
+  const { ctx, w, h } = r;
+  ctx.clearRect(0, 0, w, h);
+  const data = sessions.slice(-20);
+  if (!data.length) { chartEmpty(ctx, w, h, 'No sessions yet'); return; }
+
+  const pad = { t: 14, r: 8, b: 36, l: 34 };
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+  const maxV = Math.max(...data.map(totalClimbs), 1);
+  const barW = Math.max(4, Math.min(30, cw / data.length - 3));
+  const gap  = data.length > 1 ? (cw - barW * data.length) / (data.length - 1) : 0;
+
+  // Grid lines
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + (ch / 4) * i;
+    ctx.strokeStyle = 'rgba(58,48,37,0.45)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + cw, y); ctx.stroke();
+    ctx.fillStyle = '#4a4030';
+    ctx.font = '9px "Space Mono"';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(Math.round(maxV * (1 - i / 4)), pad.l - 4, y);
+  }
+
+  data.forEach((sess, i) => {
+    const x  = pad.l + i * (barW + gap);
+    const tc = totalClimbs(sess);
+    const bh = (tc / maxV) * ch;
+    const y  = pad.t + ch - bh;
+    const g = ctx.createLinearGradient(0, y, 0, y + bh);
+    g.addColorStop(0, 'rgba(196,134,74,0.85)');
+    g.addColorStop(1, 'rgba(196,134,74,0.22)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x, y, barW, bh);
+
+    const d = new Date(sess.date + 'T12:00:00');
+    const lbl = (d.getMonth() + 1) + '/' + d.getDate();
+    ctx.fillStyle = '#4a4030';
+    ctx.font = '8px "Space Mono"';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.save();
+    ctx.translate(x + barW / 2, pad.t + ch + 4);
+    ctx.rotate(-Math.PI / 4);
+    ctx.fillText(lbl, 0, 0);
+    ctx.restore();
+  });
+}
+
+function drawDiffChart(canvas, sessions) {
+  const r = setupCanvas(canvas);
+  if (!r) return;
+  const { ctx, w, h } = r;
+  ctx.clearRect(0, 0, w, h);
+  const data = sessions.slice(-20).filter(s => weightedAvg(s) > 0);
+  if (data.length < 2) { chartEmpty(ctx, w, h, data.length < 1 ? 'No sessions yet' : 'Log more sessions to see trend'); return; }
+
+  const pad = { t: 14, r: 8, b: 36, l: 34 };
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+
+  // Grade grid lines
+  for (let g = 1; g <= 7; g++) {
+    const y = pad.t + (1 - (g - 1) / 6) * ch;
+    ctx.strokeStyle = 'rgba(58,48,37,0.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + cw, y); ctx.stroke();
+    ctx.fillStyle = GC[g];
+    ctx.globalAlpha = 0.4;
+    ctx.font = '9px "Space Mono"';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(g, pad.l - 4, y);
+    ctx.globalAlpha = 1;
+  }
+
+  const step = cw / (data.length - 1);
+  const pts = data.map((s, i) => ({
+    x: pad.l + i * step,
+    y: pad.t + (1 - (weightedAvg(s) - 1) / 6) * ch
+  }));
+
+  // Area
+  const ag = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);
+  ag.addColorStop(0, 'rgba(196,134,74,0.12)');
+  ag.addColorStop(1, 'rgba(196,134,74,0)');
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pad.t + ch);
+  pts.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.lineTo(pts[pts.length - 1].x, pad.t + ch);
+  ctx.closePath();
+  ctx.fillStyle = ag;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle = 'rgba(196,134,74,0.75)';
+  ctx.lineWidth = 1.5;
+  ctx.lineJoin = 'round';
+  pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.stroke();
+
+  // Dots coloured by grade
+  pts.forEach((p, i) => {
+    const g = Math.max(1, Math.min(7, Math.round(weightedAvg(data[i]))));
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = GC[g];
+    ctx.fill();
+  });
+
+  // Date labels (sparse)
+  const lStep = Math.ceil(data.length / 7);
+  data.forEach((sess, i) => {
+    if (i % lStep !== 0 && i !== data.length - 1) return;
+    const d = new Date(sess.date + 'T12:00:00');
+    const lbl = (d.getMonth() + 1) + '/' + d.getDate();
+    ctx.fillStyle = '#4a4030';
+    ctx.font = '8px "Space Mono"';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.save();
+    ctx.translate(pts[i].x, pad.t + ch + 4);
+    ctx.rotate(-Math.PI / 4);
+    ctx.fillText(lbl, 0, 0);
+    ctx.restore();
+  });
+}
+
+// ── Render: dashboard ──────────────────────────────────────────────────────
+function renderCards(sessions) {
+  const pr     = globalPR(sessions);
+  const prDt   = prDate(sessions);
+  const month  = thisMonthSessions(sessions);
+  const recent = sessions.slice(-5);
+  const rAvg   = avgDiff(recent);
+  const aAvg   = avgDiff(sessions);
+  const last   = sessions[sessions.length - 1];
+  const delta  = rAvg - aAvg;
+  const arrow  = delta > 0.2  ? '<span class="trend-up">↑</span>'
+               : delta < -0.2 ? '<span class="trend-down">↓</span>'
+               :                '<span class="trend-flat">→</span>';
+
+  document.getElementById('summary-cards').innerHTML =
+    card('Personal Record', `<span class="stat-value large" style="color:${pr ? GC[pr] : 'var(--muted2)'}">${pr || '—'}</span>`,
+         prDt ? 'achieved ' + fmtDate(prDt) : 'No sessions yet', '0.04s') +
+    card('This Month', `<span class="stat-value">${month.reduce((n,s)=>n+totalClimbs(s),0)}</span>`,
+         month.length + ' session' + (month.length !== 1 ? 's' : ''), '0.08s') +
+    card('Last Session', `<span class="stat-value" style="font-size:18px;line-height:1.3">${last ? fmtDate(last.date) : '—'}</span>`,
+         last ? relDate(last.date) : 'No sessions yet', '0.12s') +
+    card('Avg Grade (recent)', `<span class="stat-value">${rAvg > 0 ? rAvg.toFixed(1) : '—'}${rAvg > 0 ? arrow : ''}</span>`,
+         'all-time: ' + (aAvg > 0 ? aAvg.toFixed(1) : '—'), '0.16s');
+}
+function card(label, valHtml, sub, delay) {
+  return `<div class="stat-card" style="animation-delay:${delay}">
+    <div class="stat-label">${label}</div>
+    ${valHtml}
+    <div class="stat-sub">${sub}</div>
+  </div>`;
+}
+
+function renderVelocity(sessions) {
+  const r4  = last4wSessions(sessions);
+  const all = sessions;
+
+  function vcCard(label, rVal, aVal, decimals) {
+    const fmt = v => v > 0 ? (decimals ? v.toFixed(decimals) : v) : '—';
+    const c = pctChange(rVal, aVal);
+    let cls = 'flat', sign = '';
+    if (c !== null && c > 5)  { cls = 'pos'; sign = '+'; }
+    if (c !== null && c < -5) { cls = 'neg'; }
+    const badge = c !== null ? `<div class="vc-badge ${cls}">${sign}${c}%</div>` : '';
+    return `<div class="velocity-card">
+      <div class="vc-label">${label}</div>
+      <div class="vc-row"><div class="vc-val">${fmt(rVal)}</div>${badge}</div>
+      <div class="vc-sub">All-time avg: ${fmt(aVal)}</div>
+    </div>`;
+  }
+
+  document.getElementById('velocity-cards').innerHTML =
+    vcCard('Avg Climbs / Session', avgVol(r4), avgVol(all), 0) +
+    vcCard('Avg Difficulty',       avgDiff(r4), avgDiff(all), 1) +
+    vcCard('Sessions / Week',      sessPerWeek(r4), sessPerWeek(all), 1);
+}
+
+function renderGradeTable(sessions) {
+  const el = document.getElementById('grade-table');
+  if (!sessions.length) {
+    el.innerHTML = '<tr><td colspan="5" style="padding:20px;color:var(--muted2);font-style:italic;text-align:center">No sessions logged yet</td></tr>';
+    return;
+  }
+  const totals = {}; const counts = {};
+  GRADES.forEach(g => { totals[g] = 0; counts[g] = 0; });
+  sessions.forEach(s => GRADES.forEach(g => {
+    if ((s.grades[g] || 0) > 0) { totals[g] += s.grades[g]; counts[g]++; }
+  }));
+  const maxT = Math.max(...Object.values(totals), 1);
+  const gymP = (loadSettings().gymProblems) || {};
+  const hasGym = Object.keys(gymP).length > 0;
+
+  let html = `<thead><tr>
+    <th>Grade</th><th>Total Sends</th><th>Sessions</th><th>Distribution</th>
+    ${hasGym ? '<th>Completion</th>' : ''}
+  </tr></thead><tbody>`;
+
+  GRADES.forEach(g => {
+    const col = GC[g];
+    const pct = gymP[g] ? Math.min(100, Math.round((totals[g] / gymP[g]) * 100)) : null;
+    const pctColor = pct !== null ? (pct >= 80 ? GC[1] : pct >= 50 ? GC[4] : GC[6]) : '';
+    html += `<tr>
+      <td><span class="grade-badge" style="background:${col}">${g}</span></td>
+      <td><span class="mono">${totals[g]}</span></td>
+      <td><span class="mono" style="color:var(--text2)">${counts[g]}</span></td>
+      <td style="width:140px">
+        <div class="grade-bar-bg">
+          <div class="grade-bar-fill" style="width:${(totals[g]/maxT)*100}%;background:${col}"></div>
+        </div>
+      </td>
+      ${hasGym ? `<td><span class="mono" style="color:${pctColor}">${pct !== null ? pct + '%' : '—'}</span></td>` : ''}
+    </tr>`;
+  });
+  el.innerHTML = html + '</tbody>';
+}
+
+// ── Render: gym settings ───────────────────────────────────────────────────
+function renderGymGrid() {
+  const gp = (loadSettings().gymProblems) || {};
+  document.getElementById('gym-grid').innerHTML = GRADES.map(g =>
+    `<div class="gym-item">
+      <div class="gym-lbl" style="color:${GC[g]}">${g}</div>
+      <input type="number" class="gym-input" id="gp-${g}" value="${gp[g] || ''}" min="1" max="999" placeholder="—">
+    </div>`
+  ).join('');
+}
+
+// ── Render: grade counters (log form) ─────────────────────────────────────
+const counts = {};
+GRADES.forEach(g => { counts[g] = 0; });
+
+function renderCounters() {
+  document.getElementById('counters-grid').innerHTML = GRADES.map(g =>
+    `<div class="gc" style="--gc:${GC[g]}">
+      <div class="gc-lbl">${g}</div>
+      <div class="gc-num" id="gcn-${g}">0</div>
+      <div class="gc-row">
+        <button class="gc-btn" data-g="${g}" data-d="-1">−</button>
+        <button class="gc-btn gc-plus" data-g="${g}" data-d="1">+</button>
+      </div>
+    </div>`
+  ).join('');
+
+  document.getElementById('counters-grid').addEventListener('click', e => {
+    const btn = e.target.closest('[data-g]');
+    if (!btn) return;
+    const g = parseInt(btn.dataset.g);
+    const d = parseInt(btn.dataset.d);
+    counts[g] = Math.max(0, counts[g] + d);
+    const el = document.getElementById('gcn-' + g);
+    el.textContent = counts[g];
+    el.classList.toggle('has-count', counts[g] > 0);
+    updatePreview();
+  });
+}
+
+function updatePreview() {
+  const total = GRADES.reduce((n, g) => n + counts[g], 0);
+  let wAvg = 0;
+  if (total > 0) {
+    wAvg = GRADES.reduce((n, g) => n + counts[g] * g, 0) / total;
+  }
+  let pr = 0;
+  for (let g = 7; g >= 1; g--) { if (counts[g] > 0) { pr = g; break; } }
+
+  document.getElementById('preview-total').textContent = total;
+  document.getElementById('preview-avg').textContent = total > 0 ? wAvg.toFixed(1) : '—';
+  const prEl = document.getElementById('preview-pr');
+  prEl.textContent = pr || '—';
+  prEl.style.color = pr ? GC[pr] : 'var(--muted2)';
+
+  const gradesEl = document.getElementById('preview-grades');
+  gradesEl.innerHTML = GRADES.filter(g => counts[g] > 0).map(g =>
+    `<div class="preview-dot" style="background:${GC[g]};width:${Math.min(20,8+counts[g])}px;height:${Math.min(20,8+counts[g])}px" title="Grade ${g}: ${counts[g]}"></div>`
+  ).join('');
+}
+
+function resetForm() {
+  GRADES.forEach(g => {
+    counts[g] = 0;
+    const el = document.getElementById('gcn-' + g);
+    if (el) { el.textContent = '0'; el.classList.remove('has-count'); }
+  });
+  document.getElementById('log-notes').value = '';
+  document.getElementById('log-duration').value = '';
+  document.getElementById('log-date').value = todayStr();
+  document.getElementById('form-error').classList.remove('show');
+  updatePreview();
+}
+
+// ── Render: history ────────────────────────────────────────────────────────
+function renderHistory(sessions) {
+  const lbl = document.getElementById('hist-count');
+  lbl.textContent = sessions.length + ' session' + (sessions.length !== 1 ? 's' : '');
+  const el = document.getElementById('session-list');
+
+  if (!sessions.length) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🧗</div>
+      <div class="empty-title">No sessions logged yet</div>
+      <div class="empty-text">Head to <em>Log Session</em> to record your first climb.</div>
+    </div>`;
+    return;
+  }
+
+  const sorted = [...sessions].reverse();
+  el.innerHTML = sorted.map((s, idx) => {
+    const grades = GRADES.filter(g => (s.grades[g] || 0) > 0);
+    const tc = totalClimbs(s);
+    const dur = s.duration ? ' · ' + s.duration + 'min' : '';
+    const pills = grades.map(g =>
+      `<div class="sc-pill">
+        <div class="sc-dot" style="background:${GC[g]}"></div>
+        Grade ${g}: ${s.grades[g]}
+      </div>`
+    ).join('');
+    return `<div class="session-card" style="animation-delay:${Math.min(idx,8)*0.04}s" data-id="${s.id}">
+      <div class="sc-top">
+        <div>
+          <div class="sc-date">${fmtDate(s.date)}</div>
+          <div class="sc-meta">${relDate(s.date)}${dur} · ${tc} climb${tc !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="sc-actions">
+          <button class="btn btn-danger btn-sm del-btn" data-id="${s.id}">Delete</button>
+        </div>
+      </div>
+      <div class="sc-grades">${pills || '<span style="font-size:11px;color:var(--muted2)">No climbs recorded</span>'}</div>
+      ${s.notes ? `<div class="sc-notes">&ldquo;${s.notes}&rdquo;</div>` : ''}
+    </div>`;
+  }).join('');
+
+  el.querySelectorAll('.del-btn').forEach(b => b.addEventListener('click', () => askDelete(b.dataset.id)));
+}
+
+// ── Delete flow ────────────────────────────────────────────────────────────
+let pendingDel = null;
+function askDelete(id) {
+  pendingDel = id;
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+document.getElementById('confirm-cancel').addEventListener('click', () => {
+  document.getElementById('confirm-overlay').classList.remove('open');
+  pendingDel = null;
+});
+document.getElementById('confirm-ok').addEventListener('click', () => {
+  if (!pendingDel) return;
+  const sessions = loadSessions().filter(s => s.id !== pendingDel);
+  saveSessions(sessions);
+  pendingDel = null;
+  document.getElementById('confirm-overlay').classList.remove('open');
+  renderAll(sessions);
+  toast('Session deleted');
+});
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+let toastT;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+  if (tab === 'dashboard') { setTimeout(() => redrawCharts(loadSessions()), 10); }
+}
+document.getElementById('nav-tabs').addEventListener('click', e => {
+  if (e.target.classList.contains('tab-btn')) switchTab(e.target.dataset.tab);
+});
+document.getElementById('quick-log-btn').addEventListener('click', () => switchTab('log'));
+
+// ── Save session ───────────────────────────────────────────────────────────
+document.getElementById('save-btn').addEventListener('click', () => {
+  const errEl = document.getElementById('form-error');
+  errEl.classList.remove('show');
+
+  const date = document.getElementById('log-date').value;
+  if (!date) { errEl.textContent = 'Please select a date'; errEl.classList.add('show'); return; }
+  if (date > todayStr()) { errEl.textContent = 'Date cannot be in the future'; errEl.classList.add('show'); return; }
+
+  const total = GRADES.reduce((n, g) => n + counts[g], 0);
+  if (total === 0) { errEl.textContent = 'Add at least one climb before saving'; errEl.classList.add('show'); return; }
+
+  const dur = parseInt(document.getElementById('log-duration').value);
+  const session = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    date,
+    duration: (!isNaN(dur) && dur > 0) ? dur : null,
+    notes: document.getElementById('log-notes').value.trim(),
+    grades: {}
+  };
+  GRADES.forEach(g => { session.grades[g] = counts[g]; });
+
+  const sessions = loadSessions();
+  sessions.push(session);
+  sessions.sort((a, b) => a.date.localeCompare(b.date));
+  saveSessions(sessions);
+
+  resetForm();
+  renderAll(sessions);
+  switchTab('dashboard');
+  toast('Session saved!');
+});
+
+document.getElementById('reset-btn').addEventListener('click', resetForm);
+
+// ── Gym settings ───────────────────────────────────────────────────────────
+document.getElementById('gym-toggle').addEventListener('click', function () {
+  this.classList.toggle('open');
+  document.getElementById('gym-body').classList.toggle('open');
+});
+document.getElementById('save-gym-btn').addEventListener('click', () => {
+  const s = loadSettings();
+  const gp = {};
+  GRADES.forEach(g => {
+    const v = parseInt(document.getElementById('gp-' + g).value);
+    if (!isNaN(v) && v > 0) gp[g] = v;
+  });
+  s.gymProblems = gp;
+  saveSettings(s);
+  renderGradeTable(loadSessions());
+  toast('Gym settings saved');
+});
+
+// ── Export / Import ────────────────────────────────────────────────────────
+document.getElementById('export-btn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify({ sessions: loadSessions() }, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'bouldering-sessions.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+document.getElementById('import-file').addEventListener('change', function () {
+  const file = this.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const imported = Array.isArray(data) ? data : (data.sessions || []);
+      if (!Array.isArray(imported)) throw new Error();
+      const existing = loadSessions();
+      const ids = new Set(existing.map(s => s.id));
+      const merged = [...existing, ...imported.filter(s => !ids.has(s.id))];
+      merged.sort((a, b) => a.date.localeCompare(b.date));
+      saveSessions(merged);
+      renderAll(merged);
+      toast('Imported ' + imported.length + ' session(s)');
+    } catch { toast('Import failed — invalid file'); }
+  };
+  reader.readAsText(file);
+  this.value = '';
+});
+
+// ── Render all ─────────────────────────────────────────────────────────────
+function redrawCharts(sessions) {
+  drawVolumeChart(document.getElementById('volume-chart'), sessions);
+  drawDiffChart(document.getElementById('diff-chart'), sessions);
+}
+function renderAll(sessions) {
+  renderCards(sessions);
+  renderVelocity(sessions);
+  renderGradeTable(sessions);
+  renderHistory(sessions);
+  redrawCharts(sessions);
+}
+
+// ── Footer version ─────────────────────────────────────────────────────────
+fetch('../version.json').then(r => r.json()).then(v => {
+  document.getElementById('footer-ver').textContent = 'v' + v.version;
+}).catch(() => {});
+
+// ── Init ───────────────────────────────────────────────────────────────────
+document.getElementById('log-date').value = todayStr();
+renderCounters();
+renderGymGrid();
+const sessions = loadSessions();
+renderAll(sessions);
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('tab-dashboard').classList.contains('active')) {
+    redrawCharts(loadSessions());
+  }
+});
+</script>
+</body>
+</html>
