@@ -721,6 +721,40 @@
   }
   .app-footer a { color: var(--text2); text-decoration: none; }
   .app-footer a:hover { color: var(--accent); }
+
+  /* Week Detail Stats */
+  .week-detail-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  /* Week detail day rows */
+  .week-detail-day {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  .week-detail-day:hover { background: rgba(196,134,74,0.05); border-color: var(--accent); }
+  .week-detail-day-status { font-size: 11px; font-weight: 700; width: 32px; flex-shrink: 0; padding-top: 2px; }
+  .week-detail-day-info { flex: 1; min-width: 0; }
+  .week-detail-day-name { font-size: 13px; font-weight: 600; }
+  .week-detail-day-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  /* Weekly summary row click */
+  .week-summary-row { cursor: pointer; transition: background 0.12s; border-radius: 6px; padding-left: 4px; padding-right: 4px; }
+  .week-summary-row:hover { background: rgba(196,134,74,0.06); }
+
+  /* Charts */
+  .chart-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .chart-wrap svg { min-width: 300px; }
 </style>
 </head>
 <body>
@@ -973,6 +1007,19 @@
     <div id="calorieModalBody"></div>
     <div class="modal-footer" style="margin-top:16px;">
       <button class="btn btn-ghost" onclick="document.getElementById('calorieModal').classList.add('hidden')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Week Detail Modal -->
+<div id="weekDetailModal" class="modal-overlay hidden" onclick="closeWeekDetailOutside(event)">
+  <div class="modal" style="max-width:540px;">
+    <div class="modal-title" id="weekDetailTitle"></div>
+    <div class="modal-subtitle" id="weekDetailSubtitle"></div>
+    <div id="weekDetailBody"></div>
+    <div class="modal-footer" style="margin-top:16px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('weekDetailModal').classList.add('hidden')">Close</button>
+      <button class="btn btn-ghost" id="weekDetailCalBtn">View in Calendar</button>
     </div>
   </div>
 </div>
@@ -1894,7 +1941,7 @@ function renderHeatmap() {
   // Group by week columns
   let html = '';
   for (let w = 1; w <= 20; w++) {
-    html += '<div class="heatmap-week">';
+    html += `<div class="heatmap-week" onclick="openWeekDetail(${w})" title="Week ${w} — click for details" style="cursor:pointer;border-radius:4px;transition:transform 0.1s;" onmouseenter="this.style.transform='scale(1.12)'" onmouseleave="this.style.transform='scale(1)'">`;
     for (let d = 0; d < 7; d++) {
       const workout = PLAN[w-1][d];
       const date = getDateForWeekDay(w, d);
@@ -1911,7 +1958,7 @@ function renderHeatmap() {
       else cls = 'hm-missed';
 
       const title = `W${w} ${DOW[d]}: ${workout.short}`;
-      html += `<div class="heatmap-cell ${cls}" title="${title}"></div>`;
+      html += `<div class="heatmap-cell ${cls}" title="${title}"></div>`; // individual cells non-clickable
     }
     html += '</div>';
   }
@@ -1928,7 +1975,7 @@ function renderHeatmap() {
     const t2 = today();
     const isFuture = weekStart > t2;
     listHtml += `
-      <div class="week-summary-row">
+      <div class="week-summary-row" onclick="openWeekDetail(${w})" title="Click to see Week ${w} details">
         <div class="wsrow-week">Week ${w}</div>
         <div style="flex:1;display:flex;align-items:center;gap:8px;">
           <span class="phase-badge ${phase.cls}" style="font-size:9px;padding:1px 6px;">${phase.name}</span>
@@ -1938,7 +1985,7 @@ function renderHeatmap() {
             </div>
           </div>
         </div>
-        <div class="wsrow-pct">${isFuture ? '—' : pct + '%'}</div>
+        <div class="wsrow-pct">${isFuture ? '—' : pct + '%'} <span style="color:var(--accent);font-size:9px;margin-left:4px;">↗</span></div>
       </div>
     `;
   }
@@ -1951,7 +1998,8 @@ function renderProgress() {
   const daysToRace = Math.max(0, Math.ceil((raceDate - today()) / 86400000));
   const totalWorkouts = PLAN.flat().filter(w => w.type !== 'rest').length;
 
-  let html = `
+  let html = buildProgressCharts();
+  html += `
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-value">${s.totalCompleted + s.totalModified}</div>
@@ -2400,6 +2448,271 @@ function openCalorieDetails() {
 
 function closeCalorieOutside(e) {
   if (e.target.id === 'calorieModal') document.getElementById('calorieModal').classList.add('hidden');
+}
+
+// ============================================================
+// WEEK STATS + DETAIL MODAL
+// ============================================================
+function calcWeekStats(weekNum) {
+  const t = today();
+  let totalKm = 0, totalTime = 0, runKm = 0, runTime = 0;
+  let completed = 0, skipped = 0, modified = 0, missed = 0;
+  const days = [];
+
+  for (let d = 0; d < 7; d++) {
+    const workout = PLAN[weekNum - 1][d];
+    const date = getDateForWeekDay(weekNum, d);
+    const dateStr = dateKey(date);
+    const dd = getDayData(dateStr);
+    const isPast = date < t;
+
+    if (workout.type !== 'rest') {
+      if (dd?.status === 'completed') completed++;
+      else if (dd?.status === 'skipped') skipped++;
+      else if (dd?.status === 'modified') modified++;
+      else if (isPast) missed++;
+
+      if (dd?.km) {
+        totalKm += dd.km;
+        if (workout.type === 'run' && dd.time) { runKm += dd.km; runTime += dd.time; }
+      }
+      if (dd?.time) totalTime += dd.time;
+    }
+    days.push({ d, workout, date, dateStr, dd, isPast });
+  }
+
+  const avgPace = runKm > 0 && runTime > 0 ? runTime / runKm : null;
+  const avgSpeed = avgPace ? 60 / avgPace : null;
+  return { totalKm, totalTime, runKm, runTime, avgPace, avgSpeed, completed, skipped, modified, missed, days };
+}
+
+function fmtPace(minPerKm) {
+  const m = Math.floor(minPerKm);
+  const s = Math.round((minPerKm - m) * 60);
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+function openWeekDetail(weekNum) {
+  const stats = calcWeekStats(weekNum);
+  const phase = getPhase(weekNum);
+  const weekStart = getDateForWeekDay(weekNum, 0);
+  const weekEnd = getDateForWeekDay(weekNum, 6);
+  const total = PLAN[weekNum - 1].filter(w => w.type !== 'rest').length;
+
+  document.getElementById('weekDetailTitle').textContent = `Week ${weekNum} — ${phase.name}`;
+  document.getElementById('weekDetailSubtitle').textContent =
+    `${formatDate(weekStart)} – ${formatDate(weekEnd)}`;
+
+  const paceStr = stats.avgPace ? fmtPace(stats.avgPace) + ' /km' : '—';
+  const speedStr = stats.avgSpeed ? stats.avgSpeed.toFixed(1) + ' km/h' : '—';
+  const totalH = Math.floor(stats.totalTime / 60);
+  const totalM = stats.totalTime % 60;
+  const timeStr = stats.totalTime
+    ? (totalH > 0 ? `${totalH}h ${totalM}m` : `${totalM}m`) : '—';
+
+  const t = today();
+  let daysHtml = '';
+  for (const { d, workout, date, dateStr, dd, isPast } of stats.days) {
+    if (workout.type === 'rest') continue;
+    const isToday = dateStr === dateKey(t);
+    const statusColor = dd?.status === 'completed' ? 'var(--success)'
+      : dd?.status === 'modified' ? 'var(--warning)'
+      : dd?.status === 'skipped' ? 'var(--danger)'
+      : isPast && !isToday ? 'rgba(168,48,32,0.6)' : 'var(--text2)';
+    const statusLabel = dd?.status === 'completed' ? 'Done'
+      : dd?.status === 'modified' ? 'Mod'
+      : dd?.status === 'skipped' ? 'Skip'
+      : isPast && !isToday ? 'Miss' : '–';
+
+    let metaParts = [];
+    if (dd?.time) metaParts.push(dd.time + ' min');
+    if (dd?.km) metaParts.push(dd.km + ' km');
+    if (dd?.time && dd?.km && workout.type === 'run') {
+      metaParts.push(fmtPace(dd.time / dd.km) + ' /km · ' + (dd.km / (dd.time / 60)).toFixed(1) + ' km/h');
+    }
+    if (dd?.notes) metaParts.push('"' + dd.notes + '"');
+
+    daysHtml += `
+      <div class="week-detail-day" onclick="closeWeekDetail();openDayModal(${weekNum},${d})">
+        <span class="week-detail-day-status" style="color:${statusColor}">${statusLabel}</span>
+        <div class="week-detail-day-info">
+          <div class="week-detail-day-name">${DOW[d]} ${formatDate(date)} · <span class="wt-${workout.type}">${workout.short}</span></div>
+          ${metaParts.length ? `<div class="week-detail-day-meta">${metaParts.join(' · ')}</div>` : ''}
+        </div>
+      </div>`;
+  }
+
+  const speedNote = stats.avgSpeed
+    ? `<div style="font-size:11px;color:var(--text2);margin:-8px 0 14px;font-style:italic;">Avg speed: ${speedStr} (run sessions only)</div>`
+    : '';
+
+  document.getElementById('weekDetailBody').innerHTML = `
+    <div class="week-detail-stats">
+      <div class="stat-card">
+        <div class="stat-value">${stats.completed + stats.modified}/${total}</div>
+        <div class="stat-label">Done</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${stats.totalKm ? (Math.round(stats.totalKm * 10) / 10) : '—'}</div>
+        <div class="stat-label">Total KM</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="font-size:18px;">${timeStr}</div>
+        <div class="stat-label">Time Logged</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="font-size:18px;">${paceStr}</div>
+        <div class="stat-label">Avg Pace</div>
+      </div>
+    </div>
+    ${speedNote}
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2);margin-bottom:8px;">Day by Day</div>
+    ${daysHtml}
+  `;
+
+  document.getElementById('weekDetailCalBtn').onclick = () => {
+    calendarWeek = weekNum;
+    closeWeekDetail();
+    switchTab('calendar');
+  };
+  document.getElementById('weekDetailModal').classList.remove('hidden');
+}
+
+function closeWeekDetail() {
+  document.getElementById('weekDetailModal').classList.add('hidden');
+}
+
+function closeWeekDetailOutside(e) {
+  if (e.target.id === 'weekDetailModal') closeWeekDetail();
+}
+
+// ============================================================
+// PROGRESS CHARTS (SVG)
+// ============================================================
+function buildBarChartSVG(bars, opts) {
+  const W = 480, H = 130;
+  const padL = 32, padR = 8, padT = 8, padB = 28;
+  const cW = W - padL - padR, cH = H - padT - padB;
+  const N = bars.length;
+  if (N === 0) return '<div style="color:var(--text2);font-size:13px;padding:8px 0;">No data yet.</div>';
+
+  const maxV = opts.maxVal || Math.max(...bars.map(b => b.value), 0.001);
+  const slot = cW / N;
+  const barW = Math.max(3, Math.floor(slot) - 3);
+  const currentWeekNum = (getWeekDayForDate(today()) || {}).weekNum;
+
+  let svg = '';
+
+  // Gridlines + y labels
+  for (let g = 0; g <= 4; g++) {
+    const v = maxV * g / 4;
+    const y = padT + cH - (g / 4) * cH;
+    svg += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W - padR}" y2="${y.toFixed(1)}" stroke="rgba(58,48,37,0.8)" stroke-width="0.5"/>`;
+    if (g % 2 === 0) svg += `<text x="${padL - 3}" y="${(y + 3).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#9a8a76">${opts.formatY(v)}</text>`;
+  }
+
+  // Bars
+  bars.forEach((b, i) => {
+    const barH = maxV > 0 ? (b.value / maxV) * cH : 0;
+    const x = padL + i * slot + (slot - barW) / 2;
+    const y = padT + cH - barH;
+    const isActive = b.weekNum === currentWeekNum;
+    svg += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW}" height="${Math.max(0, barH).toFixed(1)}" fill="${isActive ? 'var(--accent)' : opts.color}" rx="1.5" opacity="${isActive ? 1 : 0.75}"/>`;
+    if (b.weekNum === 1 || b.weekNum % 5 === 0)
+      svg += `<text x="${(x + barW / 2).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="8.5" fill="#9a8a76">W${b.weekNum}</text>`;
+  });
+
+  return `<div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">${svg}</svg></div>`;
+}
+
+function buildLineChartSVG(points, opts) {
+  const valid = points.filter(p => p.value !== null && !isNaN(p.value));
+  if (valid.length < 2) return '<div style="color:var(--text2);font-size:13px;padding:8px 0;">Not enough run data with km tracked yet.</div>';
+
+  const W = 480, H = 130;
+  const padL = 36, padR = 8, padT = 10, padB = 28;
+  const cW = W - padL - padR, cH = H - padT - padB;
+  const N = points.length;
+
+  const vals = valid.map(p => p.value);
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const range = hi - lo || 0.5;
+  const vlo = lo - range * 0.1, vhi = hi + range * 0.1;
+
+  const getX = i => padL + (N > 1 ? (i / (N - 1)) * cW : cW / 2);
+  const getY = v => padT + cH - ((v - vlo) / (vhi - vlo)) * cH;
+
+  let svg = '';
+
+  // Gridlines + y labels
+  for (let g = 0; g <= 4; g++) {
+    const v = vlo + (vhi - vlo) * g / 4;
+    const y = getY(v);
+    svg += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W - padR}" y2="${y.toFixed(1)}" stroke="rgba(58,48,37,0.8)" stroke-width="0.5"/>`;
+    if (g % 2 === 0) svg += `<text x="${padL - 3}" y="${(y + 3).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#9a8a76">${opts.formatY(v)}</text>`;
+  }
+
+  // Line path (handles gaps)
+  let pathD = '', penDown = false;
+  points.forEach((p, i) => {
+    if (p.value === null || isNaN(p.value)) { penDown = false; return; }
+    const x = getX(i), y = getY(p.value);
+    pathD += penDown ? ` L ${x.toFixed(1)} ${y.toFixed(1)}` : `M ${x.toFixed(1)} ${y.toFixed(1)}`;
+    penDown = true;
+  });
+  if (pathD) svg += `<path d="${pathD}" stroke="${opts.color}" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"/>`;
+
+  // Dots + x labels
+  points.forEach((p, i) => {
+    const x = getX(i);
+    if (p.value !== null && !isNaN(p.value)) {
+      const y = getY(p.value);
+      svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${opts.color}" stroke="var(--surface)" stroke-width="1.5"/>`;
+    }
+    if (p.weekNum === 1 || p.weekNum % 5 === 0)
+      svg += `<text x="${x.toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="8.5" fill="#9a8a76">W${p.weekNum}</text>`;
+  });
+
+  return `<div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">${svg}</svg></div>`;
+}
+
+function buildProgressCharts() {
+  const wd = getWeekDayForDate(today());
+  const maxWeek = wd ? wd.weekNum : 0;
+  if (maxWeek < 1) return '';
+
+  const kmData = [], timeData = [], paceData = [];
+  for (let w = 1; w <= maxWeek; w++) {
+    const s = calcWeekStats(w);
+    kmData.push({ weekNum: w, value: s.totalKm || 0 });
+    timeData.push({ weekNum: w, value: s.totalTime || 0 });
+    paceData.push({ weekNum: w, value: s.avgPace || null });
+  }
+
+  const maxKm = Math.max(...kmData.map(d => d.value), 0.001);
+  const maxTime = Math.max(...timeData.map(d => d.value), 0.001);
+
+  const kmChart = buildBarChartSVG(kmData, { maxVal: maxKm, color: 'var(--run)', formatY: v => Math.round(v) + 'km' });
+  const timeChart = buildBarChartSVG(timeData, { maxVal: maxTime, color: 'var(--cross)', formatY: v => Math.round(v) + 'm' });
+  const paceChart = buildLineChartSVG(paceData, { color: 'var(--warning)', formatY: v => fmtPace(v) });
+
+  return `
+    <div class="card">
+      <div class="card-title"><span class="icon">📍</span> Weekly Distance</div>
+      <div style="font-size:11px;color:var(--text2);margin:-8px 0 10px;">KM logged per week — highlighted bar is current week</div>
+      ${kmChart}
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="icon">⏱</span> Weekly Time</div>
+      <div style="font-size:11px;color:var(--text2);margin:-8px 0 10px;">Minutes logged per week</div>
+      ${timeChart}
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="icon">⚡</span> Avg Run Pace</div>
+      <div style="font-size:11px;color:var(--text2);margin:-8px 0 10px;">Min/km per week from logged runs — lower is faster</div>
+      ${paceChart}
+    </div>
+  `;
 }
 
 // ============================================================
