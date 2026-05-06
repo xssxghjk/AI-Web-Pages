@@ -100,6 +100,9 @@
       'border-radius:3px;color:#58584e;transition:background 0.15s,color 0.15s}' +
     '.mobile-nav-close:hover{background:rgba(255,255,252,0.06);color:#c8c4b4}' +
 
+    /* sidebar stats footer */
+    '.sidebar-stats-footer{padding:0.5rem 0.5rem 0.75rem;border-top:1px solid var(--nav-border);flex-shrink:0}' +
+
     /* legal disclaimer strip */
     '.nav-disclaimer{padding:0.85rem 1.5rem;font-size:0.67rem;font-style:italic;' +
       'color:#4a4035;border-top:1px solid #2a2318;text-align:center;' +
@@ -159,39 +162,40 @@
   // ── Nav structure ────────────────────────────────────────────────────────
   var SECTIONS = [
     {
-      label: 'Pages',
+      label: 'Planning',
       links: [
         { key: 'calendar',  href: '../calendar/',               text: 'Calendar',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2.5" width="11" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M1.5 5.5h11M4.5 1v3M9.5 1v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
         { key: 'trips',     href: '../trips/',                  text: 'Trips',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5C4.515 1.5 2.5 3.515 2.5 6c0 3.5 4.5 6.5 4.5 6.5s4.5-3 4.5-6.5c0-2.485-2.015-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="6" r="1.5" stroke="currentColor" stroke-width="1.4"/></svg>' },
+      ]
+    },
+    {
+      label: 'TCG',
+      links: [
         { key: 'reports',   href: '../tcg-tournament-reports/', text: 'Tournament Reports',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 2.5h9a1 1 0 011 1v7a1 1 0 01-1 1h-9a1 1 0 01-1-1v-7a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 6h5M4.5 8.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
         { key: 'prep',      href: '../tcg-tournament-prep/',    text: 'Tournament Prep',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l1.5 3 3.5.5-2.5 2.5.5 3.5L7 9.5 4 11l.5-3.5L2 5l3.5-.5L7 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>' },
-      ]
-    },
-    {
-      label: 'Tools',
-      links: [
-        { key: 'deck-viewer',      href: '../fab-deck-viewer/',    text: 'Deck Builder',
+        { key: 'deck-viewer', href: '../fab-deck-viewer/',      text: 'Deck Builder',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
-        { key: 'marathon',         href: '../marathon-training/',  text: 'Marathon Training',
-          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="3" r="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 12.5l1.5-4 1.5 2 1.5-2 1.5 4M7 5.5v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
-        { key: 'bouldering',       href: '../bouldering-tracker/', text: 'Bouldering',
-          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 11.5c0 0 1.5-3 3-4s2-3 2-3 1 2 2 3 3 4 3 4H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="5.5" cy="7" r="0.8" fill="currentColor"/><circle cx="8" cy="8.5" r="0.8" fill="currentColor"/></svg>' },
-        { key: 'journal',          href: '../journal/',            text: 'Journal',
-          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="1.5" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 4.5h4M5 7h4M5 9.5h2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M2.5 3.5h-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
       ]
     },
     {
-      label: 'Meta',
+      label: 'Self Improvement',
       links: [
-        { key: 'project-stats', href: '../project-stats/', text: 'Project Stats',
-          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="7.5" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="5.5" y="4.5" width="3" height="8" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1.5" width="3" height="11" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>' },
+        { key: 'marathon',   href: '../marathon-training/',  text: 'Marathon Training',
+          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="3" r="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 12.5l1.5-4 1.5 2 1.5-2 1.5 4M7 5.5v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+        { key: 'bouldering', href: '../bouldering-tracker/', text: 'Bouldering',
+          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 11.5c0 0 1.5-3 3-4s2-3 2-3 1 2 2 3 3 4 3 4H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="5.5" cy="7" r="0.8" fill="currentColor"/><circle cx="8" cy="8.5" r="0.8" fill="currentColor"/></svg>' },
+        { key: 'journal',    href: '../journal/',            text: 'Journal',
+          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="1.5" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 4.5h4M5 7h4M5 9.5h2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M2.5 3.5h-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
       ]
     }
   ];
+
+  var STATS_LINK = { key: 'project-stats', href: '../project-stats/', text: 'Site Stats',
+    icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="7.5" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="5.5" y="4.5" width="3" height="8" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1.5" width="3" height="11" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>' };
 
   function getActivePage() {
     var p = window.location.pathname;
@@ -223,10 +227,19 @@
     return html;
   }
 
+  function buildStatsFooter(activePage) {
+    var cls = 'sidebar-link' + (STATS_LINK.key === activePage ? ' active' : '');
+    return '<div class="sidebar-stats-footer">' +
+      '<a class="' + cls + '" href="' + STATS_LINK.href + '">' +
+      STATS_LINK.icon + STATS_LINK.text + '</a>' +
+      '</div>';
+  }
+
   // ── DOM injection (runs after the page has parsed) ───────────────────────
   function init() {
-    var activePage = getActivePage();
-    var linksHtml  = buildLinks(activePage);
+    var activePage   = getActivePage();
+    var linksHtml    = buildLinks(activePage);
+    var statsFooter  = buildStatsFooter(activePage);
 
     // Sidebar (desktop)
     var sidebar = document.createElement('aside');
@@ -236,7 +249,8 @@
         '<img src="' + NAV_BASE + 'assets/logo-64.png" class="sidebar-logo" alt="">' +
         '<span class="sidebar-brand">xssxghjk</span>' +
       '</div>' +
-      '<nav class="sidebar-nav">' + linksHtml + '</nav>';
+      '<nav class="sidebar-nav">' + linksHtml + '</nav>' +
+      statsFooter;
 
     // Mobile header strip
     var mobileHeader = document.createElement('div');
@@ -315,7 +329,8 @@
           '</svg>' +
         '</button>' +
       '</div>' +
-      '<div class="sidebar-nav">' + linksHtml + '</div>';
+      '<div class="sidebar-nav">' + linksHtml + '</div>' +
+      statsFooter;
     document.body.appendChild(drawer);
 
     // Wire up interactions
