@@ -178,6 +178,8 @@
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
         { key: 'marathon',         href: '../marathon-training/',  text: 'Marathon Training',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="3" r="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 12.5l1.5-4 1.5 2 1.5-2 1.5 4M7 5.5v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+        { key: 'bouldering',       href: '../bouldering-tracker/', text: 'Bouldering',
+          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 11.5c0 0 1.5-3 3-4s2-3 2-3 1 2 2 3 3 4 3 4H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="5.5" cy="7" r="0.8" fill="currentColor"/><circle cx="8" cy="8.5" r="0.8" fill="currentColor"/></svg>' },
         { key: 'journal',          href: '../journal/',            text: 'Journal',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="1.5" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 4.5h4M5 7h4M5 9.5h2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M2.5 3.5h-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
       ]
@@ -200,6 +202,7 @@
     if (/\/trip(\/|$)/.test(p))                   return 'trips';  // trip detail
     if (/\/fab-deck-viewer(\/|$)/.test(p))        return 'deck-viewer';
     if (/\/marathon-training(\/|$)/.test(p))      return 'marathon';
+    if (/\/bouldering-tracker(\/|$)/.test(p))    return 'bouldering';
     if (/\/journal(\/|$)/.test(p))                return 'journal';
     if (/\/project-stats(\/|$)/.test(p))          return 'project-stats';
     return null;

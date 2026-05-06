@@ -79,3 +79,11 @@ test('journal page loads', async ({ page }) => {
   const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();
   expect(sidebarVisible || hamburgerVisible).toBe(true);
 });
+
+test('bouldering tracker page loads', async ({ page }) => {
+  await page.goto('/bouldering-tracker/');
+  await expect(page).toHaveTitle(/Bouldering/);
+  const sidebarVisible = await page.locator('.sidebar').isVisible();
+  const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();
+  expect(sidebarVisible || hamburgerVisible).toBe(true);
+});
