@@ -1560,12 +1560,8 @@ function calcTotalCalories(weightKg) {
   if (!weightKg) return 0;
   let total = 0;
   for (const [key, val] of Object.entries(appData.days)) {
-    if (!val.status || val.status === 'skipped') continue;
-    const d = new Date(key + 'T00:00:00');
-    const wd = getWeekDayForDate(d);
-    if (!wd) continue;
-    const workout = PLAN[wd.weekNum - 1][wd.dayOfWeek];
-    total += calcWorkoutCalories(workout, val.time, weightKg);
+    if (!val.km) continue;
+    total += Math.round(weightKg * val.km);
   }
   return total;
 }
@@ -1573,16 +1569,13 @@ function calcTotalCalories(weightKg) {
 function buildCalorieRows(weightKg) {
   const rows = [];
   for (const [key, val] of Object.entries(appData.days)) {
-    if (!val.status || val.status === 'skipped') continue;
+    if (!val.km) continue;
     const d = new Date(key + 'T00:00:00');
     const wd = getWeekDayForDate(d);
     if (!wd) continue;
     const workout = PLAN[wd.weekNum - 1][wd.dayOfWeek];
-    const met = getWorkoutMET(workout);
-    if (!met) continue;
-    const duration = val.time || estimateWorkoutDuration(workout);
-    const calories = Math.round(met * weightKg * duration / 60);
-    rows.push({ key, date: d, workout, met, duration, fromLogged: !!val.time, calories });
+    const calories = Math.round(weightKg * val.km);
+    rows.push({ key, date: d, workout, km: val.km, calories });
   }
   rows.sort((a, b) => b.date - a.date);
   return rows;
@@ -2361,14 +2354,13 @@ function openCalorieDetails() {
 
   let tableHtml;
   if (rows.length === 0) {
-    tableHtml = '<div style="color:var(--text2);font-size:13px;padding:12px 0;">No completed workouts logged yet.</div>';
+    tableHtml = '<div style="color:var(--text2);font-size:13px;padding:12px 0;">No runs with tracked kilometres yet.</div>';
   } else {
     const rowsHtml = rows.map(r => `
       <tr>
         <td>${formatDate(r.date)}</td>
         <td>${r.workout.short}</td>
-        <td>${r.met}</td>
-        <td>${r.duration}${r.fromLogged ? '' : '*'}</td>
+        <td>${r.km}</td>
         <td style="font-weight:700;color:var(--accent);">~${r.calories}</td>
       </tr>`).join('');
     tableHtml = `
@@ -2376,23 +2368,20 @@ function openCalorieDetails() {
         <table class="cal-detail-table">
           <thead>
             <tr>
-              <th>Date</th><th>Workout</th><th>MET</th><th>Min</th><th>kcal</th>
+              <th>Date</th><th>Workout</th><th>km</th><th>kcal</th>
             </tr>
           </thead>
           <tbody>${rowsHtml}</tbody>
         </table>
-      </div>
-      <div style="font-size:11px;color:var(--text2);margin-top:5px;">* planned duration (no time logged for that session)</div>`;
+      </div>`;
   }
 
   document.getElementById('calorieModalBody').innerHTML = `
     <div style="background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:14px;">
       <div style="font-size:12px;font-weight:700;margin-bottom:4px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;">Formula</div>
-      <div style="font-family:monospace;font-size:12px;color:var(--accent);">calories = MET &times; weight (kg) &times; duration (h)</div>
+      <div style="font-family:monospace;font-size:12px;color:var(--accent);">calories = weight (kg) &times; distance (km)</div>
       <div style="margin-top:8px;font-size:11px;color:var(--text2);line-height:1.6;">
-        <strong style="color:var(--text);">MET values:</strong>
-        easy run&nbsp;8.0 &middot; intervals&nbsp;6.5 &middot; tempo&nbsp;10.0 &middot; hills&nbsp;9.5 &middot; strides&nbsp;9.0
-        &middot; strength&nbsp;4.0 &middot; cross-train&nbsp;5.5 &middot; race&nbsp;11.0
+        Only runs with tracked kilometres are included. ~1&thinsp;kcal per kg per km.
       </div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
