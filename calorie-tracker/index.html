@@ -137,7 +137,7 @@ body::before {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 12px; margin-bottom: 20px;
 }
-@media (min-width: 500px) { .day-summary { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 500px) { .day-summary { grid-template-columns: repeat(3, 1fr); } }
 .summary-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
   padding: 14px 16px;
@@ -152,6 +152,8 @@ body::before {
 }
 .summary-val.accent { color: var(--accent); }
 .summary-unit { font-size: 11px; color: var(--muted); margin-left: 3px; font-family: 'DM Serif Text', serif; }
+.summary-card-weight:hover { border-color: var(--bord2); }
+.summary-card-weight:hover .summary-val { color: var(--accent); }
 
 /* ── SECTION HEADER ── */
 .section-hdr {
@@ -539,6 +541,11 @@ canvas { display: block; width: 100%; }
         <div class="summary-val" id="sum-prot">0</div>
         <div class="summary-unit">g today</div>
       </div>
+      <div class="summary-card summary-card-weight" id="weight-card" style="cursor:pointer" title="Log body weight for this day">
+        <div class="summary-label">Body Weight</div>
+        <div class="summary-val" id="sum-weight" style="font-size:22px">—</div>
+        <div class="summary-unit" id="sum-weight-unit">tap to log</div>
+      </div>
     </div>
 
     <div class="section-hdr">
@@ -819,6 +826,34 @@ canvas { display: block; width: 100%; }
   </div>
 </div>
 
+<!-- ── WEIGHT MODAL ── -->
+<div class="modal-overlay" id="weight-modal" role="dialog" aria-modal="true" aria-labelledby="weight-modal-title">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="weight-modal-title">Log Weight</span>
+      <button class="modal-close" id="weight-modal-close" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="w-kg">Body Weight (kg)</label>
+        <input type="number" id="w-kg" class="form-input" placeholder="e.g. 75.5" min="20" max="400" step="0.1">
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:-6px">
+        Logged weight is used to estimate running calories burned in the marathon tracker.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="weight-modal-delete" style="margin-right:auto">Remove</button>
+      <button class="btn btn-ghost btn-sm" id="weight-modal-cancel">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="weight-modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── TOAST ── -->
 <div id="toast-wrap"></div>
 
@@ -836,11 +871,21 @@ const LS = {
 
 const PRESETS_KEY = 'calorie_presets';
 const LOG_KEY     = 'calorie_log';
+const WEIGHTS_KEY = 'calorie_weights';
 
 function getPresets()       { return LS.get(PRESETS_KEY, []); }
 function savePresets(arr)   { LS.set(PRESETS_KEY, arr); }
 function getLog()           { return LS.get(LOG_KEY, {}); }
 function saveLog(obj)       { LS.set(LOG_KEY, obj); }
+function getWeights()       { return LS.get(WEIGHTS_KEY, {}); }
+function saveWeights(obj)   { LS.set(WEIGHTS_KEY, obj); }
+function getWeightForDate(dateStr) { return getWeights()[dateStr] || null; }
+function setWeightForDate(dateStr, kg) {
+  const w = getWeights();
+  if (kg > 0) w[dateStr] = kg;
+  else delete w[dateStr];
+  saveWeights(w);
+}
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -954,6 +999,7 @@ function renderLog() {
     totalsBar.style.display = 'none';
     document.getElementById('sum-cal').textContent = '0';
     document.getElementById('sum-prot').textContent = '0';
+    updateWeightCard();
     return;
   }
 
@@ -1036,6 +1082,7 @@ function renderLog() {
   document.getElementById('total-cal').textContent   = Math.round(totalCal);
   document.getElementById('total-prot').textContent  = (Math.round(totalProt * 10) / 10) + ' g';
   document.getElementById('total-count').textContent = entries.length;
+  updateWeightCard();
 
   list.querySelectorAll('[data-del]').forEach(btn => {
     btn.addEventListener('click', () => deleteLogEntry(btn.dataset.del));
@@ -1051,6 +1098,55 @@ function deleteLogEntry(id) {
   renderLog();
   toast('Entry removed');
 }
+
+// ── Weight card & modal ──────────────────────────────────────────────────────
+function updateWeightCard() {
+  const kg = getWeightForDate(currentDate);
+  const valEl  = document.getElementById('sum-weight');
+  const unitEl = document.getElementById('sum-weight-unit');
+  if (kg) {
+    valEl.textContent  = kg % 1 === 0 ? kg : kg.toFixed(1);
+    unitEl.textContent = 'kg';
+  } else {
+    valEl.textContent  = '—';
+    unitEl.textContent = 'tap to log';
+  }
+}
+
+function openWeightModal() {
+  const kg = getWeightForDate(currentDate);
+  document.getElementById('w-kg').value = kg || '';
+  document.getElementById('weight-modal-delete').style.display = kg ? '' : 'none';
+  document.getElementById('weight-modal').classList.add('open');
+  document.getElementById('w-kg').focus();
+}
+
+function closeWeightModal() {
+  document.getElementById('weight-modal').classList.remove('open');
+}
+
+document.getElementById('weight-card').addEventListener('click', openWeightModal);
+document.getElementById('weight-modal-close').addEventListener('click', closeWeightModal);
+document.getElementById('weight-modal-cancel').addEventListener('click', closeWeightModal);
+document.getElementById('weight-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeWeightModal();
+});
+
+document.getElementById('weight-modal-save').addEventListener('click', () => {
+  const kg = parseFloat(document.getElementById('w-kg').value);
+  if (!kg || kg <= 0) { toast('Please enter a valid weight', 'error'); return; }
+  setWeightForDate(currentDate, kg);
+  updateWeightCard();
+  closeWeightModal();
+  toast('Weight logged for ' + formatDate(currentDate), 'success');
+});
+
+document.getElementById('weight-modal-delete').addEventListener('click', () => {
+  setWeightForDate(currentDate, 0);
+  updateWeightCard();
+  closeWeightModal();
+  toast('Weight entry removed');
+});
 
 // ── Add food to log ──────────────────────────────────────────────────────────
 function addToLog(entry) {
@@ -1585,7 +1681,7 @@ function renderTopFoods() {
 
 // ── Export / Import ──────────────────────────────────────────────────────────
 document.getElementById('export-json-btn').addEventListener('click', () => {
-  const data = { presets: getPresets(), log: getLog(), exportedAt: new Date().toISOString() };
+  const data = { presets: getPresets(), log: getLog(), weights: getWeights(), exportedAt: new Date().toISOString() };
   downloadFile('calorie-tracker.json', JSON.stringify(data, null, 2), 'application/json');
   toast('Exported JSON', 'success');
 });
@@ -1616,6 +1712,7 @@ document.getElementById('import-file').addEventListener('change', e => {
       const data = JSON.parse(ev.target.result);
       if (data.presets) savePresets(data.presets);
       if (data.log)     saveLog(data.log);
+      if (data.weights) saveWeights(data.weights);
       renderLog();
       renderPresets();
       toast('Import successful', 'success');
