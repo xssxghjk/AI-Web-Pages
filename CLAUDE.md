@@ -38,6 +38,8 @@ git push origin master
 
 Fix all conflicts yourself without asking for help — do not leave them unresolved.
 
+**Never force anything.** Do not use `--force`, `--force-with-lease`, `git reset --hard`, or any destructive git operation. Always resolve conflicts cleanly through a proper merge and commit.
+
 ## Tool Usage
 
 **Never use the Agent tool (subagents).** Do all work directly using the available tools (Read, Edit, Write, Bash, Grep, Glob, etc.). Do not delegate tasks to subagents under any circumstances.
