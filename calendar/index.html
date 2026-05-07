@@ -446,6 +446,126 @@
       background: var(--bg);
     }
 
+    /* ── DAILY REPORT EXPORT ── */
+    .cal-nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .cal-export-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.28rem 0.6rem;
+      border-radius: 2px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.62rem;
+      font-style: italic;
+      white-space: nowrap;
+    }
+    .cal-export-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    /* Center month label even with asymmetric side groups */
+    .cal-nav { position: relative; }
+    #cal-month-label { position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; }
+
+    /* ── REPORT MODAL ── */
+    .dreport-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 700;
+      background: rgba(28,24,20,0.84);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.18s ease, visibility 0s linear 0.18s;
+    }
+    .dreport-overlay.open {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.18s ease, visibility 0s linear 0s;
+    }
+    .dreport-modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 3px;
+      padding: 1.3rem 1.45rem 1.1rem;
+      width: min(340px, calc(100vw - 2rem));
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+      transform: scale(0.9) translateY(-8px);
+      transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .dreport-overlay.open .dreport-modal { transform: scale(1) translateY(0); }
+    .dreport-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+    .dreport-sub {
+      font-size: 0.74rem;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+    .dreport-date {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.84rem;
+      padding: 0.45rem 0.7rem;
+      margin-bottom: 0.9rem;
+      color-scheme: dark;
+    }
+    .dreport-date:focus { outline: none; border-color: var(--accent); }
+    .dreport-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+    .dreport-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 2px;
+      padding: 0.38rem 0.75rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.77rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .dreport-cancel:hover { border-color: var(--muted2); color: var(--text); }
+    .dreport-go {
+      background: var(--accent-dim);
+      border: 1px solid rgba(196,134,74,0.5);
+      color: var(--accent);
+      border-radius: 2px;
+      padding: 0.38rem 0.8rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.77rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .dreport-go:hover { background: rgba(196,134,74,0.18); border-color: var(--accent); }
+    .dreport-go:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+
     /* ── FOOTER ── */
     footer {
       padding: 1.75rem 2rem;
@@ -481,9 +601,15 @@
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M6.5 2L3.5 5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <span class="cal-month-label" id="cal-month-label"></span>
-      <button class="cal-nav-btn" id="cal-next">
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3.5 2L6.5 5l-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
+      <div class="cal-nav-right">
+        <button class="cal-nav-btn" id="cal-next">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3.5 2L6.5 5l-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="cal-export-btn" id="cal-export-btn" title="Download daily report image">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 6l3 3 3-3M2 11h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Daily Report
+        </button>
+      </div>
     </div>
     <div class="cal-viewport" id="cal-viewport"><div id="cal-grid"></div></div>
     <div class="cal-legend" id="cal-legend"></div>
@@ -514,6 +640,22 @@
     <div class="fab-popup-title" id="fab-popup-title"></div>
     <div class="fab-popup-dates" id="fab-popup-dates"></div>
     <div class="fab-popup-actions" id="fab-popup-actions"></div>
+  </div>
+
+  <!-- Daily Report Export Modal -->
+  <div class="dreport-overlay" id="dreport-overlay">
+    <div class="dreport-modal">
+      <div class="dreport-title">Daily Report</div>
+      <div class="dreport-sub">Download a combined image of your calorie intake and workout for any day.</div>
+      <input type="date" class="dreport-date" id="dreport-date">
+      <div class="dreport-actions">
+        <button class="dreport-cancel" id="dreport-cancel">Cancel</button>
+        <button class="dreport-go" id="dreport-go">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 6l3 3 3-3M2 11h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download
+        </button>
+      </div>
+    </div>
   </div>
 
   <script src="../trips/trips.js"></script>
@@ -1085,6 +1227,280 @@
     iframeModalFrame.addEventListener('load', () => {
       setupIframeDismissGesture();
     });
+
+    // ── DAILY REPORT EXPORT ──────────────────────────────────────────────────
+    (function () {
+      const dreportOverlay = document.getElementById('dreport-overlay');
+      const dreportDate    = document.getElementById('dreport-date');
+      const dreportCancel  = document.getElementById('dreport-cancel');
+      const dreportGo      = document.getElementById('dreport-go');
+      const calExportBtn   = document.getElementById('cal-export-btn');
+
+      function todayIso() {
+        const d = new Date();
+        return d.getFullYear() + '-' +
+          String(d.getMonth() + 1).padStart(2, '0') + '-' +
+          String(d.getDate()).padStart(2, '0');
+      }
+
+      function openReportModal() {
+        dreportDate.value = todayIso();
+        dreportGo.disabled = false;
+        dreportGo.innerHTML = '<svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 6l3 3 3-3M2 11h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Download';
+        dreportOverlay.classList.add('open');
+      }
+
+      function closeReportModal() { dreportOverlay.classList.remove('open'); }
+
+      calExportBtn.addEventListener('click', openReportModal);
+      dreportCancel.addEventListener('click', closeReportModal);
+      dreportOverlay.addEventListener('click', e => { if (e.target === dreportOverlay) closeReportModal(); });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && dreportOverlay.classList.contains('open')) closeReportModal();
+      });
+
+      dreportGo.addEventListener('click', () => {
+        const dateStr = dreportDate.value;
+        if (!dateStr) return;
+        dreportGo.disabled = true;
+        dreportGo.textContent = 'Generating…';
+        generateDailyReport(dateStr).then(() => {
+          closeReportModal();
+        });
+      });
+
+      function generateDailyReport(dateStr) {
+        return new Promise(resolve => {
+          document.fonts.ready.then(() => {
+            // ── Load data ──────────────────────────────────────────────────
+            let calorieLog = {}, workoutData = {};
+            try { calorieLog = JSON.parse(localStorage.getItem('calorie_log') || '{}'); } catch {}
+            try { workoutData = JSON.parse(localStorage.getItem('c2hm_v1') || '{}'); } catch {}
+
+            const entries    = calorieLog[dateStr] || [];
+            const dayWorkout = (workoutData.days || {})[dateStr] || null;
+            const weightKg   = workoutData.weightKg || null;
+
+            // ── Process calories ───────────────────────────────────────────
+            const MEAL_ORDER = ['breakfast','lunch','dinner','snack','other'];
+            const CAT_COLORS = { breakfast:'#d4924a', lunch:'#5ab4cc', dinner:'#c4864a', snack:'#7ab87a', other:'#7a6e60' };
+            const CAT_LABELS = { breakfast:'Breakfast', lunch:'Lunch', dinner:'Dinner', snack:'Snack', other:'Other' };
+            const grouped = {};
+            let totalCalIn = 0, totalProtein = 0;
+            entries.forEach(e => {
+              const cat = e.category || 'other';
+              if (!grouped[cat]) grouped[cat] = [];
+              grouped[cat].push(e);
+              totalCalIn  += e.calories || 0;
+              totalProtein += e.protein  || 0;
+            });
+            const activeCats = MEAL_ORDER.filter(c => grouped[c] && grouped[c].length > 0);
+
+            // ── Process workout ────────────────────────────────────────────
+            let workoutCal = 0;
+            if (dayWorkout) {
+              if (dayWorkout.km && weightKg)        workoutCal = Math.round(weightKg * dayWorkout.km);
+              else if (dayWorkout.time && weightKg) workoutCal = Math.round(8.0 * weightKg * dayWorkout.time / 60);
+            }
+
+            // ── Format date label ──────────────────────────────────────────
+            const [Y, Mo, D] = dateStr.split('-').map(Number);
+            const dt  = new Date(Y, Mo - 1, D);
+            const DOW = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            const MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            const dateLabel = DOW[dt.getDay()] + ', ' + MON[dt.getMonth()] + ' ' + D + ', ' + Y;
+
+            // ── Canvas constants ───────────────────────────────────────────
+            const W = 600, PAD_X = 38, PAD_TOP = 30, PAD_BOT = 38;
+            const IW = W - PAD_X * 2;
+
+            // ── Two-pass paint function ────────────────────────────────────
+            // Pass 1: ctx=null  → measure-only (returns total height)
+            // Pass 2: ctx=real  → draws and returns total height
+            function paint(ctx) {
+              let y = PAD_TOP;
+
+              function r(color, x, yy, w, h) {
+                if (!ctx) return;
+                ctx.fillStyle = color;
+                ctx.fillRect(x, yy, w, h);
+              }
+              function t(font, color, ls, str, x, yy) {
+                if (!ctx) return;
+                ctx.font = font;
+                ctx.fillStyle = color;
+                ctx.letterSpacing = ls;
+                ctx.fillText(str, x, yy);
+              }
+              function tr(font, color, ls, str, rx, yy) {
+                if (!ctx) return;
+                ctx.font = font;
+                ctx.letterSpacing = ls;
+                ctx.fillStyle = color;
+                ctx.fillText(str, rx - ctx.measureText(str).width, yy);
+              }
+              function clampStr(str, maxPx, font, ls) {
+                if (!ctx) return str;
+                ctx.font = font;
+                ctx.letterSpacing = ls;
+                let s = str;
+                while (ctx.measureText(s).width > maxPx && s.length > 1) s = s.slice(0, -1);
+                return s === str ? str : s + '…';
+              }
+              function divider(yy) {
+                r('#3a3025', PAD_X, yy, IW, 1);
+              }
+              function sectionLabel(str, yy) {
+                t('700 9px "DM Serif Text", Georgia, serif', '#c4864a', '1.4px', str, PAD_X, yy + 9);
+              }
+
+              // Accent gradient bar
+              if (ctx) {
+                const grad = ctx.createLinearGradient(PAD_X, 0, PAD_X + 220, 0);
+                grad.addColorStop(0, '#c4864a');
+                grad.addColorStop(1, 'rgba(196,134,74,0)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(PAD_X, y, 220, 3);
+              }
+              y += 3 + 10;
+
+              sectionLabel('DAILY REPORT', y);
+              y += 9 + 7;
+
+              t('italic 700 24px "Cormorant Garamond", Georgia, serif', '#e8dfd0', '-0.24px', dateLabel, PAD_X, y + 24);
+              y += 24 + 20;
+
+              divider(y); y += 1 + 20;
+
+              // ── CALORIES SECTION ──────────────────────────────────────────
+              sectionLabel('CALORIES IN', y); y += 9 + 10;
+
+              t('italic 700 26px "Cormorant Garamond", Georgia, serif', '#e8dfd0', '-0.26px', Math.round(totalCalIn).toLocaleString() + ' kcal', PAD_X, y + 26);
+              y += 26 + 14;
+
+              if (activeCats.length === 0) {
+                t('italic 13px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', 'No calorie data recorded for this date.', PAD_X, y + 13);
+                y += 13 + 6;
+              } else {
+                activeCats.forEach(cat => {
+                  const ces = grouped[cat];
+                  const catTotal = ces.reduce((s, e) => s + (e.calories || 0), 0);
+
+                  // Color dot
+                  r(CAT_COLORS[cat], PAD_X, y + 6, 4, 16);
+                  // Category name (bold left) + total (muted right)
+                  t('700 14px "DM Serif Text", Georgia, serif', '#e8dfd0', '0px', CAT_LABELS[cat], PAD_X + 10, y + 18);
+                  tr('14px "DM Serif Text", Georgia, serif', '#9a8a76', '0px', Math.round(catTotal).toLocaleString() + ' kcal', PAD_X + IW, y + 18);
+                  y += 28;
+
+                  // Entries
+                  ces.forEach(e => {
+                    const entryFont = '12px "DM Serif Text", Georgia, serif';
+                    const calStr  = Math.round(e.calories || 0).toLocaleString() + ' kcal';
+                    const maxNamePx = IW - 14 - 72;
+                    const name = clampStr(e.name || 'Unnamed', maxNamePx, entryFont, '0px');
+                    t(entryFont, '#7a6e60', '0px', name, PAD_X + 14, y + 12);
+                    tr(entryFont, '#7a6e60', '0px', calStr, PAD_X + IW, y + 12);
+                    y += 21;
+                  });
+                  y += 6;
+                });
+
+                if (totalProtein > 0) {
+                  y += 4;
+                  t('12px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', 'Protein', PAD_X, y + 12);
+                  tr('12px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', Math.round(totalProtein) + 'g', PAD_X + IW, y + 12);
+                  y += 20;
+                }
+              }
+
+              y += 16;
+              divider(y); y += 1 + 20;
+
+              // ── WORKOUT SECTION ───────────────────────────────────────────
+              sectionLabel('WORKOUT', y); y += 9 + 10;
+
+              if (!dayWorkout || !dayWorkout.status) {
+                t('italic 13px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', 'No workout recorded for this date.', PAD_X, y + 13);
+                y += 13 + 6;
+              } else {
+                const SC = { completed:'#7ab87a', modified:'#d4924a', skipped:'#c46a6a' };
+                const SL = { completed:'✓ Completed', modified:'◎ Modified', skipped:'✗ Skipped' };
+                t('700 15px "DM Serif Text", Georgia, serif', SC[dayWorkout.status] || '#9a8a76', '0px', SL[dayWorkout.status] || dayWorkout.status, PAD_X, y + 15);
+                y += 15 + 12;
+
+                const parts = [];
+                if (dayWorkout.km)   parts.push(dayWorkout.km + ' km');
+                if (dayWorkout.time) parts.push(dayWorkout.time + ' min');
+                if (workoutCal > 0)  parts.push('∼' + workoutCal.toLocaleString() + ' kcal burned');
+
+                if (parts.length > 0) {
+                  t('13px "DM Serif Text", Georgia, serif', '#9a8a76', '0px', parts.join('  ·  '), PAD_X, y + 13);
+                  y += 13 + 10;
+                }
+
+                if (dayWorkout.notes) {
+                  t('italic 12px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', '“' + dayWorkout.notes + '”', PAD_X, y + 12);
+                  y += 12 + 8;
+                }
+              }
+
+              y += 14;
+              divider(y); y += 1 + 20;
+
+              // ── NET SECTION ───────────────────────────────────────────────
+              const net = Math.round(totalCalIn - workoutCal);
+              t('700 9px "DM Serif Text", Georgia, serif', '#9a8a76', '1.1px', 'NET CALORIES', PAD_X, y + 9);
+              y += 9 + 8;
+              t('italic 700 28px "Cormorant Garamond", Georgia, serif', '#e8dfd0', '-0.28px', net.toLocaleString() + ' kcal', PAD_X, y + 28);
+              y += 28;
+
+              return y + PAD_BOT;
+            }
+
+            // ── Measure pass (no ctx) ──────────────────────────────────────
+            const totalH = paint(null);
+
+            // ── Draw pass ─────────────────────────────────────────────────
+            const DPR = 2;
+            const canvas = document.createElement('canvas');
+            canvas.width  = W * DPR;
+            canvas.height = totalH * DPR;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(DPR, DPR);
+
+            // Background
+            ctx.fillStyle = '#1c1814';
+            ctx.fillRect(0, 0, W, totalH);
+
+            // Subtle dot texture
+            ctx.fillStyle = 'rgba(232,223,208,0.02)';
+            for (let px = 12; px < W; px += 24) {
+              for (let py = 12; py < totalH; py += 24) {
+                ctx.beginPath();
+                ctx.arc(px, py, 0.7, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            }
+
+            paint(ctx);
+
+            // ── Download ──────────────────────────────────────────────────
+            canvas.toBlob(blob => {
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href     = url;
+              a.download = 'daily-report-' + dateStr + '.png';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              setTimeout(() => URL.revokeObjectURL(url), 2000);
+              resolve();
+            }, 'image/png');
+          });
+        });
+      }
+    })();
 
     // Intercept FAB popup internal links (prep / report — not external event page)
     popupActions.addEventListener('click', e => {
