@@ -75,10 +75,11 @@
       max-width: 1400px;
       margin: 0 auto;
       display: flex;
-      align-items: baseline;
+      align-items: center;
       gap: 1.5rem;
       flex-wrap: wrap;
     }
+    .hero-inner .cal-export-btn { margin-left: auto; }
     .hero h1 {
       font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: clamp(2rem, 5vw, 3.5rem);
@@ -447,11 +448,6 @@
     }
 
     /* ── DAILY REPORT EXPORT ── */
-    .cal-nav-right {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
     .cal-export-btn {
       display: flex;
       align-items: center;
@@ -592,6 +588,10 @@
     <div class="hero-inner">
       <h1>Calendar</h1>
       <p>Trips and FaB events laid out month by month.</p>
+      <button class="cal-export-btn" id="cal-export-btn" title="Download daily report image">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 6l3 3 3-3M2 11h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Daily Report
+      </button>
     </div>
   </header>
 
@@ -601,15 +601,9 @@
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M6.5 2L3.5 5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <span class="cal-month-label" id="cal-month-label"></span>
-      <div class="cal-nav-right">
-        <button class="cal-nav-btn" id="cal-next">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3.5 2L6.5 5l-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <button class="cal-export-btn" id="cal-export-btn" title="Download daily report image">
-          <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 6l3 3 3-3M2 11h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Daily Report
-        </button>
-      </div>
+      <button class="cal-nav-btn" id="cal-next">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3.5 2L6.5 5l-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
     <div class="cal-viewport" id="cal-viewport"><div id="cal-grid"></div></div>
     <div class="cal-legend" id="cal-legend"></div>
