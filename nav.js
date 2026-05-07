@@ -190,6 +190,8 @@
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 11.5c0 0 1.5-3 3-4s2-3 2-3 1 2 2 3 3 4 3 4H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="5.5" cy="7" r="0.8" fill="currentColor"/><circle cx="8" cy="8.5" r="0.8" fill="currentColor"/></svg>' },
         { key: 'journal',    href: '../journal/',            text: 'Journal',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="1.5" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 4.5h4M5 7h4M5 9.5h2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M2.5 3.5h-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
+        { key: 'calorie-tracker', href: '../calorie-tracker/', text: 'Calorie Tracker',
+          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M7 4v3l2 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
       ]
     }
   ];
@@ -208,6 +210,7 @@
     if (/\/marathon-training(\/|$)/.test(p))      return 'marathon';
     if (/\/bouldering-tracker(\/|$)/.test(p))    return 'bouldering';
     if (/\/journal(\/|$)/.test(p))                return 'journal';
+    if (/\/calorie-tracker(\/|$)/.test(p))        return 'calorie-tracker';
     if (/\/project-stats(\/|$)/.test(p))          return 'project-stats';
     return null;
   }

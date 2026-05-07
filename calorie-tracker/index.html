@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calorie Tracker</title>
+<script src="../nav.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #1c1814;
+  --surface:  #252018;
+  --surf2:    #2e2820;
+  --surf3:    #332e24;
+  --border:   #3a3025;
+  --bord2:    #4a4030;
+  --accent:   #c4864a;
+  --accent-d: rgba(196,134,74,0.10);
+  --accent-b: rgba(196,134,74,0.28);
+  --green:    #7ab87a;
+  --green-d:  rgba(122,184,122,0.10);
+  --green-b:  rgba(122,184,122,0.28);
+  --red:      #c46a6a;
+  --text:     #e8dfd0;
+  --text2:    #9a8a76;
+  --muted:    #7a6e60;
+  --muted2:   #5a5040;
+}
+html { overflow-x: hidden; }
+body {
+  font-family: 'DM Serif Text', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle, rgba(232,223,208,0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 0;
+}
+.app-header, .nav-tabs, .main, .app-footer, .modal-overlay, #toast-wrap {
+  position: relative; z-index: 1;
+}
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--text);
+  padding: 12px 20px;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-inner {
+  max-width: 960px; margin: 0 auto;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.header-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.app-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 20px; font-weight: 700; font-style: italic;
+}
+.app-title span { color: var(--accent); }
+.date-nav {
+  display: flex; align-items: center; gap: 6px;
+  flex: 1; justify-content: center; flex-wrap: wrap;
+  position: relative;
+}
+.date-display {
+  font-size: 13px; color: var(--text); cursor: pointer;
+  padding: 5px 10px; border: 1px solid var(--border); border-radius: 2px;
+  transition: border-color 0.15s, color 0.15s; white-space: nowrap; user-select: none;
+}
+.date-display:hover { border-color: var(--accent); color: var(--accent); }
+#date-picker {
+  position: absolute; opacity: 0; pointer-events: none;
+  width: 1px; height: 1px; top: 100%; left: 50%;
+}
+.header-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 6px 13px; border-radius: 2px; border: none; cursor: pointer;
+  font-size: 12px; font-family: 'DM Serif Text', Georgia, serif;
+  transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+.btn-sm { padding: 4px 9px; font-size: 11px; }
+.btn-xs { padding: 3px 7px; font-size: 10px; }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-primary { background: var(--accent); color: #1c1814; font-weight: 700; }
+.btn-primary:hover { filter: brightness(1.12); }
+.btn-danger { background: transparent; border: 1px solid var(--red); color: var(--red); }
+.btn-danger:hover { background: rgba(196,106,106,0.12); }
+.btn-nav {
+  background: none; border: none; cursor: pointer; color: var(--text2);
+  padding: 4px 7px; border-radius: 2px; font-size: 16px; line-height: 1;
+  transition: color 0.15s, background 0.15s;
+}
+.btn-nav:hover { color: var(--text); background: rgba(232,223,208,0.06); }
+
+/* ── NAV TABS ── */
+.nav-tabs {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 20px; display: flex; overflow-x: auto;
+  position: sticky; top: 56px; z-index: 99;
+  scrollbar-width: none;
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 10px 16px; background: none; border: none; cursor: pointer;
+  font-family: 'DM Serif Text', Georgia, serif; font-size: 12px;
+  color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s; white-space: nowrap;
+}
+.tab-btn:hover { color: var(--text2); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── MAIN ── */
+.main { padding: 20px; max-width: 960px; margin: 0 auto; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── DAY SUMMARY STRIP ── */
+.day-summary {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-bottom: 20px;
+}
+@media (min-width: 500px) { .day-summary { grid-template-columns: repeat(2, 1fr); } }
+.summary-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+  padding: 14px 16px;
+}
+.summary-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--muted); font-style: italic; margin-bottom: 4px;
+}
+.summary-val {
+  font-family: 'Space Mono', monospace; font-size: 26px; font-weight: 700;
+  color: var(--text); line-height: 1;
+}
+.summary-val.accent { color: var(--accent); }
+.summary-unit { font-size: 11px; color: var(--muted); margin-left: 3px; font-family: 'DM Serif Text', serif; }
+
+/* ── SECTION HEADER ── */
+.section-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; gap: 8px;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 15px;
+  font-weight: 700; font-style: italic; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+
+/* ── LOG ENTRIES ── */
+.log-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+.log-item {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 3px;
+  padding: 10px 12px; display: flex; align-items: center; gap: 10px;
+  transition: border-color 0.15s;
+}
+.log-item:hover { border-color: var(--bord2); }
+.log-cat-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;
+}
+.log-info { flex: 1; min-width: 0; }
+.log-name { font-size: 13px; color: var(--text); font-weight: 400; }
+.log-qty { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.log-macros {
+  display: flex; gap: 12px; flex-shrink: 0;
+  font-family: 'Space Mono', monospace; font-size: 12px;
+}
+.log-cal { color: var(--accent); }
+.log-prot { color: var(--green); }
+.log-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.icon-btn {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  color: var(--muted2); border-radius: 2px; transition: color 0.15s, background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.icon-btn:hover { color: var(--text2); background: rgba(232,223,208,0.06); }
+.icon-btn.del:hover { color: var(--red); }
+.empty-state {
+  text-align: center; padding: 40px 20px;
+  color: var(--muted2); font-size: 13px; font-style: italic;
+}
+
+/* ── TOTALS ── */
+.totals-bar {
+  background: var(--surface); border: 1px solid var(--bord2);
+  border-radius: 4px; padding: 12px 16px;
+  display: flex; gap: 24px; align-items: center; flex-wrap: wrap;
+}
+.total-item { display: flex; flex-direction: column; gap: 2px; }
+.total-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.total-num { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; }
+.total-num.cal { color: var(--accent); }
+.total-num.prot { color: var(--green); }
+
+/* ── PRESETS ── */
+.preset-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px; margin-bottom: 20px;
+}
+.preset-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 3px;
+  padding: 12px; display: flex; flex-direction: column; gap: 6px;
+  transition: border-color 0.15s;
+}
+.preset-card:hover { border-color: var(--bord2); }
+.preset-name { font-size: 13px; color: var(--text); }
+.preset-meta { font-size: 11px; color: var(--muted); }
+.preset-macros {
+  display: flex; gap: 10px;
+  font-family: 'Space Mono', monospace; font-size: 11px;
+}
+.preset-cal { color: var(--accent); }
+.preset-prot { color: var(--green); }
+.preset-actions { display: flex; gap: 4px; margin-top: 4px; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.72);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 40px 16px;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.2s, visibility 0s linear 0.2s;
+  overflow-y: auto;
+}
+.modal-overlay.open {
+  opacity: 1; visibility: visible;
+  transition: opacity 0.2s, visibility 0s linear 0s;
+}
+.modal {
+  background: var(--surf2); border: 1px solid var(--bord2); border-radius: 4px;
+  width: 100%; max-width: 480px;
+  transform: translateY(-8px); transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header {
+  padding: 14px 16px 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; font-weight: 700; font-style: italic;
+}
+.modal-close {
+  background: none; border: none; cursor: pointer; color: var(--muted2);
+  padding: 4px; border-radius: 2px; transition: color 0.15s;
+  display: flex; align-items: center;
+}
+.modal-close:hover { color: var(--text2); }
+.modal-body { padding: 16px; }
+.modal-footer {
+  padding: 12px 16px; border-top: 1px solid var(--border);
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+
+/* Entry mode selector */
+.mode-tabs {
+  display: flex; gap: 0; margin-bottom: 16px;
+  border: 1px solid var(--border); border-radius: 3px; overflow: hidden;
+}
+.mode-tab {
+  flex: 1; padding: 7px 4px; background: none; border: none; cursor: pointer;
+  font-family: 'DM Serif Text', serif; font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  border-right: 1px solid var(--border); transition: all 0.15s;
+}
+.mode-tab:last-child { border-right: none; }
+.mode-tab.active { background: var(--accent-d); color: var(--accent); }
+.mode-tab:hover:not(.active) { color: var(--text2); background: rgba(232,223,208,0.04); }
+
+/* Form */
+.form-group { margin-bottom: 12px; }
+.form-label {
+  display: block; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--muted); margin-bottom: 5px;
+}
+.form-input, .form-select {
+  width: 100%; padding: 7px 10px; background: var(--surf3);
+  border: 1px solid var(--border); border-radius: 2px;
+  color: var(--text); font-family: 'DM Serif Text', serif; font-size: 13px;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+.form-input:focus, .form-select:focus {
+  outline: none; border-color: var(--accent);
+}
+.form-input::placeholder { color: var(--muted2); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; }
+
+/* Quick preset list inside modal */
+.quick-list { display: flex; flex-direction: column; gap: 6px; max-height: 340px; overflow-y: auto; }
+.quick-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; background: var(--surf3); border: 1px solid var(--border);
+  border-radius: 3px; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+}
+.quick-item:hover { border-color: var(--accent-b); background: var(--accent-d); }
+.quick-cat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.quick-info { flex: 1; min-width: 0; }
+.quick-name { font-size: 12px; color: var(--text); }
+.quick-sub { font-size: 10px; color: var(--muted); }
+.quick-macros {
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  display: flex; gap: 8px; flex-shrink: 0;
+}
+.qty-row {
+  display: flex; align-items: center; gap: 8px; margin-top: 10px;
+  padding-top: 10px; border-top: 1px solid var(--border);
+}
+.qty-lbl { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.qty-input {
+  width: 70px; padding: 5px 8px;
+  background: var(--surf3); border: 1px solid var(--border); border-radius: 2px;
+  color: var(--text); font-family: 'Space Mono', monospace; font-size: 13px;
+  text-align: center; -webkit-appearance: none;
+}
+.qty-input:focus { outline: none; border-color: var(--accent); }
+.qty-preview {
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  color: var(--muted); margin-left: auto;
+}
+
+/* Category colors */
+.cat-breakfast { background: #d4924a; }
+.cat-lunch     { background: #5ab4cc; }
+.cat-dinner    { background: #c4864a; }
+.cat-snack     { background: #7ab87a; }
+.cat-other     { background: #7a6e60; }
+
+/* ── DASHBOARD ── */
+.dash-grid {
+  display: grid; grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 700px) {
+  .dash-grid { grid-template-columns: 1fr 1fr; }
+}
+.dash-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+  padding: 16px;
+}
+.dash-card.full { grid-column: 1 / -1; }
+.dash-card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px; font-weight: 700; font-style: italic;
+  color: var(--text2); margin-bottom: 12px; text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+canvas { display: block; width: 100%; }
+
+.stat-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+}
+.stat-box {
+  background: var(--surf2); border: 1px solid var(--border); border-radius: 3px;
+  padding: 10px 12px;
+}
+.stat-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.stat-val {
+  font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700;
+  color: var(--text); margin-top: 2px;
+}
+.stat-val.accent { color: var(--accent); }
+.stat-val.green  { color: var(--green); }
+
+.top-foods-list { display: flex; flex-direction: column; gap: 6px; }
+.top-food-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px;
+}
+.top-food-rank {
+  font-family: 'Space Mono', monospace; font-size: 10px;
+  color: var(--muted2); width: 16px; flex-shrink: 0;
+}
+.top-food-name { flex: 1; color: var(--text); }
+.top-food-count { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); }
+.top-food-cal { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent); }
+
+/* Chart legend */
+.chart-legend {
+  display: flex; gap: 14px; margin-bottom: 8px; flex-wrap: wrap;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* Date range selector */
+.range-tabs {
+  display: flex; gap: 0; margin-bottom: 12px;
+  border: 1px solid var(--border); border-radius: 2px; overflow: hidden;
+  align-self: flex-start; width: fit-content;
+}
+.range-tab {
+  padding: 5px 12px; background: none; border: none; cursor: pointer;
+  font-family: 'DM Serif Text', serif; font-size: 10px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.07em;
+  border-right: 1px solid var(--border); transition: all 0.15s;
+}
+.range-tab:last-child { border-right: none; }
+.range-tab.active { background: var(--accent-d); color: var(--accent); }
+.range-tab:hover:not(.active) { color: var(--text2); }
+
+/* Export buttons */
+.export-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+/* ── TOAST ── */
+#toast-wrap {
+  position: fixed; bottom: 24px; right: 20px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+}
+.toast {
+  background: var(--surf2); border: 1px solid var(--bord2); border-radius: 3px;
+  padding: 9px 14px; font-size: 12px; color: var(--text2);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error   { border-left: 3px solid var(--red); }
+
+/* ── FOOTER ── */
+.app-footer {
+  max-width: 960px; margin: 32px auto 0; padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px;
+}
+.footer-text { font-size: 11px; color: var(--muted2); font-style: italic; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 500px) {
+  .log-macros { gap: 8px; font-size: 11px; }
+  .summary-val { font-size: 22px; }
+  .day-summary { grid-template-columns: 1fr 1fr; }
+  .form-row-3 { grid-template-columns: 1fr 1fr; }
+  .form-row-3 .span2 { grid-column: 1 / -1; }
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div>
+        <div class="app-title">Calorie <span>Tracker</span></div>
+      </div>
+    </div>
+    <div class="date-nav" id="date-nav-area">
+      <button class="btn-nav" id="prev-day" title="Previous day">&#8249;</button>
+      <div class="date-display" id="date-display" title="Click to pick date">—</div>
+      <button class="btn-nav" id="next-day" title="Next day">&#8250;</button>
+      <input type="date" id="date-picker" tabindex="-1" aria-hidden="true">
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" id="add-food-btn">+ Add Food</button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <button class="tab-btn active" data-tab="log">Log</button>
+  <button class="tab-btn" data-tab="presets">Presets</button>
+  <button class="tab-btn" data-tab="dashboard">Dashboard</button>
+</nav>
+
+<main class="main">
+
+  <!-- ── LOG TAB ── -->
+  <div class="tab-panel active" id="tab-log">
+    <div class="day-summary">
+      <div class="summary-card">
+        <div class="summary-label">Calories</div>
+        <div class="summary-val accent" id="sum-cal">0</div>
+        <div class="summary-unit">kcal today</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Protein</div>
+        <div class="summary-val" id="sum-prot">0</div>
+        <div class="summary-unit">g today</div>
+      </div>
+    </div>
+
+    <div class="section-hdr">
+      <span class="section-title">Meals</span>
+    </div>
+
+    <div class="log-list" id="log-list">
+      <div class="empty-state" id="log-empty">No entries yet — add your first meal.</div>
+    </div>
+
+    <div class="totals-bar" id="totals-bar" style="display:none">
+      <div class="total-item">
+        <span class="total-lbl">Total Calories</span>
+        <span class="total-num cal" id="total-cal">0</span>
+      </div>
+      <div class="total-item">
+        <span class="total-lbl">Total Protein</span>
+        <span class="total-num prot" id="total-prot">0 g</span>
+      </div>
+      <div class="total-item" style="margin-left:auto">
+        <span class="total-lbl">Entries</span>
+        <span class="total-num" id="total-count" style="color:var(--muted)">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PRESETS TAB ── -->
+  <div class="tab-panel" id="tab-presets">
+    <div class="section-hdr">
+      <span class="section-title">Saved Presets</span>
+      <button class="btn btn-ghost btn-sm" id="new-preset-btn">+ New Preset</button>
+    </div>
+    <div class="preset-grid" id="preset-grid">
+      <div class="empty-state" id="presets-empty" style="grid-column:1/-1">
+        No presets yet — create one to quickly log frequent meals.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DASHBOARD TAB ── -->
+  <div class="tab-panel" id="tab-dashboard">
+    <div class="dash-grid">
+
+      <div class="dash-card full">
+        <div class="dash-card-title">Weekly Overview</div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Calories</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Protein (g)</div>
+        </div>
+        <canvas id="chart-weekly" height="160"></canvas>
+      </div>
+
+      <div class="dash-card full">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+          <div class="dash-card-title" style="margin-bottom:0">Monthly Overview</div>
+          <div class="range-tabs">
+            <button class="range-tab active" data-range="30">30 Days</button>
+            <button class="range-tab" data-range="60">60 Days</button>
+            <button class="range-tab" data-range="90">90 Days</button>
+          </div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Calories</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Protein (g)</div>
+        </div>
+        <canvas id="chart-monthly" height="140"></canvas>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-title">Averages</div>
+        <div class="stat-grid">
+          <div class="stat-box">
+            <div class="stat-lbl">Avg Cal / Day</div>
+            <div class="stat-val accent" id="avg-cal">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-lbl">Avg Protein / Day</div>
+            <div class="stat-val green" id="avg-prot">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-lbl">Peak Calories</div>
+            <div class="stat-val" id="peak-cal">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-lbl">Days Logged</div>
+            <div class="stat-val" id="days-logged">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-title">Top Foods (by frequency)</div>
+        <div class="top-foods-list" id="top-foods-list">
+          <div class="empty-state" style="padding:20px 0">No data yet.</div>
+        </div>
+      </div>
+
+      <div class="dash-card full">
+        <div class="dash-card-title">Export Data</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">
+          Download all log entries and presets for backup or portability.
+        </div>
+        <div class="export-row">
+          <button class="btn btn-ghost btn-sm" id="export-json-btn">Export JSON</button>
+          <button class="btn btn-ghost btn-sm" id="export-csv-btn">Export CSV</button>
+          <button class="btn btn-ghost btn-sm" id="import-btn">Import JSON</button>
+          <input type="file" id="import-file" accept=".json" style="display:none">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<footer class="app-footer">
+  <span class="footer-text" id="footer-ver">v—</span>
+</footer>
+
+<!-- ── ADD / EDIT FOOD MODAL ── -->
+<div class="modal-overlay" id="food-modal" role="dialog" aria-modal="true" aria-labelledby="food-modal-title">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="food-modal-title">Add Food</span>
+      <button class="modal-close" id="food-modal-close" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- Mode tabs -->
+      <div class="mode-tabs" id="mode-tabs">
+        <button class="mode-tab active" data-mode="preset">Quick Preset</button>
+        <button class="mode-tab" data-mode="manual">Manual Entry</button>
+      </div>
+
+      <!-- Quick Preset mode -->
+      <div id="mode-preset">
+        <div id="quick-list-wrap">
+          <div class="quick-list" id="quick-list"></div>
+          <div id="quick-empty" style="display:none" class="empty-state" style="padding:20px 0">
+            No presets yet — create some in the Presets tab.
+          </div>
+        </div>
+        <div class="qty-row" id="quick-qty-row" style="display:none">
+          <span class="qty-lbl">Servings:</span>
+          <input type="number" class="qty-input" id="quick-qty" value="1" min="0.1" step="0.1">
+          <span class="qty-preview" id="quick-qty-preview"></span>
+          <button class="btn btn-primary btn-sm" id="quick-add-confirm">Log</button>
+        </div>
+      </div>
+
+      <!-- Manual Entry mode -->
+      <div id="mode-manual" style="display:none">
+        <div class="form-group">
+          <label class="form-label" for="m-name">Food Name</label>
+          <input type="text" id="m-name" class="form-input" placeholder="e.g. Chicken Breast">
+        </div>
+        <div class="form-row-3">
+          <div class="form-group span2">
+            <label class="form-label" for="m-amount">Amount</label>
+            <input type="number" id="m-amount" class="form-input" placeholder="150" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="m-unit">Unit</label>
+            <select id="m-unit" class="form-select">
+              <option>g</option>
+              <option>ml</option>
+              <option>oz</option>
+              <option>cup</option>
+              <option>piece</option>
+              <option>tbsp</option>
+              <option>tsp</option>
+              <option>serving</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="m-cal">Calories (kcal)</label>
+            <input type="number" id="m-cal" class="form-input" placeholder="165" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="m-prot">Protein (g)</label>
+            <input type="number" id="m-prot" class="form-input" placeholder="31" min="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="m-cat">Category</label>
+            <select id="m-cat" class="form-select">
+              <option value="breakfast">Breakfast</option>
+              <option value="lunch">Lunch</option>
+              <option value="dinner">Dinner</option>
+              <option value="snack" selected>Snack</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group" style="display:flex;flex-direction:column;justify-content:flex-end">
+            <label class="form-label">&nbsp;</label>
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:12px;color:var(--text2)">
+              <input type="checkbox" id="m-save-preset" style="accent-color:var(--accent)">
+              Save as preset
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" id="manual-footer">
+      <button class="btn btn-ghost btn-sm" id="food-modal-cancel">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="food-modal-submit">Add to Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PRESET CREATE / EDIT MODAL ── -->
+<div class="modal-overlay" id="preset-modal" role="dialog" aria-modal="true" aria-labelledby="preset-modal-title">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="preset-modal-title">New Preset</span>
+      <button class="modal-close" id="preset-modal-close" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="p-id">
+      <div class="form-group">
+        <label class="form-label" for="p-name">Preset Name</label>
+        <input type="text" id="p-name" class="form-input" placeholder="e.g. Chicken Breast 150g">
+      </div>
+      <div class="form-row-3">
+        <div class="form-group span2">
+          <label class="form-label" for="p-serving-size">Serving Size</label>
+          <input type="number" id="p-serving-size" class="form-input" placeholder="150" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="p-serving-unit">Unit</label>
+          <select id="p-serving-unit" class="form-select">
+            <option>g</option>
+            <option>ml</option>
+            <option>oz</option>
+            <option>cup</option>
+            <option>piece</option>
+            <option>tbsp</option>
+            <option>tsp</option>
+            <option>serving</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="p-cal">Calories per serving</label>
+          <input type="number" id="p-cal" class="form-input" placeholder="165" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="p-prot">Protein per serving (g)</label>
+          <input type="number" id="p-prot" class="form-input" placeholder="31" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="p-cat">Category</label>
+        <select id="p-cat" class="form-select">
+          <option value="breakfast">Breakfast</option>
+          <option value="lunch">Lunch</option>
+          <option value="dinner">Dinner</option>
+          <option value="snack" selected>Snack</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" id="preset-modal-cancel">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="preset-modal-save">Save Preset</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast-wrap"></div>
+
+<script>
+'use strict';
+
+// ── Storage helpers ──────────────────────────────────────────────────────────
+const LS = {
+  get(k, fallback) {
+    try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
+    catch { return fallback; }
+  },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
+const PRESETS_KEY = 'calorie_presets';
+const LOG_KEY     = 'calorie_log';
+
+function getPresets()       { return LS.get(PRESETS_KEY, []); }
+function savePresets(arr)   { LS.set(PRESETS_KEY, arr); }
+function getLog()           { return LS.get(LOG_KEY, {}); }
+function saveLog(obj)       { LS.set(LOG_KEY, obj); }
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+// ── Date helpers ─────────────────────────────────────────────────────────────
+function p2(n) { return n < 10 ? '0' + n : '' + n; }
+function dateStr(d) {
+  return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+}
+function parseDate(s) {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+function formatDate(s) {
+  const d = parseDate(s);
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const today = dateStr(new Date());
+  if (s === today) return 'Today';
+  const yesterday = dateStr(new Date(Date.now() - 864e5));
+  if (s === yesterday) return 'Yesterday';
+  return days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
+}
+
+// ── Category colors ──────────────────────────────────────────────────────────
+const CAT_COLORS = {
+  breakfast: '#d4924a',
+  lunch:     '#5ab4cc',
+  dinner:    '#c4864a',
+  snack:     '#7ab87a',
+  other:     '#7a6e60'
+};
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+function toast(msg, type = '') {
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  wrap.appendChild(el);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => el.classList.add('show'));
+  });
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 220);
+  }, 2400);
+}
+
+// ── State ────────────────────────────────────────────────────────────────────
+let currentDate = dateStr(new Date());
+let monthlyRange = 30;
+let selectedPreset = null;
+
+// ── Date navigation ──────────────────────────────────────────────────────────
+function setDate(s) {
+  currentDate = s;
+  document.getElementById('date-display').textContent = formatDate(s);
+  document.getElementById('date-picker').value = s;
+  renderLog();
+}
+
+document.getElementById('prev-day').addEventListener('click', () => {
+  const d = parseDate(currentDate);
+  d.setDate(d.getDate() - 1);
+  setDate(dateStr(d));
+});
+document.getElementById('next-day').addEventListener('click', () => {
+  const d = parseDate(currentDate);
+  d.setDate(d.getDate() + 1);
+  setDate(dateStr(d));
+});
+document.getElementById('date-display').addEventListener('click', () => {
+  document.getElementById('date-picker').showPicker?.() ||
+    document.getElementById('date-picker').click();
+});
+document.getElementById('date-picker').addEventListener('change', e => {
+  if (e.target.value) setDate(e.target.value);
+});
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'dashboard') renderDashboard();
+  });
+});
+
+// ── Log rendering ────────────────────────────────────────────────────────────
+function getDateLog(date) {
+  const log = getLog();
+  return log[date] || [];
+}
+
+function renderLog() {
+  const entries = getDateLog(currentDate);
+  const list = document.getElementById('log-list');
+  const empty = document.getElementById('log-empty');
+  const totalsBar = document.getElementById('totals-bar');
+
+  list.innerHTML = '';
+
+  if (entries.length === 0) {
+    list.appendChild(empty);
+    empty.style.display = '';
+    totalsBar.style.display = 'none';
+    document.getElementById('sum-cal').textContent = '0';
+    document.getElementById('sum-prot').textContent = '0';
+    return;
+  }
+
+  empty.style.display = 'none';
+  totalsBar.style.display = 'flex';
+
+  let totalCal = 0, totalProt = 0;
+
+  entries.forEach(entry => {
+    totalCal  += entry.calories || 0;
+    totalProt += entry.protein  || 0;
+
+    const item = document.createElement('div');
+    item.className = 'log-item';
+    item.dataset.id = entry.id;
+
+    const cal  = Math.round(entry.calories || 0);
+    const prot = Math.round((entry.protein || 0) * 10) / 10;
+    const qty  = entry.quantity !== 1
+      ? `${entry.quantity}× ${entry.servingSize}${entry.servingUnit}`
+      : `${entry.servingSize}${entry.servingUnit}`;
+
+    item.innerHTML = `
+      <div class="log-cat-dot cat-${entry.category || 'other'}"
+           style="background:${CAT_COLORS[entry.category] || CAT_COLORS.other}"></div>
+      <div class="log-info">
+        <div class="log-name">${esc(entry.name)}</div>
+        <div class="log-qty">${esc(qty)} &middot; ${capFirst(entry.category || 'other')}</div>
+      </div>
+      <div class="log-macros">
+        <span class="log-cal">${cal} kcal</span>
+        <span class="log-prot">${prot}g</span>
+      </div>
+      <div class="log-actions">
+        <button class="icon-btn del" data-del="${entry.id}" title="Delete">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+            <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>`;
+    list.appendChild(item);
+  });
+
+  document.getElementById('sum-cal').textContent  = Math.round(totalCal);
+  document.getElementById('sum-prot').textContent = Math.round(totalProt * 10) / 10;
+  document.getElementById('total-cal').textContent   = Math.round(totalCal);
+  document.getElementById('total-prot').textContent  = (Math.round(totalProt * 10) / 10) + ' g';
+  document.getElementById('total-count').textContent = entries.length;
+
+  list.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', () => deleteLogEntry(btn.dataset.del));
+  });
+}
+
+function deleteLogEntry(id) {
+  const log = getLog();
+  if (!log[currentDate]) return;
+  log[currentDate] = log[currentDate].filter(e => e.id !== id);
+  if (log[currentDate].length === 0) delete log[currentDate];
+  saveLog(log);
+  renderLog();
+  toast('Entry removed');
+}
+
+// ── Add food to log ──────────────────────────────────────────────────────────
+function addToLog(entry) {
+  const log = getLog();
+  if (!log[currentDate]) log[currentDate] = [];
+  log[currentDate].push(entry);
+  saveLog(log);
+  renderLog();
+}
+
+// ── Presets rendering ────────────────────────────────────────────────────────
+function renderPresets() {
+  const presets = getPresets();
+  const grid    = document.getElementById('preset-grid');
+  const empty   = document.getElementById('presets-empty');
+  grid.innerHTML = '';
+
+  if (presets.length === 0) {
+    grid.appendChild(empty);
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const sorted = [...presets].sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0));
+
+  sorted.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'preset-card';
+    card.innerHTML = `
+      <div class="preset-name">${esc(p.name)}</div>
+      <div class="preset-meta">${esc(p.servingSize + p.servingUnit)} &middot; ${capFirst(p.category)}</div>
+      <div class="preset-macros">
+        <span class="preset-cal">${Math.round(p.calories)} kcal</span>
+        <span class="preset-prot">${Math.round(p.protein * 10) / 10}g protein</span>
+      </div>
+      <div class="preset-actions">
+        <button class="btn btn-primary btn-xs" data-quick-log="${p.id}" title="Log 1 serving">Log</button>
+        <button class="btn btn-ghost btn-xs"  data-edit="${p.id}" title="Edit">Edit</button>
+        <button class="btn btn-danger btn-xs" data-del-preset="${p.id}" title="Delete">Del</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll('[data-quick-log]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = getPresets().find(x => x.id === btn.dataset.quickLog);
+      if (!p) return;
+      addToLog({
+        id: uid(), date: currentDate, name: p.name,
+        quantity: 1, servingSize: p.servingSize, servingUnit: p.servingUnit,
+        calories: p.calories, protein: p.protein,
+        category: p.category, timestamp: new Date().toISOString(), source: 'preset'
+      });
+      updatePresetUsage(p.id);
+      toast(p.name + ' added to log', 'success');
+    });
+  });
+
+  grid.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.addEventListener('click', () => openPresetModal(btn.dataset.edit));
+  });
+
+  grid.querySelectorAll('[data-del-preset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const presets = getPresets().filter(x => x.id !== btn.dataset.delPreset);
+      savePresets(presets);
+      renderPresets();
+      toast('Preset deleted');
+    });
+  });
+}
+
+function updatePresetUsage(id) {
+  const presets = getPresets();
+  const p = presets.find(x => x.id === id);
+  if (!p) return;
+  p.usageCount = (p.usageCount || 0) + 1;
+  p.lastUsed = new Date().toISOString();
+  savePresets(presets);
+}
+
+// ── Food modal ───────────────────────────────────────────────────────────────
+let foodModalMode = 'preset';
+
+function openFoodModal() {
+  document.getElementById('food-modal-title').textContent = 'Add Food';
+  resetFoodModal();
+  document.getElementById('food-modal').classList.add('open');
+  renderQuickList();
+}
+
+function closeFoodModal() {
+  document.getElementById('food-modal').classList.remove('open');
+  selectedPreset = null;
+}
+
+function resetFoodModal() {
+  setFoodMode('preset');
+  document.getElementById('m-name').value    = '';
+  document.getElementById('m-amount').value  = '';
+  document.getElementById('m-cal').value     = '';
+  document.getElementById('m-prot').value    = '';
+  document.getElementById('m-cat').value     = 'snack';
+  document.getElementById('m-save-preset').checked = false;
+  document.getElementById('quick-qty').value = '1';
+  document.getElementById('quick-qty-row').style.display = 'none';
+  selectedPreset = null;
+}
+
+function setFoodMode(mode) {
+  foodModalMode = mode;
+  document.querySelectorAll('.mode-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.mode === mode);
+  });
+  document.getElementById('mode-preset').style.display = mode === 'preset' ? '' : 'none';
+  document.getElementById('mode-manual').style.display  = mode === 'manual' ? '' : 'none';
+  document.getElementById('manual-footer').style.display = mode === 'manual' ? '' : 'none';
+}
+
+document.querySelectorAll('.mode-tab').forEach(t => {
+  t.addEventListener('click', () => setFoodMode(t.dataset.mode));
+});
+
+document.getElementById('add-food-btn').addEventListener('click', openFoodModal);
+document.getElementById('food-modal-close').addEventListener('click', closeFoodModal);
+document.getElementById('food-modal-cancel').addEventListener('click', closeFoodModal);
+document.getElementById('food-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeFoodModal();
+});
+
+document.getElementById('food-modal-submit').addEventListener('click', () => {
+  const name   = document.getElementById('m-name').value.trim();
+  const amount = parseFloat(document.getElementById('m-amount').value) || 0;
+  const unit   = document.getElementById('m-unit').value;
+  const cal    = parseFloat(document.getElementById('m-cal').value)  || 0;
+  const prot   = parseFloat(document.getElementById('m-prot').value) || 0;
+  const cat    = document.getElementById('m-cat').value;
+  const save   = document.getElementById('m-save-preset').checked;
+
+  if (!name) { toast('Please enter a food name', 'error'); return; }
+
+  const entry = {
+    id: uid(), date: currentDate, name,
+    quantity: 1, servingSize: amount, servingUnit: unit,
+    calories: cal, protein: prot, category: cat,
+    timestamp: new Date().toISOString(), source: 'manual'
+  };
+  addToLog(entry);
+
+  if (save) {
+    const presets = getPresets();
+    presets.push({
+      id: uid(), name, servingSize: amount, servingUnit: unit,
+      calories: cal, protein: prot, category: cat,
+      createdAt: new Date().toISOString(), usageCount: 1,
+      lastUsed: new Date().toISOString()
+    });
+    savePresets(presets);
+    renderPresets();
+    toast(name + ' added and saved as preset', 'success');
+  } else {
+    toast(name + ' added to log', 'success');
+  }
+
+  closeFoodModal();
+});
+
+// Quick preset list inside food modal
+function renderQuickList() {
+  const presets = getPresets();
+  const list  = document.getElementById('quick-list');
+  const empty = document.getElementById('quick-empty');
+  list.innerHTML = '';
+
+  if (presets.length === 0) {
+    empty.style.display = '';
+    document.getElementById('quick-list-wrap').style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  document.getElementById('quick-list-wrap').style.display = '';
+
+  const sorted = [...presets].sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0));
+  sorted.forEach(p => {
+    const item = document.createElement('div');
+    item.className = 'quick-item';
+    item.dataset.pid = p.id;
+    item.innerHTML = `
+      <div class="quick-cat-dot" style="background:${CAT_COLORS[p.category] || CAT_COLORS.other}"></div>
+      <div class="quick-info">
+        <div class="quick-name">${esc(p.name)}</div>
+        <div class="quick-sub">${esc(p.servingSize + p.servingUnit)} &middot; ${capFirst(p.category)}</div>
+      </div>
+      <div class="quick-macros">
+        <span style="color:var(--accent)">${Math.round(p.calories)} kcal</span>
+        <span style="color:var(--green)">${Math.round(p.protein * 10) / 10}g</span>
+      </div>`;
+    item.addEventListener('click', () => selectQuickPreset(p));
+    list.appendChild(item);
+  });
+}
+
+function selectQuickPreset(p) {
+  selectedPreset = p;
+  document.querySelectorAll('.quick-item').forEach(el => {
+    el.style.borderColor = el.dataset.pid === p.id ? 'var(--accent)' : '';
+    el.style.background  = el.dataset.pid === p.id ? 'var(--accent-d)' : '';
+  });
+  const qtyRow = document.getElementById('quick-qty-row');
+  qtyRow.style.display = 'flex';
+  document.getElementById('quick-qty').value = '1';
+  updateQtyPreview();
+}
+
+function updateQtyPreview() {
+  if (!selectedPreset) return;
+  const qty = parseFloat(document.getElementById('quick-qty').value) || 1;
+  const cal  = Math.round(selectedPreset.calories * qty);
+  const prot = Math.round(selectedPreset.protein  * qty * 10) / 10;
+  document.getElementById('quick-qty-preview').textContent =
+    `= ${cal} kcal, ${prot}g protein`;
+}
+
+document.getElementById('quick-qty').addEventListener('input', updateQtyPreview);
+
+document.getElementById('quick-add-confirm').addEventListener('click', () => {
+  if (!selectedPreset) return;
+  const qty = parseFloat(document.getElementById('quick-qty').value) || 1;
+  const p   = selectedPreset;
+  addToLog({
+    id: uid(), date: currentDate, name: p.name,
+    quantity: qty,
+    servingSize: p.servingSize, servingUnit: p.servingUnit,
+    calories: p.calories * qty, protein: p.protein * qty,
+    category: p.category, timestamp: new Date().toISOString(), source: 'preset'
+  });
+  updatePresetUsage(p.id);
+  toast(p.name + ' added to log', 'success');
+  closeFoodModal();
+});
+
+// ── Preset modal ─────────────────────────────────────────────────────────────
+function openPresetModal(editId) {
+  const isEdit = !!editId;
+  document.getElementById('preset-modal-title').textContent = isEdit ? 'Edit Preset' : 'New Preset';
+  document.getElementById('p-id').value = editId || '';
+
+  if (isEdit) {
+    const p = getPresets().find(x => x.id === editId);
+    if (!p) return;
+    document.getElementById('p-name').value         = p.name;
+    document.getElementById('p-serving-size').value = p.servingSize;
+    document.getElementById('p-serving-unit').value = p.servingUnit;
+    document.getElementById('p-cal').value           = p.calories;
+    document.getElementById('p-prot').value          = p.protein;
+    document.getElementById('p-cat').value           = p.category;
+  } else {
+    document.getElementById('p-name').value         = '';
+    document.getElementById('p-serving-size').value = '';
+    document.getElementById('p-serving-unit').value = 'g';
+    document.getElementById('p-cal').value           = '';
+    document.getElementById('p-prot').value          = '';
+    document.getElementById('p-cat').value           = 'snack';
+  }
+  document.getElementById('preset-modal').classList.add('open');
+}
+
+function closePresetModal() {
+  document.getElementById('preset-modal').classList.remove('open');
+}
+
+document.getElementById('new-preset-btn').addEventListener('click', () => openPresetModal(null));
+document.getElementById('preset-modal-close').addEventListener('click', closePresetModal);
+document.getElementById('preset-modal-cancel').addEventListener('click', closePresetModal);
+document.getElementById('preset-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closePresetModal();
+});
+
+document.getElementById('preset-modal-save').addEventListener('click', () => {
+  const name    = document.getElementById('p-name').value.trim();
+  const size    = parseFloat(document.getElementById('p-serving-size').value) || 0;
+  const unit    = document.getElementById('p-serving-unit').value;
+  const cal     = parseFloat(document.getElementById('p-cal').value)  || 0;
+  const prot    = parseFloat(document.getElementById('p-prot').value) || 0;
+  const cat     = document.getElementById('p-cat').value;
+  const editId  = document.getElementById('p-id').value;
+
+  if (!name) { toast('Please enter a preset name', 'error'); return; }
+
+  const presets = getPresets();
+  if (editId) {
+    const idx = presets.findIndex(x => x.id === editId);
+    if (idx >= 0) {
+      presets[idx] = { ...presets[idx], name, servingSize: size, servingUnit: unit,
+        calories: cal, protein: prot, category: cat };
+    }
+    toast('Preset updated', 'success');
+  } else {
+    presets.push({ id: uid(), name, servingSize: size, servingUnit: unit,
+      calories: cal, protein: prot, category: cat,
+      createdAt: new Date().toISOString(), usageCount: 0, lastUsed: null });
+    toast('Preset saved', 'success');
+  }
+  savePresets(presets);
+  renderPresets();
+  closePresetModal();
+});
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+document.querySelectorAll('.range-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.range-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    monthlyRange = parseInt(btn.dataset.range);
+    drawMonthlyChart();
+  });
+});
+
+function renderDashboard() {
+  drawWeeklyChart();
+  drawMonthlyChart();
+  renderStats();
+  renderTopFoods();
+}
+
+function getDailyTotals(days) {
+  const log = getLog();
+  const today = new Date();
+  const result = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = dateStr(d);
+    const entries = log[key] || [];
+    const cal  = entries.reduce((s, e) => s + (e.calories || 0), 0);
+    const prot = entries.reduce((s, e) => s + (e.protein  || 0), 0);
+    result.push({ date: key, cal, prot, hasData: entries.length > 0 });
+  }
+  return result;
+}
+
+function drawChart(canvasId, data, opts = {}) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx    = canvas.getContext('2d');
+  const dpr    = window.devicePixelRatio || 1;
+  const W      = canvas.parentElement.clientWidth;
+  const H      = parseInt(canvas.getAttribute('height')) || 160;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+
+  const pad   = { top: 12, right: 8, bottom: 28, left: 44 };
+  const cW    = W - pad.left - pad.right;
+  const cH    = H - pad.top  - pad.bottom;
+  const n     = data.length;
+  if (n === 0) return;
+
+  const maxCal  = Math.max(...data.map(d => d.cal),  1);
+  const maxProt = Math.max(...data.map(d => d.prot), 1);
+  const maxVal  = Math.max(maxCal, maxProt * 10);
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(58,48,37,0.8)';
+  ctx.lineWidth   = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + cH - (i / 4) * cH;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(pad.left + cW, y);
+    ctx.stroke();
+    const val = Math.round((i / 4) * maxCal);
+    ctx.fillStyle = '#5a5040';
+    ctx.font = '10px DM Serif Text, Georgia, serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(val, pad.left - 4, y + 3);
+  }
+
+  const barGroupW = cW / n;
+  const barW      = Math.max(4, Math.min(barGroupW * 0.32, 18));
+  const gap       = Math.max(2, barGroupW * 0.06);
+
+  data.forEach((d, i) => {
+    const cx = pad.left + i * barGroupW + barGroupW / 2;
+
+    // Cal bar
+    const calH = d.cal > 0 ? Math.max(2, (d.cal / maxCal) * cH) : 0;
+    const cx1  = cx - barW - gap / 2;
+    ctx.fillStyle = opts.calColor || '#c4864a';
+    ctx.globalAlpha = d.hasData ? 0.85 : 0.2;
+    ctx.beginPath();
+    ctx.roundRect(cx1, pad.top + cH - calH, barW, calH, [2, 2, 0, 0]);
+    ctx.fill();
+
+    // Prot bar (scaled for visual comparison: protein * 10)
+    const protScaled = d.prot * 10;
+    const protH = protScaled > 0 ? Math.max(2, (protScaled / maxCal) * cH) : 0;
+    const cx2   = cx + gap / 2;
+    ctx.fillStyle = opts.protColor || '#7ab87a';
+    ctx.globalAlpha = d.hasData ? 0.8 : 0.2;
+    ctx.beginPath();
+    ctx.roundRect(cx2, pad.top + cH - protH, barW, protH, [2, 2, 0, 0]);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // X labels
+    const label = opts.xLabel ? opts.xLabel(d, i) : d.date.slice(5);
+    ctx.fillStyle = '#5a5040';
+    ctx.font      = '9px DM Serif Text, Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, cx, H - pad.bottom + 12);
+  });
+}
+
+function drawWeeklyChart() {
+  const data = getDailyTotals(7);
+  const days  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  drawChart('chart-weekly', data, {
+    xLabel: (d) => {
+      const day = parseDate(d.date).getDay();
+      return days[day];
+    }
+  });
+}
+
+function drawMonthlyChart() {
+  const data = getDailyTotals(monthlyRange);
+  drawChart('chart-monthly', data, {
+    xLabel: (d, i) => {
+      const total = data.length;
+      if (total <= 31) return d.date.slice(8); // day number
+      if (i % 7 === 0) return d.date.slice(5);
+      return '';
+    }
+  });
+}
+
+function renderStats() {
+  const log = getLog();
+  const days = Object.keys(log);
+  const daysLogged = days.length;
+  document.getElementById('days-logged').textContent = daysLogged;
+
+  if (daysLogged === 0) {
+    document.getElementById('avg-cal').textContent  = '—';
+    document.getElementById('avg-prot').textContent = '—';
+    document.getElementById('peak-cal').textContent = '—';
+    return;
+  }
+
+  let totalCal = 0, totalProt = 0, peakCal = 0;
+  days.forEach(d => {
+    const entries = log[d];
+    const cal  = entries.reduce((s, e) => s + (e.calories || 0), 0);
+    const prot = entries.reduce((s, e) => s + (e.protein  || 0), 0);
+    totalCal  += cal;
+    totalProt += prot;
+    if (cal > peakCal) peakCal = cal;
+  });
+
+  document.getElementById('avg-cal').textContent  = Math.round(totalCal  / daysLogged);
+  document.getElementById('avg-prot').textContent = Math.round(totalProt / daysLogged) + 'g';
+  document.getElementById('peak-cal').textContent = Math.round(peakCal);
+}
+
+function renderTopFoods() {
+  const log  = getLog();
+  const freq = {};
+  Object.values(log).forEach(entries => {
+    entries.forEach(e => {
+      const k = e.name.toLowerCase();
+      if (!freq[k]) freq[k] = { name: e.name, count: 0, totalCal: 0 };
+      freq[k].count++;
+      freq[k].totalCal += e.calories || 0;
+    });
+  });
+  const sorted = Object.values(freq).sort((a, b) => b.count - a.count).slice(0, 7);
+  const container = document.getElementById('top-foods-list');
+  if (sorted.length === 0) {
+    container.innerHTML = '<div class="empty-state" style="padding:20px 0">No data yet.</div>';
+    return;
+  }
+  container.innerHTML = sorted.map((f, i) => `
+    <div class="top-food-item">
+      <span class="top-food-rank">#${i + 1}</span>
+      <span class="top-food-name">${esc(f.name)}</span>
+      <span class="top-food-count">${f.count}×</span>
+      <span class="top-food-cal">${Math.round(f.totalCal)} kcal</span>
+    </div>`).join('');
+}
+
+// ── Export / Import ──────────────────────────────────────────────────────────
+document.getElementById('export-json-btn').addEventListener('click', () => {
+  const data = { presets: getPresets(), log: getLog(), exportedAt: new Date().toISOString() };
+  downloadFile('calorie-tracker.json', JSON.stringify(data, null, 2), 'application/json');
+  toast('Exported JSON', 'success');
+});
+
+document.getElementById('export-csv-btn').addEventListener('click', () => {
+  const log = getLog();
+  const rows = [['Date','Name','Quantity','ServingSize','ServingUnit','Calories','Protein','Category','Timestamp']];
+  Object.values(log).flat().sort((a, b) => a.timestamp < b.timestamp ? -1 : 1)
+    .forEach(e => {
+      rows.push([e.date, e.name, e.quantity, e.servingSize, e.servingUnit,
+        e.calories, e.protein, e.category, e.timestamp]);
+    });
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  downloadFile('calorie-log.csv', csv, 'text/csv');
+  toast('Exported CSV', 'success');
+});
+
+document.getElementById('import-btn').addEventListener('click', () => {
+  document.getElementById('import-file').click();
+});
+
+document.getElementById('import-file').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.presets) savePresets(data.presets);
+      if (data.log)     saveLog(data.log);
+      renderLog();
+      renderPresets();
+      toast('Import successful', 'success');
+    } catch {
+      toast('Invalid JSON file', 'error');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+function downloadFile(name, content, type) {
+  const a   = document.createElement('a');
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  a.href     = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Utilities ────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function capFirst(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
+
+// ── Footer version ───────────────────────────────────────────────────────────
+fetch('../version.json').then(r => r.json()).then(v => {
+  document.getElementById('footer-ver').textContent = 'v' + v.version;
+}).catch(() => {});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+setDate(dateStr(new Date()));
+renderPresets();
+</script>
+</body>
+</html>
