@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Today</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&display=swap">
+  <script src="../nav.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #1c1814;
+      --surface:      #252018;
+      --surface2:     #2e271d;
+      --border:       #3a3025;
+      --border2:      #4a3e2e;
+      --accent:       #c4864a;
+      --accent-dim:   rgba(196,134,74,0.07);
+      --accent-bdr:   rgba(196,134,74,0.22);
+      --text:         #e8dfd0;
+      --muted:        #9a8a76;
+      --muted2:       #7a6e60;
+      --muted3:       #5a4e40;
+      --done:         #6a9a6a;
+      --done-bg:      rgba(106,154,106,0.07);
+      --done-border:  rgba(106,154,106,0.18);
+      --skipped-c:    #7a6a5a;
+      --skipped-bg:   rgba(122,106,90,0.07);
+      --skipped-bdr:  rgba(122,106,90,0.18);
+    }
+
+    html { overflow-x: hidden; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.022) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.012) 1px, transparent 1px);
+      background-size: 4px 4px, 6px 6px;
+      background-position: 0 0, 2px 2px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 2rem 1.5rem 1.5rem;
+      border-bottom: 2px solid var(--text);
+      position: relative; z-index: 1;
+    }
+    .hero-inner { max-width: 620px; margin: 0 auto; }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700; font-style: italic;
+      letter-spacing: -0.02em; line-height: 1;
+      color: var(--text);
+    }
+    .hero-date {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 0.4rem;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      max-width: 620px;
+      margin: 1.75rem auto 4rem;
+      padding: 0 1.25rem;
+      position: relative; z-index: 1;
+    }
+
+    /* ── GROUPS ── */
+    .todo-group { margin-bottom: 1.75rem; }
+
+    .group-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted3);
+      font-style: italic;
+      margin-bottom: 0.45rem;
+      padding-left: 0.1rem;
+    }
+
+    /* ── ITEM ── */
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.65rem 0.8rem;
+      border-radius: 2px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+      transition: border-color 0.15s, background 0.15s;
+      min-height: 52px;
+    }
+    .todo-item:hover { border-color: var(--border2); background: var(--surface2); }
+
+    .todo-item.is-done   { border-color: var(--done-border);    background: var(--done-bg);    }
+    .todo-item.is-skipped{ border-color: var(--skipped-bdr);   background: var(--skipped-bg); }
+
+    .todo-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+      width: 1.4rem;
+      text-align: center;
+      opacity: 0.65;
+      line-height: 1;
+    }
+
+    .todo-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.08rem;
+    }
+
+    .todo-label {
+      font-size: 0.87rem;
+      color: var(--text);
+      line-height: 1.35;
+    }
+    .todo-item.is-done .todo-label   { color: var(--muted); }
+    .todo-item.is-skipped .todo-label { color: var(--muted2); }
+
+    .todo-sub {
+      font-size: 0.7rem;
+      color: var(--muted2);
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.4;
+    }
+
+    .todo-badge {
+      flex-shrink: 0;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-style: italic;
+      padding: 0.15rem 0.45rem;
+      border-radius: 2px;
+    }
+    .badge-pending {
+      color: var(--muted2);
+      border: 1px solid var(--border);
+    }
+    .badge-done {
+      color: var(--done);
+      border: 1px solid var(--done-border);
+      background: var(--done-bg);
+    }
+    .badge-skipped {
+      color: var(--skipped-c);
+      border: 1px solid var(--skipped-bdr);
+      background: var(--skipped-bg);
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      padding: 3.5rem 1rem;
+      text-align: center;
+      color: var(--muted2);
+      font-style: italic;
+      font-size: 0.88rem;
+      line-height: 1.7;
+    }
+    .empty-state a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-bdr); }
+    .empty-state a:hover { border-bottom-color: var(--accent); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 1.5rem 2rem;
+      font-size: 0.75rem;
+      font-style: italic;
+      color: var(--muted3);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      position: relative; z-index: 1;
+    }
+    footer a { color: var(--muted2); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 600px) {
+      .hero { padding: 1.25rem 0.75rem 1rem; }
+      .main { padding: 0 0.75rem; margin-top: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <h1>Today</h1>
+      <p class="hero-date" id="hero-date"></p>
+    </div>
+  </header>
+
+  <main class="main" id="main">
+    <div class="empty-state">Loading…</div>
+  </main>
+
+  <footer>
+    <span id="page-version" style="opacity:0.6"></span>
+    <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
+    <span id="storage-size"></span>
+  </footer>
+
+  <script>
+  (function () {
+    function padZ(n) { return n < 10 ? '0' + n : '' + n; }
+    function todayStr() {
+      var d = new Date();
+      return d.getFullYear() + '-' + padZ(d.getMonth() + 1) + '-' + padZ(d.getDate());
+    }
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var iso = todayStr();
+
+    // Hero date
+    var DOW_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var MON_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('hero-date').textContent =
+      DOW_FULL[today.getDay()] + ', ' + MON_FULL[today.getMonth()] + ' ' + today.getDate() + ', ' + today.getFullYear();
+
+    // ── Load data ────────────────────────────────────────────────────────────
+    var entries = {}, goals = {}, marathon = {}, strength = {};
+    try { entries  = JSON.parse(localStorage.getItem('journal_entries') || '{}'); } catch (e) {}
+    try { goals    = JSON.parse(localStorage.getItem('journal_goals')   || '{}'); } catch (e) {}
+    try { marathon = JSON.parse(localStorage.getItem('c2hm_v1')         || '{}'); } catch (e) {}
+    try { strength = JSON.parse(localStorage.getItem('workout_plan_v3') || '{}'); } catch (e) {}
+
+    var dayEntry   = entries[iso] || {};
+    var hasMorning = !!dayEntry.morning;
+    var hasEvening = !!dayEntry.evening;
+    var activeGoals = Object.values(goals).filter(function (g) { return g && g.status === 'active'; });
+    var hasGoals   = activeGoals.length > 0;
+
+    // ── Marathon run check ───────────────────────────────────────────────────
+    // Rest days per week [0=Sun … 6=Sat], matching calendar's WORKOUT_STATUS logic
+    var MARATHON_REST = [
+      [0,1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],
+      [1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[0,1,5],[1,5],[0,1,5],[1,3,5,6]
+    ];
+    var marathonRun = null;
+    if (marathon.planStart) {
+      // Shift dates if needed (legacy UTC offset correction)
+      var mDays = marathon.days || {};
+      var mPlanStart = marathon.planStart;
+      if (!marathon.version && new Date().getTimezoneOffset() < 0) {
+        function shiftIso(iso2) {
+          var p = iso2.split('-').map(Number);
+          var nd = new Date(p[0], p[1] - 1, p[2] + 1);
+          return nd.getFullYear() + '-' + padZ(nd.getMonth() + 1) + '-' + padZ(nd.getDate());
+        }
+        var shifted = {};
+        for (var k in mDays) if (Object.prototype.hasOwnProperty.call(mDays, k)) shifted[shiftIso(k)] = mDays[k];
+        mDays = shifted;
+        mPlanStart = shiftIso(mPlanStart);
+      }
+
+      var planStart = new Date(mPlanStart + 'T00:00:00');
+      var week1Sun  = new Date(planStart.getTime() - planStart.getDay() * 86400000);
+      week1Sun.setHours(0, 0, 0, 0);
+      var diffDays  = Math.round((today.getTime() - week1Sun.getTime()) / 86400000);
+      var weekIdx   = Math.floor(diffDays / 7);
+      var dow       = today.getDay();
+
+      if (weekIdx >= 0 && weekIdx < 20 && !MARATHON_REST[weekIdx].includes(dow) && today.getTime() >= planStart.getTime()) {
+        var md = mDays[iso] || null;
+        var mStatus = 'pending';
+        if (md && (md.status === 'completed' || md.status === 'modified')) mStatus = 'done';
+        else if (md && md.status === 'skipped') mStatus = 'skipped';
+        var mSub = '';
+        if (md && md.km) mSub = md.km + ' km';
+        else if (md && md.time) mSub = md.time + ' min';
+        marathonRun = { status: mStatus, sub: mSub };
+      }
+    }
+
+    // ── Strength check ───────────────────────────────────────────────────────
+    var ST_TYPES = [
+      { name: 'Push Day', muscles: 'Chest · Shoulders · Triceps' },
+      { name: 'Pull Day', muscles: 'Back · Biceps · Grip'        },
+      { name: 'Legs Day', muscles: 'Glutes · Hamstrings · Hips'  },
+    ];
+    var strengthSession = null;
+    if (strength && (strength.entries !== undefined || strength.schedule !== undefined)) {
+      var sched = Array.isArray(strength.schedule) && strength.schedule.length === 3
+        ? strength.schedule : [1, 3, 5];
+      var sidx = sched.indexOf(today.getDay());
+      if (sidx !== -1) {
+        var se = (strength.entries || {})[iso] || null;
+        var sDone = se && se.status === 'done';
+        strengthSession = { type: ST_TYPES[sidx], done: sDone };
+      }
+    }
+
+    // ── Build item groups ────────────────────────────────────────────────────
+    var groups = [];
+
+    // Morning
+    if (hasGoals) {
+      var mSub2 = '';
+      if (hasMorning && dayEntry.morning && dayEntry.morning.focus) {
+        var f = dayEntry.morning.focus;
+        mSub2 = '“' + (f.length > 64 ? f.slice(0, 64) + '…' : f) + '”';
+      } else if (!hasMorning) {
+        mSub2 = 'Set intentions for the day';
+      }
+      groups.push({
+        label: 'Morning',
+        items: [{
+          icon: '☀',
+          label: 'Morning Journal',
+          sub: mSub2,
+          href: '../journal/',
+          status: hasMorning ? 'done' : 'pending',
+        }]
+      });
+    }
+
+    // Training
+    var trainingItems = [];
+    if (marathonRun) {
+      trainingItems.push({
+        icon: '🏃',
+        label: 'Marathon Run',
+        sub: marathonRun.sub || 'Scheduled run',
+        href: '../marathon-training/',
+        status: marathonRun.status,
+      });
+    }
+    if (strengthSession) {
+      trainingItems.push({
+        icon: '💪',
+        label: strengthSession.type.name,
+        sub: strengthSession.type.muscles,
+        href: '../workout/',
+        status: strengthSession.done ? 'done' : 'pending',
+      });
+    }
+    if (trainingItems.length) groups.push({ label: 'Training', items: trainingItems });
+
+    // Evening
+    if (hasGoals) {
+      var eSub = '';
+      if (hasEvening) eSub = 'Reflection complete';
+      else if (hasMorning && dayEntry.morning && dayEntry.morning.goalConnections && dayEntry.morning.goalConnections.length)
+        eSub = 'Review your progress on ' + dayEntry.morning.goalConnections.length + ' goal' + (dayEntry.morning.goalConnections.length !== 1 ? 's' : '');
+      else eSub = 'Reflect and log your day';
+      groups.push({
+        label: 'Evening',
+        items: [{
+          icon: '🌙',
+          label: 'Evening Reflection',
+          sub: eSub,
+          href: '../journal/',
+          status: hasEvening ? 'done' : 'pending',
+        }]
+      });
+    }
+
+    // ── Render ───────────────────────────────────────────────────────────────
+    var main = document.getElementById('main');
+
+    if (!groups.length) {
+      main.innerHTML =
+        '<div class="empty-state">' +
+        'No active goals or training plans set up yet.<br>' +
+        'Start in <a href="../journal/">Journal</a>, <a href="../marathon-training/">Marathon Training</a>, or <a href="../workout/">Workout</a>.' +
+        '</div>';
+      return;
+    }
+
+    var html = '';
+    groups.forEach(function (g) {
+      html += '<div class="todo-group">';
+      html += '<div class="group-label">' + esc(g.label) + '</div>';
+      g.items.forEach(function (item) {
+        var cls = 'todo-item' +
+          (item.status === 'done' ? ' is-done' : '') +
+          (item.status === 'skipped' ? ' is-skipped' : '');
+        var badgeCls = item.status === 'done' ? 'badge-done'
+          : item.status === 'skipped' ? 'badge-skipped' : 'badge-pending';
+        var badgeText = item.status === 'done' ? 'done' : item.status === 'skipped' ? 'skipped' : 'pending';
+        html += '<a class="' + cls + '" href="' + esc(item.href) + '">';
+        html += '<span class="todo-icon">' + item.icon + '</span>';
+        html += '<span class="todo-body">';
+        html += '<span class="todo-label">' + esc(item.label) + '</span>';
+        if (item.sub) html += '<span class="todo-sub">' + esc(item.sub) + '</span>';
+        html += '</span>';
+        html += '<span class="todo-badge ' + badgeCls + '">' + badgeText + '</span>';
+        html += '</a>';
+      });
+      html += '</div>';
+    });
+
+    main.innerHTML = html;
+  })();
+  </script>
+
+  <script>
+  fetch('../version.json').then(r => r.json()).then(v => {
+    var e = document.getElementById('page-version');
+    if (e) e.textContent = 'v' + v.version;
+  }).catch(() => {});
+  (function () {
+    var u = 0;
+    try {
+      for (var k in localStorage) {
+        if (Object.prototype.hasOwnProperty.call(localStorage, k))
+          u += (k.length + localStorage[k].length) * 2;
+      }
+    } catch (e) {}
+    var kb = (u / 1024).toFixed(1);
+    var pct = +(u / (5 * 1024 * 1024) * 100).toFixed(1);
+    var el = document.getElementById('storage-size');
+    if (el) {
+      el.textContent = 'Storage: ' + kb + ' KB / 5 MB';
+      el.style.opacity = 0.6;
+      if (pct > 90) el.style.color = '#f87171';
+      else if (pct > 70) el.style.color = '#fbbf24';
+    }
+  })();
+  </script>
+
+</body>
+</html>

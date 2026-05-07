@@ -562,6 +562,74 @@
     .dreport-go:hover { background: rgba(196,134,74,0.18); border-color: var(--accent); }
     .dreport-go:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
 
+    /* ── TODAY STRIP ── */
+    .today-strip {
+      border-bottom: 1px solid var(--border);
+      padding: 0.55rem 1.25rem;
+      position: relative; z-index: 1;
+    }
+    .today-strip-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .today-strip-hd {
+      font-size: 0.57rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted-2);
+      font-style: italic;
+      flex-shrink: 0;
+      padding-right: 0.35rem;
+      border-right: 1px solid var(--border);
+    }
+    .today-strip-items {
+      display: flex;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .tsi {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.68rem;
+      font-style: italic;
+      color: var(--muted2);
+      padding: 0.18rem 0.5rem;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      background: transparent;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      white-space: nowrap;
+      font-family: 'DM Serif Text', Georgia, serif;
+    }
+    .tsi:hover { border-color: var(--border2); color: var(--text); }
+    .tsi.tsi-done { color: var(--muted-2); border-color: transparent; }
+    .tsi-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .tsi-dot-pending { background: var(--accent); opacity: 0.7; }
+    .tsi-dot-done    { background: var(--ongoing); opacity: 0.55; }
+    .tsi-dot-skipped { background: var(--muted-2); opacity: 0.55; }
+    .today-strip-link {
+      margin-left: auto;
+      font-size: 0.6rem;
+      font-style: italic;
+      color: var(--muted-2);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .today-strip-link:hover { color: var(--muted2); }
+
     /* ── FOOTER ── */
     footer {
       padding: 1.75rem 2rem;
@@ -594,6 +662,15 @@
       </button>
     </div>
   </header>
+
+  <!-- Today's todos strip -->
+  <div class="today-strip" id="today-strip" style="display:none">
+    <div class="today-strip-inner">
+      <span class="today-strip-hd">Today</span>
+      <div class="today-strip-items" id="today-strip-items"></div>
+      <a class="today-strip-link" href="../todos/">all →</a>
+    </div>
+  </div>
 
   <main class="main">
     <div class="cal-nav">
@@ -651,6 +728,97 @@
       </div>
     </div>
   </div>
+
+  <script>
+  // ── TODAY TODOS STRIP ──────────────────────────────────────────────────────
+  (function () {
+    function padZ(n) { return n < 10 ? '0' + n : '' + n; }
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var iso = today.getFullYear() + '-' + padZ(today.getMonth() + 1) + '-' + padZ(today.getDate());
+
+    var entries = {}, goals = {}, marathon = {}, strength = {};
+    try { entries  = JSON.parse(localStorage.getItem('journal_entries') || '{}'); } catch (e) {}
+    try { goals    = JSON.parse(localStorage.getItem('journal_goals')   || '{}'); } catch (e) {}
+    try { marathon = JSON.parse(localStorage.getItem('c2hm_v1')         || '{}'); } catch (e) {}
+    try { strength = JSON.parse(localStorage.getItem('workout_plan_v3') || '{}'); } catch (e) {}
+
+    var dayEntry   = entries[iso] || {};
+    var hasMorning = !!dayEntry.morning;
+    var hasEvening = !!dayEntry.evening;
+    var hasGoals   = Object.values(goals).some(function (g) { return g && g.status === 'active'; });
+
+    // Marathon run check (same REST_DAYS as WORKOUT_STATUS builder)
+    var MARATHON_REST = [
+      [0,1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],
+      [1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[0,1,5],[1,5],[0,1,5],[1,3,5,6]
+    ];
+    var marathonRun = null;
+    if (marathon.planStart) {
+      var mDays = marathon.days || {};
+      var mPlanStart = marathon.planStart;
+      if (!marathon.version && new Date().getTimezoneOffset() < 0) {
+        var shifted = {};
+        for (var k in mDays) if (Object.prototype.hasOwnProperty.call(mDays, k)) {
+          var p = k.split('-').map(Number);
+          var nd = new Date(p[0], p[1] - 1, p[2] + 1);
+          var nk = nd.getFullYear() + '-' + padZ(nd.getMonth() + 1) + '-' + padZ(nd.getDate());
+          shifted[nk] = mDays[k];
+        }
+        mDays = shifted;
+        var pp = mPlanStart.split('-').map(Number);
+        var pnd = new Date(pp[0], pp[1] - 1, pp[2] + 1);
+        mPlanStart = pnd.getFullYear() + '-' + padZ(pnd.getMonth() + 1) + '-' + padZ(pnd.getDate());
+      }
+      var planStart = new Date(mPlanStart + 'T00:00:00');
+      var week1Sun  = new Date(planStart.getTime() - planStart.getDay() * 86400000);
+      week1Sun.setHours(0, 0, 0, 0);
+      var diff  = Math.round((today.getTime() - week1Sun.getTime()) / 86400000);
+      var wIdx  = Math.floor(diff / 7);
+      var dow   = today.getDay();
+      if (wIdx >= 0 && wIdx < 20 && !MARATHON_REST[wIdx].includes(dow) && today.getTime() >= planStart.getTime()) {
+        var md = mDays[iso] || null;
+        var ms = 'pending';
+        if (md && (md.status === 'completed' || md.status === 'modified')) ms = 'done';
+        else if (md && md.status === 'skipped') ms = 'skipped';
+        marathonRun = ms;
+      }
+    }
+
+    // Strength check
+    var strengthStatus = null;
+    var ST_NAMES = ['Push', 'Pull', 'Legs'];
+    if (strength && (strength.entries !== undefined || strength.schedule !== undefined)) {
+      var sched = Array.isArray(strength.schedule) && strength.schedule.length === 3
+        ? strength.schedule : [1, 3, 5];
+      var sidx = sched.indexOf(today.getDay());
+      if (sidx !== -1) {
+        var se = (strength.entries || {})[iso] || null;
+        strengthStatus = { name: ST_NAMES[sidx], done: !!(se && se.status === 'done') };
+      }
+    }
+
+    // Build chips
+    var items = [];
+    if (hasGoals) items.push({ label: '☀ Morning', status: hasMorning ? 'done' : 'pending', href: '../journal/' });
+    if (marathonRun) items.push({ label: '🏃 Run', status: marathonRun, href: '../marathon-training/' });
+    if (strengthStatus) items.push({ label: '💪 ' + strengthStatus.name, status: strengthStatus.done ? 'done' : 'pending', href: '../workout/' });
+    if (hasGoals) items.push({ label: '🌙 Evening', status: hasEvening ? 'done' : 'pending', href: '../journal/' });
+
+    if (!items.length) return;
+
+    var strip = document.getElementById('today-strip');
+    var container = document.getElementById('today-strip-items');
+    var html = '';
+    items.forEach(function (item) {
+      var dotCls = 'tsi-dot-' + item.status;
+      html += '<a class="tsi' + (item.status === 'done' ? ' tsi-done' : '') + '" href="' + item.href + '">' +
+        '<span class="tsi-dot ' + dotCls + '"></span>' + item.label + '</a>';
+    });
+    container.innerHTML = html;
+    strip.style.display = '';
+  })();
+  </script>
 
   <script src="../trips/trips.js"></script>
   <script>
