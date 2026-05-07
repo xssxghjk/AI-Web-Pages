@@ -5558,6 +5558,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const totalCards = currentDeckPairs.reduce((s, p) => s + p.entry.qty, 0);
 
     // Load all card images in parallel
+    // Blob URLs created here must NOT be revoked until after canvas.toBlob() — revoking
+    // early allows the browser to free the decoded image data before drawImage runs.
+    const blobUrls = [];
     async function loadImg(url) {
       // Try direct load with CORS first
       const direct = await new Promise(res => {
@@ -5569,21 +5572,31 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       });
       if (direct) return direct;
 
-      // Fallback: fetch via CORS proxy → blob URL so canvas isn't tainted
-      try {
-        const resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
-        if (!resp.ok) return null;
-        const blob = await resp.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        return await new Promise(res => {
-          const img = new Image();
-          img.onload  = () => { URL.revokeObjectURL(objectUrl); res(img); };
-          img.onerror = () => { URL.revokeObjectURL(objectUrl); res(null); };
-          img.src = objectUrl;
-        });
-      } catch {
-        return null;
+      // Fallback: fetch via CORS proxy → blob URL (same-origin for canvas)
+      // Try two proxies in case one is down or rate-limiting
+      const proxies = [
+        'https://corsproxy.io/?' + encodeURIComponent(url),
+        'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+      ];
+      for (const proxyUrl of proxies) {
+        try {
+          const resp = await fetch(proxyUrl);
+          if (!resp.ok) continue;
+          const blob = await resp.blob();
+          const objectUrl = URL.createObjectURL(blob);
+          blobUrls.push(objectUrl); // revoked after toBlob, not here
+          const img = await new Promise(res => {
+            const i = new Image();
+            i.onload  = () => res(i);
+            i.onerror = () => res(null);
+            i.src = objectUrl;
+          });
+          if (img) return img;
+        } catch {
+          // try next proxy
+        }
       }
+      return null;
     }
     const urlList = [];
     for (const p of currentDeckPairs) {
@@ -5750,6 +5763,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     try {
       canvas.toBlob(blob => {
+        blobUrls.forEach(u => URL.revokeObjectURL(u));
         if (!blob) { showToast('Could not generate image.', true); return; }
         const url = URL.createObjectURL(blob);
         const a   = document.createElement('a');
@@ -5761,6 +5775,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         URL.revokeObjectURL(url);
       });
     } catch (e) {
+      blobUrls.forEach(u => URL.revokeObjectURL(u));
       showToast('Could not export — card images blocked by cross-origin policy.', true);
     }
   }
