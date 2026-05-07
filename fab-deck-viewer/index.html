@@ -2101,6 +2101,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       </button>
       <div style="flex:1"></div>
       <button class="btn-secondary" id="btn-export-deck" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">Export</button>
+      <button class="btn-secondary" id="btn-export-image" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">Save as Image</button>
       <button class="btn-danger" id="btn-delete-deck">Delete</button>
     </div>
 
@@ -5507,6 +5508,135 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   document.getElementById('analysis-simulator').addEventListener('click', handleAnalysisClick);
   document.getElementById('analysis-simulator').addEventListener('keydown', handleAnalysisKeydown);
 
+  /* ── Deck image export ───────────────────────────────────────────── */
+  async function exportDeckImage(deck) {
+    const W = 1920, H = 1080;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    await document.fonts.load('bold 28px "DM Serif Text"');
+    await document.fonts.load('14px "DM Serif Text"');
+
+    const buckets = {};
+    GROUPS.forEach(g => { buckets[g.key] = []; });
+    for (const p of currentDeckPairs) {
+      const key = p.card ? (p.card.color || 'other') : 'other';
+      (buckets[key] || buckets.other).push(p);
+    }
+    const totalCards = currentDeckPairs.reduce((s, p) => s + p.entry.qty, 0);
+
+    ctx.textBaseline = 'alphabetic';
+
+    // Background
+    ctx.fillStyle = '#1c1814';
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle dot pattern
+    ctx.fillStyle = 'rgba(232,223,208,0.04)';
+    for (let dx = 12; dx < W; dx += 24) {
+      for (let dy = 12; dy < H; dy += 24) {
+        ctx.beginPath();
+        ctx.arc(dx, dy, 1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Accent top border
+    ctx.fillStyle = '#c4864a';
+    ctx.fillRect(0, 0, W, 3);
+
+    // Deck name
+    ctx.font = 'bold 28px "DM Serif Text", Georgia, serif';
+    ctx.fillStyle = '#e8dfd0';
+    ctx.fillText(deck.name, 40, 44);
+
+    // Subtitle
+    const dateStr = new Date(deck.savedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    ctx.font = '15px "DM Serif Text", Georgia, serif';
+    ctx.fillStyle = '#7a6e60';
+    ctx.fillText(`${dateStr}  ·  ${totalCards} cards`, 40, 66);
+
+    // Header separator
+    const HEADER_H = 80;
+    ctx.fillStyle = '#3a3025';
+    ctx.fillRect(0, HEADER_H, W, 1);
+
+    const COL_W = Math.floor(W / 4);
+    const PAD = 32;
+    const COL_Y = HEADER_H + 16;
+    const TEXT_W = COL_W - PAD * 2;
+    const LINE_H = 21;
+
+    function truncate(text, maxW) {
+      if (ctx.measureText(text).width <= maxW) return text;
+      let t = text;
+      while (t.length > 1 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1);
+      return t + '…';
+    }
+
+    GROUPS.forEach((g, i) => {
+      const colPairs = buckets[g.key];
+      if (!colPairs || colPairs.length === 0) return;
+
+      const colX = i * COL_W;
+      const textX = colX + PAD;
+      const colTotal = colPairs.reduce((s, p) => s + p.entry.qty, 0);
+
+      // Column separator (skip first)
+      if (i > 0) {
+        ctx.fillStyle = '#2e2820';
+        ctx.fillRect(colX, HEADER_H + 1, 1, H - HEADER_H - 1);
+      }
+
+      // Group header
+      ctx.font = 'bold 11px "DM Serif Text", Georgia, serif';
+      ctx.fillStyle = g.color;
+      ctx.fillText(`${g.label.toUpperCase()}  ·  ${colTotal}`, textX, COL_Y + 16);
+
+      // Underline
+      ctx.fillStyle = g.color;
+      ctx.globalAlpha = 0.3;
+      ctx.fillRect(textX, COL_Y + 22, COL_W - PAD * 2, 1);
+      ctx.globalAlpha = 1;
+
+      // Card rows
+      let rowY = COL_Y + 46;
+      const QTY_REF_W = (() => { ctx.font = 'bold 12px "Courier New", monospace'; return ctx.measureText('×3').width; })();
+
+      for (const p of colPairs) {
+        ctx.font = 'bold 12px "Courier New", monospace';
+        ctx.fillStyle = '#c4864a';
+        ctx.fillText(`×${p.entry.qty}`, textX, rowY);
+
+        ctx.font = '14px "DM Serif Text", Georgia, serif';
+        ctx.fillStyle = '#e8dfd0';
+        ctx.fillText(truncate(p.entry.name, TEXT_W - QTY_REF_W - 8), textX + QTY_REF_W + 8, rowY);
+
+        rowY += LINE_H;
+      }
+    });
+
+    // Footer watermark
+    ctx.font = '11px "DM Serif Text", Georgia, serif';
+    ctx.fillStyle = 'rgba(122,110,96,0.45)';
+    ctx.textAlign = 'right';
+    ctx.fillText('FaB Deck Builder', W - 20, H - 12);
+    ctx.textAlign = 'left';
+
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (deck.name || 'deck').replace(/[^a-zA-Z0-9 _-]/g, '').trim().replace(/\s+/g, '-') + '-deck.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+
   /* ── Deck export ──────────────────────────────────────────────────── */
   function exportDeck(deck) {
     const payload = {
@@ -5533,6 +5663,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     if (deck) {
       exportDeck(deck);
       showToast('Deck exported — check your downloads.');
+    }
+  });
+
+  document.getElementById('btn-export-image').addEventListener('click', async () => {
+    if (!currentDeckId) return;
+    const deck = loadDecks().find(d => d.id === currentDeckId);
+    if (deck) {
+      await exportDeckImage(deck);
+      showToast('Image saved to downloads.');
     }
   });
 
