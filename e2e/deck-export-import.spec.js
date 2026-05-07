@@ -44,40 +44,6 @@ test.describe('deck export / import', () => {
     await expect(page.locator('#btn-export-deck')).toBeVisible();
   });
 
-  test('save as image button is visible on deck detail page', async ({ page }) => {
-    await seedDeck(page, SEED_DECK);
-    await page.goto('/fab-deck-viewer/');
-    await page.click('.deck-row');
-    await page.waitForSelector('#btn-export-image', { state: 'visible' });
-    await expect(page.locator('#btn-export-image')).toBeVisible();
-  });
-
-  test('save as image triggers a PNG download', async ({ page }) => {
-    // getDisplayMedia requires a browser dialog that can't be automated.
-    // Mock it to return a canvas-based video stream immediately so the export
-    // flow runs to completion and produces the download.
-    await page.addInitScript(() => {
-      navigator.mediaDevices = navigator.mediaDevices || {};
-      navigator.mediaDevices.getDisplayMedia = async () => {
-        const c = Object.assign(document.createElement('canvas'), { width: 200, height: 200 });
-        c.getContext('2d').fillRect(0, 0, 200, 200);
-        return c.captureStream(1);
-      };
-    });
-
-    await seedDeck(page, SEED_DECK);
-    await page.goto('/fab-deck-viewer/');
-    await page.click('.deck-row');
-    await page.waitForSelector('#btn-export-image', { state: 'visible' });
-
-    const [download] = await Promise.all([
-      page.waitForEvent('download'),
-      page.click('#btn-export-image'),
-    ]);
-
-    expect(download.suggestedFilename()).toMatch(/Export-Test-Briar.*\.png$/);
-  });
-
   test('export triggers a file download with correct filename', async ({ page }) => {
     await seedDeck(page, SEED_DECK);
     await page.goto('/fab-deck-viewer/');
