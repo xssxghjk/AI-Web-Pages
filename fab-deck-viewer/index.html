@@ -228,6 +228,18 @@
       font-family: 'DM Serif Text', Georgia, serif;
       font-style: italic;
     }
+    .deck-row-count {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.72rem; font-weight: 600;
+      font-family: 'DM Mono', 'Courier New', monospace;
+      font-style: normal; letter-spacing: 0.02em;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+    }
+    .deck-row-count-sep {
+      display: inline-block; width: 1px; height: 0.7em;
+      background: var(--border-2); margin: 0 0.4rem; vertical-align: middle;
+    }
     .deck-row-cta {
       display: flex;
       align-items: center;
@@ -539,6 +551,12 @@
       font-size: 0.75rem; color: var(--muted);
       font-family: 'DM Serif Text', Georgia, serif;
       font-style: italic;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .detail-card-count {
+      font-family: 'DM Mono', 'Courier New', monospace;
+      font-style: normal; font-size: 0.68rem; font-weight: 600;
+      color: var(--accent); letter-spacing: 0.03em;
     }
 
     /* ── Stats bar ── */
@@ -562,6 +580,13 @@
       margin-bottom: 0.75rem;
     }
     .group-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .group-head-count {
+      font-family: 'DM Mono', 'Courier New', monospace;
+      font-style: normal; font-size: 0.65rem; font-weight: 600;
+      color: var(--muted); letter-spacing: 0.04em;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 2px; padding: 0 0.35rem; line-height: 1.6;
+    }
 
     /* ── Card grid ── */
     .card-grid {
@@ -2107,7 +2132,10 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     <div class="detail-head">
       <div class="detail-head-name" id="detail-name"></div>
-      <div class="detail-head-date" id="detail-date"></div>
+      <div class="detail-head-date">
+        <span id="detail-date"></span>
+        <span id="detail-card-count" class="detail-card-count"></span>
+      </div>
     </div>
 
     <div class="card-warn" id="card-warn"></div>
@@ -2357,7 +2385,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const row = document.createElement('div');
       row.className = 'deck-row';
 
-      const count = deck.cardCount ? `${deck.cardCount} cards · ` : '';
+      const countNum = deck.cardCount || 0;
       const date  = new Date(deck.savedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
       let formatLabel = '';
@@ -2376,10 +2404,13 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         }
       }
 
+      const countHtml = countNum
+        ? `<div class="deck-row-count">${countNum} cards<span class="deck-row-count-sep"></span><span style="font-family:'DM Serif Text',Georgia,serif;font-style:italic;font-weight:400;color:var(--muted)">${formatLabel}${date}</span></div>`
+        : `<div class="deck-row-count" style="color:var(--muted)">${formatLabel}${date}</div>`;
       row.innerHTML = `
         <div class="deck-row-body">
           <div class="deck-row-name">${esc(deck.name)}</div>
-          <div class="deck-row-meta">${formatLabel}${count}${date}</div>
+          ${countHtml}
           ${equipWarnHtml}
         </div>
         <div class="deck-row-cta">
@@ -2462,6 +2493,10 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     document.getElementById('detail-name').textContent = deck.name;
     document.getElementById('detail-date').textContent =
       new Date(deck.savedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    const totalCardCount = pairs.reduce((s, p) => s + p.entry.qty, 0);
+    const countEl = document.getElementById('detail-card-count');
+    countEl.textContent = totalCardCount ? `${totalCardCount} cards` : '';
+    countEl.style.display = totalCardCount ? '' : 'none';
 
     // Reset tabs to Decklist
     document.getElementById('tab-btn-decklist').className = 'tab-btn active';
@@ -2535,7 +2570,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       section.style.marginBottom = '2rem';
       const head = document.createElement('div');
       head.className = 'group-head';
-      head.innerHTML = `<span style="color:${g.color}">${g.label}</span>`;
+      const grpCount = counts[g.key] || 0;
+      head.innerHTML = `<span style="color:${g.color}">${g.label}</span><span class="group-head-count">${grpCount}</span>`;
       section.appendChild(head);
       const grid = document.createElement('div');
       grid.className = 'card-grid';
