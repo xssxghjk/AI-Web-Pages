@@ -95,3 +95,11 @@ test('calorie tracker page loads', async ({ page }) => {
   const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();
   expect(sidebarVisible || hamburgerVisible).toBe(true);
 });
+
+test('workout tracker page loads', async ({ page }) => {
+  await page.goto('/workout/');
+  await expect(page).toHaveTitle(/Workout/);
+  const sidebarVisible = await page.locator('.sidebar').isVisible();
+  const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();
+  expect(sidebarVisible || hamburgerVisible).toBe(true);
+});
