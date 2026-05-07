@@ -221,20 +221,6 @@
     .cal-trip-bar.s-planning  { background: var(--planning-bg);  color: var(--planning);  border: 1px solid var(--planning-border); }
     .cal-trip-bar.s-fab-event { background: var(--fab-event-bg); color: var(--fab-event); border: 1px solid var(--fab-event-border); }
 
-    /* ── WORKOUT DAY DOTS ── */
-    .workout-dot {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-    }
-    .wd-done    { background: #166534; }
-    .wd-skipped { background: #92400e; }
-    .wd-missed  { background: #c8102e; }
-    .wd-paused  { background: #1e3f6e; border: 1px solid #2a5a90; }
-
     /* ── LEGEND ── */
     .cal-legend {
       display: flex;
@@ -737,53 +723,15 @@
     today.setHours(0, 0, 0, 0);
     var iso = today.getFullYear() + '-' + padZ(today.getMonth() + 1) + '-' + padZ(today.getDate());
 
-    var entries = {}, goals = {}, marathon = {}, strength = {};
+    var entries = {}, goals = {}, strength = {};
     try { entries  = JSON.parse(localStorage.getItem('journal_entries') || '{}'); } catch (e) {}
     try { goals    = JSON.parse(localStorage.getItem('journal_goals')   || '{}'); } catch (e) {}
-    try { marathon = JSON.parse(localStorage.getItem('c2hm_v1')         || '{}'); } catch (e) {}
     try { strength = JSON.parse(localStorage.getItem('workout_plan_v3') || '{}'); } catch (e) {}
 
     var dayEntry   = entries[iso] || {};
     var hasMorning = !!dayEntry.morning;
     var hasEvening = !!dayEntry.evening;
     var hasGoals   = Object.values(goals).some(function (g) { return g && g.status === 'active'; });
-
-    // Marathon run check (same REST_DAYS as WORKOUT_STATUS builder)
-    var MARATHON_REST = [
-      [0,1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],
-      [1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[0,1,5],[1,5],[0,1,5],[1,3,5,6]
-    ];
-    var marathonRun = null;
-    if (marathon.planStart) {
-      var mDays = marathon.days || {};
-      var mPlanStart = marathon.planStart;
-      if (!marathon.version && new Date().getTimezoneOffset() < 0) {
-        var shifted = {};
-        for (var k in mDays) if (Object.prototype.hasOwnProperty.call(mDays, k)) {
-          var p = k.split('-').map(Number);
-          var nd = new Date(p[0], p[1] - 1, p[2] + 1);
-          var nk = nd.getFullYear() + '-' + padZ(nd.getMonth() + 1) + '-' + padZ(nd.getDate());
-          shifted[nk] = mDays[k];
-        }
-        mDays = shifted;
-        var pp = mPlanStart.split('-').map(Number);
-        var pnd = new Date(pp[0], pp[1] - 1, pp[2] + 1);
-        mPlanStart = pnd.getFullYear() + '-' + padZ(pnd.getMonth() + 1) + '-' + padZ(pnd.getDate());
-      }
-      var planStart = new Date(mPlanStart + 'T00:00:00');
-      var week1Sun  = new Date(planStart.getTime() - planStart.getDay() * 86400000);
-      week1Sun.setHours(0, 0, 0, 0);
-      var diff  = Math.round((today.getTime() - week1Sun.getTime()) / 86400000);
-      var wIdx  = Math.floor(diff / 7);
-      var dow   = today.getDay();
-      if (wIdx >= 0 && wIdx < 20 && !MARATHON_REST[wIdx].includes(dow) && today.getTime() >= planStart.getTime()) {
-        var md = mDays[iso] || null;
-        var ms = 'pending';
-        if (md && (md.status === 'completed' || md.status === 'modified')) ms = 'done';
-        else if (md && md.status === 'skipped') ms = 'skipped';
-        marathonRun = ms;
-      }
-    }
 
     // Strength check
     var strengthStatus = null;
@@ -801,7 +749,6 @@
     // Build chips
     var items = [];
     if (hasGoals) items.push({ label: '☀ Morning', status: hasMorning ? 'done' : 'pending', href: '../journal/' });
-    if (marathonRun) items.push({ label: '🏃 Run', status: marathonRun, href: '../marathon-training/' });
     if (strengthStatus) items.push({ label: '💪 ' + strengthStatus.name, status: strengthStatus.done ? 'done' : 'pending', href: '../workout/' });
     if (hasGoals) items.push({ label: '🌙 Evening', status: hasEvening ? 'done' : 'pending', href: '../journal/' });
 
@@ -821,80 +768,6 @@
   </script>
 
   <script src="../trips/trips.js"></script>
-  <script>
-  // Build per-day workout status lookup from localStorage (c2hm_v1)
-  // REST_DAYS[weekIdx] = day indices (0=Sun…6=Sat) that are rest type
-  window.WORKOUT_STATUS = {};
-  (function () {
-    try {
-      const raw = localStorage.getItem('c2hm_v1');
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      if (!data.planStart) return;
-
-      // Old marathon-training used toISOString() (UTC dates). For UTC+ users,
-      // local midnight is the previous UTC day, so entries were stored 1 day early.
-      // Shift all keys +1 day in-memory when no version field is present.
-      function shiftIso(iso) {
-        const [y, m, d] = iso.split('-').map(Number);
-        const nd = new Date(y, m - 1, d + 1);
-        return nd.getFullYear() + '-' + String(nd.getMonth() + 1).padStart(2, '0') + '-' + String(nd.getDate()).padStart(2, '0');
-      }
-      let days = data.days || {};
-      let planStart = data.planStart;
-      if (!data.version && new Date().getTimezoneOffset() < 0) {
-        const shifted = {};
-        for (const [k, v] of Object.entries(days)) shifted[shiftIso(k)] = v;
-        days = shifted;
-        planStart = shiftIso(planStart);
-      }
-
-      const REST_DAYS = [
-        [0,1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],
-        [1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[0,1,5],[1,5],[0,1,5],[1,3,5,6]
-      ];
-
-      const start = new Date(planStart + 'T00:00:00');
-      const week1Sun = new Date(start.getTime() - start.getDay() * 86400000);
-      week1Sun.setHours(0, 0, 0, 0);
-
-      const todayMs = new Date().setHours(0, 0, 0, 0);
-
-      for (let w = 0; w < 20; w++) {
-        for (let d = 0; d < 7; d++) {
-          const dt = new Date(week1Sun.getFullYear(), week1Sun.getMonth(), week1Sun.getDate() + w * 7 + d);
-          const iso = dt.getFullYear() + '-' +
-            String(dt.getMonth() + 1).padStart(2, '0') + '-' +
-            String(dt.getDate()).padStart(2, '0');
-
-          if (REST_DAYS[w].includes(d)) continue; // rest days get no dot
-          if (dt.getTime() < start.getTime()) continue; // before plan start
-
-          const entry = days[iso];
-          if (entry && (entry.status === 'completed' || entry.status === 'modified')) {
-            window.WORKOUT_STATUS[iso] = 'done';
-          } else if (entry && entry.status === 'skipped') {
-            window.WORKOUT_STATUS[iso] = 'skipped';
-          } else if (dt.getTime() < todayMs) {
-            const dMs = dt.getTime();
-            let paused = false;
-            for (const p of (data.pauseHistory || [])) {
-              const s = new Date(p.since + 'T00:00:00').getTime();
-              const e = new Date(p.end   + 'T00:00:00').getTime();
-              if (dMs >= s && dMs < e) { paused = true; break; }
-            }
-            if (!paused && data.pause) {
-              const s = new Date(data.pause.since + 'T00:00:00').getTime();
-              const e = s + data.pause.days * 86400000;
-              if (dMs >= s && dMs < e) paused = true;
-            }
-            window.WORKOUT_STATUS[iso] = paused ? 'paused' : 'missed';
-          }
-        }
-      }
-    } catch (e) {}
-  })();
-  </script>
   <script>
   (function () {
     function esc(str) {
@@ -1010,14 +883,8 @@
           const isoKey = date.getFullYear() + '-' +
             String(date.getMonth() + 1).padStart(2, '0') + '-' +
             String(date.getDate()).padStart(2, '0');
-          const wStatus = window.WORKOUT_STATUS && window.WORKOUT_STATUS[isoKey];
-          const dotHtml = wStatus === 'done'    ? '<div class="workout-dot wd-done"></div>'
-                        : wStatus === 'skipped' ? '<div class="workout-dot wd-skipped"></div>'
-                        : wStatus === 'missed'  ? '<div class="workout-dot wd-missed"></div>'
-                        : wStatus === 'paused'  ? '<div class="workout-dot wd-paused"></div>'
-                        : '';
           return `<div class="cal-day${isToday ? ' today' : ''}${hasTrip ? ' has-trip' : ''}" style="height:${cellH}px">` +
-            `<div class="cal-day-num">${date.getDate()}</div>${dotHtml}</div>`;
+            `<div class="cal-day-num">${date.getDate()}</div></div>`;
         }).join('');
 
         const barsHtml = weekBars.map(({ trip, colStart, colEnd, overflowLeft, overflowRight, slot }) => {
@@ -1050,12 +917,6 @@
       const items = [];
       if (tripStatus) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-${esc(tripStatus)}"></div><span>Trips</span></div>`);
       if (hasFabEvent) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-fab-event"></div><span>FaB Events</span></div>`);
-      const ws = window.WORKOUT_STATUS || {};
-      const vals = Object.values(ws);
-      if (vals.some(v => v === 'done'))    items.push('<div class="cal-legend-item"><div class="workout-dot wd-done" style="position:static;flex-shrink:0"></div><span>Workout done</span></div>');
-      if (vals.some(v => v === 'skipped')) items.push('<div class="cal-legend-item"><div class="workout-dot wd-skipped" style="position:static;flex-shrink:0"></div><span>Workout skipped</span></div>');
-      if (vals.some(v => v === 'paused'))  items.push('<div class="cal-legend-item"><div class="workout-dot wd-paused" style="position:static;flex-shrink:0"></div><span>Workout paused</span></div>');
-      if (vals.some(v => v === 'missed'))  items.push('<div class="cal-legend-item"><div class="workout-dot wd-missed" style="position:static;flex-shrink:0"></div><span>Workout missed</span></div>');
       legend.innerHTML = items.join('');
     }
 
