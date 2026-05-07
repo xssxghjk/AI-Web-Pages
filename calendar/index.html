@@ -1359,6 +1359,8 @@
             // Pass 2: ctx=real  → draws and returns total height
             function paint(ctx) {
               let y = PAD_TOP;
+              const totalBurn = workoutCal + strengthCal + boulderCal;
+              const net = Math.round(totalCalIn - totalBurn);
 
               function r(color, x, yy, w, h) {
                 if (!ctx) return;
@@ -1391,7 +1393,7 @@
                 r('#3a3025', PAD_X, yy, IW, 1);
               }
               function sectionLabel(str, yy) {
-                t('700 9px "DM Serif Text", Georgia, serif', '#c4864a', '1.4px', str, PAD_X, yy + 9);
+                t('700 9px “DM Serif Text”, Georgia, serif', '#c4864a', '1.4px', str, PAD_X, yy + 9);
               }
 
               // Accent gradient bar
@@ -1407,148 +1409,128 @@
               sectionLabel('DAILY REPORT', y);
               y += 9 + 7;
 
-              t('italic 700 24px "Cormorant Garamond", Georgia, serif', '#e8dfd0', '-0.24px', dateLabel, PAD_X, y + 24);
-              y += 24 + 20;
+              t('italic 700 24px “Cormorant Garamond”, Georgia, serif', '#e8dfd0', '-0.24px', dateLabel, PAD_X, y + 24);
+              y += 24 + 18;
 
               divider(y); y += 1 + 20;
 
-              // ── CALORIES SECTION ──────────────────────────────────────────
-              sectionLabel('CALORIES IN', y); y += 9 + 10;
+              // ── HERO STATS (3-column) ─────────────────────────────────────
+              const COL_W = Math.floor(IW / 3);
+              const heroStats = [
+                { label: 'CALORIES IN',    value: Math.round(totalCalIn).toLocaleString() + ' kcal', color: '#c4864a' },
+                { label: 'CALORIES BURNT', value: totalBurn > 0 ? totalBurn.toLocaleString() + ' kcal' : '—',         color: '#5ab4cc' },
+                { label: 'PROTEIN',        value: totalProtein > 0 ? Math.round(totalProtein) + 'g' : '—',            color: '#7ab87a' },
+              ];
+              heroStats.forEach((stat, i) => {
+                const lx = PAD_X + COL_W * i;
+                t('700 8px “DM Serif Text”, Georgia, serif', '#7a6e60', '1.2px', stat.label, lx, y + 8);
+                t('italic 700 22px “Cormorant Garamond”, Georgia, serif', stat.color, '-0.22px', stat.value, lx, y + 8 + 10 + 22);
+              });
+              y += 8 + 10 + 22 + 20;
 
-              t('italic 700 26px "Cormorant Garamond", Georgia, serif', '#e8dfd0', '-0.26px', Math.round(totalCalIn).toLocaleString() + ' kcal', PAD_X, y + 26);
-              y += 26 + 14;
+              divider(y); y += 1 + 16;
 
-              if (activeCats.length === 0) {
-                t('italic 13px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', 'No calorie data recorded for this date.', PAD_X, y + 13);
-                y += 13 + 6;
-              } else {
+              // ── NET ───────────────────────────────────────────────────────
+              t('700 9px “DM Serif Text”, Georgia, serif', '#9a8a76', '1.1px', 'NET CALORIES', PAD_X, y + 9);
+              y += 9 + 8;
+              t('italic 700 28px “Cormorant Garamond”, Georgia, serif', '#e8dfd0', '-0.28px', net.toLocaleString() + ' kcal', PAD_X, y + 28);
+              y += 28 + 20;
+
+              // ── MEAL BREAKDOWN (only if entries exist) ────────────────────
+              if (activeCats.length > 0) {
+                divider(y); y += 1 + 16;
+                sectionLabel('MEALS', y); y += 9 + 10;
+
                 activeCats.forEach(cat => {
                   const ces = grouped[cat];
                   const catTotal = ces.reduce((s, e) => s + (e.calories || 0), 0);
 
-                  // Color dot
-                  r(CAT_COLORS[cat], PAD_X, y + 6, 4, 16);
-                  // Category name (bold left) + total (muted right)
-                  t('700 14px "DM Serif Text", Georgia, serif', '#e8dfd0', '0px', CAT_LABELS[cat], PAD_X + 10, y + 18);
-                  tr('14px "DM Serif Text", Georgia, serif', '#9a8a76', '0px', Math.round(catTotal).toLocaleString() + ' kcal', PAD_X + IW, y + 18);
-                  y += 28;
+                  r(CAT_COLORS[cat], PAD_X, y + 5, 4, 14);
+                  t('700 13px “DM Serif Text”, Georgia, serif', '#e8dfd0', '0px', CAT_LABELS[cat], PAD_X + 10, y + 16);
+                  tr('13px “DM Serif Text”, Georgia, serif', '#9a8a76', '0px', Math.round(catTotal).toLocaleString() + ' kcal', PAD_X + IW, y + 16);
+                  y += 26;
 
-                  // Entries
                   ces.forEach(e => {
-                    const entryFont = '12px "DM Serif Text", Georgia, serif';
+                    const entryFont = '11px “DM Serif Text”, Georgia, serif';
                     const calStr  = Math.round(e.calories || 0).toLocaleString() + ' kcal';
-                    const maxNamePx = IW - 14 - 72;
+                    const maxNamePx = IW - 14 - 66;
                     const name = clampStr(e.name || 'Unnamed', maxNamePx, entryFont, '0px');
-                    t(entryFont, '#7a6e60', '0px', name, PAD_X + 14, y + 12);
-                    tr(entryFont, '#7a6e60', '0px', calStr, PAD_X + IW, y + 12);
-                    y += 21;
+                    t(entryFont, '#7a6e60', '0px', name, PAD_X + 14, y + 11);
+                    tr(entryFont, '#7a6e60', '0px', calStr, PAD_X + IW, y + 11);
+                    y += 18;
                   });
-                  y += 6;
-                });
-
-                if (totalProtein > 0) {
                   y += 4;
-                  t('12px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', 'Protein', PAD_X, y + 12);
-                  tr('12px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', Math.round(totalProtein) + 'g', PAD_X + IW, y + 12);
-                  y += 20;
-                }
+                });
+                y += 4;
               }
 
-              y += 16;
-              divider(y); y += 1 + 20;
+              // ── RUNNING (only if run recorded) ────────────────────────────
+              if (dayWorkout && dayWorkout.status) {
+                divider(y); y += 1 + 16;
+                sectionLabel('RUNNING', y); y += 9 + 10;
 
-              // ── RUNNING SECTION ───────────────────────────────────────────
-              sectionLabel('RUNNING', y); y += 9 + 10;
-
-              if (!dayWorkout || !dayWorkout.status) {
-                t('italic 13px “DM Serif Text”, Georgia, serif', '#7a6e60', '0px', 'No run recorded for this date.', PAD_X, y + 13);
-                y += 13 + 6;
-              } else {
                 const SC = { completed:'#7ab87a', modified:'#d4924a', skipped:'#c46a6a' };
                 const SL = { completed:'✓ Completed', modified:'◎ Modified', skipped:'✗ Skipped' };
-                t('700 15px “DM Serif Text”, Georgia, serif', SC[dayWorkout.status] || '#9a8a76', '0px', SL[dayWorkout.status] || dayWorkout.status, PAD_X, y + 15);
-                y += 15 + 12;
+                t('700 14px “DM Serif Text”, Georgia, serif', SC[dayWorkout.status] || '#9a8a76', '0px', SL[dayWorkout.status] || dayWorkout.status, PAD_X, y + 14);
+                y += 14 + 8;
 
                 const parts = [];
                 if (dayWorkout.km)   parts.push(dayWorkout.km + ' km');
                 if (dayWorkout.time) parts.push(dayWorkout.time + ' min');
                 if (workoutCal > 0)  parts.push('∼' + workoutCal.toLocaleString() + ' kcal burned');
-
                 if (parts.length > 0) {
-                  t('13px “DM Serif Text”, Georgia, serif', '#9a8a76', '0px', parts.join('  ·  '), PAD_X, y + 13);
-                  y += 13 + 10;
-                }
-
-                if (dayWorkout.notes) {
-                  t('italic 12px “DM Serif Text”, Georgia, serif', '#7a6e60', '0px', '”' + dayWorkout.notes + '”', PAD_X, y + 12);
+                  t('12px “DM Serif Text”, Georgia, serif', '#9a8a76', '0px', parts.join('  ·  '), PAD_X, y + 12);
                   y += 12 + 8;
+                }
+                if (dayWorkout.notes) {
+                  t('italic 11px “DM Serif Text”, Georgia, serif', '#7a6e60', '0px', '”' + dayWorkout.notes + '”', PAD_X, y + 11);
+                  y += 11 + 8;
                 }
               }
 
-              y += 14;
-              divider(y); y += 1 + 20;
+              // ── STRENGTH TRAINING (only if session done) ──────────────────
+              if (strengthSession) {
+                divider(y); y += 1 + 16;
+                sectionLabel('STRENGTH TRAINING', y); y += 9 + 10;
 
-              // ── STRENGTH TRAINING SECTION ─────────────────────────────────
-              sectionLabel('STRENGTH TRAINING', y); y += 9 + 10;
-
-              if (!strengthSession) {
-                t('italic 13px “DM Serif Text”, Georgia, serif', '#7a6e60', '0px', 'No strength session logged for this date.', PAD_X, y + 13);
-                y += 13 + 6;
-              } else {
-                t('700 15px “DM Serif Text”, Georgia, serif', '#7ab87a', '0px', '✓ ' + strengthSession.name + ' Session', PAD_X, y + 15);
-                y += 15 + 8;
+                t('700 14px “DM Serif Text”, Georgia, serif', '#7ab87a', '0px', '✓ ' + strengthSession.name + ' Session', PAD_X, y + 14);
+                y += 14 + 6;
                 if (strengthSession.muscles) {
-                  t('12px “DM Serif Text”, Georgia, serif', '#9a8a76', '0px', strengthSession.muscles, PAD_X, y + 12);
-                  y += 12 + 8;
+                  t('11px “DM Serif Text”, Georgia, serif', '#9a8a76', '0px', strengthSession.muscles, PAD_X, y + 11);
+                  y += 11 + 6;
                 }
                 const sParts = [];
                 if (strengthEntry.duration) sParts.push(strengthEntry.duration + ' min');
                 if (strengthCal > 0) sParts.push('∼' + strengthCal.toLocaleString() + ' kcal burned');
                 if (sParts.length > 0) {
-                  t('13px “DM Serif Text”, Georgia, serif', '#9a8a76', '0px', sParts.join('  ·  '), PAD_X, y + 13);
-                  y += 13 + 10;
+                  t('12px “DM Serif Text”, Georgia, serif', '#9a8a76', '0px', sParts.join('  ·  '), PAD_X, y + 12);
+                  y += 12 + 10;
                 }
               }
 
-              y += 14;
-              divider(y); y += 1 + 20;
+              // ── BOULDERING (only if session exists) ──────────────────────
+              if (boulderSession) {
+                divider(y); y += 1 + 16;
+                sectionLabel('BOULDERING', y); y += 9 + 10;
 
-              // ── BOULDERING SECTION ────────────────────────────────────────
-              sectionLabel('BOULDERING', y); y += 9 + 10;
-
-              if (!boulderSession) {
-                t('italic 13px “DM Serif Text”, Georgia, serif', '#7a6e60', '0px', 'No bouldering session logged for this date.', PAD_X, y + 13);
-                y += 13 + 6;
-              } else {
-                t('700 15px “DM Serif Text”, Georgia, serif', '#7ab87a', '0px', '✓ Session', PAD_X, y + 15);
-                y += 15 + 8;
+                t('700 14px “DM Serif Text”, Georgia, serif', '#7ab87a', '0px', '✓ Session', PAD_X, y + 14);
+                y += 14 + 6;
                 const bParts = [];
                 if (boulderSession.duration) bParts.push(boulderSession.duration + ' min');
                 if (boulderCal > 0) bParts.push('∼' + boulderCal.toLocaleString() + ' kcal burned');
                 const totalClimbs = Object.values(boulderSession.grades || {}).reduce((s, c) => s + c, 0);
                 if (totalClimbs > 0) bParts.push(totalClimbs + ' climb' + (totalClimbs !== 1 ? 's' : ''));
                 if (bParts.length > 0) {
-                  t('13px “DM Serif Text”, Georgia, serif', '#9a8a76', '0px', bParts.join('  ·  '), PAD_X, y + 13);
-                  y += 13 + 10;
-                }
-                if (boulderSession.notes) {
-                  const noteFont = 'italic 12px “DM Serif Text”, Georgia, serif';
-                  const noteStr  = clampStr('”' + boulderSession.notes + '”', IW - 4, noteFont, '0px');
-                  t(noteFont, '#7a6e60', '0px', noteStr, PAD_X, y + 12);
+                  t('12px “DM Serif Text”, Georgia, serif', '#9a8a76', '0px', bParts.join('  ·  '), PAD_X, y + 12);
                   y += 12 + 8;
                 }
+                if (boulderSession.notes) {
+                  const noteFont = 'italic 11px “DM Serif Text”, Georgia, serif';
+                  const noteStr  = clampStr('”' + boulderSession.notes + '”', IW - 4, noteFont, '0px');
+                  t(noteFont, '#7a6e60', '0px', noteStr, PAD_X, y + 11);
+                  y += 11 + 8;
+                }
               }
-
-              y += 14;
-              divider(y); y += 1 + 20;
-
-              // ── NET SECTION ───────────────────────────────────────────────
-              const totalBurn = workoutCal + strengthCal + boulderCal;
-              const net = Math.round(totalCalIn - totalBurn);
-              t('700 9px "DM Serif Text", Georgia, serif', '#9a8a76', '1.1px', 'NET CALORIES', PAD_X, y + 9);
-              y += 9 + 8;
-              t('italic 700 28px "Cormorant Garamond", Georgia, serif', '#e8dfd0', '-0.28px', net.toLocaleString() + ' kcal', PAD_X, y + 28);
-              y += 28;
 
               return y + PAD_BOT;
             }
