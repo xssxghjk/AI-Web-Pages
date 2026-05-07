@@ -1053,184 +1053,181 @@ function buildPlan() {
   // Workout object: { type, short, desc }
 
   function R(short, desc) { return { type:'run', short, desc }; }
-  function S(short, desc) { return { type:'strength', short, desc }; }
-  function C(short, desc) { return { type:'cross', short, desc }; }
   function rest() { return { type:'rest', short:'Rest', desc:'Rest day. Recovery is part of training!' }; }
-  function yoga() { return { type:'rest', short:'Rest/Yoga', desc:'Rest or light yoga. Keep it easy.' }; }
 
   // Week 1
   weeks.push([
     rest(), // Sun
     rest(), // Mon
     R('Run/Walk ×8','1 min run / 2 min walk — repeat 8 times (~24 min). Walk warm-up 5 min + cool-down 5 min.'), // Tue
-    S('Strength','Full body strength training ~30 min. Focus on core, glutes, single-leg work.'), // Wed
+    rest(), // Wed
     R('Run/Walk ×8','1 min run / 2 min walk — repeat 8 times (~24 min). Walk warm-up 5 min + cool-down 5 min.'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('Long Run/Walk ×10','1 min run / 2 min walk — repeat 10 times (~30 min). Easy effort.'), // Sat
   ]);
 
   // Week 2
   weeks.push([
-    C('Cross-train 30 min','30 min easy cross-training: cycling, swimming, elliptical, or brisk walk.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('Run/Walk ×8','90 sec run / 90 sec walk — repeat 8 times (~24 min). Easy effort.'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('Run/Walk ×8','90 sec run / 90 sec walk — repeat 8 times (~24 min).'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('Long Run/Walk ×10','90 sec run / 90 sec walk — repeat 10 times (~30 min). Easy effort.'), // Sat
   ]);
 
   // Week 3
   weeks.push([
-    C('Cross-train 35 min','35 min easy cross-training.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('Run/Walk ×7','2 min run / 1 min walk — repeat 7 times (~21 min). Building run time!'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('Run/Walk ×7','2 min run / 1 min walk — repeat 7 times (~21 min).'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('Long Run/Walk ×10','2 min run / 1 min walk — repeat 10 times (~30 min). Easy pace.'), // Sat
   ]);
 
   // Week 4
   weeks.push([
-    C('Cross-train 35 min','35 min easy cross-training.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('Run/Walk ×6','3 min run / 1 min walk — repeat 6 times (~24 min). Good progress!'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('Run/Walk ×6','3 min run / 1 min walk — repeat 6 times (~24 min).'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('Long Run/Walk ×8','3 min run / 1 min walk — repeat 8 times (~32 min). Easy effort.'), // Sat
   ]);
 
   // Week 5
   weeks.push([
-    C('Cross-train 40 min','40 min easy cross-training.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('Run/Walk ×5','4 min run / 1 min walk — repeat 5 times (~25 min).'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('Run/Walk ×5','4 min run / 1 min walk — repeat 5 times (~25 min).'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('Long Run/Walk 35 min','4 min run / 1 min walk — repeat 7 times (~35 min). Keep it easy.'), // Sat
   ]);
 
   // Week 6
   weeks.push([
-    C('Cross-train 40 min','40 min easy cross-training.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('Run/Walk ×5','5 min run / 1 min walk — repeat 5 times (~30 min). Nearly continuous!'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('20 min continuous','Run continuously for 20 min at easy conversational pace. Big milestone!'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('Run/Walk ×7','5 min run / 1 min walk — repeat 7 times (~42 min). Easy effort.'), // Sat
   ]);
 
   // Week 7
   weeks.push([
-    C('Cross-train 40 min','40 min easy cross-training.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('25 min easy','25 min continuous easy run. Conversational pace throughout.'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('20 min + strides','20 min easy run, then 4×30 sec strides (fast but controlled). Walk 60 sec between.'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('35 min (~5km)','35 min continuous run. You\'re running a 5K! Easy effort.'), // Sat
   ]);
 
   // Week 8
   weeks.push([
-    C('Cross-train 45 min','45 min easy cross-training.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('25 min easy','25 min continuous easy run.'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('25 min + strides','25 min easy run, then strides. 4×30 sec at faster pace.'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('40 min run','40 min continuous run. Easy conversational pace. Great work!'), // Sat
   ]);
 
   // Week 9
   weeks.push([
-    C('Cross-train 45 min','45 min easy cross-training.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('30 min easy','30 min continuous easy run.'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('25 min + 5 strides','25 min easy run + 5×30 sec strides with 60 sec walk recovery.'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('45 min run','45 min continuous easy run. Building that endurance base!'), // Sat
   ]);
 
   // Week 10
   weeks.push([
-    C('Cross-train 45 min','45 min easy cross-training.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('30 min easy','30 min easy continuous run.'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('30 min easy','30 min easy continuous run.'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('50 min (~7-8km)','50 min continuous run. Roughly 7-8km! You are building real fitness.'), // Sat
   ]);
 
   // Week 11
   weeks.push([
-    C('Cross-train 45 min','45 min easy cross-training.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('30 min easy','30 min easy continuous run.'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('Tempo 10/10/10','10 min easy warm-up, 10 min at comfortably hard tempo pace, 10 min easy cool-down.'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('55 min run','55 min continuous easy run. Stay at conversational pace.'), // Sat
   ]);
 
   // Week 12
   weeks.push([
-    C('Cross-train 45 min','45 min easy cross-training.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('35 min easy','35 min easy continuous run.'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('Hills session','15 min easy, then 4×1 min uphill running (hard effort), jog back down, 10 min easy cool-down.'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('60 min (~10km)','60 min easy run — you\'re hitting the 10K distance! Huge milestone!'), // Sat
   ]);
 
   // Week 13
   weeks.push([
-    C('Cross-train 50 min','50 min easy cross-training.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('35 min easy','35 min easy continuous run.'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('Tempo 10/15/10','10 min easy, 15 min tempo (comfortably hard), 10 min easy cool-down.'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('70 min run','70 min easy long run. Focus on time on feet, not pace.'), // Sat
   ]);
 
   // Week 14
   weeks.push([
-    C('Cross-train 50 min','50 min easy cross-training.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('40 min easy','40 min easy continuous run.'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('30 min + 6 strides','30 min easy + 6×30 sec strides. Feeling stronger!'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('75 min (~12km)','75 min easy long run — around 12km. Excellent endurance building!'), // Sat
   ]);
 
   // Week 15
   weeks.push([
-    C('Cross-train 50 min','50 min easy cross-training.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('40 min easy','40 min easy run.'), // Tue
-    S('Strength','Full body strength ~30 min.'), // Wed
+    rest(), // Wed
     R('Tempo 10/20/10','10 min easy, 20 min tempo, 10 min easy. Strong effort today!'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('85 min (~14km)','85 min easy long run — approximately 14km. Almost there!'), // Sat
   ]);
 
   // Week 16
   weeks.push([
-    C('Cross-train 45 min','45 min easy cross-training — slightly reduced as we peak.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('45 min easy','45 min easy run.'), // Tue
-    S('Strength 25 min','Shorter strength session — 25 min. Reduce intensity slightly.'), // Wed
+    rest(), // Wed
     R('35 min + strides','35 min easy + strides. Staying sharp.'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('95 min (~16km)','95 min long run — roughly 16km. Your longest yet!'), // Sat
   ]);
 
@@ -1239,20 +1236,20 @@ function buildPlan() {
     rest(), // Sun — rest this week (peak week)
     rest(), // Mon
     R('45 min easy','45 min easy run. Peak week — keep it controlled!'), // Tue
-    S('Strength 25 min','Strength 25 min — reduced volume.'), // Wed
+    rest(), // Wed
     R('Tempo 10/20/10','10 min easy, 20 min tempo, 10 min easy. Peak effort!'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('105-110 min (~18km)','105-110 min long run — approximately 18km. Your peak training run! Amazing!'), // Sat
   ]);
 
   // Week 18 (Taper begins)
   weeks.push([
-    C('Walk 30 min','30 min easy walk. Taper week — let the body recover.'), // Sun
+    rest(), // Sun
     rest(), // Mon
     R('35 min easy','35 min easy run. Begin taper — trust the process!'), // Tue
-    S('Light Strength 20 min','Light strength 20 min. Maintenance only.'), // Wed
+    rest(), // Wed
     R('30 min + 4 strides','30 min easy + 4×30 sec strides. Keeping legs fresh.'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('75 min easy','75 min easy long run. Noticeably shorter — that\'s the taper!'), // Sat
   ]);
 
@@ -1261,9 +1258,9 @@ function buildPlan() {
     rest(), // Sun
     rest(), // Mon
     R('30 min easy','30 min very easy run. Stay relaxed — trust your training!'), // Tue
-    { type:'cross', short:'Stretch only', desc:'Stretching and mobility work only. No running. ~20-30 min.' }, // Wed
+    rest(), // Wed
     R('25 min + 4 strides','25 min easy + 4×20 sec strides. Keep legs feeling light.'), // Thu
-    yoga(), // Fri
+    rest(), // Fri
     R('45 min easy','45 min easy run. Last somewhat long run before race!'), // Sat
   ]);
 
