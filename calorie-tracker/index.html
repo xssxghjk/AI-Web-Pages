@@ -627,9 +627,8 @@ canvas { display: block; width: 100%; }
 
 <nav class="nav-tabs">
   <button class="tab-btn active" data-tab="log">Log</button>
-  <button class="tab-btn" data-tab="presets">Presets</button>
-  <button class="tab-btn" data-tab="weight">Weight</button>
   <button class="tab-btn" data-tab="dashboard">Dashboard</button>
+  <button class="tab-btn" data-tab="presets">My Foods</button>
 </nav>
 
 <main class="main">
@@ -700,36 +699,55 @@ canvas { display: block; width: 100%; }
     </div>
   </div>
 
-  <!-- ── WEIGHT TAB ── -->
-  <div class="tab-panel" id="tab-weight">
-
-    <div class="wh-stats-grid" id="wh-stats-grid"></div>
-
-    <div class="dash-card full" style="margin-top:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-        <div class="dash-card-title" style="margin-bottom:0">Weight Trend</div>
-        <div class="range-tabs" id="wh-range-tabs">
-          <button class="range-tab active" data-wrange="30">30 Days</button>
-          <button class="range-tab" data-wrange="90">90 Days</button>
-          <button class="range-tab" data-wrange="0">All Time</button>
-        </div>
-      </div>
-      <canvas id="chart-weight" height="180"></canvas>
-    </div>
-
-    <div class="section-hdr" style="margin-top:20px">
-      <span class="section-title">History</span>
-      <button class="btn btn-ghost btn-sm" id="wh-add-btn">+ Log Weight</button>
-    </div>
-    <div id="wh-list"></div>
-    <div id="wh-empty" class="empty-state">No weight entries yet — log your weight on any day.</div>
-
-  </div>
-
   <!-- ── DASHBOARD TAB ── -->
   <div class="tab-panel" id="tab-dashboard">
     <div class="dash-grid">
 
+      <!-- Weight section -->
+      <div class="dash-card full">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+          <div class="dash-card-title" style="margin-bottom:0">Weight Trend</div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div class="range-tabs" id="wh-range-tabs">
+              <button class="range-tab active" data-wrange="30">30d</button>
+              <button class="range-tab" data-wrange="90">90d</button>
+              <button class="range-tab" data-wrange="0">All</button>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="wh-add-btn">+ Log Weight</button>
+          </div>
+        </div>
+        <div class="wh-stats-grid" id="wh-stats-grid"></div>
+        <canvas id="chart-weight" height="160" style="margin-top:12px"></canvas>
+      </div>
+
+      <div class="dash-card full">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+          <div class="dash-card-title" style="margin-bottom:0">Weight History</div>
+        </div>
+        <div id="wh-list" style="max-height:220px;overflow-y:auto"></div>
+        <div id="wh-empty" class="empty-state">No weight entries yet — log your weight on any day.</div>
+      </div>
+
+      <!-- Calories burned section -->
+      <div class="dash-card full">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+          <div class="dash-card-title" style="margin-bottom:0">Calories Burned</div>
+          <div class="range-tabs" id="burned-range-tabs">
+            <button class="range-tab active" data-burn-range="30">30d</button>
+            <button class="range-tab" data-burn-range="60">60d</button>
+            <button class="range-tab" data-burn-range="90">90d</button>
+          </div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#7ab87a"></div>Running</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#5ab4cc"></div>Bouldering</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e87838"></div>Strength</div>
+        </div>
+        <canvas id="chart-burned" height="140"></canvas>
+        <div id="burned-empty" class="empty-state" style="display:none">No activity data in this range — log workouts to see estimates here.</div>
+      </div>
+
+      <!-- Food intake section -->
       <div class="dash-card full">
         <div class="dash-card-title">Weekly Overview</div>
         <div class="chart-legend">
@@ -743,9 +761,9 @@ canvas { display: block; width: 100%; }
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
           <div class="dash-card-title" style="margin-bottom:0">Monthly Overview</div>
           <div class="range-tabs">
-            <button class="range-tab active" data-range="30">30 Days</button>
-            <button class="range-tab" data-range="60">60 Days</button>
-            <button class="range-tab" data-range="90">90 Days</button>
+            <button class="range-tab active" data-range="30">30d</button>
+            <button class="range-tab" data-range="60">60d</button>
+            <button class="range-tab" data-range="90">90d</button>
           </div>
         </div>
         <div class="chart-legend">
@@ -829,7 +847,7 @@ canvas { display: block; width: 100%; }
         <div id="quick-list-wrap">
           <div class="quick-list" id="quick-list"></div>
           <div id="quick-empty" style="display:none" class="empty-state" style="padding:20px 0">
-            No presets yet — create some in the Presets tab.
+            No presets yet — create some in the My Foods tab.
           </div>
         </div>
         <div class="quick-summary" id="quick-summary" style="display:none">
@@ -1100,6 +1118,7 @@ function toast(msg, type = '') {
 let currentDate = dateStr(new Date());
 let monthlyRange = 30;
 let weightRange   = 30;
+let burnedRange   = 30;
 let pendingCounts = {};
 
 // ── Date navigation ──────────────────────────────────────────────────────────
@@ -1137,7 +1156,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.add('active');
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     if (btn.dataset.tab === 'dashboard') renderDashboard();
-    if (btn.dataset.tab === 'weight') renderWeightHistory();
   });
 });
 
@@ -1300,8 +1318,7 @@ document.getElementById('weight-modal-save').addEventListener('click', () => {
   setWeightForDate(target, kg);
   if (target === currentDate) updateWeightCard();
   closeWeightModal();
-  // refresh history tab if it's open
-  if (document.getElementById('tab-weight').classList.contains('active')) renderWeightHistory();
+  if (document.getElementById('tab-dashboard').classList.contains('active')) renderWeightHistory();
   toast('Weight logged for ' + formatDate(target), 'success');
 });
 
@@ -1310,7 +1327,7 @@ document.getElementById('weight-modal-delete').addEventListener('click', () => {
   setWeightForDate(target, 0);
   if (target === currentDate) updateWeightCard();
   closeWeightModal();
-  if (document.getElementById('tab-weight').classList.contains('active')) renderWeightHistory();
+  if (document.getElementById('tab-dashboard').classList.contains('active')) renderWeightHistory();
   toast('Weight entry removed');
 });
 
@@ -1917,20 +1934,142 @@ document.getElementById('preset-modal-save').addEventListener('click', () => {
 });
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
-document.querySelectorAll('.range-tab').forEach(btn => {
+document.querySelectorAll('.range-tab[data-range]').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.range-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.range-tab[data-range]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     monthlyRange = parseInt(btn.dataset.range);
     drawMonthlyChart();
   });
 });
 
+document.getElementById('burned-range-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('[data-burn-range]');
+  if (!btn) return;
+  document.querySelectorAll('#burned-range-tabs .range-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  burnedRange = parseInt(btn.dataset.burnRange);
+  drawBurnedCaloriesChart();
+});
+
 function renderDashboard() {
+  renderWeightHistory();
+  drawBurnedCaloriesChart();
   drawWeeklyChart();
   drawMonthlyChart();
   renderStats();
   renderTopFoods();
+}
+
+function getDailyBurned(days) {
+  const today = new Date();
+  const result = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = dateStr(d);
+    const run  = getRunningActivity(key);
+    const boul = getBoulderingActivity(key);
+    const work = getWorkoutActivity(key);
+    result.push({
+      date: key,
+      running:    run?.kcal  || 0,
+      bouldering: boul?.kcal || 0,
+      workout:    work?.kcal || 0,
+      hasData: !!(run || boul || work),
+    });
+  }
+  return result;
+}
+
+function drawBurnedCaloriesChart() {
+  const data   = getDailyBurned(burnedRange);
+  const canvas = document.getElementById('chart-burned');
+  const emptyEl = document.getElementById('burned-empty');
+  if (!canvas) return;
+
+  const anyData = data.some(d => d.hasData);
+  if (!anyData) {
+    canvas.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = '';
+    return;
+  }
+  canvas.style.display = '';
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.style.width  = '';
+  canvas.style.height = '';
+  const W = canvas.offsetWidth;
+  if (!canvas.dataset.chartHeight) canvas.dataset.chartHeight = canvas.getAttribute('height') || '140';
+  const H = parseInt(canvas.dataset.chartHeight) || 140;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const pad  = { top: 12, right: 8, bottom: 28, left: 44 };
+  const cW   = W - pad.left - pad.right;
+  const cH   = H - pad.top  - pad.bottom;
+  const n    = data.length;
+  const COLORS = { running: '#7ab87a', bouldering: '#5ab4cc', workout: '#e87838' };
+
+  const maxTotal = Math.max(...data.map(d => d.running + d.bouldering + d.workout), 1);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(58,48,37,0.8)';
+  ctx.lineWidth   = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + cH - (i / 4) * cH;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cW, y); ctx.stroke();
+    ctx.fillStyle = '#5a5040';
+    ctx.font = '10px DM Serif Text, Georgia, serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.round((i / 4) * maxTotal), pad.left - 4, y + 3);
+  }
+
+  const barGroupW = cW / n;
+  const barW      = Math.max(4, Math.min(barGroupW * 0.55, 20));
+
+  data.forEach((d, i) => {
+    const cx     = pad.left + i * barGroupW + barGroupW / 2 - barW / 2;
+    const total  = d.running + d.bouldering + d.workout;
+    const alpha  = d.hasData ? 0.85 : 0.15;
+    let yOffset  = pad.top + cH;
+
+    // Stacked bars: running (bottom), bouldering (middle), workout (top)
+    for (const sport of ['running', 'bouldering', 'workout']) {
+      const val = d[sport];
+      if (val <= 0) continue;
+      const bh = Math.max(2, (val / maxTotal) * cH);
+      yOffset -= bh;
+      ctx.fillStyle = COLORS[sport];
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.roundRect(cx, yOffset, barW, bh, [2, 2, 0, 0]);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // X label
+    const step = Math.max(1, Math.ceil(n / 10));
+    if (i % step === 0 || i === n - 1) {
+      const day = parseDate(d.date);
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const label = burnedRange <= 31
+        ? String(day.getDate())
+        : (i % 7 === 0 ? months[day.getMonth()] + ' ' + day.getDate() : '');
+      if (label) {
+        ctx.fillStyle = '#5a5040';
+        ctx.font = '9px DM Serif Text, Georgia, serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, cx + barW / 2, H - pad.bottom + 12);
+      }
+    }
+  });
 }
 
 function getDailyTotals(days) {
