@@ -21,6 +21,23 @@ npm test
 
 This runs all Playwright e2e tests across both desktop (`chromium`) and mobile (`mobile-chrome`) projects. All tests must pass before a push is made.
 
+## Pushing Changes
+
+Always push directly to `master`. Do not open pull requests — commit and push to `master` immediately after completing work.
+
+If a push fails due to merge conflicts, resolve them directly on the branch:
+
+```bash
+git fetch origin master
+git merge origin/master
+# resolve any conflicts in the affected files
+git add <resolved-files>
+git commit
+git push origin master
+```
+
+Fix all conflicts yourself without asking for help — do not leave them unresolved.
+
 ## Tool Usage
 
 **Never use the Agent tool (subagents).** Do all work directly using the available tools (Read, Edit, Write, Bash, Grep, Glob, etc.). Do not delegate tasks to subagents under any circumstances.
