@@ -1596,6 +1596,29 @@ function estimateWorkoutDuration(workout) {
   return 30;
 }
 
+// Returns the closest logged weight (kg) for a given dateStr.
+// Checks the calorie tracker's 'calorie_weights' store first, then falls back to appData.weightKg.
+function getWeightForDate(dateStr) {
+  try {
+    const raw = localStorage.getItem('calorie_weights');
+    if (raw) {
+      const weights = JSON.parse(raw);
+      const dates = Object.keys(weights).filter(d => weights[d] > 0);
+      if (dates.length > 0) {
+        const target = new Date(dateStr + 'T00:00:00').getTime();
+        let closest = null, minDiff = Infinity;
+        for (const d of dates) {
+          const diff = Math.abs(new Date(d + 'T00:00:00').getTime() - target);
+          if (diff < minDiff) { minDiff = diff; closest = d; }
+        }
+        if (closest) return { kg: weights[closest], source: closest };
+      }
+    }
+  } catch {}
+  const kg = appData.weightKg || null;
+  return kg ? { kg, source: 'default' } : null;
+}
+
 function calcWorkoutCalories(workout, loggedMin, weightKg) {
   const met = getWorkoutMET(workout);
   if (!met || !weightKg) return 0;
@@ -1603,17 +1626,18 @@ function calcWorkoutCalories(workout, loggedMin, weightKg) {
   return Math.round(met * weightKg * duration / 60);
 }
 
-function calcTotalCalories(weightKg) {
-  if (!weightKg) return 0;
+function calcTotalCalories() {
   let total = 0;
   for (const [key, val] of Object.entries(appData.days)) {
     if (!val.km) continue;
-    total += Math.round(weightKg * val.km);
+    const w = getWeightForDate(key);
+    if (!w) continue;
+    total += Math.round(w.kg * val.km);
   }
   return total;
 }
 
-function buildCalorieRows(weightKg) {
+function buildCalorieRows() {
   const rows = [];
   for (const [key, val] of Object.entries(appData.days)) {
     if (!val.km) continue;
@@ -1621,8 +1645,10 @@ function buildCalorieRows(weightKg) {
     const wd = getWeekDayForDate(d);
     if (!wd) continue;
     const workout = PLAN[wd.weekNum - 1][wd.dayOfWeek];
-    const calories = Math.round(weightKg * val.km);
-    rows.push({ key, date: d, workout, km: val.km, calories });
+    const w = getWeightForDate(key);
+    if (!w) continue;
+    const calories = Math.round(w.kg * val.km);
+    rows.push({ key, date: d, workout, km: val.km, calories, weightKg: w.kg, weightSource: w.source });
   }
   rows.sort((a, b) => b.date - a.date);
   return rows;
@@ -1670,11 +1696,14 @@ function renderStats() {
 
   // Stats grid
   const weightKg = appData.weightKg || null;
-  const totalCal = calcTotalCalories(weightKg);
+  const hasAnyWeight = weightKg || (() => {
+    try { const w = JSON.parse(localStorage.getItem('calorie_weights') || 'null'); return w && Object.keys(w).length > 0; } catch { return false; }
+  })();
+  const totalCal = calcTotalCalories();
   const weightDisplay = weightKg ? `${weightKg} kg` : '—';
-  const calDisplay = weightKg ? `~${totalCal.toLocaleString()}` : '—';
-  const calOnclick = weightKg ? 'openCalorieDetails()' : 'openWeightModal()';
-  const calHint = weightKg ? 'details ↗' : 'set weight first';
+  const calDisplay = hasAnyWeight ? `~${totalCal.toLocaleString()}` : '—';
+  const calOnclick = hasAnyWeight ? 'openCalorieDetails()' : 'openWeightModal()';
+  const calHint = hasAnyWeight ? 'details ↗' : 'set weight first';
 
   document.getElementById('statsGrid').innerHTML = `
     <div class="stat-card">
@@ -2394,34 +2423,39 @@ function closeWeightOutside(e) {
 }
 
 function openCalorieDetails() {
-  const weightKg = appData.weightKg;
-  if (!weightKg) { openWeightModal(); return; }
+  const rows = buildCalorieRows();
+  if (rows.length === 0 && !appData.weightKg) { openWeightModal(); return; }
 
-  const rows = buildCalorieRows(weightKg);
   const total = rows.reduce((s, r) => s + r.calories, 0);
 
   let tableHtml;
   if (rows.length === 0) {
     tableHtml = '<div style="color:var(--text2);font-size:13px;padding:12px 0;">No runs with tracked kilometres yet.</div>';
   } else {
-    const rowsHtml = rows.map(r => `
+    const rowsHtml = rows.map(r => {
+      const weightLabel = r.weightSource !== 'default' ? `${r.weightKg} kg` : `${r.weightKg} kg*`;
+      return `
       <tr>
         <td>${formatDate(r.date)}</td>
         <td>${r.workout.short}</td>
         <td>${r.km}</td>
+        <td style="color:var(--text2);font-size:11px;">${weightLabel}</td>
         <td style="font-weight:700;color:var(--accent);">~${r.calories}</td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
+    const hasDefault = rows.some(r => r.weightSource === 'default');
     tableHtml = `
       <div style="overflow-y:auto;max-height:260px;margin-top:12px;border:1px solid var(--border);border-radius:8px;padding:2px 8px;">
         <table class="cal-detail-table">
           <thead>
             <tr>
-              <th>Date</th><th>Workout</th><th>km</th><th>kcal</th>
+              <th>Date</th><th>Workout</th><th>km</th><th>Weight</th><th>kcal</th>
             </tr>
           </thead>
           <tbody>${rowsHtml}</tbody>
         </table>
-      </div>`;
+      </div>
+      ${hasDefault ? '<div style="font-size:10px;color:var(--text2);margin-top:6px;">* fallback weight — log daily weights in the Calorie Tracker for more accurate estimates.</div>' : ''}`;
   }
 
   document.getElementById('calorieModalBody').innerHTML = `
@@ -2433,7 +2467,7 @@ function openCalorieDetails() {
       </div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-      <div style="font-size:13px;">Body weight: <strong>${weightKg}&thinsp;kg</strong></div>
+      <div style="font-size:12px;color:var(--text2);">Weight sourced from Calorie Tracker (closest date). <button class="btn btn-ghost btn-sm" onclick="document.getElementById('calorieModal').classList.add('hidden');openWeightModal();" style="margin-left:6px;vertical-align:middle;">Edit fallback</button></div>
       <button class="btn btn-ghost btn-sm" onclick="document.getElementById('calorieModal').classList.add('hidden');openWeightModal();">Edit weight</button>
     </div>
     ${tableHtml}
