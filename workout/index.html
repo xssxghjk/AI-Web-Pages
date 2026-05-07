@@ -21,6 +21,7 @@
   --text2:   #9a8a76;
   --muted:   #7a6e60;
   --muted2:  #5a5040;
+  --skip-c:  #8a7a9a;
 }
 html { overflow-x: hidden; }
 body {
@@ -75,7 +76,7 @@ body::before {
 /* ── WEEK NAV ── */
 .week-nav {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 16px; gap: 10px;
+  margin-bottom: 6px; gap: 10px;
 }
 .week-label {
   font-family: 'Cormorant Garamond', Georgia, serif;
@@ -91,6 +92,64 @@ body::before {
 }
 .nav-btn:hover:not(:disabled) { border-color: var(--text2); color: var(--text); }
 .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+/* ── SCHEDULE TOGGLE ── */
+.schedule-toggle-row {
+  text-align: center;
+  margin-bottom: 16px;
+}
+.schedule-toggle-btn {
+  background: none; border: none;
+  color: var(--muted); font-size: 10px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  font-style: italic; cursor: pointer;
+  transition: color 0.15s;
+  font-family: 'DM Serif Text', Georgia, serif;
+}
+.schedule-toggle-btn:hover { color: var(--text2); }
+
+/* ── SCHEDULE PANEL ── */
+.schedule-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  padding: 0 16px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  margin-bottom: 0;
+}
+.schedule-panel.open {
+  max-height: 200px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.schedule-panel-title {
+  font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--muted);
+  font-style: italic; margin-bottom: 12px;
+}
+.schedule-rows { display: flex; flex-direction: column; gap: 8px; }
+.schedule-row {
+  display: flex; align-items: center; gap: 12px;
+}
+.schedule-session-name {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px; font-weight: 700;
+  min-width: 40px;
+}
+.schedule-select {
+  background: var(--surf2); border: 1px solid var(--border);
+  color: var(--text); padding: 4px 8px;
+  font-family: 'DM Serif Text', Georgia, serif;
+  font-size: 12px; cursor: pointer;
+  flex: 1; max-width: 150px;
+}
+.schedule-select:focus { outline: 1px solid var(--accent); }
+.schedule-hint {
+  font-size: 10px; color: var(--muted2); font-style: italic;
+  margin-top: 10px;
+}
 
 /* ── STATS ── */
 .stats-row {
@@ -136,6 +195,7 @@ body::before {
 }
 .day-card.workout-day { border-top-color: var(--dc, var(--accent)); }
 .day-card.done { background: rgba(var(--dc-r, 196,134,74), 0.06); }
+.day-card.skipped { background: rgba(138,122,154,0.05); }
 .day-card.today { box-shadow: inset 0 0 0 1px var(--text2); }
 .day-card.future { opacity: 0.5; }
 
@@ -157,6 +217,13 @@ body::before {
   display: none;
 }
 .day-card.done .done-check { display: block; }
+.skip-mark {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px; font-weight: 700;
+  color: var(--skip-c);
+  display: none;
+}
+.day-card.skipped .skip-mark { display: block; }
 
 .day-body { flex: 1; }
 .muscle-name {
@@ -165,6 +232,7 @@ body::before {
   color: var(--dc, var(--accent));
   line-height: 1.2; margin-bottom: 5px;
 }
+.day-card.skipped .muscle-name { color: var(--skip-c); }
 .muscle-focus {
   font-size: 9px; color: var(--muted);
   font-style: italic; line-height: 1.45;
@@ -175,24 +243,53 @@ body::before {
   font-style: italic; margin-top: 4px;
 }
 
-.check-btn {
+/* ── CARD ACTIONS ── */
+.card-actions {
   margin-top: auto;
-  padding: 7px 0 0;
-  background: none; border: none;
+  padding-top: 7px;
   border-top: 1px solid rgba(var(--dc-r, 196,134,74), 0.2);
+  display: flex; align-items: center; gap: 6px;
+}
+.day-card.skipped .card-actions { border-top-color: rgba(138,122,154,0.2); }
+
+.check-btn {
+  background: none; border: none;
   color: var(--dc, var(--text2));
-  width: 100%;
   font-family: 'DM Serif Text', Georgia, serif;
   font-size: 11px; cursor: pointer;
-  text-align: left;
+  text-align: left; padding: 0; flex: 1;
   transition: color 0.15s;
 }
 .check-btn:hover { color: var(--text); }
-.check-btn.done-btn {
+
+.skip-btn {
+  background: none; border: none;
   color: var(--muted2);
-  border-top-color: var(--border);
+  font-family: 'DM Serif Text', Georgia, serif;
+  font-size: 10px; cursor: pointer;
+  padding: 0; font-style: italic;
+  transition: color 0.15s; white-space: nowrap;
 }
-.check-btn.done-btn:hover { color: #c44840; }
+.skip-btn:hover { color: var(--skip-c); }
+
+.done-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px; color: var(--dc, var(--accent));
+  flex: 1;
+}
+.skipped-label {
+  font-size: 10px; color: var(--skip-c);
+  font-style: italic; flex: 1;
+}
+.undo-btn {
+  background: none; border: none;
+  color: var(--muted2);
+  font-family: 'DM Serif Text', Georgia, serif;
+  font-size: 10px; cursor: pointer;
+  padding: 0; font-style: italic;
+  transition: color 0.15s;
+}
+.undo-btn:hover { color: var(--text2); }
 
 .future-label {
   margin-top: auto;
@@ -221,10 +318,12 @@ body::before {
     border-top-color: var(--border);
     border-left-color: var(--dc, var(--accent));
   }
+  .day-card.skipped { border-left-color: var(--skip-c); }
   .day-card.today {
     box-shadow: none;
     outline: 1px solid var(--text2);
   }
+  .done-check, .skip-mark { display: none !important; }
   .day-top {
     flex-direction: column;
     align-items: flex-start;
@@ -233,25 +332,30 @@ body::before {
     min-width: 38px;
     gap: 2px;
   }
-  .done-check { display: none !important; }
   .day-body { margin-top: 0; flex: 1; }
   .muscle-name { font-size: 13px; }
   .muscle-focus { font-size: 9px; }
-  .check-btn {
+  .card-actions {
     margin-top: 0;
-    padding: 0 0 0 10px;
+    padding-top: 0;
     border-top: none;
+    padding-left: 10px;
     border-left: 1px solid rgba(var(--dc-r, 196,134,74), 0.25);
-    width: auto;
-    white-space: nowrap;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    min-width: 64px;
   }
-  .check-btn.done-btn { border-left-color: var(--border); }
+  .day-card.skipped .card-actions { border-left-color: rgba(138,122,154,0.3); }
   .future-label {
     margin-top: 0;
     padding-top: 0;
     border-top: none;
     white-space: nowrap;
   }
+  .schedule-rows { flex-direction: row; flex-wrap: wrap; gap: 12px; }
+  .schedule-row { flex-direction: column; gap: 4px; align-items: flex-start; }
+  .schedule-select { max-width: 120px; }
 }
 
 /* ── DIVIDER ── */
@@ -280,12 +384,92 @@ body::before {
   border-radius: 50%; flex-shrink: 0;
 }
 .dot-miss { background: var(--muted2); }
+.dot-skip { background: transparent; border: 1.5px solid var(--skip-c); }
 .hist-frac {
   font-family: 'Space Mono', monospace;
   font-size: 10px; color: var(--muted2);
   margin-left: auto;
 }
 .hist-frac.perfect { color: var(--accent); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(28,24,20,0.88);
+  z-index: 2000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--bord2);
+  border-top: 3px solid var(--accent);
+  padding: 20px 24px 18px;
+  min-width: 280px; max-width: 360px; width: 100%;
+  transform: translateY(8px);
+  transition: transform 0.2s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-session {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 20px; font-weight: 700; font-style: italic;
+  margin-bottom: 2px;
+}
+.modal-date {
+  font-size: 11px; color: var(--text2);
+  margin-bottom: 16px; font-style: italic;
+}
+.modal-label {
+  font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--muted);
+  font-style: italic; margin-bottom: 8px;
+}
+.dur-presets {
+  display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;
+}
+.dur-preset {
+  background: var(--surf2); border: 1px solid var(--border);
+  color: var(--text2);
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  padding: 5px 10px; cursor: pointer;
+  transition: all 0.15s;
+}
+.dur-preset:hover, .dur-preset.active {
+  border-color: var(--accent); color: var(--text);
+  background: rgba(196,134,74,0.08);
+}
+.dur-custom-row {
+  display: flex; gap: 8px; align-items: center;
+  margin-bottom: 14px;
+}
+.dur-input {
+  background: var(--surf2); border: 1px solid var(--border);
+  color: var(--text); padding: 5px 8px;
+  font-family: 'Space Mono', monospace; font-size: 12px;
+  width: 64px; text-align: center;
+}
+.dur-input:focus { outline: 1px solid var(--accent); }
+.dur-unit { font-size: 11px; color: var(--muted); }
+.modal-actions { display: flex; gap: 8px; align-items: center; }
+.btn-log {
+  background: var(--accent); border: none;
+  color: #1c1814; padding: 8px 18px;
+  font-family: 'DM Serif Text', Georgia, serif;
+  font-size: 13px; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-log:hover { opacity: 0.85; }
+.btn-cancel {
+  background: none; border: 1px solid var(--border);
+  color: var(--text2); padding: 8px 14px;
+  font-family: 'DM Serif Text', Georgia, serif;
+  font-size: 13px; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-cancel:hover { border-color: var(--text2); color: var(--text); }
 
 /* ── FOOTER ── */
 .app-footer {
@@ -313,7 +497,7 @@ body::before {
 <header class="app-header">
   <div class="header-inner">
     <h1 class="app-title">Workout <span>Plan</span></h1>
-    <div class="header-sub">Push · Pull · Legs — Mon · Wed · Fri</div>
+    <div class="header-sub" id="header-sub">Push · Pull · Legs</div>
   </div>
   <div class="type-spectrum" aria-hidden="true">
     <span style="background:#e87838"></span>
@@ -328,6 +512,15 @@ body::before {
     <button class="nav-btn" id="btn-prev">← Prev</button>
     <span class="week-label" id="week-label"></span>
     <button class="nav-btn" id="btn-next">Next →</button>
+  </div>
+  <div class="schedule-toggle-row">
+    <button class="schedule-toggle-btn" id="btn-schedule-toggle">⚙ adjust schedule</button>
+  </div>
+
+  <div class="schedule-panel" id="schedule-panel">
+    <div class="schedule-panel-title">Workout Schedule — drag days to fit your week</div>
+    <div class="schedule-rows" id="schedule-rows"></div>
+    <div class="schedule-hint">Swapping two sessions exchanges their days automatically.</div>
   </div>
 
   <div class="stats-row">
@@ -361,26 +554,79 @@ body::before {
 
 <div id="toast"></div>
 
+<!-- Duration modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal">
+    <div class="modal-session" id="modal-session-name"></div>
+    <div class="modal-date" id="modal-date"></div>
+    <div class="modal-label">Duration</div>
+    <div class="dur-presets">
+      <button class="dur-preset" data-min="30">30 min</button>
+      <button class="dur-preset" data-min="45">45 min</button>
+      <button class="dur-preset" data-min="60">60 min</button>
+      <button class="dur-preset" data-min="90">90 min</button>
+    </div>
+    <div class="dur-custom-row">
+      <input class="dur-input" id="dur-input" type="number" min="1" max="300" placeholder="—">
+      <span class="dur-unit">min</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-log" id="btn-log">Log Session</button>
+      <button class="btn-cancel" id="btn-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const SK = 'workout_plan_v2';
+const SK = 'workout_plan_v3';
+const DEFAULT_SCHEDULE = [1, 3, 5];
 
-const SESSIONS = {
-  1: { name: 'Push',  muscles: 'Chest · Shoulders · Triceps · Core',         color: '#e87838', rgb: '232,120,56'  },
-  3: { name: 'Pull',  muscles: 'Back · Rear Delts · Biceps · Grip',           color: '#4ec994', rgb: '78,201,148'  },
-  5: { name: 'Legs',  muscles: 'Glutes · Hamstrings · Lower Back · Hips',     color: '#7a9de8', rgb: '122,157,232' },
-};
-const WORKOUT_DAYS = new Set([1, 3, 5]); // Mon, Wed, Fri
-const DAY_NAMES    = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+const SESSION_TYPES = [
+  { name: 'Push', muscles: 'Chest · Shoulders · Triceps · Core',       color: '#e87838', rgb: '232,120,56'  },
+  { name: 'Pull', muscles: 'Back · Rear Delts · Biceps · Grip',         color: '#4ec994', rgb: '78,201,148'  },
+  { name: 'Legs', muscles: 'Glutes · Hamstrings · Lower Back · Hips',   color: '#7a9de8', rgb: '122,157,232' },
+];
+const DAY_NAMES = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+const DAY_LONG  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-let viewOffset = 0; // weeks from current week
+let viewOffset = 0;
+let scheduleOpen = false;
+let modalState = null; // { iso, session }
 
-function load() {
-  try { return new Set(JSON.parse(localStorage.getItem(SK) || '[]')); }
-  catch { return new Set(); }
+// ── Data ────────────────────────────────────────────
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(SK);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  // Migrate from v2 (Set of ISO strings)
+  try {
+    const old = localStorage.getItem('workout_plan_v2');
+    if (old) {
+      const entries = {};
+      JSON.parse(old).forEach(iso => { entries[iso] = { status: 'done', duration: null }; });
+      return { entries, schedule: [...DEFAULT_SCHEDULE] };
+    }
+  } catch {}
+  return { entries: {}, schedule: [...DEFAULT_SCHEDULE] };
 }
-function save(set) {
-  localStorage.setItem(SK, JSON.stringify([...set]));
+
+function saveData(data) {
+  localStorage.setItem(SK, JSON.stringify(data));
 }
+
+function getSchedule(data) {
+  return Array.isArray(data.schedule) && data.schedule.length === 3
+    ? data.schedule : [...DEFAULT_SCHEDULE];
+}
+
+function getSessionByDow(schedule, dow) {
+  const idx = schedule.indexOf(dow);
+  return idx >= 0 ? SESSION_TYPES[idx] : null;
+}
+
+// ── Date utils ──────────────────────────────────────
 
 function toIso(d) {
   return d.getFullYear() + '-' +
@@ -398,36 +644,40 @@ function getMonday(offset) {
 function getWeekDays(offset) {
   const mon = getMonday(offset);
   return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(mon);
-    d.setDate(mon.getDate() + i);
-    return d;
+    const d = new Date(mon); d.setDate(mon.getDate() + i); return d;
   });
 }
 
-function calcStats(completions) {
+// ── Stats ────────────────────────────────────────────
+
+function calcStats(data) {
+  const schedule = getSchedule(data);
   const today = todayIso();
+  const twDays = getWeekDays(0).filter(d => schedule.includes(d.getDay()));
+  const twDone = twDays.filter(d => data.entries[toIso(d)]?.status === 'done').length;
 
-  const twDays = getWeekDays(0).filter(d => WORKOUT_DAYS.has(d.getDay()));
-  const twDone = twDays.filter(d => completions.has(toIso(d))).length;
-
-  // Streak: consecutive completed workout days going backward from today
   let streak = 0;
   const now = new Date(); now.setHours(0, 0, 0, 0);
   for (let i = 0; i < 730; i++) {
     const d = new Date(now); d.setDate(now.getDate() - i);
-    if (!WORKOUT_DAYS.has(d.getDay())) continue;
+    if (!schedule.includes(d.getDay())) continue;
     const iso = toIso(d);
     if (iso > today) continue;
-    if (iso === today && !completions.has(iso)) continue; // today not done yet — don't break
-    if (completions.has(iso)) streak++;
+    const entry = data.entries[iso];
+    if (iso === today && !entry) continue; // today not logged yet — benefit of doubt
+    if (entry?.status === 'done') streak++;
     else break;
   }
 
-  return { twDone, twTotal: twDays.length, streak, total: completions.size };
+  const total = Object.values(data.entries).filter(e => e.status === 'done').length;
+  return { twDone, twTotal: twDays.length, streak, total };
 }
 
+// ── Render ──────────────────────────────────────────
+
 function render() {
-  const completions = load();
+  const data = loadData();
+  const schedule = getSchedule(data);
   const today = todayIso();
   const days = getWeekDays(viewOffset);
 
@@ -438,30 +688,83 @@ function render() {
   document.getElementById('btn-prev').disabled = viewOffset <= -52;
   document.getElementById('btn-next').disabled = viewOffset >= 0;
 
-  const { twDone, twTotal, streak, total } = calcStats(completions);
-  document.getElementById('stat-week').textContent    = twDone + '/' + twTotal;
-  document.getElementById('stat-streak').textContent  = streak;
-  document.getElementById('stat-total').textContent   = total;
+  const { twDone, twTotal, streak, total } = calcStats(data);
+  document.getElementById('stat-week').textContent   = twDone + '/' + twTotal;
+  document.getElementById('stat-streak').textContent = streak;
+  document.getElementById('stat-total').textContent  = total;
 
+  document.getElementById('header-sub').textContent =
+    'Push · Pull · Legs — ' + schedule.map(d => DAY_NAMES[d]).join(' · ');
+
+  renderSchedulePanel(schedule);
+  renderGrid(data, schedule, days, today);
+  renderHistory(data, schedule, today);
+}
+
+function renderSchedulePanel(schedule) {
+  const container = document.getElementById('schedule-rows');
+  container.innerHTML = '';
+  SESSION_TYPES.forEach((sess, idx) => {
+    const row = document.createElement('div');
+    row.className = 'schedule-row';
+
+    const label = document.createElement('span');
+    label.className = 'schedule-session-name';
+    label.style.color = sess.color;
+    label.textContent = sess.name;
+
+    const sel = document.createElement('select');
+    sel.className = 'schedule-select';
+    for (let d = 0; d < 7; d++) {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = DAY_LONG[d];
+      if (d === schedule[idx]) opt.selected = true;
+      sel.appendChild(opt);
+    }
+    sel.addEventListener('change', () => {
+      const newDow = parseInt(sel.value);
+      const data = loadData();
+      const s = getSchedule(data);
+      const conflictIdx = s.indexOf(newDow);
+      if (conflictIdx >= 0 && conflictIdx !== idx) {
+        s[conflictIdx] = s[idx]; // swap: give conflicting session the old day
+      }
+      s[idx] = newDow;
+      data.schedule = s;
+      saveData(data);
+      render();
+    });
+
+    row.appendChild(label);
+    row.appendChild(sel);
+    container.appendChild(row);
+  });
+}
+
+function renderGrid(data, schedule, days, today) {
   const grid = document.getElementById('week-grid');
   grid.innerHTML = '';
 
   for (const d of days) {
     const iso       = toIso(d);
     const dow       = d.getDay();
-    const isWorkout = WORKOUT_DAYS.has(dow);
-    const isDone    = completions.has(iso);
+    const session   = getSessionByDow(schedule, dow);
+    const isWorkout = !!session;
+    const entry     = data.entries[iso];
+    const isDone    = entry?.status === 'done';
+    const isSkipped = entry?.status === 'skipped';
     const isFuture  = iso > today;
     const isToday   = iso === today;
-    const session   = SESSIONS[dow];
 
     const card = document.createElement('div');
     card.className = [
       'day-card',
-      isWorkout ? 'workout-day' : 'rest-day',
-      isDone    ? 'done'        : '',
-      isToday   ? 'today'       : '',
-      isFuture  ? 'future'      : '',
+      isWorkout  ? 'workout-day' : 'rest-day',
+      isDone     ? 'done'        : '',
+      isSkipped  ? 'skipped'     : '',
+      isToday    ? 'today'       : '',
+      isFuture   ? 'future'      : '',
     ].filter(Boolean).join(' ');
 
     if (isWorkout && session) {
@@ -470,32 +773,59 @@ function render() {
     }
 
     if (isWorkout && session) {
-      let action = '';
-      if (!isFuture) {
-        action = `<button class="check-btn${isDone ? ' done-btn' : ''}" data-date="${iso}">${isDone ? '✓ Done' : 'Check off'}</button>`;
+      let actionHtml = '';
+      if (isFuture) {
+        actionHtml = '<div class="future-label">upcoming</div>';
+      } else if (isDone) {
+        const dur = entry.duration ? entry.duration + ' min' : 'done';
+        actionHtml = `<div class="card-actions">
+          <span class="done-label">✓ ${dur}</span>
+          <button class="undo-btn" data-date="${iso}">undo</button>
+        </div>`;
+      } else if (isSkipped) {
+        actionHtml = `<div class="card-actions">
+          <span class="skipped-label">× skipped</span>
+          <button class="undo-btn" data-date="${iso}">undo</button>
+        </div>`;
       } else {
-        action = '<div class="future-label">upcoming</div>';
+        actionHtml = `<div class="card-actions">
+          <button class="check-btn" data-date="${iso}">Check off</button>
+          <button class="skip-btn" data-date="${iso}">skip</button>
+        </div>`;
       }
+
       card.innerHTML = `
         <div class="day-top">
           <span class="day-name">${DAY_NAMES[dow]}</span>
           <span class="done-check">✓</span>
+          <span class="skip-mark">×</span>
         </div>
         <div class="day-body">
           <div class="muscle-name">${session.name}</div>
           <div class="muscle-focus">${session.muscles}</div>
         </div>
-        ${action}
+        ${actionHtml}
       `;
+
       if (!isFuture) {
-        card.querySelector('.check-btn').addEventListener('click', () => {
-          const s = load();
-          if (s.has(iso)) s.delete(iso);
-          else s.add(iso);
-          save(s);
-          toast(s.has(iso) ? 'Session logged!' : 'Removed');
-          render();
-        });
+        if (isDone || isSkipped) {
+          card.querySelector('.undo-btn').addEventListener('click', () => {
+            const d2 = loadData();
+            delete d2.entries[iso];
+            saveData(d2);
+            toast('Entry removed');
+            render();
+          });
+        } else {
+          card.querySelector('.check-btn').addEventListener('click', () => openModal(iso, session));
+          card.querySelector('.skip-btn').addEventListener('click', () => {
+            const d2 = loadData();
+            d2.entries[iso] = { status: 'skipped' };
+            saveData(d2);
+            toast('Workout skipped');
+            render();
+          });
+        }
       }
     } else {
       card.innerHTML = `
@@ -510,21 +840,20 @@ function render() {
 
     grid.appendChild(card);
   }
-
-  renderHistory(completions, today);
 }
 
-function renderHistory(completions, today) {
+function renderHistory(data, schedule, today) {
   const el = document.getElementById('history');
   el.innerHTML = '';
   const rows = [];
 
   for (let w = -1; w >= -52; w--) {
     const wdays = getWeekDays(w);
-    const pastWo = wdays.filter(d => WORKOUT_DAYS.has(d.getDay()) && toIso(d) <= today);
+    const pastWo = wdays.filter(d => schedule.includes(d.getDay()) && toIso(d) <= today);
     if (!pastWo.length) continue;
-    const done = pastWo.filter(d => completions.has(toIso(d))).length;
-    rows.push({ mon: wdays[0], days: pastWo, done, total: pastWo.length });
+    const done    = pastWo.filter(d => data.entries[toIso(d)]?.status === 'done').length;
+    const total   = pastWo.length;
+    rows.push({ mon: wdays[0], days: pastWo, done, total });
     if (rows.length >= 10) break;
   }
 
@@ -538,9 +867,15 @@ function renderHistory(completions, today) {
     const div = document.createElement('div');
     div.className = 'hist-row';
     const dotsHtml = wdays.map(d => {
-      const session = SESSIONS[d.getDay()];
-      const isDone  = completions.has(toIso(d));
-      return `<span class="hist-dot${isDone ? '' : ' dot-miss'}" ${isDone ? `style="background:${session.color}"` : ''}></span>`;
+      const iso   = toIso(d);
+      const entry = data.entries[iso];
+      const sess  = getSessionByDow(schedule, d.getDay());
+      if (entry?.status === 'done') {
+        return `<span class="hist-dot" style="background:${sess?.color || '#c4864a'}"></span>`;
+      } else if (entry?.status === 'skipped') {
+        return `<span class="hist-dot dot-skip"></span>`;
+      }
+      return `<span class="hist-dot dot-miss"></span>`;
     }).join('');
     div.innerHTML = `
       <span class="hist-week">${mon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
@@ -551,6 +886,86 @@ function renderHistory(completions, today) {
   }
 }
 
+// ── Modal ────────────────────────────────────────────
+
+function openModal(iso, session) {
+  modalState = { iso, session };
+  const modal = document.getElementById('modal');
+  modal.style.borderTopColor = session.color;
+
+  const nameEl = document.getElementById('modal-session-name');
+  nameEl.textContent = session.name + ' Session';
+  nameEl.style.color = session.color;
+
+  const d = new Date(iso + 'T00:00:00');
+  document.getElementById('modal-date').textContent =
+    d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  document.getElementById('dur-input').value = '';
+  document.querySelectorAll('.dur-preset').forEach(b => b.classList.remove('active'));
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('dur-input').focus();
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  modalState = null;
+}
+
+function logSession(duration) {
+  if (!modalState) return;
+  const data = loadData();
+  data.entries[modalState.iso] = { status: 'done', duration: duration || null };
+  saveData(data);
+  closeModal();
+  toast(duration ? `Logged — ${duration} min` : 'Session logged!');
+  render();
+}
+
+document.querySelectorAll('.dur-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.dur-preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('dur-input').value = btn.dataset.min;
+  });
+});
+
+document.getElementById('dur-input').addEventListener('input', () => {
+  document.querySelectorAll('.dur-preset').forEach(b => b.classList.remove('active'));
+});
+
+document.getElementById('btn-log').addEventListener('click', () => {
+  const raw = parseInt(document.getElementById('dur-input').value);
+  logSession(raw > 0 && raw <= 300 ? raw : null);
+});
+
+document.getElementById('btn-cancel').addEventListener('click', closeModal);
+
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ── Schedule toggle ──────────────────────────────────
+
+document.getElementById('btn-schedule-toggle').addEventListener('click', () => {
+  scheduleOpen = !scheduleOpen;
+  document.getElementById('schedule-panel').classList.toggle('open', scheduleOpen);
+  document.getElementById('btn-schedule-toggle').textContent =
+    scheduleOpen ? '⊗ close schedule' : '⚙ adjust schedule';
+});
+
+// ── Nav ──────────────────────────────────────────────
+
+document.getElementById('btn-prev').addEventListener('click', () => { viewOffset--; render(); });
+document.getElementById('btn-next').addEventListener('click', () => { viewOffset++; render(); });
+
+// ── Toast ─────────────────────────────────────────────
+
 let toastTimer;
 function toast(msg) {
   const el = document.getElementById('toast');
@@ -559,9 +974,6 @@ function toast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
 }
-
-document.getElementById('btn-prev').addEventListener('click', () => { viewOffset--; render(); });
-document.getElementById('btn-next').addEventListener('click', () => { viewOffset++; render(); });
 
 fetch('../version.json').then(r => r.json()).then(v => {
   document.getElementById('footer-ver').textContent = 'v' + v.version;
