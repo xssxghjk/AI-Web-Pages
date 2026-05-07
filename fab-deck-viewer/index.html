@@ -5511,14 +5511,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   /* ── Deck image export ───────────────────────────────────────────── */
   async function exportDeckImage(deck) {
     const W = 1920, H = 1080;
-    const canvas = document.createElement('canvas');
-    canvas.width = W;
-    canvas.height = H;
-    const ctx = canvas.getContext('2d');
 
-    await document.fonts.load('bold 28px "DM Serif Text"');
-    await document.fonts.load('14px "DM Serif Text"');
-
+    // Bucket cards by group
     const buckets = {};
     GROUPS.forEach(g => { buckets[g.key] = []; });
     for (const p of currentDeckPairs) {
@@ -5527,14 +5521,38 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     }
     const totalCards = currentDeckPairs.reduce((s, p) => s + p.entry.qty, 0);
 
+    // Load all card images in parallel
+    function loadImg(url) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload  = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = url;
+      });
+    }
+    const urlList = [];
+    for (const p of currentDeckPairs) {
+      if (p.card && p.card.imgUrl && !urlList.includes(p.card.imgUrl)) urlList.push(p.card.imgUrl);
+    }
+    const imgResults = await Promise.all(urlList.map(loadImg));
+    const loadedImages = new Map(urlList.map((url, i) => [url, imgResults[i]]));
+
+    await document.fonts.load('bold 11px "DM Serif Text"');
+
+    // Canvas setup
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
     ctx.textBaseline = 'alphabetic';
 
     // Background
     ctx.fillStyle = '#1c1814';
     ctx.fillRect(0, 0, W, H);
 
-    // Subtle dot pattern
-    ctx.fillStyle = 'rgba(232,223,208,0.04)';
+    // Dot pattern
+    ctx.fillStyle = 'rgba(232,223,208,0.035)';
     for (let dx = 12; dx < W; dx += 24) {
       for (let dy = 12; dy < H; dy += 24) {
         ctx.beginPath();
@@ -5552,7 +5570,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     ctx.fillStyle = '#e8dfd0';
     ctx.fillText(deck.name, 40, 44);
 
-    // Subtitle
+    // Date + total
     const dateStr = new Date(deck.savedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
     ctx.font = '15px "DM Serif Text", Georgia, serif';
     ctx.fillStyle = '#7a6e60';
@@ -5563,11 +5581,25 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     ctx.fillStyle = '#3a3025';
     ctx.fillRect(0, HEADER_H, W, 1);
 
-    const COL_W = Math.floor(W / 4);
-    const PAD = 32;
-    const COL_Y = HEADER_H + 16;
-    const TEXT_W = COL_W - PAD * 2;
-    const LINE_H = 21;
+    // Layout constants
+    const COL_W    = Math.floor(W / 4);  // 480
+    const PAD      = 16;
+    const CARD_GAP = 7;
+    const N        = 4;  // cards per row
+    const CARD_W   = Math.floor((COL_W - PAD * 2 - CARD_GAP * (N - 1)) / N);  // ~106
+    const CARD_H   = Math.round(CARD_W / 0.714);                                // ~148
+    const LABEL_H  = 28;
+    const COL_TOP  = HEADER_H + 12;
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y,     x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x,     y + h, r);
+      ctx.arcTo(x,     y + h, x,     y,     r);
+      ctx.arcTo(x,     y,     x + w, y,     r);
+      ctx.closePath();
+    }
 
     function truncate(text, maxW) {
       if (ctx.measureText(text).width <= maxW) return text;
@@ -5576,65 +5608,107 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       return t + '…';
     }
 
-    GROUPS.forEach((g, i) => {
+    GROUPS.forEach((g, colIdx) => {
       const colPairs = buckets[g.key];
       if (!colPairs || colPairs.length === 0) return;
 
-      const colX = i * COL_W;
-      const textX = colX + PAD;
+      const colX    = colIdx * COL_W;
+      const textX   = colX + PAD;
       const colTotal = colPairs.reduce((s, p) => s + p.entry.qty, 0);
 
-      // Column separator (skip first)
-      if (i > 0) {
-        ctx.fillStyle = '#2e2820';
+      // Column separator
+      if (colIdx > 0) {
+        ctx.fillStyle = '#2a2218';
         ctx.fillRect(colX, HEADER_H + 1, 1, H - HEADER_H - 1);
       }
 
-      // Group header
+      // Group label
       ctx.font = 'bold 11px "DM Serif Text", Georgia, serif';
       ctx.fillStyle = g.color;
-      ctx.fillText(`${g.label.toUpperCase()}  ·  ${colTotal}`, textX, COL_Y + 16);
+      ctx.fillText(`${g.label.toUpperCase()}  ·  ${colTotal}`, textX, COL_TOP + 16);
 
-      // Underline
       ctx.fillStyle = g.color;
-      ctx.globalAlpha = 0.3;
-      ctx.fillRect(textX, COL_Y + 22, COL_W - PAD * 2, 1);
+      ctx.globalAlpha = 0.28;
+      ctx.fillRect(textX, COL_TOP + 22, COL_W - PAD * 2, 1);
       ctx.globalAlpha = 1;
 
-      // Card rows
-      let rowY = COL_Y + 46;
-      const QTY_REF_W = (() => { ctx.font = 'bold 12px "Courier New", monospace'; return ctx.measureText('×3').width; })();
+      // Card thumbnails
+      const cardsTop = COL_TOP + LABEL_H + 4;
+      colPairs.forEach((p, idx) => {
+        const row = Math.floor(idx / N);
+        const col = idx % N;
+        const cx  = colX + PAD + col * (CARD_W + CARD_GAP);
+        const cy  = cardsTop + row * (CARD_H + CARD_GAP);
+        if (cy + CARD_H > H - 8) return;
 
-      for (const p of colPairs) {
-        ctx.font = 'bold 12px "Courier New", monospace';
-        ctx.fillStyle = '#c4864a';
-        ctx.fillText(`×${p.entry.qty}`, textX, rowY);
+        const img = p.card && p.card.imgUrl ? loadedImages.get(p.card.imgUrl) : null;
 
-        ctx.font = '14px "DM Serif Text", Georgia, serif';
-        ctx.fillStyle = '#e8dfd0';
-        ctx.fillText(truncate(p.entry.name, TEXT_W - QTY_REF_W - 8), textX + QTY_REF_W + 8, rowY);
+        if (img) {
+          ctx.save();
+          roundRect(cx, cy, CARD_W, CARD_H, 4);
+          ctx.clip();
+          ctx.drawImage(img, cx, cy, CARD_W, CARD_H);
+          ctx.restore();
 
-        rowY += LINE_H;
-      }
+          // Subtle border over image
+          ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+          ctx.lineWidth = 1;
+          roundRect(cx, cy, CARD_W, CARD_H, 4);
+          ctx.stroke();
+        } else {
+          // Placeholder
+          ctx.fillStyle = '#252018';
+          roundRect(cx, cy, CARD_W, CARD_H, 4);
+          ctx.fill();
+          ctx.strokeStyle = '#3a3025';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.font = '9px "DM Serif Text", Georgia, serif';
+          ctx.fillStyle = '#7a6e60';
+          ctx.textAlign = 'center';
+          ctx.fillText(truncate(p.entry.name, CARD_W - 6), cx + CARD_W / 2, cy + CARD_H / 2 + 4);
+          ctx.textAlign = 'left';
+        }
+
+        // Qty badge (top-right, only when > 1)
+        if (p.entry.qty > 1) {
+          const badge = `×${p.entry.qty}`;
+          ctx.font = 'bold 11px "Courier New", monospace';
+          const bW = ctx.measureText(badge).width + 9;
+          const bH = 17;
+          const bX = cx + CARD_W - bW - 3;
+          const bY = cy + 3;
+          ctx.fillStyle = 'rgba(20,16,12,0.88)';
+          roundRect(bX, bY, bW, bH, 3);
+          ctx.fill();
+          ctx.fillStyle = '#c4864a';
+          ctx.fillText(badge, bX + 4, bY + bH - 4);
+        }
+      });
     });
 
-    // Footer watermark
+    // Watermark
     ctx.font = '11px "DM Serif Text", Georgia, serif';
-    ctx.fillStyle = 'rgba(122,110,96,0.45)';
+    ctx.fillStyle = 'rgba(122,110,96,0.4)';
     ctx.textAlign = 'right';
     ctx.fillText('FaB Deck Builder', W - 20, H - 12);
     ctx.textAlign = 'left';
 
-    canvas.toBlob(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = (deck.name || 'deck').replace(/[^a-zA-Z0-9 _-]/g, '').trim().replace(/\s+/g, '-') + '-deck.png';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
+    try {
+      canvas.toBlob(blob => {
+        if (!blob) { showToast('Could not generate image.', true); return; }
+        const url = URL.createObjectURL(blob);
+        const a   = document.createElement('a');
+        a.href     = url;
+        a.download = (deck.name || 'deck').replace(/[^a-zA-Z0-9 _-]/g, '').trim().replace(/\s+/g, '-') + '-deck.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    } catch (e) {
+      showToast('Could not export — card images blocked by cross-origin policy.', true);
+    }
   }
 
   /* ── Deck export ──────────────────────────────────────────────────── */
