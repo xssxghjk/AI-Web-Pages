@@ -535,9 +535,8 @@ canvas { display: block; width: 100%; }
       <span class="section-title">Meals</span>
     </div>
 
-    <div class="log-list" id="log-list">
-      <div class="empty-state" id="log-empty">No entries yet — add your first meal.</div>
-    </div>
+    <div class="log-list" id="log-list"></div>
+    <div class="empty-state" id="log-empty">No entries yet — add your first meal.</div>
 
     <div class="totals-bar" id="totals-bar" style="display:none">
       <div class="total-item">
@@ -940,7 +939,6 @@ function renderLog() {
   list.innerHTML = '';
 
   if (entries.length === 0) {
-    list.appendChild(empty);
     empty.style.display = '';
     totalsBar.style.display = 'none';
     document.getElementById('sum-cal').textContent = '0';
