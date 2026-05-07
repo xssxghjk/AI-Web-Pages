@@ -984,22 +984,6 @@
   </div>
 </div>
 
-<!-- Weight Modal -->
-<div id="weightModal" class="modal-overlay hidden" onclick="closeWeightOutside(event)">
-  <div class="modal">
-    <div class="modal-title">Body Weight</div>
-    <div class="modal-subtitle">Used to estimate calories burned. No need to be exact — a rough number is fine.</div>
-    <div class="form-group">
-      <label class="form-label">Weight (kg)</label>
-      <input type="number" class="form-input" id="weightInput" placeholder="e.g. 75" min="30" max="300" step="0.5">
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="document.getElementById('weightModal').classList.add('hidden')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveWeight()">Save</button>
-    </div>
-  </div>
-</div>
-
 <!-- Calorie Details Modal -->
 <div id="calorieModal" class="modal-overlay hidden" onclick="closeCalorieOutside(event)">
   <div class="modal" style="max-width:520px;">
@@ -1695,15 +1679,13 @@ function renderStats() {
   document.getElementById('heroWeekLabel').textContent = `${elapsed} of ${totalDays} training days elapsed`;
 
   // Stats grid
-  const weightKg = appData.weightKg || null;
-  const hasAnyWeight = weightKg || (() => {
+  const hasAnyWeight = (() => {
     try { const w = JSON.parse(localStorage.getItem('calorie_weights') || 'null'); return w && Object.keys(w).length > 0; } catch { return false; }
   })();
   const totalCal = calcTotalCalories();
-  const weightDisplay = weightKg ? `${weightKg} kg` : '—';
   const calDisplay = hasAnyWeight ? `~${totalCal.toLocaleString()}` : '—';
-  const calOnclick = hasAnyWeight ? 'openCalorieDetails()' : 'openWeightModal()';
-  const calHint = hasAnyWeight ? 'details ↗' : 'set weight first';
+  const calOnclick = hasAnyWeight ? 'openCalorieDetails()' : '';
+  const calHint = hasAnyWeight ? 'details ↗' : 'log weight in Calorie Tracker';
 
   document.getElementById('statsGrid').innerHTML = `
     <div class="stat-card">
@@ -1722,11 +1704,7 @@ function renderStats() {
       <div class="stat-value">${s.streak}</div>
       <div class="stat-label">Workout Streak</div>
     </div>
-    <div class="stat-card stat-card-interactive" onclick="openWeightModal()" title="Click to update your body weight">
-      <div class="stat-value" style="${weightKg ? '' : 'font-size:18px;'}">${weightDisplay}</div>
-      <div class="stat-label">Body Weight <span style="opacity:0.55;font-size:9px;">&#9998; edit</span></div>
-    </div>
-    <div class="stat-card stat-card-interactive" onclick="${calOnclick}" title="${weightKg ? 'Click to see how this is calculated' : 'Set your body weight to enable calorie estimates'}">
+    <div class="stat-card${hasAnyWeight ? ' stat-card-interactive' : ''}" ${calOnclick ? `onclick="${calOnclick}"` : ''} title="${hasAnyWeight ? 'Click to see how this is calculated' : 'Log your body weight in the Calorie Tracker to enable estimates'}">
       <div class="stat-value">${calDisplay}</div>
       <div class="stat-label">Est. kcal <span style="opacity:0.55;font-size:9px;">${calHint}</span></div>
     </div>
@@ -2254,8 +2232,7 @@ function closeExportOutside(e) {
 function confirmReset() {
   if (confirm('Reset ALL training data? This cannot be undone.')) {
     if (confirm('Are you sure? All progress and the start date will be cleared.')) {
-      const savedWeight = appData.weightKg || null;
-      appData = { days: {}, pause: null, pauseHistory: [], planStart: null, version: 1, weightKg: savedWeight };
+      appData = { days: {}, pause: null, pauseHistory: [], planStart: null, version: 1 };
       saveData(appData);
       updatePauseBanner();
       render();
@@ -2401,31 +2378,10 @@ function playBeep(type) {
 }
 
 // ============================================================
-// WEIGHT & CALORIE MODALS
+// CALORIE MODAL
 // ============================================================
-function openWeightModal() {
-  document.getElementById('weightInput').value = appData.weightKg || '';
-  document.getElementById('weightModal').classList.remove('hidden');
-}
-
-function saveWeight() {
-  const val = parseFloat(document.getElementById('weightInput').value);
-  if (val > 0) {
-    appData.weightKg = val;
-    saveData(appData);
-  }
-  document.getElementById('weightModal').classList.add('hidden');
-  render();
-}
-
-function closeWeightOutside(e) {
-  if (e.target.id === 'weightModal') document.getElementById('weightModal').classList.add('hidden');
-}
-
 function openCalorieDetails() {
   const rows = buildCalorieRows();
-  if (rows.length === 0 && !appData.weightKg) { openWeightModal(); return; }
-
   const total = rows.reduce((s, r) => s + r.calories, 0);
 
   let tableHtml;
@@ -2466,10 +2422,7 @@ function openCalorieDetails() {
         Only runs with tracked kilometres are included. ~1&thinsp;kcal per kg per km.
       </div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-      <div style="font-size:12px;color:var(--text2);">Weight sourced from Calorie Tracker (closest date). <button class="btn btn-ghost btn-sm" onclick="document.getElementById('calorieModal').classList.add('hidden');openWeightModal();" style="margin-left:6px;vertical-align:middle;">Edit fallback</button></div>
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('calorieModal').classList.add('hidden');openWeightModal();">Edit weight</button>
-    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:4px;">Weight sourced from Calorie Tracker (closest date).</div>
     ${tableHtml}
     <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
       <div style="font-size:12px;color:var(--text2);">Total estimated</div>
