@@ -1429,7 +1429,9 @@ function drawChart(canvasId, data, opts = {}) {
   if (!canvas) return;
   const ctx    = canvas.getContext('2d');
   const dpr    = window.devicePixelRatio || 1;
-  const W      = canvas.parentElement.clientWidth;
+  canvas.style.width  = '';
+  canvas.style.height = '';
+  const W      = canvas.offsetWidth;
   const H      = parseInt(canvas.getAttribute('height')) || 160;
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
