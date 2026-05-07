@@ -526,6 +526,67 @@ canvas { display: block; width: 100%; }
 }
 .footer-text { font-size: 11px; color: var(--muted2); font-style: italic; }
 
+/* ── ACTIVITY BURNED ── */
+.activity-section { margin-top: 24px; }
+.activity-list {
+  display: flex; flex-direction: column;
+  border: 1px solid var(--border); border-radius: 3px;
+  overflow: hidden;
+}
+.activity-row {
+  background: var(--surface);
+  padding: 11px 14px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.15s;
+}
+.activity-row:last-child { border-bottom: none; }
+.activity-sport { display: flex; align-items: center; gap: 8px; flex: 1; }
+.activity-sport-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.activity-sport-name { font-size: 13px; color: var(--text); }
+.activity-kcal-wrap { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.activity-kcal-val {
+  font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; color: var(--accent);
+}
+.activity-details-btn {
+  background: none; border: 1px solid var(--border); border-radius: 2px;
+  color: var(--muted); font-size: 10px; padding: 2px 7px; cursor: pointer;
+  font-family: 'DM Serif Text', serif; letter-spacing: 0.04em;
+  transition: border-color 0.15s, color 0.15s; white-space: nowrap;
+}
+.activity-details-btn:hover { border-color: var(--accent); color: var(--accent); }
+.activity-no-weight { font-size: 11px; color: var(--muted2); font-style: italic; }
+.activity-total-bar {
+  background: var(--surf2); border: 1px solid var(--bord2); border-radius: 3px;
+  padding: 10px 14px; margin-top: 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.activity-total-lbl {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);
+}
+.activity-total-val {
+  font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700; color: var(--accent);
+}
+
+/* Sport details modal table */
+.sport-detail-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+.sport-detail-table th {
+  padding: 5px 8px; color: var(--muted); text-align: left;
+  border-bottom: 1px solid var(--border); font-weight: 400; font-style: italic;
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+}
+.sport-detail-table td { padding: 6px 8px; border-bottom: 1px solid rgba(58,48,37,0.35); vertical-align: top; }
+.sport-detail-table tr:last-child td { border-bottom: none; }
+.sport-detail-formula {
+  background: var(--surf3); border-radius: 3px; padding: 10px 12px; margin-bottom: 12px;
+}
+.sport-detail-formula-lbl {
+  font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 4px;
+}
+.sport-detail-formula-expr {
+  font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent);
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 500px) {
   .log-macros { gap: 8px; font-size: 11px; }
@@ -612,6 +673,16 @@ canvas { display: block; width: 100%; }
       <div class="total-item" style="margin-left:auto">
         <span class="total-lbl">Entries</span>
         <span class="total-num" id="total-count" style="color:var(--muted)">0</span>
+      </div>
+    </div>
+    <div class="activity-section" id="activity-section" style="display:none">
+      <div class="section-hdr">
+        <span class="section-title">Activity Burned</span>
+      </div>
+      <div class="activity-list" id="activity-list"></div>
+      <div class="activity-total-bar" id="activity-total-bar">
+        <span class="activity-total-lbl">Total Burned</span>
+        <span class="activity-total-val" id="activity-total-val">—</span>
       </div>
     </div>
   </div>
@@ -925,6 +996,24 @@ canvas { display: block; width: 100%; }
   </div>
 </div>
 
+<!-- ── SPORT DETAILS MODAL ── -->
+<div class="modal-overlay" id="sport-modal" role="dialog" aria-modal="true" aria-labelledby="sport-modal-title">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="sport-modal-title">Activity Details</span>
+      <button class="modal-close" id="sport-modal-close" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body" id="sport-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" id="sport-modal-cancel">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── TOAST ── -->
 <div id="toast-wrap"></div>
 
@@ -1019,6 +1108,7 @@ function setDate(s) {
   document.getElementById('date-display').textContent = formatDate(s);
   document.getElementById('date-picker').value = s;
   renderLog();
+  renderActivity(s);
 }
 
 document.getElementById('prev-day').addEventListener('click', () => {
@@ -2079,6 +2169,206 @@ function esc(s) {
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function capFirst(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
+
+// ── Activity: cross-sport calorie burn ───────────────────────────────────────
+
+function getClosestWeightForDate(dateStr) {
+  const weights = getWeights();
+  const dates = Object.keys(weights).filter(d => weights[d] > 0);
+  if (dates.length === 0) return null;
+  const target = new Date(dateStr + 'T00:00:00').getTime();
+  let closest = null, minDiff = Infinity;
+  for (const d of dates) {
+    const diff = Math.abs(new Date(d + 'T00:00:00').getTime() - target);
+    if (diff < minDiff) { minDiff = diff; closest = d; }
+  }
+  return closest ? { kg: weights[closest], date: closest } : null;
+}
+
+function getRunningActivity(dateStr) {
+  try {
+    const data = JSON.parse(localStorage.getItem('c2hm_v1') || 'null');
+    if (!data || !data.days) return null;
+    const day = data.days[dateStr];
+    if (!day || !day.km) return null;
+    const w = getClosestWeightForDate(dateStr);
+    return { hasData: true, weight: w, km: day.km, kcal: w ? Math.round(w.kg * day.km) : null };
+  } catch { return null; }
+}
+
+function getBoulderingActivity(dateStr) {
+  try {
+    const sessions = JSON.parse(localStorage.getItem('bouldering_sessions') || '[]');
+    const daySessions = sessions.filter(s => s.date === dateStr);
+    if (daySessions.length === 0) return null;
+    const w = getClosestWeightForDate(dateStr);
+    const GRADES = [1,2,3,4,5,6,7];
+    const details = daySessions.map(s => {
+      const totalClimbs = GRADES.reduce((n,g) => n + (s.grades[g]||0), 0);
+      const wavg = totalClimbs > 0 ? GRADES.reduce((n,g) => n + (s.grades[g]||0)*g, 0) / totalClimbs : 0;
+      const met = wavg <= 2 ? 5.0 : wavg <= 4 ? 6.5 : 8.0;
+      const duration = s.duration || 90;
+      const kcal = w ? Math.round(met * w.kg * (duration / 60)) : null;
+      return { totalClimbs, wavg, met, duration, durationEstimated: !s.duration, kcal };
+    });
+    const kcal = w ? details.reduce((n, d) => n + (d.kcal || 0), 0) : null;
+    return { hasData: true, weight: w, details, kcal };
+  } catch { return null; }
+}
+
+function getWorkoutActivity(dateStr) {
+  try {
+    const data = JSON.parse(localStorage.getItem('workout_plan_v3') || 'null');
+    if (!data || !data.entries) return null;
+    const entry = data.entries[dateStr];
+    if (!entry || entry.status !== 'done') return null;
+    const w = getClosestWeightForDate(dateStr);
+    const SESSION_NAMES = ['Push', 'Pull', 'Legs'];
+    const schedule = Array.isArray(data.schedule) && data.schedule.length === 3 ? data.schedule : [1,3,5];
+    const dow = new Date(dateStr + 'T00:00:00').getDay();
+    const sessIdx = schedule.indexOf(dow);
+    const sessionName = sessIdx >= 0 ? SESSION_NAMES[sessIdx] : 'Strength';
+    const met = 4.0;
+    const duration = entry.duration || 60;
+    const kcal = w ? Math.round(met * w.kg * (duration / 60)) : null;
+    return { hasData: true, weight: w, sessionName, met, duration, durationEstimated: !entry.duration, kcal };
+  } catch { return null; }
+}
+
+function renderActivity(date) {
+  const running   = getRunningActivity(date);
+  const bouldering = getBoulderingActivity(date);
+  const workout   = getWorkoutActivity(date);
+
+  const section = document.getElementById('activity-section');
+  const list    = document.getElementById('activity-list');
+  const totalBar = document.getElementById('activity-total-bar');
+  const totalVal = document.getElementById('activity-total-val');
+
+  if (!running && !bouldering && !workout) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+
+  const hasWeight = !!(running?.weight || bouldering?.weight || workout?.weight);
+  const sports = [
+    running    && { label: 'Running',    color: '#7ab87a', data: running,    type: 'running'    },
+    bouldering && { label: 'Bouldering', color: '#5ab4cc', data: bouldering, type: 'bouldering' },
+    workout    && { label: 'Strength',   color: '#e87838', data: workout,    type: 'workout'    },
+  ].filter(Boolean);
+
+  list.innerHTML = sports.map(s => {
+    const kcalHtml = s.data.kcal != null
+      ? `<span class="activity-kcal-val">~${s.data.kcal.toLocaleString()} kcal</span>
+         <button class="activity-details-btn" onclick="openSportDetails('${s.type}','${date}')">details ↗</button>`
+      : `<span class="activity-no-weight">log weight to estimate</span>`;
+    return `<div class="activity-row">
+      <div class="activity-sport">
+        <div class="activity-sport-dot" style="background:${s.color}"></div>
+        <span class="activity-sport-name">${s.label}</span>
+      </div>
+      <div class="activity-kcal-wrap">${kcalHtml}</div>
+    </div>`;
+  }).join('');
+
+  const total = sports.reduce((n, s) => n + (s.data.kcal || 0), 0);
+  if (hasWeight && total > 0) {
+    totalVal.textContent = '~' + total.toLocaleString() + ' kcal';
+    totalBar.style.display = 'flex';
+  } else {
+    totalBar.style.display = 'none';
+  }
+}
+
+function openSportDetails(type, date) {
+  const modal = document.getElementById('sport-modal');
+  const title = document.getElementById('sport-modal-title');
+  const body  = document.getElementById('sport-modal-body');
+
+  if (type === 'running') {
+    const d = getRunningActivity(date);
+    title.textContent = 'Running — Calorie Estimate';
+    const w = d.weight;
+    body.innerHTML = `
+      <div class="sport-detail-formula">
+        <div class="sport-detail-formula-lbl">Formula</div>
+        <div class="sport-detail-formula-expr">kcal = weight (kg) × distance (km)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5">~1 kcal per kg per km. Standard rule-of-thumb for steady-state running.</div>
+      </div>
+      ${w ? `<table class="sport-detail-table">
+        <thead><tr><th>Distance</th><th>Weight</th><th>Weight date</th><th>Est. kcal</th></tr></thead>
+        <tbody><tr>
+          <td style="font-family:'Space Mono',monospace">${d.km} km</td>
+          <td style="font-family:'Space Mono',monospace">${w.kg} kg</td>
+          <td style="color:var(--muted);font-size:11px">${w.date}</td>
+          <td style="font-family:'Space Mono',monospace;color:var(--accent);font-weight:700">~${d.kcal}</td>
+        </tr></tbody>
+      </table>` : '<div style="color:var(--muted2);font-size:12px;font-style:italic">No weight logged — add a body weight entry to enable estimates.</div>'}
+      <div style="font-size:11px;color:var(--muted2);margin-top:12px;font-style:italic">Rough estimate only. Actual burn varies with pace, terrain, and fitness.</div>`;
+
+  } else if (type === 'bouldering') {
+    const d = getBoulderingActivity(date);
+    title.textContent = 'Bouldering — Calorie Estimate';
+    const w = d.weight;
+    const rowsHtml = d.details.map((s, i) => `<tr>
+      <td>${i + 1}</td>
+      <td style="font-family:'Space Mono',monospace">${s.totalClimbs}</td>
+      <td style="font-family:'Space Mono',monospace">${s.wavg > 0 ? s.wavg.toFixed(1) : '—'}</td>
+      <td style="font-family:'Space Mono',monospace">${s.met}</td>
+      <td style="font-family:'Space Mono',monospace">${s.duration} min${s.durationEstimated ? '*' : ''}</td>
+      <td style="font-family:'Space Mono',monospace;color:var(--accent);font-weight:700">${s.kcal != null ? '~' + s.kcal : '—'}</td>
+    </tr>`).join('');
+    const hasDurationEst = d.details.some(s => s.durationEstimated);
+    body.innerHTML = `
+      <div class="sport-detail-formula">
+        <div class="sport-detail-formula-lbl">Formula</div>
+        <div class="sport-detail-formula-expr">kcal = MET × weight (kg) × duration (h)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5">MET by avg grade: ≤2 → 5.0, ≤4 → 6.5, 5–7 → 8.0. Default duration: 90 min if not logged.</div>
+      </div>
+      ${w ? `<table class="sport-detail-table">
+        <thead><tr><th>#</th><th>Climbs</th><th>Avg grade</th><th>MET</th><th>Duration</th><th>kcal</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+      ${hasDurationEst ? '<div style="font-size:10px;color:var(--muted2);margin-top:6px">* estimated — log session duration in the Bouldering Tracker for more accuracy.</div>' : ''}` : '<div style="color:var(--muted2);font-size:12px;font-style:italic">No weight logged — add a body weight entry to enable estimates.</div>'}
+      <div style="font-size:11px;color:var(--muted2);margin-top:12px;font-style:italic">Rough estimate only. Actual burn varies with rest time, intensity, and technique.</div>`;
+
+  } else if (type === 'workout') {
+    const d = getWorkoutActivity(date);
+    title.textContent = 'Strength Training — Calorie Estimate';
+    const w = d.weight;
+    body.innerHTML = `
+      <div class="sport-detail-formula">
+        <div class="sport-detail-formula-lbl">Formula</div>
+        <div class="sport-detail-formula-expr">kcal = MET × weight (kg) × duration (h)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5">MET = 4.0 (general strength/resistance training). Default duration: 60 min if not logged.</div>
+      </div>
+      ${w ? `<table class="sport-detail-table">
+        <thead><tr><th>Session</th><th>MET</th><th>Duration</th><th>Weight</th><th>kcal</th></tr></thead>
+        <tbody><tr>
+          <td>${d.sessionName}</td>
+          <td style="font-family:'Space Mono',monospace">${d.met}</td>
+          <td style="font-family:'Space Mono',monospace">${d.duration} min${d.durationEstimated ? '*' : ''}</td>
+          <td style="font-family:'Space Mono',monospace">${w.kg} kg</td>
+          <td style="font-family:'Space Mono',monospace;color:var(--accent);font-weight:700">~${d.kcal}</td>
+        </tr></tbody>
+      </table>
+      ${d.durationEstimated ? '<div style="font-size:10px;color:var(--muted2);margin-top:6px">* estimated — log session duration in the Workout tracker for more accuracy.</div>' : ''}` : '<div style="color:var(--muted2);font-size:12px;font-style:italic">No weight logged — add a body weight entry to enable estimates.</div>'}
+      <div style="font-size:11px;color:var(--muted2);margin-top:12px;font-style:italic">Rough estimate only. Actual burn varies with exercise selection, rest intervals, and intensity.</div>`;
+  }
+
+  modal.classList.add('open');
+}
+
+document.getElementById('sport-modal-close').addEventListener('click', () => {
+  document.getElementById('sport-modal').classList.remove('open');
+});
+document.getElementById('sport-modal-cancel').addEventListener('click', () => {
+  document.getElementById('sport-modal').classList.remove('open');
+});
+document.getElementById('sport-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) document.getElementById('sport-modal').classList.remove('open');
+});
 
 // ── Footer version ───────────────────────────────────────────────────────────
 fetch('../version.json').then(r => r.json()).then(v => {
