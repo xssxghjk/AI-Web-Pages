@@ -437,6 +437,43 @@ canvas { display: block; width: 100%; }
 .top-food-count { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); }
 .top-food-cal { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent); }
 
+/* ── WEIGHT HISTORY ── */
+.wh-stats-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+  margin-bottom: 0;
+}
+@media (min-width: 500px) { .wh-stats-grid { grid-template-columns: repeat(4, 1fr); } }
+.wh-stat {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+  padding: 12px 14px;
+}
+.wh-stat-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; }
+.wh-stat-val {
+  font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; color: var(--text);
+}
+.wh-stat-val.up   { color: var(--red); }
+.wh-stat-val.down { color: var(--green); }
+.wh-stat-val.neutral { color: var(--muted); }
+
+.wh-list { display: flex; flex-direction: column; gap: 0; margin-bottom: 20px; }
+.wh-item {
+  background: var(--surface); border: 1px solid var(--border); border-top: none;
+  padding: 10px 14px; display: flex; align-items: center; gap: 12px;
+  transition: border-color 0.15s;
+}
+.wh-item:first-child { border-top: 1px solid var(--border); border-radius: 3px 3px 0 0; }
+.wh-item:last-child  { border-radius: 0 0 3px 3px; }
+.wh-item:only-child  { border-radius: 3px; }
+.wh-item:hover { border-color: var(--bord2); }
+.wh-date { font-size: 12px; color: var(--text2); flex: 1; }
+.wh-kg   { font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700; color: var(--text); min-width: 56px; }
+.wh-delta {
+  font-family: 'Space Mono', monospace; font-size: 11px; min-width: 52px; text-align: right;
+}
+.wh-delta.up   { color: var(--red); }
+.wh-delta.down { color: var(--green); }
+.wh-delta.zero { color: var(--muted2); }
+
 /* Chart legend */
 .chart-legend {
   display: flex; gap: 14px; margin-bottom: 8px; flex-wrap: wrap;
@@ -523,6 +560,7 @@ canvas { display: block; width: 100%; }
 <nav class="nav-tabs">
   <button class="tab-btn active" data-tab="log">Log</button>
   <button class="tab-btn" data-tab="presets">Presets</button>
+  <button class="tab-btn" data-tab="weight">Weight</button>
   <button class="tab-btn" data-tab="dashboard">Dashboard</button>
 </nav>
 
@@ -582,6 +620,32 @@ canvas { display: block; width: 100%; }
         No presets yet — create one to quickly log frequent meals.
       </div>
     </div>
+  </div>
+
+  <!-- ── WEIGHT TAB ── -->
+  <div class="tab-panel" id="tab-weight">
+
+    <div class="wh-stats-grid" id="wh-stats-grid"></div>
+
+    <div class="dash-card full" style="margin-top:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <div class="dash-card-title" style="margin-bottom:0">Weight Trend</div>
+        <div class="range-tabs" id="wh-range-tabs">
+          <button class="range-tab active" data-wrange="30">30 Days</button>
+          <button class="range-tab" data-wrange="90">90 Days</button>
+          <button class="range-tab" data-wrange="0">All Time</button>
+        </div>
+      </div>
+      <canvas id="chart-weight" height="180"></canvas>
+    </div>
+
+    <div class="section-hdr" style="margin-top:20px">
+      <span class="section-title">History</span>
+      <button class="btn btn-ghost btn-sm" id="wh-add-btn">+ Log Weight</button>
+    </div>
+    <div id="wh-list"></div>
+    <div id="wh-empty" class="empty-state">No weight entries yet — log your weight on any day.</div>
+
   </div>
 
   <!-- ── DASHBOARD TAB ── -->
@@ -939,6 +1003,7 @@ function toast(msg, type = '') {
 // ── State ────────────────────────────────────────────────────────────────────
 let currentDate = dateStr(new Date());
 let monthlyRange = 30;
+let weightRange   = 30;
 let pendingCounts = {};
 
 // ── Date navigation ──────────────────────────────────────────────────────────
@@ -975,6 +1040,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.add('active');
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     if (btn.dataset.tab === 'dashboard') renderDashboard();
+    if (btn.dataset.tab === 'weight') renderWeightHistory();
   });
 });
 
@@ -1114,15 +1180,13 @@ function updateWeightCard() {
 }
 
 function openWeightModal() {
-  const kg = getWeightForDate(currentDate);
-  document.getElementById('w-kg').value = kg || '';
-  document.getElementById('weight-modal-delete').style.display = kg ? '' : 'none';
-  document.getElementById('weight-modal').classList.add('open');
-  document.getElementById('w-kg').focus();
+  openWeightModalForDate(currentDate);
 }
 
 function closeWeightModal() {
   document.getElementById('weight-modal').classList.remove('open');
+  whEditDate = null;
+  document.getElementById('weight-modal-title').textContent = 'Log Weight';
 }
 
 document.getElementById('weight-card').addEventListener('click', openWeightModal);
@@ -1135,18 +1199,286 @@ document.getElementById('weight-modal').addEventListener('click', e => {
 document.getElementById('weight-modal-save').addEventListener('click', () => {
   const kg = parseFloat(document.getElementById('w-kg').value);
   if (!kg || kg <= 0) { toast('Please enter a valid weight', 'error'); return; }
-  setWeightForDate(currentDate, kg);
-  updateWeightCard();
+  const target = whEditDate || currentDate;
+  setWeightForDate(target, kg);
+  if (target === currentDate) updateWeightCard();
   closeWeightModal();
-  toast('Weight logged for ' + formatDate(currentDate), 'success');
+  // refresh history tab if it's open
+  if (document.getElementById('tab-weight').classList.contains('active')) renderWeightHistory();
+  toast('Weight logged for ' + formatDate(target), 'success');
 });
 
 document.getElementById('weight-modal-delete').addEventListener('click', () => {
-  setWeightForDate(currentDate, 0);
-  updateWeightCard();
+  const target = whEditDate || currentDate;
+  setWeightForDate(target, 0);
+  if (target === currentDate) updateWeightCard();
   closeWeightModal();
+  if (document.getElementById('tab-weight').classList.contains('active')) renderWeightHistory();
   toast('Weight entry removed');
 });
+
+// ── Weight History ────────────────────────────────────────────────────────────
+let whEditDate = null; // date currently being edited from history
+
+function getWeightHistory() {
+  const w = getWeights();
+  return Object.entries(w)
+    .filter(([, kg]) => kg > 0)
+    .map(([date, kg]) => ({ date, kg }))
+    .sort((a, b) => a.date < b.date ? -1 : 1);
+}
+
+function renderWeightHistory() {
+  const all = getWeightHistory();
+  renderWeightStats(all);
+  drawWeightTrendChart(all);
+  renderWeightList(all);
+}
+
+function renderWeightStats(all) {
+  const grid = document.getElementById('wh-stats-grid');
+  if (all.length === 0) { grid.innerHTML = ''; return; }
+
+  const kgs = all.map(e => e.kg);
+  const latest = all[all.length - 1].kg;
+  const min = Math.min(...kgs);
+  const max = Math.max(...kgs);
+  const avg = kgs.reduce((s, k) => s + k, 0) / kgs.length;
+  const delta = all.length > 1 ? latest - all[0].kg : null;
+  const deltaClass = delta === null ? 'neutral' : delta < 0 ? 'down' : delta > 0 ? 'up' : 'neutral';
+  const deltaStr  = delta === null ? '—' : (delta > 0 ? '+' : '') + delta.toFixed(1) + ' kg';
+
+  grid.innerHTML = `
+    <div class="wh-stat">
+      <div class="wh-stat-lbl">Current</div>
+      <div class="wh-stat-val">${latest.toFixed(1)} <span style="font-size:12px;color:var(--muted);font-family:'DM Serif Text',serif">kg</span></div>
+    </div>
+    <div class="wh-stat">
+      <div class="wh-stat-lbl">Change</div>
+      <div class="wh-stat-val ${deltaClass}">${deltaStr}</div>
+    </div>
+    <div class="wh-stat">
+      <div class="wh-stat-lbl">Min / Max</div>
+      <div class="wh-stat-val" style="font-size:15px">${min.toFixed(1)} – ${max.toFixed(1)} <span style="font-size:11px;color:var(--muted);font-family:'DM Serif Text',serif">kg</span></div>
+    </div>
+    <div class="wh-stat">
+      <div class="wh-stat-lbl">Average</div>
+      <div class="wh-stat-val">${avg.toFixed(1)} <span style="font-size:12px;color:var(--muted);font-family:'DM Serif Text',serif">kg</span></div>
+    </div>`;
+}
+
+function drawWeightTrendChart(allEntries) {
+  const canvas = document.getElementById('chart-weight');
+  if (!canvas) return;
+
+  // Filter to range
+  let data = allEntries;
+  if (weightRange > 0) {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - weightRange);
+    const cutoffStr = dateStr(cutoff);
+    data = allEntries.filter(e => e.date >= cutoffStr);
+  }
+
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.style.width = '';
+  canvas.style.height = '';
+  const W = canvas.offsetWidth;
+  if (!canvas.dataset.chartHeight) canvas.dataset.chartHeight = canvas.getAttribute('height') || '180';
+  const H = parseInt(canvas.dataset.chartHeight) || 180;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  if (data.length === 0) {
+    ctx.fillStyle = '#5a5040';
+    ctx.font = '12px DM Serif Text, Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No entries in this range', W / 2, H / 2);
+    return;
+  }
+
+  const pad = { top: 16, right: 20, bottom: 32, left: 50 };
+  const cW = W - pad.left - pad.right;
+  const cH = H - pad.top  - pad.bottom;
+  const n  = data.length;
+
+  const kgs   = data.map(d => d.kg);
+  const minKg = Math.min(...kgs);
+  const maxKg = Math.max(...kgs);
+  const spread = maxKg - minKg || 1;
+  const yMin = minKg - spread * 0.15;
+  const yMax = maxKg + spread * 0.15;
+
+  function xPos(i) { return pad.left + (n === 1 ? cW / 2 : i / (n - 1) * cW); }
+  function yPos(kg) { return pad.top + cH - ((kg - yMin) / (yMax - yMin)) * cH; }
+
+  // Grid lines
+  const gridCount = 4;
+  ctx.strokeStyle = 'rgba(58,48,37,0.8)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= gridCount; i++) {
+    const kg = yMin + (yMax - yMin) * (i / gridCount);
+    const y = yPos(kg);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cW, y); ctx.stroke();
+    ctx.fillStyle = '#5a5040';
+    ctx.font = '10px DM Serif Text, Georgia, serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(kg.toFixed(1), pad.left - 4, y + 3);
+  }
+
+  // Shaded area under line
+  if (n > 1) {
+    ctx.beginPath();
+    ctx.moveTo(xPos(0), yPos(data[0].kg));
+    for (let i = 1; i < n; i++) ctx.lineTo(xPos(i), yPos(data[i].kg));
+    ctx.lineTo(xPos(n - 1), pad.top + cH);
+    ctx.lineTo(xPos(0), pad.top + cH);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(196,134,74,0.07)';
+    ctx.fill();
+  }
+
+  // Trend line (linear regression)
+  if (n >= 3) {
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    data.forEach((d, i) => { sumX += i; sumY += d.kg; sumXY += i * d.kg; sumX2 += i * i; });
+    const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    ctx.beginPath();
+    ctx.moveTo(xPos(0), yPos(intercept));
+    ctx.lineTo(xPos(n - 1), yPos(slope * (n - 1) + intercept));
+    ctx.strokeStyle = slope < 0 ? 'rgba(122,184,122,0.35)' : 'rgba(196,106,106,0.35)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Line
+  if (n > 1) {
+    ctx.beginPath();
+    ctx.moveTo(xPos(0), yPos(data[0].kg));
+    for (let i = 1; i < n; i++) ctx.lineTo(xPos(i), yPos(data[i].kg));
+    ctx.strokeStyle = '#c4864a';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  // Dots + x labels
+  data.forEach((d, i) => {
+    const x = xPos(i), y = yPos(d.kg);
+    ctx.beginPath();
+    ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#c4864a';
+    ctx.fill();
+    ctx.strokeStyle = '#1c1814';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // X label: show every Nth entry to avoid crowding
+    const step = Math.max(1, Math.ceil(n / 8));
+    if (i % step === 0 || i === n - 1) {
+      const d2 = parseDate(d.date);
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const label = months[d2.getMonth()] + ' ' + d2.getDate();
+      ctx.fillStyle = '#5a5040';
+      ctx.font = '9px DM Serif Text, Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, x, H - pad.bottom + 12);
+    }
+  });
+}
+
+function renderWeightList(all) {
+  const listEl  = document.getElementById('wh-list');
+  const emptyEl = document.getElementById('wh-empty');
+
+  if (all.length === 0) {
+    listEl.innerHTML = '';
+    emptyEl.style.display = '';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  // Newest first for display
+  const reversed = [...all].reverse();
+  listEl.innerHTML = '<div class="wh-list">' + reversed.map((entry, i) => {
+    // Delta vs previous entry (which is next in the reversed array)
+    const prev = reversed[i + 1];
+    let deltaHtml = '<span class="wh-delta zero">—</span>';
+    if (prev) {
+      const diff = entry.kg - prev.kg;
+      const cls  = diff < 0 ? 'down' : diff > 0 ? 'up' : 'zero';
+      const sign = diff > 0 ? '+' : '';
+      deltaHtml  = `<span class="wh-delta ${cls}">${sign}${diff.toFixed(1)}</span>`;
+    }
+    const dateLabel = formatDate(entry.date) === 'Today' || formatDate(entry.date) === 'Yesterday'
+      ? formatDate(entry.date) + ' (' + entry.date + ')'
+      : formatDate(entry.date);
+    return `
+      <div class="wh-item">
+        <span class="wh-date">${esc(dateLabel)}</span>
+        <span class="wh-kg">${entry.kg.toFixed(1)} kg</span>
+        ${deltaHtml}
+        <div class="log-actions">
+          <button class="icon-btn" data-wh-edit="${esc(entry.date)}" title="Edit">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
+              <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="icon-btn del" data-wh-del="${esc(entry.date)}" title="Delete">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+              <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>`;
+  }).join('') + '</div>';
+
+  listEl.querySelectorAll('[data-wh-edit]').forEach(btn => {
+    btn.addEventListener('click', () => openWeightModalForDate(btn.dataset.whEdit));
+  });
+  listEl.querySelectorAll('[data-wh-del]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setWeightForDate(btn.dataset.whDel, 0);
+      if (currentDate === btn.dataset.whDel) updateWeightCard();
+      renderWeightHistory();
+      toast('Weight entry removed');
+    });
+  });
+}
+
+// Range selector
+document.getElementById('wh-range-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('[data-wrange]');
+  if (!btn) return;
+  document.querySelectorAll('#wh-range-tabs .range-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  weightRange = parseInt(btn.dataset.wrange);
+  drawWeightTrendChart(getWeightHistory());
+});
+
+// "Log Weight" button in history tab opens modal for today
+document.getElementById('wh-add-btn').addEventListener('click', () => {
+  openWeightModalForDate(currentDate);
+});
+
+// Open weight modal targeting a specific date (history edit or today)
+function openWeightModalForDate(targetDate) {
+  whEditDate = targetDate;
+  document.getElementById('weight-modal-title').textContent =
+    'Weight — ' + (formatDate(targetDate) === 'Today' ? 'Today' : formatDate(targetDate));
+  const kg = getWeightForDate(targetDate);
+  document.getElementById('w-kg').value = kg || '';
+  document.getElementById('weight-modal-delete').style.display = kg ? '' : 'none';
+  document.getElementById('weight-modal').classList.add('open');
+  document.getElementById('w-kg').focus();
+}
 
 // ── Add food to log ──────────────────────────────────────────────────────────
 function addToLog(entry) {
