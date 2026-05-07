@@ -1611,11 +1611,8 @@
               if (dayWeighIn) {
                 divider(y); y += 1 + 16;
                 sectionLabel('BODY WEIGHT', y); y += 9 + 8;
-                const wLbs = (dayWeighIn * 2.20462).toFixed(1);
                 const wKgStr  = dayWeighIn.toFixed(1) + ' kg';
-                const wLbsStr = wLbs + ' lbs';
                 t('italic 700 26px “Cormorant Garamond”, Georgia, serif', '#a8c4e0', '-0.26px', wKgStr, PAD_X, y + 26);
-                t('14px “DM Serif Text”, Georgia, serif', '#7a8a9a', '0px', wLbsStr, PAD_X + 80, y + 26);
                 y += 26 + 18;
               }
 
