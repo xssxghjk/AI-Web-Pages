@@ -544,13 +544,6 @@
   .stat-card-interactive { cursor: pointer; transition: border-color 0.15s, background 0.15s; }
   .stat-card-interactive:hover { border-color: var(--accent); background: rgba(196,134,74,0.07); }
 
-  .cal-detail-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .cal-detail-table th { padding: 4px 6px; color: var(--text2); text-align: left; border-bottom: 1px solid var(--border); }
-  .cal-detail-table th:last-child, .cal-detail-table td:last-child { text-align: right; }
-  .cal-detail-table th:nth-child(3), .cal-detail-table th:nth-child(4),
-  .cal-detail-table td:nth-child(3), .cal-detail-table td:nth-child(4) { text-align: right; }
-  .cal-detail-table td { padding: 4px 6px; border-bottom: 1px solid rgba(58,48,37,0.4); }
-
   .section-header { margin-bottom: 20px; }
   .section-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
   .section-sub { color: var(--text2); font-size: 13px; }
@@ -980,17 +973,6 @@
     <div class="modal-footer" style="margin-top:12px;">
       <button class="btn btn-ghost" onclick="document.getElementById('exportModal').classList.add('hidden')">Close</button>
       <button class="btn btn-primary" onclick="copyExport()">Copy to Clipboard</button>
-    </div>
-  </div>
-</div>
-
-<!-- Calorie Details Modal -->
-<div id="calorieModal" class="modal-overlay hidden" onclick="closeCalorieOutside(event)">
-  <div class="modal" style="max-width:520px;">
-    <div class="modal-title">Calorie Estimate Details</div>
-    <div id="calorieModalBody"></div>
-    <div class="modal-footer" style="margin-top:16px;">
-      <button class="btn btn-ghost" onclick="document.getElementById('calorieModal').classList.add('hidden')">Close</button>
     </div>
   </div>
 </div>
@@ -1543,98 +1525,6 @@ function calcStats() {
   return { totalCompleted, totalSkipped, totalModified, totalTime, totalKm, streak, weeksCompleted, currentWeek };
 }
 
-// ============================================================
-// CALORIE ESTIMATES
-// Formula: MET × weight_kg × duration_hours
-// ============================================================
-function getWorkoutMET(workout) {
-  if (workout.type === 'rest') return 0;
-  if (workout.type === 'strength') return 4.0;
-  if (workout.type === 'cross') return 5.5;
-  if (workout.type === 'race') return 11.0;
-  const text = (workout.short + ' ' + workout.desc).toLowerCase();
-  if (text.includes('tempo')) return 10.0;
-  if (text.includes('hill')) return 9.5;
-  if (text.includes('stride')) return 9.0;
-  if (text.includes('run/walk') || (text.includes('run') && text.includes('walk'))) return 6.5;
-  return 8.0;
-}
-
-function estimateWorkoutDuration(workout) {
-  const text = workout.desc;
-  const minInt = text.match(/(\d+)\s*min\s+run\s*\/\s*(\d+)\s*min\s+walk[^]*?repeat\s+(\d+)\s+times/i);
-  if (minInt) return (parseInt(minInt[1]) + parseInt(minInt[2])) * parseInt(minInt[3]);
-  const secInt = text.match(/(\d+)\s*sec\s+run\s*\/\s*(\d+)\s*sec\s+walk[^]*?repeat\s+(\d+)\s+times/i);
-  if (secInt) return Math.round((parseInt(secInt[1]) + parseInt(secInt[2])) * parseInt(secInt[3]) / 60);
-  const range = text.match(/(\d+)-(\d+)\s*min/i);
-  if (range) return Math.round((parseInt(range[1]) + parseInt(range[2])) / 2);
-  const single = text.match(/(\d+)\s*min/i);
-  if (single) return parseInt(single[1]);
-  if (workout.type === 'run') return 30;
-  if (workout.type === 'strength') return 30;
-  if (workout.type === 'cross') return 40;
-  if (workout.type === 'race') return 150;
-  return 30;
-}
-
-// Returns the closest logged weight (kg) for a given dateStr.
-// Checks the calorie tracker's 'calorie_weights' store first, then falls back to appData.weightKg.
-function getWeightForDate(dateStr) {
-  try {
-    const raw = localStorage.getItem('calorie_weights');
-    if (raw) {
-      const weights = JSON.parse(raw);
-      const dates = Object.keys(weights).filter(d => weights[d] > 0);
-      if (dates.length > 0) {
-        const target = new Date(dateStr + 'T00:00:00').getTime();
-        let closest = null, minDiff = Infinity;
-        for (const d of dates) {
-          const diff = Math.abs(new Date(d + 'T00:00:00').getTime() - target);
-          if (diff < minDiff) { minDiff = diff; closest = d; }
-        }
-        if (closest) return { kg: weights[closest], source: closest };
-      }
-    }
-  } catch {}
-  const kg = appData.weightKg || null;
-  return kg ? { kg, source: 'default' } : null;
-}
-
-function calcWorkoutCalories(workout, loggedMin, weightKg) {
-  const met = getWorkoutMET(workout);
-  if (!met || !weightKg) return 0;
-  const duration = loggedMin || estimateWorkoutDuration(workout);
-  return Math.round(met * weightKg * duration / 60);
-}
-
-function calcTotalCalories() {
-  let total = 0;
-  for (const [key, val] of Object.entries(appData.days)) {
-    if (!val.km) continue;
-    const w = getWeightForDate(key);
-    if (!w) continue;
-    total += Math.round(w.kg * val.km);
-  }
-  return total;
-}
-
-function buildCalorieRows() {
-  const rows = [];
-  for (const [key, val] of Object.entries(appData.days)) {
-    if (!val.km) continue;
-    const d = new Date(key + 'T00:00:00');
-    const wd = getWeekDayForDate(d);
-    if (!wd) continue;
-    const workout = PLAN[wd.weekNum - 1][wd.dayOfWeek];
-    const w = getWeightForDate(key);
-    if (!w) continue;
-    const calories = Math.round(w.kg * val.km);
-    rows.push({ key, date: d, workout, km: val.km, calories, weightKg: w.kg, weightSource: w.source });
-  }
-  rows.sort((a, b) => b.date - a.date);
-  return rows;
-}
-
 function getWeekCompletion(weekNum) {
   const t = today();
   let total = 0, done = 0;
@@ -1676,14 +1566,6 @@ function renderStats() {
   document.getElementById('heroWeekLabel').textContent = `${elapsed} of ${totalDays} training days elapsed`;
 
   // Stats grid
-  const hasAnyWeight = (() => {
-    try { const w = JSON.parse(localStorage.getItem('calorie_weights') || 'null'); return w && Object.keys(w).length > 0; } catch { return false; }
-  })();
-  const totalCal = calcTotalCalories();
-  const calDisplay = hasAnyWeight ? `~${totalCal.toLocaleString()}` : '—';
-  const calOnclick = hasAnyWeight ? 'openCalorieDetails()' : '';
-  const calHint = hasAnyWeight ? 'details ↗' : 'log weight in Calorie Tracker';
-
   document.getElementById('statsGrid').innerHTML = `
     <div class="stat-card">
       <div class="stat-value">${s.totalCompleted + s.totalModified}</div>
@@ -1700,10 +1582,6 @@ function renderStats() {
     <div class="stat-card">
       <div class="stat-value">${s.streak}</div>
       <div class="stat-label">Workout Streak</div>
-    </div>
-    <div class="stat-card${hasAnyWeight ? ' stat-card-interactive' : ''}" ${calOnclick ? `onclick="${calOnclick}"` : ''} title="${hasAnyWeight ? 'Click to see how this is calculated' : 'Log your body weight in the Calorie Tracker to enable estimates'}">
-      <div class="stat-value">${calDisplay}</div>
-      <div class="stat-label">Est. kcal <span style="opacity:0.55;font-size:9px;">${calHint}</span></div>
     </div>
   `;
 
@@ -2372,66 +2250,6 @@ function playBeep(type) {
     else if (type === 'warn') { tone(550, t, 0.1, 0.2); tone(730, t + 0.18, 0.1, 0.2); tone(920, t + 0.36, 0.18, 0.25); }
     else if (type === 'done') { tone(660, t, 0.15); tone(880, t + 0.2, 0.15); tone(1100, t + 0.4, 0.35); }
   } catch(e) {}
-}
-
-// ============================================================
-// CALORIE MODAL
-// ============================================================
-function openCalorieDetails() {
-  const rows = buildCalorieRows();
-  const total = rows.reduce((s, r) => s + r.calories, 0);
-
-  let tableHtml;
-  if (rows.length === 0) {
-    tableHtml = '<div style="color:var(--text2);font-size:13px;padding:12px 0;">No runs with tracked kilometres yet.</div>';
-  } else {
-    const rowsHtml = rows.map(r => {
-      const weightLabel = r.weightSource !== 'default' ? `${r.weightKg} kg` : `${r.weightKg} kg*`;
-      return `
-      <tr>
-        <td>${formatDate(r.date)}</td>
-        <td>${r.workout.short}</td>
-        <td>${r.km}</td>
-        <td style="color:var(--text2);font-size:11px;">${weightLabel}</td>
-        <td style="font-weight:700;color:var(--accent);">~${r.calories}</td>
-      </tr>`;
-    }).join('');
-    const hasDefault = rows.some(r => r.weightSource === 'default');
-    tableHtml = `
-      <div style="overflow-y:auto;max-height:260px;margin-top:12px;border:1px solid var(--border);border-radius:8px;padding:2px 8px;">
-        <table class="cal-detail-table">
-          <thead>
-            <tr>
-              <th>Date</th><th>Workout</th><th>km</th><th>Weight</th><th>kcal</th>
-            </tr>
-          </thead>
-          <tbody>${rowsHtml}</tbody>
-        </table>
-      </div>
-      ${hasDefault ? '<div style="font-size:10px;color:var(--text2);margin-top:6px;">* fallback weight — log daily weights in the Calorie Tracker for more accurate estimates.</div>' : ''}`;
-  }
-
-  document.getElementById('calorieModalBody').innerHTML = `
-    <div style="background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:14px;">
-      <div style="font-size:12px;font-weight:700;margin-bottom:4px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;">Formula</div>
-      <div style="font-family:monospace;font-size:12px;color:var(--accent);">calories = weight (kg) &times; distance (km)</div>
-      <div style="margin-top:8px;font-size:11px;color:var(--text2);line-height:1.6;">
-        Only runs with tracked kilometres are included. ~1&thinsp;kcal per kg per km.
-      </div>
-    </div>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:4px;">Weight sourced from Calorie Tracker (closest date).</div>
-    ${tableHtml}
-    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-      <div style="font-size:12px;color:var(--text2);">Total estimated</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--accent);">~${total.toLocaleString()}&thinsp;kcal</div>
-    </div>
-    <div style="font-size:11px;color:var(--text2);margin-top:6px;font-style:italic;">Rough estimates only — actual burn varies with fitness, terrain, and pace.</div>
-  `;
-  document.getElementById('calorieModal').classList.remove('hidden');
-}
-
-function closeCalorieOutside(e) {
-  if (e.target.id === 'calorieModal') document.getElementById('calorieModal').classList.add('hidden');
 }
 
 // ============================================================
