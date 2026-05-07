@@ -1267,13 +1267,26 @@
         return new Promise(resolve => {
           document.fonts.ready.then(() => {
             // ── Load data ──────────────────────────────────────────────────
-            let calorieLog = {}, workoutData = {};
-            try { calorieLog = JSON.parse(localStorage.getItem('calorie_log') || '{}'); } catch {}
-            try { workoutData = JSON.parse(localStorage.getItem('c2hm_v1') || '{}'); } catch {}
+            let calorieLog = {}, workoutData = {}, strengthData = {}, caloWeights = {};
+            let boulderSessions = [];
+            try { calorieLog      = JSON.parse(localStorage.getItem('calorie_log')          || '{}'); } catch {}
+            try { workoutData     = JSON.parse(localStorage.getItem('c2hm_v1')              || '{}'); } catch {}
+            try { strengthData    = JSON.parse(localStorage.getItem('workout_plan_v3')      || '{}'); } catch {}
+            try { boulderSessions = JSON.parse(localStorage.getItem('bouldering_sessions')  || '[]'); } catch {}
+            try { caloWeights     = JSON.parse(localStorage.getItem('calorie_weights')      || '{}'); } catch {}
 
             const entries    = calorieLog[dateStr] || [];
             const dayWorkout = (workoutData.days || {})[dateStr] || null;
-            const weightKg   = workoutData.weightKg || null;
+
+            // Weight: prefer calorie_weights (most recent entry ≤ date), fall back to marathon tracker
+            let weightKg = workoutData.weightKg || null;
+            {
+              const wEntries = Object.entries(caloWeights)
+                .filter(([d, kg]) => d <= dateStr && kg > 0)
+                .sort((a, b) => b[0].localeCompare(a[0]));
+              if (wEntries.length) weightKg = wEntries[0][1];
+            }
+            if (!weightKg) weightKg = 75;
 
             // ── Process calories ───────────────────────────────────────────
             const MEAL_ORDER = ['breakfast','lunch','dinner','snack','other'];
@@ -1290,11 +1303,44 @@
             });
             const activeCats = MEAL_ORDER.filter(c => grouped[c] && grouped[c].length > 0);
 
-            // ── Process workout ────────────────────────────────────────────
+            // ── Process marathon workout ───────────────────────────────────
             let workoutCal = 0;
             if (dayWorkout) {
               if (dayWorkout.km && weightKg)        workoutCal = Math.round(weightKg * dayWorkout.km);
               else if (dayWorkout.time && weightKg) workoutCal = Math.round(8.0 * weightKg * dayWorkout.time / 60);
+            }
+
+            // ── Process strength training ──────────────────────────────────
+            const strengthEntryMap = strengthData.entries || {};
+            const strengthEntry    = strengthEntryMap[dateStr] || null;
+            const ST_TYPES = [
+              { name: 'Push', muscles: 'Chest · Shoulders · Triceps' },
+              { name: 'Pull', muscles: 'Back · Biceps · Grip'        },
+              { name: 'Legs', muscles: 'Glutes · Hamstrings · Hips'  },
+            ];
+            let strengthSession = null;
+            if (strengthEntry && strengthEntry.status === 'done') {
+              const sched = Array.isArray(strengthData.schedule) && strengthData.schedule.length === 3
+                ? strengthData.schedule : [1, 3, 5];
+              const [SY, SM, SD] = dateStr.split('-').map(Number);
+              const sdow = new Date(SY, SM - 1, SD).getDay();
+              const sidx = sched.indexOf(sdow);
+              strengthSession = sidx >= 0 ? ST_TYPES[sidx] : { name: 'Strength', muscles: '' };
+            }
+            // MET 3.0: conservative for strength training with rest periods
+            let strengthCal = 0;
+            if (strengthSession) {
+              const sdur = (strengthEntry.duration || 60) / 60;
+              strengthCal = Math.round(3.0 * weightKg * sdur);
+            }
+
+            // ── Process bouldering ─────────────────────────────────────────
+            const boulderSession = boulderSessions.find(s => s.date === dateStr) || null;
+            // MET 2.0: very conservative — long rests between short active bursts
+            let boulderCal = 0;
+            if (boulderSession) {
+              const bdur = (boulderSession.duration || 90) / 60;
+              boulderCal = Math.round(2.0 * weightKg * bdur);
             }
 
             // ── Format date label ──────────────────────────────────────────
@@ -1411,16 +1457,16 @@
               y += 16;
               divider(y); y += 1 + 20;
 
-              // ── WORKOUT SECTION ───────────────────────────────────────────
-              sectionLabel('WORKOUT', y); y += 9 + 10;
+              // ── RUNNING SECTION ───────────────────────────────────────────
+              sectionLabel('RUNNING', y); y += 9 + 10;
 
               if (!dayWorkout || !dayWorkout.status) {
-                t('italic 13px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', 'No workout recorded for this date.', PAD_X, y + 13);
+                t('italic 13px “DM Serif Text”, Georgia, serif', '#7a6e60', '0px', 'No run recorded for this date.', PAD_X, y + 13);
                 y += 13 + 6;
               } else {
                 const SC = { completed:'#7ab87a', modified:'#d4924a', skipped:'#c46a6a' };
                 const SL = { completed:'✓ Completed', modified:'◎ Modified', skipped:'✗ Skipped' };
-                t('700 15px "DM Serif Text", Georgia, serif', SC[dayWorkout.status] || '#9a8a76', '0px', SL[dayWorkout.status] || dayWorkout.status, PAD_X, y + 15);
+                t('700 15px “DM Serif Text”, Georgia, serif', SC[dayWorkout.status] || '#9a8a76', '0px', SL[dayWorkout.status] || dayWorkout.status, PAD_X, y + 15);
                 y += 15 + 12;
 
                 const parts = [];
@@ -1429,12 +1475,66 @@
                 if (workoutCal > 0)  parts.push('∼' + workoutCal.toLocaleString() + ' kcal burned');
 
                 if (parts.length > 0) {
-                  t('13px "DM Serif Text", Georgia, serif', '#9a8a76', '0px', parts.join('  ·  '), PAD_X, y + 13);
+                  t('13px “DM Serif Text”, Georgia, serif', '#9a8a76', '0px', parts.join('  ·  '), PAD_X, y + 13);
                   y += 13 + 10;
                 }
 
                 if (dayWorkout.notes) {
-                  t('italic 12px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', '“' + dayWorkout.notes + '”', PAD_X, y + 12);
+                  t('italic 12px “DM Serif Text”, Georgia, serif', '#7a6e60', '0px', '”' + dayWorkout.notes + '”', PAD_X, y + 12);
+                  y += 12 + 8;
+                }
+              }
+
+              y += 14;
+              divider(y); y += 1 + 20;
+
+              // ── STRENGTH TRAINING SECTION ─────────────────────────────────
+              sectionLabel('STRENGTH TRAINING', y); y += 9 + 10;
+
+              if (!strengthSession) {
+                t('italic 13px “DM Serif Text”, Georgia, serif', '#7a6e60', '0px', 'No strength session logged for this date.', PAD_X, y + 13);
+                y += 13 + 6;
+              } else {
+                t('700 15px “DM Serif Text”, Georgia, serif', '#7ab87a', '0px', '✓ ' + strengthSession.name + ' Session', PAD_X, y + 15);
+                y += 15 + 8;
+                if (strengthSession.muscles) {
+                  t('12px “DM Serif Text”, Georgia, serif', '#9a8a76', '0px', strengthSession.muscles, PAD_X, y + 12);
+                  y += 12 + 8;
+                }
+                const sParts = [];
+                if (strengthEntry.duration) sParts.push(strengthEntry.duration + ' min');
+                if (strengthCal > 0) sParts.push('∼' + strengthCal.toLocaleString() + ' kcal burned');
+                if (sParts.length > 0) {
+                  t('13px “DM Serif Text”, Georgia, serif', '#9a8a76', '0px', sParts.join('  ·  '), PAD_X, y + 13);
+                  y += 13 + 10;
+                }
+              }
+
+              y += 14;
+              divider(y); y += 1 + 20;
+
+              // ── BOULDERING SECTION ────────────────────────────────────────
+              sectionLabel('BOULDERING', y); y += 9 + 10;
+
+              if (!boulderSession) {
+                t('italic 13px “DM Serif Text”, Georgia, serif', '#7a6e60', '0px', 'No bouldering session logged for this date.', PAD_X, y + 13);
+                y += 13 + 6;
+              } else {
+                t('700 15px “DM Serif Text”, Georgia, serif', '#7ab87a', '0px', '✓ Session', PAD_X, y + 15);
+                y += 15 + 8;
+                const bParts = [];
+                if (boulderSession.duration) bParts.push(boulderSession.duration + ' min');
+                if (boulderCal > 0) bParts.push('∼' + boulderCal.toLocaleString() + ' kcal burned');
+                const totalClimbs = Object.values(boulderSession.grades || {}).reduce((s, c) => s + c, 0);
+                if (totalClimbs > 0) bParts.push(totalClimbs + ' climb' + (totalClimbs !== 1 ? 's' : ''));
+                if (bParts.length > 0) {
+                  t('13px “DM Serif Text”, Georgia, serif', '#9a8a76', '0px', bParts.join('  ·  '), PAD_X, y + 13);
+                  y += 13 + 10;
+                }
+                if (boulderSession.notes) {
+                  const noteFont = 'italic 12px “DM Serif Text”, Georgia, serif';
+                  const noteStr  = clampStr('”' + boulderSession.notes + '”', IW - 4, noteFont, '0px');
+                  t(noteFont, '#7a6e60', '0px', noteStr, PAD_X, y + 12);
                   y += 12 + 8;
                 }
               }
@@ -1443,7 +1543,8 @@
               divider(y); y += 1 + 20;
 
               // ── NET SECTION ───────────────────────────────────────────────
-              const net = Math.round(totalCalIn - workoutCal);
+              const totalBurn = workoutCal + strengthCal + boulderCal;
+              const net = Math.round(totalCalIn - totalBurn);
               t('700 9px "DM Serif Text", Georgia, serif', '#9a8a76', '1.1px', 'NET CALORIES', PAD_X, y + 9);
               y += 9 + 8;
               t('italic 700 28px "Cormorant Garamond", Georgia, serif', '#e8dfd0', '-0.28px', net.toLocaleString() + ' kcal', PAD_X, y + 28);
