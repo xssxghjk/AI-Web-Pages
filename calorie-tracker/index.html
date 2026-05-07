@@ -1429,8 +1429,13 @@ function drawChart(canvasId, data, opts = {}) {
   if (!canvas) return;
   const ctx    = canvas.getContext('2d');
   const dpr    = window.devicePixelRatio || 1;
-  const W      = canvas.parentElement.clientWidth || canvas.parentElement.offsetWidth || 300;
-  const H      = parseInt(canvas.getAttribute('height')) || 160;
+  canvas.style.width  = '';
+  canvas.style.height = '';
+  const W      = canvas.offsetWidth;
+  // Cache original height: canvas.height = H*dpr overwrites the height attribute, so reading
+  // it again next call would give H*dpr instead of the intended H.
+  if (!canvas.dataset.chartHeight) canvas.dataset.chartHeight = canvas.getAttribute('height') || '160';
+  const H      = parseInt(canvas.dataset.chartHeight) || 160;
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
   canvas.style.width  = W + 'px';
