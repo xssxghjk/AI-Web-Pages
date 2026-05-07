@@ -29,12 +29,14 @@ const SEED_DECK_2 = {
 
 async function seedDeck(page, deck) {
   await page.addInitScript((d) => {
+    localStorage.setItem('nav_notice_v1', '1');
     localStorage.setItem('fab_saved_decks_v1', JSON.stringify([d]));
   }, deck);
 }
 
 async function seedDecks(page, decks) {
   await page.addInitScript((ds) => {
+    localStorage.setItem('nav_notice_v1', '1');
     localStorage.setItem('fab_saved_decks_v1', JSON.stringify(ds));
   }, decks);
 }
@@ -130,6 +132,7 @@ test.describe('sideboard guide', () => {
     // Expand the matchup row to reveal the Edit button
     await page.click('.sb-matchup-head');
     await page.waitForSelector('.sb-matchup-edit-btn', { state: 'visible' });
+    await page.locator('.sb-matchup-edit-btn').scrollIntoViewIfNeeded();
     await page.click('.sb-matchup-edit-btn');
     await page.fill('#sb-hero-input', 'Ira');
     // First click: warnings; second click: save anyway
@@ -153,6 +156,7 @@ test.describe('sideboard guide', () => {
     // Expand the matchup row to reveal the Edit button
     await page.click('.sb-matchup-head');
     await page.waitForSelector('.sb-matchup-edit-btn', { state: 'visible' });
+    await page.locator('.sb-matchup-edit-btn').scrollIntoViewIfNeeded();
     await page.click('.sb-matchup-edit-btn');
     page.once('dialog', dialog => dialog.accept());
     await page.click('#sb-delete');
@@ -467,7 +471,8 @@ test.describe('sideboard save — post-cut warnings', () => {
 
     // Cut Shield (Off-Hand) — leaves single 1H MainSword with no Off-Hand
     const shieldRow = page.locator('.sb-picker-row', { hasText: 'Shield' });
-    await shieldRow.locator('.sb-picker-minus').click();
+    await shieldRow.scrollIntoViewIfNeeded();
+    await shieldRow.locator('.sb-picker-minus').click({ force: true });
 
     // First click: post-cut equipment warning shown, save blocked
     await page.click('#sb-save');

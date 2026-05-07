@@ -5558,14 +5558,32 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const totalCards = currentDeckPairs.reduce((s, p) => s + p.entry.qty, 0);
 
     // Load all card images in parallel
-    function loadImg(url) {
-      return new Promise(resolve => {
+    async function loadImg(url) {
+      // Try direct load with CORS first
+      const direct = await new Promise(res => {
         const img = new Image();
         img.crossOrigin = 'anonymous';
-        img.onload  = () => resolve(img);
-        img.onerror = () => resolve(null);
+        img.onload  = () => res(img);
+        img.onerror = () => res(null);
         img.src = url;
       });
+      if (direct) return direct;
+
+      // Fallback: fetch via CORS proxy → blob URL so canvas isn't tainted
+      try {
+        const resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+        if (!resp.ok) return null;
+        const blob = await resp.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        return await new Promise(res => {
+          const img = new Image();
+          img.onload  = () => { URL.revokeObjectURL(objectUrl); res(img); };
+          img.onerror = () => { URL.revokeObjectURL(objectUrl); res(null); };
+          img.src = objectUrl;
+        });
+      } catch {
+        return null;
+      }
     }
     const urlList = [];
     for (const p of currentDeckPairs) {
