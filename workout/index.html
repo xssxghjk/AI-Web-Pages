@@ -120,7 +120,7 @@ body::before {
   margin-bottom: 0;
 }
 .schedule-panel.open {
-  max-height: 200px;
+  max-height: 150px;
   padding: 14px 16px;
   margin-bottom: 16px;
 }
@@ -129,26 +129,64 @@ body::before {
   letter-spacing: 0.1em; color: var(--muted);
   font-style: italic; margin-bottom: 12px;
 }
-.schedule-rows { display: flex; flex-direction: column; gap: 8px; }
-.schedule-row {
-  display: flex; align-items: center; gap: 12px;
+/* ── SCHEDULE DRAG GRID ── */
+.sched-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  user-select: none;
+  -webkit-user-select: none;
 }
-.schedule-session-name {
+.sched-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 2px 6px;
+  border: 1px solid transparent;
+  transition: border-color 0.12s, background 0.12s;
+  min-height: 56px;
+}
+.sched-slot.drag-over {
+  border-color: var(--accent);
+  background: rgba(196,134,74,0.1);
+}
+.sched-day-lbl {
   font-family: 'Space Mono', monospace;
-  font-size: 11px; font-weight: 700;
-  min-width: 40px;
+  font-size: 8px; font-weight: 700;
+  letter-spacing: 0.07em;
+  color: var(--muted2);
 }
-.schedule-select {
-  background: var(--surf2); border: 1px solid var(--border);
-  color: var(--text); padding: 4px 8px;
+.sched-chip {
+  background: rgba(var(--chip-rgb, 196,134,74), 0.12);
+  border: 1px solid var(--chip-c, var(--accent));
+  color: var(--chip-c, var(--accent));
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  padding: 5px 3px;
+  cursor: grab;
+  text-align: center;
+  width: 100%;
+  touch-action: none;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  transition: opacity 0.12s;
+}
+.sched-chip:active { cursor: grabbing; }
+.sched-chip.is-dragging { opacity: 0.22; cursor: grabbing; }
+.sched-rest {
+  color: var(--muted2); font-size: 14px;
+  font-style: italic; margin-top: 6px;
   font-family: 'DM Serif Text', Georgia, serif;
-  font-size: 12px; cursor: pointer;
-  flex: 1; max-width: 150px;
 }
-.schedule-select:focus { outline: 1px solid var(--accent); }
-.schedule-hint {
-  font-size: 10px; color: var(--muted2); font-style: italic;
-  margin-top: 10px;
+#sched-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.55);
+  transform: scale(1.1);
+  opacity: 0.92;
+  transition: none !important;
 }
 
 /* ── STATS ── */
@@ -353,9 +391,6 @@ body::before {
     border-top: none;
     white-space: nowrap;
   }
-  .schedule-rows { flex-direction: row; flex-wrap: wrap; gap: 12px; }
-  .schedule-row { flex-direction: column; gap: 4px; align-items: flex-start; }
-  .schedule-select { max-width: 120px; }
 }
 
 /* ── DIVIDER ── */
@@ -518,9 +553,8 @@ body::before {
   </div>
 
   <div class="schedule-panel" id="schedule-panel">
-    <div class="schedule-panel-title">Workout Schedule — drag days to fit your week</div>
-    <div class="schedule-rows" id="schedule-rows"></div>
-    <div class="schedule-hint">Swapping two sessions exchanges their days automatically.</div>
+    <div class="schedule-panel-title">Drag sessions to rearrange your week</div>
+    <div class="sched-grid" id="sched-grid"></div>
   </div>
 
   <div class="stats-row">
@@ -701,45 +735,132 @@ function render() {
   renderHistory(data, schedule, today);
 }
 
+// ── Schedule drag-and-drop ────────────────────────────
+
+const SCHED_DOW_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Mon → Sun
+
+let dragState = null;
+
 function renderSchedulePanel(schedule) {
-  const container = document.getElementById('schedule-rows');
+  const container = document.getElementById('sched-grid');
   container.innerHTML = '';
-  SESSION_TYPES.forEach((sess, idx) => {
-    const row = document.createElement('div');
-    row.className = 'schedule-row';
 
-    const label = document.createElement('span');
-    label.className = 'schedule-session-name';
-    label.style.color = sess.color;
-    label.textContent = sess.name;
+  SCHED_DOW_ORDER.forEach(dow => {
+    const slot = document.createElement('div');
+    slot.className = 'sched-slot';
+    slot.dataset.dow = dow;
 
-    const sel = document.createElement('select');
-    sel.className = 'schedule-select';
-    for (let d = 0; d < 7; d++) {
-      const opt = document.createElement('option');
-      opt.value = d;
-      opt.textContent = DAY_LONG[d];
-      if (d === schedule[idx]) opt.selected = true;
-      sel.appendChild(opt);
+    const lbl = document.createElement('div');
+    lbl.className = 'sched-day-lbl';
+    lbl.textContent = DAY_NAMES[dow];
+    slot.appendChild(lbl);
+
+    const sessIdx = schedule.indexOf(dow);
+    if (sessIdx >= 0) {
+      const sess = SESSION_TYPES[sessIdx];
+      const chip = document.createElement('div');
+      chip.className = 'sched-chip';
+      chip.dataset.sessIdx = sessIdx;
+      chip.style.setProperty('--chip-c',   sess.color);
+      chip.style.setProperty('--chip-rgb', sess.rgb);
+      chip.textContent = sess.name;
+      chip.addEventListener('pointerdown', onChipPointerDown);
+      slot.appendChild(chip);
+    } else {
+      const rest = document.createElement('div');
+      rest.className = 'sched-rest';
+      rest.textContent = '·';
+      slot.appendChild(rest);
     }
-    sel.addEventListener('change', () => {
-      const newDow = parseInt(sel.value);
-      const data = loadData();
-      const s = getSchedule(data);
-      const conflictIdx = s.indexOf(newDow);
-      if (conflictIdx >= 0 && conflictIdx !== idx) {
-        s[conflictIdx] = s[idx]; // swap: give conflicting session the old day
-      }
-      s[idx] = newDow;
-      data.schedule = s;
-      saveData(data);
-      render();
-    });
 
-    row.appendChild(label);
-    row.appendChild(sel);
-    container.appendChild(row);
+    container.appendChild(slot);
   });
+}
+
+function onChipPointerDown(e) {
+  e.preventDefault();
+  const chip = e.currentTarget;
+  const slot = chip.closest('.sched-slot');
+  if (!slot) return;
+
+  chip.setPointerCapture(e.pointerId);
+
+  const rect = chip.getBoundingClientRect();
+  const ghost = chip.cloneNode(true);
+  ghost.id = 'sched-ghost';
+  ghost.style.width   = rect.width  + 'px';
+  ghost.style.left    = rect.left   + 'px';
+  ghost.style.top     = rect.top    + 'px';
+  document.body.appendChild(ghost);
+
+  chip.classList.add('is-dragging');
+
+  dragState = {
+    chip,
+    ghost,
+    sessIdx:   parseInt(chip.dataset.sessIdx),
+    fromDow:   parseInt(slot.dataset.dow),
+    offsetX:   e.clientX - rect.left,
+    offsetY:   e.clientY - rect.top,
+    pointerId: e.pointerId,
+  };
+
+  chip.addEventListener('pointermove',   onChipPointerMove);
+  chip.addEventListener('pointerup',     onChipPointerUp);
+  chip.addEventListener('pointercancel', onChipPointerUp);
+}
+
+function slotAtPoint(x, y) {
+  const { ghost } = dragState;
+  ghost.style.visibility = 'hidden';
+  const el = document.elementFromPoint(x, y);
+  ghost.style.visibility = '';
+  return el?.closest('.sched-slot') || null;
+}
+
+function onChipPointerMove(e) {
+  if (!dragState) return;
+  const { ghost, offsetX, offsetY, fromDow } = dragState;
+
+  ghost.style.left = (e.clientX - offsetX) + 'px';
+  ghost.style.top  = (e.clientY - offsetY) + 'px';
+
+  const target = slotAtPoint(e.clientX, e.clientY);
+  document.querySelectorAll('.sched-slot.drag-over').forEach(s => s.classList.remove('drag-over'));
+  if (target && parseInt(target.dataset.dow) !== fromDow) {
+    target.classList.add('drag-over');
+  }
+}
+
+function onChipPointerUp(e) {
+  if (!dragState) return;
+  const { chip, ghost, sessIdx, fromDow, pointerId } = dragState;
+
+  const target = slotAtPoint(e.clientX, e.clientY);
+  const toDow  = target ? parseInt(target.dataset.dow) : null;
+
+  ghost.remove();
+  chip.classList.remove('is-dragging');
+  chip.releasePointerCapture(pointerId);
+  document.querySelectorAll('.sched-slot.drag-over').forEach(s => s.classList.remove('drag-over'));
+
+  chip.removeEventListener('pointermove',   onChipPointerMove);
+  chip.removeEventListener('pointerup',     onChipPointerUp);
+  chip.removeEventListener('pointercancel', onChipPointerUp);
+
+  dragState = null;
+
+  if (toDow !== null && toDow !== fromDow) {
+    const data = loadData();
+    const s = getSchedule(data);
+    const conflictIdx = s.indexOf(toDow);
+    if (conflictIdx >= 0) s[conflictIdx] = fromDow; // swap
+    s[sessIdx] = toDow;
+    data.schedule = s;
+    saveData(data);
+    toast('Schedule updated');
+    render();
+  }
 }
 
 function renderGrid(data, schedule, days, today) {
