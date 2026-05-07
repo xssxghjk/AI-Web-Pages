@@ -5696,6 +5696,10 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   // Canvas-based text export — works on all browsers including mobile.
   // No card art (avoids CORS taint); deck is laid out as a styled card list.
+  // Canvas export — matches the 1920×1080 overlay layout.
+  // Images are requested with crossOrigin='anonymous'. If the GCS bucket sends
+  // CORS headers they render as card art; if not, onerror fires and we draw a
+  // text placeholder. Either way the canvas stays untainted and toBlob() works.
   async function exportDeckImageCanvas(deck) {
     const buckets = {};
     GROUPS.forEach(g => { buckets[g.key] = []; });
@@ -5704,109 +5708,144 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       (buckets[key] || buckets.other).push(p);
     }
 
-    const activeGroups = GROUPS.filter(g => buckets[g.key]?.length > 0);
-    const numCols = activeGroups.length || 1;
+    const W       = 1920, H = 1080;
+    const COL_W   = Math.floor(W / 4);
+    const PAD     = 16;
+    const CGAP    = 7;
+    const N       = 4;
+    const CARD_W  = Math.floor((COL_W - PAD * 2 - CGAP * (N - 1)) / N);
+    const CARD_H  = Math.round(CARD_W / 0.714);
+    const LABEL_H = 34;
+    const BODY_TOP = 80;
 
-    const W         = 1200;
-    const PAD_X     = 20;
-    const HEADER_H  = 88;
-    const LABEL_H   = 38;
-    const ROW_H     = 22;
-    const maxRows   = Math.max(...activeGroups.map(g => buckets[g.key].length), 1);
-    const H         = Math.max(HEADER_H + LABEL_H + maxRows * ROW_H + 32, 300);
-    const COL_W     = Math.floor(W / numCols);
+    // Pre-load card images with CORS — if the server allows it we get art,
+    // otherwise onerror fires and imgLoaded[url] stays null (text placeholder).
+    const uniqueUrls = [...new Set(
+      currentDeckPairs.filter(p => p.card?.imgUrl).map(p => p.card.imgUrl)
+    )];
+    const imgLoaded = Object.create(null);
+    await Promise.all(uniqueUrls.map(url => new Promise(resolve => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload  = () => { imgLoaded[url] = img; resolve(); };
+      img.onerror = () => { imgLoaded[url] = null; resolve(); };
+      img.src = url;
+    })));
 
     const canvas = document.createElement('canvas');
     canvas.width  = W;
     canvas.height = H;
     const ctx = canvas.getContext('2d');
 
-    // Background
+    // Background + dot texture
     ctx.fillStyle = '#1c1814';
     ctx.fillRect(0, 0, W, H);
-
-    // Subtle dot texture
-    ctx.fillStyle = 'rgba(232,223,208,0.035)';
-    for (let x = 12; x < W; x += 24) {
+    ctx.fillStyle = 'rgba(232,223,208,0.04)';
+    for (let x = 12; x < W; x += 24)
       for (let y = 12; y < H; y += 24) {
-        ctx.beginPath();
-        ctx.arc(x, y, 1, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, 1, 0, Math.PI * 2); ctx.fill();
       }
-    }
 
     // Accent bar
     ctx.fillStyle = '#c4864a';
     ctx.fillRect(0, 0, W, 3);
 
-    // Deck name
-    ctx.font = 'bold 28px Georgia, serif';
-    ctx.fillStyle = '#e8dfd0';
-    ctx.fillText(deck.name || 'Deck', PAD_X, 46);
-
-    // Date + card count
+    // Header
     const totalCards = currentDeckPairs.reduce((s, p) => s + p.entry.qty, 0);
     const dateStr = new Date(deck.savedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-    ctx.font = '15px Georgia, serif';
+    ctx.fillStyle = '#e8dfd0';
+    ctx.font = 'bold 28px Georgia, serif';
+    ctx.fillText(deck.name || 'Deck', 40, 48);
     ctx.fillStyle = '#7a6e60';
-    ctx.fillText(`${dateStr}  ·  ${totalCards} cards`, PAD_X, 68);
-
-    // Header separator
+    ctx.font = '15px Georgia, serif';
+    ctx.fillText(`${dateStr}  ·  ${totalCards} cards`, 40, 70);
     ctx.fillStyle = '#3a3025';
-    ctx.fillRect(0, HEADER_H - 1, W, 1);
+    ctx.fillRect(0, BODY_TOP - 2, W, 1);
 
-    // Helper: truncate text to fit within maxW pixels
-    function fitText(text, maxW) {
-      if (ctx.measureText(text).width <= maxW) return text;
-      let t = text;
-      while (t.length > 1 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1);
-      return t + '…';
-    }
-
-    activeGroups.forEach((g, ci) => {
-      const pairs    = buckets[g.key];
+    // Columns
+    GROUPS.forEach((g, ci) => {
+      const pairs = buckets[g.key];
+      if (!pairs || !pairs.length) return;
       const colTotal = pairs.reduce((s, p) => s + p.entry.qty, 0);
-      const x        = ci * COL_W;
+      const colX = ci * COL_W;
 
-      if (ci > 0) {
-        ctx.fillStyle = '#2a2218';
-        ctx.fillRect(x, HEADER_H, 1, H - HEADER_H);
-      }
+      if (ci > 0) { ctx.fillStyle = '#2a2218'; ctx.fillRect(colX, BODY_TOP, 1, H - BODY_TOP); }
 
       // Column label
-      ctx.font = 'bold 10px "Courier New", monospace';
+      ctx.font = 'bold 11px "Courier New", monospace';
       ctx.fillStyle = g.color;
-      ctx.fillText(`${g.label.toUpperCase()}  ·  ${colTotal}`, x + PAD_X, HEADER_H + 24);
-
-      // Label underline
+      ctx.textAlign = 'left';
+      ctx.fillText(`${g.label.toUpperCase()} · ${colTotal}`, colX + PAD, BODY_TOP + 22);
       ctx.strokeStyle = g.color + '44';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(x, HEADER_H + LABEL_H - 1);
-      ctx.lineTo(x + COL_W, HEADER_H + LABEL_H - 1);
+      ctx.moveTo(colX, BODY_TOP + LABEL_H);
+      ctx.lineTo(colX + COL_W, BODY_TOP + LABEL_H);
       ctx.stroke();
 
       pairs.forEach((p, idx) => {
-        const rowY = HEADER_H + LABEL_H + idx * ROW_H;
+        const row = Math.floor(idx / N), c2 = idx % N;
+        const cx  = colX + PAD + c2 * (CARD_W + CGAP);
+        const cy  = BODY_TOP + LABEL_H + 4 + row * (CARD_H + CGAP);
+        if (cy + CARD_H > H - 8) return;
 
-        if (idx % 2 === 0) {
-          ctx.fillStyle = 'rgba(255,255,255,0.018)';
-          ctx.fillRect(x, rowY, COL_W, ROW_H);
+        const r = 4;
+        function roundedPath() {
+          ctx.beginPath();
+          ctx.moveTo(cx + r, cy);
+          ctx.lineTo(cx + CARD_W - r, cy);
+          ctx.arcTo(cx + CARD_W, cy, cx + CARD_W, cy + r, r);
+          ctx.lineTo(cx + CARD_W, cy + CARD_H - r);
+          ctx.arcTo(cx + CARD_W, cy + CARD_H, cx + CARD_W - r, cy + CARD_H, r);
+          ctx.lineTo(cx + r, cy + CARD_H);
+          ctx.arcTo(cx, cy + CARD_H, cx, cy + CARD_H - r, r);
+          ctx.lineTo(cx, cy + r);
+          ctx.arcTo(cx, cy, cx + r, cy, r);
+          ctx.closePath();
         }
 
-        const textY = rowY + ROW_H - 6;
+        // Card background
+        ctx.fillStyle = '#252018';
+        roundedPath(); ctx.fill();
+        ctx.strokeStyle = '#3a3025'; ctx.lineWidth = 1;
+        roundedPath(); ctx.stroke();
 
+        const loaded = p.card?.imgUrl ? imgLoaded[p.card.imgUrl] : null;
+        if (loaded) {
+          ctx.save();
+          roundedPath(); ctx.clip();
+          ctx.drawImage(loaded, cx, cy, CARD_W, CARD_H);
+          ctx.restore();
+        } else {
+          // Text placeholder
+          const fs = Math.max(8, Math.floor(CARD_W / 7));
+          ctx.font = `${fs}px Georgia, serif`;
+          ctx.fillStyle = '#7a6e60';
+          ctx.textAlign = 'center';
+          const words = p.entry.name.split(' ');
+          let line = '', lines2 = [];
+          for (const w of words) {
+            const test = line ? `${line} ${w}` : w;
+            if (ctx.measureText(test).width > CARD_W - 8) { lines2.push(line); line = w; }
+            else line = test;
+          }
+          if (line) lines2.push(line);
+          const lh = fs * 1.3;
+          const sy = cy + (CARD_H - lines2.length * lh) / 2 + fs;
+          lines2.forEach((l, li) => ctx.fillText(l, cx + CARD_W / 2, sy + li * lh));
+          ctx.textAlign = 'left';
+        }
+
+        // Qty badge
         if (p.entry.qty > 1) {
+          const bw = 24, bh = 16;
+          ctx.fillStyle = 'rgba(20,16,12,0.88)';
+          ctx.fillRect(cx + CARD_W - bw - 2, cy + 2, bw, bh);
           ctx.font = 'bold 11px "Courier New", monospace';
           ctx.fillStyle = '#c4864a';
-          ctx.fillText(`×${p.entry.qty}`, x + PAD_X, textY);
-          ctx.font = '13px Georgia, serif';
-          ctx.fillStyle = '#e8dfd0';
-          ctx.fillText(fitText(p.entry.name, COL_W - PAD_X - 32), x + PAD_X + 28, textY);
-        } else {
-          ctx.font = '13px Georgia, serif';
-          ctx.fillStyle = '#e8dfd0';
-          ctx.fillText(fitText(p.entry.name, COL_W - PAD_X * 2), x + PAD_X, textY);
+          ctx.textAlign = 'right';
+          ctx.fillText(`×${p.entry.qty}`, cx + CARD_W - 4, cy + 13);
+          ctx.textAlign = 'left';
         }
       });
     });
@@ -5815,14 +5854,18 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     ctx.font = '11px Georgia, serif';
     ctx.fillStyle = 'rgba(122,110,96,0.4)';
     ctx.textAlign = 'right';
-    ctx.fillText('FaB Deck Builder', W - 16, H - 10);
+    ctx.fillText('FaB Deck Builder', W - 20, H - 12);
 
     return new Promise((resolve, reject) => {
-      canvas.toBlob(blob => {
-        if (!blob) { reject(new Error('toBlob failed')); return; }
-        _triggerDownload(blob, _deckFilename(deck));
-        resolve();
-      }, 'image/png');
+      try {
+        canvas.toBlob(blob => {
+          if (!blob) { reject(new Error('toBlob failed')); return; }
+          _triggerDownload(blob, _deckFilename(deck));
+          resolve();
+        }, 'image/png');
+      } catch (e) {
+        reject(e);
+      }
     });
   }
 
@@ -5832,7 +5875,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     // Mobile / unsupported browsers: canvas text export
     if (!navigator.mediaDevices?.getDisplayMedia) {
-      if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+      if (btn) { btn.disabled = true; btn.textContent = 'Fetching art…'; }
       try {
         await exportDeckImageCanvas(deck);
         showToast('Image saved to downloads.');
