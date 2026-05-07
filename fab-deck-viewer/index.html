@@ -131,6 +131,14 @@
       padding-bottom: 1.25rem;
       border-bottom: 2px solid var(--text);
     }
+    .detail-page-actions {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-left: auto;
+    }
+    @media (max-width: 600px) {
+      .detail-page-header { flex-wrap: wrap; gap: 0.5rem 0; }
+      .detail-page-actions { width: 100%; margin-left: 0; justify-content: flex-end; flex-wrap: wrap; }
+    }
     .page-header-title {
       font-family: 'Cormorant Garamond', Georgia, serif;
       font-style: italic;
@@ -2119,15 +2127,16 @@ Header lines, section labels, and footers are ignored automatically."></textarea
      ══════════════════════════════════════════ -->
 <div id="view-detail" class="view" style="display:none;">
   <div class="page">
-    <div class="page-header">
+    <div class="page-header detail-page-header">
       <button class="btn-ghost btn-back" id="btn-back-from-detail">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>
         My Decks
       </button>
-      <div style="flex:1"></div>
-      <button class="btn-secondary" id="btn-export-deck" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">Export</button>
-      <button class="btn-secondary" id="btn-export-image" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">Save as Image</button>
-      <button class="btn-danger" id="btn-delete-deck">Delete</button>
+      <div class="detail-page-actions">
+        <button class="btn-secondary" id="btn-export-deck" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">Export</button>
+        <button class="btn-secondary" id="btn-export-image" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">Save as Image</button>
+        <button class="btn-danger" id="btn-delete-deck">Delete</button>
+      </div>
     </div>
 
     <div class="detail-head">
@@ -5670,31 +5679,205 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     return overlay;
   }
 
+  function _deckFilename(deck) {
+    return (deck.name || 'deck').replace(/[^a-zA-Z0-9 _-]/g, '').trim().replace(/\s+/g, '-') + '-deck.png';
+  }
+
+  function _triggerDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // Canvas-based text export — works on all browsers including mobile.
+  // No card art (avoids CORS taint); deck is laid out as a styled card list.
+  async function exportDeckImageCanvas(deck) {
+    const buckets = {};
+    GROUPS.forEach(g => { buckets[g.key] = []; });
+    for (const p of currentDeckPairs) {
+      const key = p.card ? (p.card.color || 'other') : 'other';
+      (buckets[key] || buckets.other).push(p);
+    }
+
+    const activeGroups = GROUPS.filter(g => buckets[g.key]?.length > 0);
+    const numCols = activeGroups.length || 1;
+
+    const W         = 1200;
+    const PAD_X     = 20;
+    const HEADER_H  = 88;
+    const LABEL_H   = 38;
+    const ROW_H     = 22;
+    const maxRows   = Math.max(...activeGroups.map(g => buckets[g.key].length), 1);
+    const H         = Math.max(HEADER_H + LABEL_H + maxRows * ROW_H + 32, 300);
+    const COL_W     = Math.floor(W / numCols);
+
+    const canvas = document.createElement('canvas');
+    canvas.width  = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = '#1c1814';
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle dot texture
+    ctx.fillStyle = 'rgba(232,223,208,0.035)';
+    for (let x = 12; x < W; x += 24) {
+      for (let y = 12; y < H; y += 24) {
+        ctx.beginPath();
+        ctx.arc(x, y, 1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Accent bar
+    ctx.fillStyle = '#c4864a';
+    ctx.fillRect(0, 0, W, 3);
+
+    // Deck name
+    ctx.font = 'bold 28px Georgia, serif';
+    ctx.fillStyle = '#e8dfd0';
+    ctx.fillText(deck.name || 'Deck', PAD_X, 46);
+
+    // Date + card count
+    const totalCards = currentDeckPairs.reduce((s, p) => s + p.entry.qty, 0);
+    const dateStr = new Date(deck.savedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    ctx.font = '15px Georgia, serif';
+    ctx.fillStyle = '#7a6e60';
+    ctx.fillText(`${dateStr}  ·  ${totalCards} cards`, PAD_X, 68);
+
+    // Header separator
+    ctx.fillStyle = '#3a3025';
+    ctx.fillRect(0, HEADER_H - 1, W, 1);
+
+    // Helper: truncate text to fit within maxW pixels
+    function fitText(text, maxW) {
+      if (ctx.measureText(text).width <= maxW) return text;
+      let t = text;
+      while (t.length > 1 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1);
+      return t + '…';
+    }
+
+    activeGroups.forEach((g, ci) => {
+      const pairs    = buckets[g.key];
+      const colTotal = pairs.reduce((s, p) => s + p.entry.qty, 0);
+      const x        = ci * COL_W;
+
+      if (ci > 0) {
+        ctx.fillStyle = '#2a2218';
+        ctx.fillRect(x, HEADER_H, 1, H - HEADER_H);
+      }
+
+      // Column label
+      ctx.font = 'bold 10px "Courier New", monospace';
+      ctx.fillStyle = g.color;
+      ctx.fillText(`${g.label.toUpperCase()}  ·  ${colTotal}`, x + PAD_X, HEADER_H + 24);
+
+      // Label underline
+      ctx.strokeStyle = g.color + '44';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x, HEADER_H + LABEL_H - 1);
+      ctx.lineTo(x + COL_W, HEADER_H + LABEL_H - 1);
+      ctx.stroke();
+
+      pairs.forEach((p, idx) => {
+        const rowY = HEADER_H + LABEL_H + idx * ROW_H;
+
+        if (idx % 2 === 0) {
+          ctx.fillStyle = 'rgba(255,255,255,0.018)';
+          ctx.fillRect(x, rowY, COL_W, ROW_H);
+        }
+
+        const textY = rowY + ROW_H - 6;
+
+        if (p.entry.qty > 1) {
+          ctx.font = 'bold 11px "Courier New", monospace';
+          ctx.fillStyle = '#c4864a';
+          ctx.fillText(`×${p.entry.qty}`, x + PAD_X, textY);
+          ctx.font = '13px Georgia, serif';
+          ctx.fillStyle = '#e8dfd0';
+          ctx.fillText(fitText(p.entry.name, COL_W - PAD_X - 32), x + PAD_X + 28, textY);
+        } else {
+          ctx.font = '13px Georgia, serif';
+          ctx.fillStyle = '#e8dfd0';
+          ctx.fillText(fitText(p.entry.name, COL_W - PAD_X * 2), x + PAD_X, textY);
+        }
+      });
+    });
+
+    // Watermark
+    ctx.font = '11px Georgia, serif';
+    ctx.fillStyle = 'rgba(122,110,96,0.4)';
+    ctx.textAlign = 'right';
+    ctx.fillText('FaB Deck Builder', W - 16, H - 10);
+
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(blob => {
+        if (!blob) { reject(new Error('toBlob failed')); return; }
+        _triggerDownload(blob, _deckFilename(deck));
+        resolve();
+      }, 'image/png');
+    });
+  }
+
   async function exportDeckImage(deck) {
+    const btn = document.getElementById('btn-export-image');
+    const origText = btn ? btn.textContent : '';
+
+    // Mobile / unsupported browsers: canvas text export
     if (!navigator.mediaDevices?.getDisplayMedia) {
-      showToast('Screen capture is not supported in this browser. Try Chrome or Edge.', true);
+      if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+      try {
+        await exportDeckImageCanvas(deck);
+        showToast('Image saved to downloads.');
+      } catch {
+        showToast('Could not generate image.', true);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = origText; }
+      }
       return;
     }
 
+    // Desktop: screen capture
     const overlay = buildExportOverlay(deck);
-    document.body.appendChild(overlay);
 
-    // Images are already in the browser cache from the deck view — wait for them to paint
+    // Hint banner so the user knows what to do in the share dialog
+    const banner = document.createElement('div');
+    banner.style.cssText = [
+      'position:fixed;bottom:0;left:0;right:0;z-index:1000000;',
+      'padding:10px 20px;text-align:center;',
+      'background:rgba(28,24,20,0.92);border-top:1px solid rgba(196,134,74,0.35);',
+      'color:#c4864a;font-family:"DM Serif Text",Georgia,serif;font-style:italic;font-size:14px;',
+    ].join('');
+    banner.textContent = 'Select this tab in the share dialog, then click Share to capture your deck';
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(banner);
+
     const imgs = [...overlay.querySelectorAll('img')];
     await Promise.all(imgs.map(img =>
       img.complete ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r; })
     ));
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
+    if (btn) { btn.disabled = true; btn.textContent = 'Sharing…'; }
+
     let stream;
     try {
-      // preferCurrentTab is a Chrome hint that pre-selects the current tab in the dialog
       stream = await navigator.mediaDevices.getDisplayMedia({
         video: { displaySurface: 'browser' },
         preferCurrentTab: true,
       });
     } catch (e) {
-      document.body.removeChild(overlay);
+      if (document.body.contains(overlay)) document.body.removeChild(overlay);
+      if (document.body.contains(banner)) document.body.removeChild(banner);
+      if (btn) { btn.disabled = false; btn.textContent = origText; }
       if (e.name !== 'NotAllowedError') showToast('Screen capture failed.', true);
       return;
     }
@@ -5709,7 +5892,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         setTimeout(() => rej(new Error('timeout')), 10000);
       });
       await video.play();
-      // Wait for the share-dialog close animation and a fresh rendered frame
       await new Promise(r => setTimeout(r, 300));
       await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
@@ -5720,18 +5902,16 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
       canvas.toBlob(blob => {
         if (!blob) { showToast('Could not generate image.', true); return; }
-        const url = URL.createObjectURL(blob);
-        const a   = document.createElement('a');
-        a.href     = url;
-        a.download = (deck.name || 'deck').replace(/[^a-zA-Z0-9 _-]/g, '').trim().replace(/\s+/g, '-') + '-deck.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        _triggerDownload(blob, _deckFilename(deck));
+        showToast('Image saved to downloads.');
       });
+    } catch {
+      showToast('Screen capture failed.', true);
     } finally {
       stream.getTracks().forEach(t => t.stop());
-      if (document.getElementById('deck-export-overlay')) document.body.removeChild(overlay);
+      if (document.body.contains(overlay)) document.body.removeChild(overlay);
+      if (document.body.contains(banner)) document.body.removeChild(banner);
+      if (btn) { btn.disabled = false; btn.textContent = origText; }
     }
   }
 
@@ -5767,10 +5947,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   document.getElementById('btn-export-image').addEventListener('click', async () => {
     if (!currentDeckId) return;
     const deck = loadDecks().find(d => d.id === currentDeckId);
-    if (deck) {
-      await exportDeckImage(deck);
-      showToast('Image saved to downloads.');
-    }
+    if (deck) await exportDeckImage(deck);
   });
 
   /* ── Deck file import ─────────────────────────────────────────────── */
