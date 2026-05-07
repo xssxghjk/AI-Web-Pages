@@ -352,22 +352,32 @@ body::before {
   font-family: 'Space Mono', monospace; font-size: 11px;
   display: flex; gap: 8px; flex-shrink: 0;
 }
-.qty-row {
-  display: flex; align-items: center; gap: 8px; margin-top: 10px;
-  padding-top: 10px; border-top: 1px solid var(--border);
+/* Stepper controls */
+.quick-stepper {
+  display: flex; align-items: center; gap: 5px; flex-shrink: 0;
 }
-.qty-lbl { font-size: 11px; color: var(--muted); white-space: nowrap; }
-.qty-input {
-  width: 70px; padding: 5px 8px;
-  background: var(--surf3); border: 1px solid var(--border); border-radius: 2px;
-  color: var(--text); font-family: 'Space Mono', monospace; font-size: 13px;
-  text-align: center; -webkit-appearance: none;
+.stepper-btn {
+  width: 24px; height: 24px;
+  background: var(--surf2); border: 1px solid var(--border); border-radius: 2px;
+  color: var(--text2); font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; padding: 0; font-family: 'Space Mono', monospace;
+  line-height: 1;
 }
-.qty-input:focus { outline: none; border-color: var(--accent); }
-.qty-preview {
-  font-family: 'Space Mono', monospace; font-size: 11px;
-  color: var(--muted); margin-left: auto;
+.stepper-btn:hover { border-color: var(--accent); color: var(--accent); }
+.stepper-val {
+  font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700;
+  color: var(--text); min-width: 20px; text-align: center;
 }
+/* Quick log summary bar */
+.quick-summary {
+  margin-top: 10px; padding: 9px 12px;
+  background: var(--surf3); border: 1px solid var(--accent-b); border-radius: 3px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.qs-totals { display: flex; gap: 12px; font-family: 'Space Mono', monospace; font-size: 11px; }
+#qs-cal  { color: var(--accent); }
+#qs-prot { color: var(--green); }
 
 /* Category colors */
 .cat-breakfast { background: #d4924a; }
@@ -673,11 +683,12 @@ canvas { display: block; width: 100%; }
             No presets yet — create some in the Presets tab.
           </div>
         </div>
-        <div class="qty-row" id="quick-qty-row" style="display:none">
-          <span class="qty-lbl">Servings:</span>
-          <input type="number" class="qty-input" id="quick-qty" value="1" min="0.1" step="0.1">
-          <span class="qty-preview" id="quick-qty-preview"></span>
-          <button class="btn btn-primary btn-sm" id="quick-add-confirm">Log</button>
+        <div class="quick-summary" id="quick-summary" style="display:none">
+          <div class="qs-totals">
+            <span id="qs-cal">0 kcal</span>
+            <span id="qs-prot">0g</span>
+          </div>
+          <button class="btn btn-primary btn-sm" id="quick-log-all-btn">Log items</button>
         </div>
       </div>
 
@@ -883,7 +894,7 @@ function toast(msg, type = '') {
 // ── State ────────────────────────────────────────────────────────────────────
 let currentDate = dateStr(new Date());
 let monthlyRange = 30;
-let selectedPreset = null;
+let pendingCounts = {};
 
 // ── Date navigation ──────────────────────────────────────────────────────────
 function setDate(s) {
@@ -1134,7 +1145,7 @@ function openFoodModal() {
 
 function closeFoodModal() {
   document.getElementById('food-modal').classList.remove('open');
-  selectedPreset = null;
+  pendingCounts = {};
 }
 
 function resetFoodModal() {
@@ -1145,9 +1156,8 @@ function resetFoodModal() {
   document.getElementById('m-prot').value    = '';
   document.getElementById('m-cat').value     = 'snack';
   document.getElementById('m-save-preset').checked = false;
-  document.getElementById('quick-qty').value = '1';
-  document.getElementById('quick-qty-row').style.display = 'none';
-  selectedPreset = null;
+  pendingCounts = {};
+  document.getElementById('quick-summary').style.display = 'none';
 }
 
 function setFoodMode(mode) {
@@ -1214,10 +1224,12 @@ function renderQuickList() {
   const list  = document.getElementById('quick-list');
   const empty = document.getElementById('quick-empty');
   list.innerHTML = '';
+  pendingCounts = {};
 
   if (presets.length === 0) {
     empty.style.display = '';
     document.getElementById('quick-list-wrap').style.display = 'none';
+    updateQuickSummary();
     return;
   }
   empty.style.display = 'none';
@@ -1225,6 +1237,7 @@ function renderQuickList() {
 
   const sorted = [...presets].sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0));
   sorted.forEach(p => {
+    pendingCounts[p.id] = 0;
     const item = document.createElement('div');
     item.className = 'quick-item';
     item.dataset.pid = p.id;
@@ -1237,49 +1250,78 @@ function renderQuickList() {
       <div class="quick-macros">
         <span style="color:var(--accent)">${Math.round(p.calories)} kcal</span>
         <span style="color:var(--green)">${Math.round(p.protein * 10) / 10}g</span>
+      </div>
+      <div class="quick-stepper">
+        <button class="stepper-btn" data-action="dec" data-pid="${p.id}">−</button>
+        <span class="stepper-val" id="sv-${p.id}">0</span>
+        <button class="stepper-btn" data-action="inc" data-pid="${p.id}">+</button>
       </div>`;
-    item.addEventListener('click', () => selectQuickPreset(p));
     list.appendChild(item);
   });
+
+  updateQuickSummary();
 }
 
-function selectQuickPreset(p) {
-  selectedPreset = p;
-  document.querySelectorAll('.quick-item').forEach(el => {
-    el.style.borderColor = el.dataset.pid === p.id ? 'var(--accent)' : '';
-    el.style.background  = el.dataset.pid === p.id ? 'var(--accent-d)' : '';
+function stepPreset(pid, delta) {
+  pendingCounts[pid] = Math.max(0, (pendingCounts[pid] || 0) + delta);
+  const valEl = document.getElementById('sv-' + pid);
+  if (valEl) valEl.textContent = pendingCounts[pid];
+  const item = document.querySelector(`.quick-item[data-pid="${pid}"]`);
+  if (item) {
+    item.style.borderColor = pendingCounts[pid] > 0 ? 'var(--accent)' : '';
+    item.style.background  = pendingCounts[pid] > 0 ? 'var(--accent-d)' : '';
+  }
+  updateQuickSummary();
+}
+
+function updateQuickSummary() {
+  const presets = getPresets();
+  let totalCal = 0, totalProt = 0, totalServings = 0;
+  presets.forEach(p => {
+    const count = pendingCounts[p.id] || 0;
+    totalCal      += p.calories * count;
+    totalProt     += p.protein  * count;
+    totalServings += count;
   });
-  const qtyRow = document.getElementById('quick-qty-row');
-  qtyRow.style.display = 'flex';
-  document.getElementById('quick-qty').value = '1';
-  updateQtyPreview();
+  const summaryEl = document.getElementById('quick-summary');
+  summaryEl.style.display = totalServings > 0 ? 'flex' : 'none';
+  if (totalServings > 0) {
+    document.getElementById('qs-cal').textContent  = Math.round(totalCal) + ' kcal';
+    document.getElementById('qs-prot').textContent = (Math.round(totalProt * 10) / 10) + 'g';
+    const itemsSelected = Object.values(pendingCounts).filter(v => v > 0).length;
+    document.getElementById('quick-log-all-btn').textContent =
+      'Log ' + totalServings + ' serving' + (totalServings !== 1 ? 's' : '') +
+      ' (' + itemsSelected + ' item' + (itemsSelected !== 1 ? 's' : '') + ')';
+  }
 }
 
-function updateQtyPreview() {
-  if (!selectedPreset) return;
-  const qty = parseFloat(document.getElementById('quick-qty').value) || 1;
-  const cal  = Math.round(selectedPreset.calories * qty);
-  const prot = Math.round(selectedPreset.protein  * qty * 10) / 10;
-  document.getElementById('quick-qty-preview').textContent =
-    `= ${cal} kcal, ${prot}g protein`;
-}
+document.getElementById('quick-list').addEventListener('click', e => {
+  const btn = e.target.closest('.stepper-btn');
+  if (!btn) return;
+  const pid = btn.dataset.pid;
+  stepPreset(pid, btn.dataset.action === 'inc' ? 1 : -1);
+});
 
-document.getElementById('quick-qty').addEventListener('input', updateQtyPreview);
-
-document.getElementById('quick-add-confirm').addEventListener('click', () => {
-  if (!selectedPreset) return;
-  const qty = parseFloat(document.getElementById('quick-qty').value) || 1;
-  const p   = selectedPreset;
-  addToLog({
-    id: uid(), date: currentDate, name: p.name,
-    quantity: qty,
-    servingSize: p.servingSize, servingUnit: p.servingUnit,
-    calories: p.calories * qty, protein: p.protein * qty,
-    category: p.category, timestamp: new Date().toISOString(), source: 'preset'
+document.getElementById('quick-log-all-btn').addEventListener('click', () => {
+  const presets = getPresets();
+  let itemsLogged = 0;
+  presets.forEach(p => {
+    const count = pendingCounts[p.id] || 0;
+    if (count === 0) return;
+    addToLog({
+      id: uid(), date: currentDate, name: p.name,
+      quantity: count,
+      servingSize: p.servingSize, servingUnit: p.servingUnit,
+      calories: p.calories * count, protein: p.protein * count,
+      category: p.category, timestamp: new Date().toISOString(), source: 'preset'
+    });
+    updatePresetUsage(p.id);
+    itemsLogged++;
   });
-  updatePresetUsage(p.id);
-  toast(p.name + ' added to log', 'success');
-  closeFoodModal();
+  if (itemsLogged > 0) {
+    toast(itemsLogged + ' item' + (itemsLogged !== 1 ? 's' : '') + ' added to log', 'success');
+    closeFoodModal();
+  }
 });
 
 // ── Preset modal ─────────────────────────────────────────────────────────────
