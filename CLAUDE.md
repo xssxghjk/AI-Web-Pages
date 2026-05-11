@@ -23,17 +23,22 @@ This runs all Playwright e2e tests across both desktop (`chromium`) and mobile (
 
 ## Pushing Changes
 
-Always push directly to `master`. Do not open pull requests — commit and push to `master` immediately after completing work.
-
-If a push fails due to merge conflicts, resolve them directly on the branch:
+Always merge directly into `main` and push. Do not open pull requests. The workflow is:
 
 ```bash
-git fetch origin master
-git merge origin/master
-# resolve any conflicts in the affected files
+git fetch origin main
+git checkout main
+git merge --no-ff <feature-branch>
+# if conflicts arise, resolve every file manually, then:
 git add <resolved-files>
 git commit
-git push origin master
+git push -u origin main
+```
+
+If you are already on main (e.g. working directly there), just commit and push:
+
+```bash
+git push -u origin main
 ```
 
 Fix all conflicts yourself without asking for help — do not leave them unresolved.
