@@ -455,6 +455,23 @@ canvas { display: block; width: 100%; }
 .wh-stat-val.down { color: var(--green); }
 .wh-stat-val.neutral { color: var(--muted); }
 
+/* ── DAILY WEIGHT TREND ARROW ── */
+.summary-trend {
+  display: flex; align-items: center; justify-content: center; gap: 3px;
+  font-family: 'Space Mono', monospace; font-size: 10px; margin-top: 4px; min-height: 16px;
+}
+.wt-arrow { font-size: 13px; line-height: 1; }
+.wt-delta { font-size: 10px; letter-spacing: 0.03em; }
+.wt-arrow.up, .wt-delta.up { color: var(--red); }
+.wt-arrow.down, .wt-delta.down { color: var(--green); }
+.wt-arrow.flat, .wt-delta.flat { color: var(--muted); }
+
+/* ── CHART WEIGHT SUBSECTION ── */
+.chart-subsection {
+  margin-top: 14px; padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
 .wh-list { display: flex; flex-direction: column; gap: 0; margin-bottom: 20px; }
 .wh-item {
   background: var(--surface); border: 1px solid var(--border); border-top: none;
@@ -650,6 +667,7 @@ canvas { display: block; width: 100%; }
         <div class="summary-label">Body Weight</div>
         <div class="summary-val" id="sum-weight" style="font-size:22px">—</div>
         <div class="summary-unit" id="sum-weight-unit">tap to log</div>
+        <div id="sum-weight-trend" class="summary-trend"></div>
       </div>
     </div>
 
@@ -755,6 +773,12 @@ canvas { display: block; width: 100%; }
           <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Protein (g)</div>
         </div>
         <canvas id="chart-weekly" height="160"></canvas>
+        <div class="chart-subsection">
+          <div class="chart-legend" style="margin-bottom:6px">
+            <div class="legend-item"><div class="legend-dot" style="background:#c4864a"></div>Weight (kg)</div>
+          </div>
+          <canvas id="chart-weight-weekly" height="90"></canvas>
+        </div>
       </div>
 
       <div class="dash-card full">
@@ -771,6 +795,12 @@ canvas { display: block; width: 100%; }
           <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Protein (g)</div>
         </div>
         <canvas id="chart-monthly" height="140"></canvas>
+        <div class="chart-subsection">
+          <div class="chart-legend" style="margin-bottom:6px">
+            <div class="legend-item"><div class="legend-dot" style="background:#c4864a"></div>Weight (kg)</div>
+          </div>
+          <canvas id="chart-weight-monthly" height="90"></canvas>
+        </div>
       </div>
 
       <div class="dash-card">
@@ -1282,15 +1312,37 @@ function deleteLogEntry(id) {
 
 // ── Weight card & modal ──────────────────────────────────────────────────────
 function updateWeightCard() {
-  const kg = getWeightForDate(currentDate);
+  const kg     = getWeightForDate(currentDate);
   const valEl  = document.getElementById('sum-weight');
   const unitEl = document.getElementById('sum-weight-unit');
+  const trendEl = document.getElementById('sum-weight-trend');
+
   if (kg) {
     valEl.textContent  = kg % 1 === 0 ? kg : kg.toFixed(1);
     unitEl.textContent = 'kg';
+
+    if (trendEl) {
+      const all = getWeightHistory();
+      const idx = all.findIndex(e => e.date === currentDate);
+      const prev = idx > 0 ? all[idx - 1] : (idx === -1 && all.length ? all[all.length - 1] : null);
+      if (prev) {
+        const delta = kg - prev.kg;
+        const absD  = Math.abs(delta).toFixed(1);
+        if (delta > 0.04) {
+          trendEl.innerHTML = `<span class="wt-arrow up">▲</span><span class="wt-delta up">+${absD} kg</span>`;
+        } else if (delta < -0.04) {
+          trendEl.innerHTML = `<span class="wt-arrow down">▼</span><span class="wt-delta down">−${absD} kg</span>`;
+        } else {
+          trendEl.innerHTML = `<span class="wt-arrow flat">—</span><span class="wt-delta flat">unchanged</span>`;
+        }
+      } else {
+        trendEl.innerHTML = '';
+      }
+    }
   } else {
     valEl.textContent  = '—';
     unitEl.textContent = 'tap to log';
+    if (trendEl) trendEl.innerHTML = '';
   }
 }
 
@@ -2179,6 +2231,7 @@ function drawWeeklyChart() {
       return days[day];
     }
   });
+  drawWeightSparkline('chart-weight-weekly', 7);
 }
 
 function drawMonthlyChart() {
@@ -2186,9 +2239,137 @@ function drawMonthlyChart() {
   drawChart('chart-monthly', data, {
     xLabel: (d, i) => {
       const total = data.length;
-      if (total <= 31) return d.date.slice(8); // day number
+      if (total <= 31) return d.date.slice(8);
       if (i % 7 === 0) return d.date.slice(5);
       return '';
+    }
+  });
+  drawWeightSparkline('chart-weight-monthly', monthlyRange);
+}
+
+function drawWeightSparkline(canvasId, days) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+
+  const all = getWeightHistory();
+  let data = all;
+  if (days > 0) {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const cutoffStr = dateStr(cutoff);
+    data = all.filter(e => e.date >= cutoffStr);
+  }
+
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.style.width  = '';
+  canvas.style.height = '';
+  const W = canvas.offsetWidth;
+  if (!canvas.dataset.chartHeight) canvas.dataset.chartHeight = canvas.getAttribute('height') || '90';
+  const H = parseInt(canvas.dataset.chartHeight) || 90;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  if (data.length < 2) {
+    ctx.fillStyle = '#5a5040';
+    ctx.font = '11px DM Serif Text, Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(data.length === 0 ? 'No weight data in range' : 'Log more entries to see trend', W / 2, H / 2);
+    return;
+  }
+
+  const pad = { top: 10, right: 20, bottom: 26, left: 46 };
+  const cW  = W - pad.left - pad.right;
+  const cH  = H - pad.top  - pad.bottom;
+  const n   = data.length;
+
+  const kgs    = data.map(d => d.kg);
+  const minKg  = Math.min(...kgs);
+  const maxKg  = Math.max(...kgs);
+  const spread = maxKg - minKg || 0.5;
+  const yMin   = minKg - spread * 0.2;
+  const yMax   = maxKg + spread * 0.2;
+
+  function xPos(i) { return pad.left + (n === 1 ? cW / 2 : i / (n - 1) * cW); }
+  function yPos(kg) { return pad.top + cH - ((kg - yMin) / (yMax - yMin)) * cH; }
+
+  // Grid
+  const gridCount = 3;
+  for (let i = 0; i <= gridCount; i++) {
+    const kg = yMin + (yMax - yMin) * (i / gridCount);
+    const y  = yPos(kg);
+    ctx.strokeStyle = 'rgba(58,48,37,0.8)';
+    ctx.lineWidth   = 1;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cW, y); ctx.stroke();
+    ctx.fillStyle = '#5a5040';
+    ctx.font = '9px DM Serif Text, Georgia, serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(kg.toFixed(1), pad.left - 4, y + 3);
+  }
+
+  // Area fill
+  ctx.beginPath();
+  ctx.moveTo(xPos(0), yPos(data[0].kg));
+  for (let i = 1; i < n; i++) ctx.lineTo(xPos(i), yPos(data[i].kg));
+  ctx.lineTo(xPos(n - 1), pad.top + cH);
+  ctx.lineTo(xPos(0), pad.top + cH);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(196,134,74,0.07)';
+  ctx.fill();
+
+  // Trend line (linear regression)
+  if (n >= 3) {
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    data.forEach((d, i) => { sumX += i; sumY += d.kg; sumXY += i * d.kg; sumX2 += i * i; });
+    const slope     = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    ctx.beginPath();
+    ctx.moveTo(xPos(0), yPos(intercept));
+    ctx.lineTo(xPos(n - 1), yPos(slope * (n - 1) + intercept));
+    ctx.strokeStyle = slope < 0 ? 'rgba(122,184,122,0.45)' : 'rgba(196,106,106,0.45)';
+    ctx.lineWidth   = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Line
+  ctx.beginPath();
+  ctx.moveTo(xPos(0), yPos(data[0].kg));
+  for (let i = 1; i < n; i++) ctx.lineTo(xPos(i), yPos(data[i].kg));
+  ctx.strokeStyle = '#c4864a';
+  ctx.lineWidth   = 1.5;
+  ctx.stroke();
+
+  // Dots (only when few enough to be legible)
+  if (n <= 14) {
+    data.forEach((d, i) => {
+      const x = xPos(i), y = yPos(d.kg);
+      ctx.beginPath();
+      ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#c4864a';
+      ctx.fill();
+      ctx.strokeStyle = '#1c1814';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+  }
+
+  // X labels
+  const step = Math.max(1, Math.ceil(n / 6));
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  data.forEach((d, i) => {
+    if (i % step === 0 || i === n - 1) {
+      const d2    = parseDate(d.date);
+      const label = months[d2.getMonth()] + ' ' + d2.getDate();
+      ctx.fillStyle = '#5a5040';
+      ctx.font = '8px DM Serif Text, Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, xPos(i), H - pad.bottom + 11);
     }
   });
 }
