@@ -729,6 +729,10 @@
   <!-- ── LOG SESSION ── -->
   <div id="tab-log" class="tab-panel">
     <div class="log-form">
+      <div id="edit-banner" style="display:none;align-items:center;justify-content:space-between;background:var(--surf2);border:1px solid var(--bord2);border-left:3px solid var(--accent);padding:8px 14px;margin-bottom:16px;gap:12px">
+        <span style="font-size:12px;color:var(--text2);font-style:italic">Editing — <span class="edit-banner-date" style="color:var(--text);font-style:normal"></span></span>
+        <span id="autosave-status" style="font-size:11px;font-family:'Space Mono',monospace;display:none"></span>
+      </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" for="log-date">Date</label>
@@ -1180,6 +1184,7 @@ function renderCounters() {
     el.textContent = counts[g];
     el.classList.toggle('has-count', counts[g] > 0);
     updatePreview();
+    scheduleAutoSave();
   });
 }
 
@@ -1204,7 +1209,100 @@ function updatePreview() {
   ).join('');
 }
 
+// ── Edit / auto-save ────────────────────────────────────────────────────────
+let editingId = null;
+let autoSaveTimer = null;
+let autoSaveStatus = '';
+
+function loadSessionIntoForm(session) {
+  editingId = session.id;
+  document.getElementById('log-date').value = session.date;
+  document.getElementById('log-duration').value = session.duration || '';
+  document.getElementById('log-notes').value = session.notes || '';
+  GRADES.forEach(g => {
+    counts[g] = session.grades[g] || 0;
+    const el = document.getElementById('gcn-' + g);
+    if (el) { el.textContent = counts[g]; el.classList.toggle('has-count', counts[g] > 0); }
+  });
+  updatePreview();
+  updateFormMode();
+}
+
+function checkAndLoadTodaySession() {
+  if (editingId) return;
+  const date = document.getElementById('log-date').value;
+  if (date !== todayStr()) return;
+  const sess = loadSessions().find(s => s.date === date);
+  if (sess) loadSessionIntoForm(sess);
+}
+
+function updateFormMode() {
+  const isEditing = !!editingId;
+  const banner = document.getElementById('edit-banner');
+  const saveBtn = document.getElementById('save-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const statusEl = document.getElementById('autosave-status');
+  if (isEditing) {
+    const date = document.getElementById('log-date').value;
+    banner.style.display = 'flex';
+    banner.querySelector('.edit-banner-date').textContent = fmtDate(date);
+    saveBtn.style.display = 'none';
+    resetBtn.textContent = 'New Session';
+    statusEl.style.display = 'inline';
+  } else {
+    banner.style.display = 'none';
+    saveBtn.style.display = '';
+    resetBtn.textContent = 'Reset';
+    statusEl.style.display = 'none';
+  }
+}
+
+function scheduleAutoSave() {
+  if (!editingId) return;
+  clearTimeout(autoSaveTimer);
+  showAutoSaveStatus('saving');
+  autoSaveTimer = setTimeout(doAutoSave, 1200);
+}
+
+function doAutoSave() {
+  if (!editingId) return;
+  const date = document.getElementById('log-date').value;
+  if (!date) return;
+  const dur = parseInt(document.getElementById('log-duration').value);
+  const sessions = loadSessions();
+  const idx = sessions.findIndex(s => s.id === editingId);
+  if (idx === -1) return;
+  sessions[idx] = {
+    ...sessions[idx],
+    date,
+    duration: (!isNaN(dur) && dur > 0) ? dur : null,
+    notes: document.getElementById('log-notes').value.trim(),
+    grades: Object.fromEntries(GRADES.map(g => [g, counts[g]]))
+  };
+  sessions.sort((a, b) => a.date.localeCompare(b.date));
+  saveSessions(sessions);
+  renderAll(sessions);
+  showAutoSaveStatus('saved');
+  document.querySelector('#edit-banner .edit-banner-date').textContent = fmtDate(date);
+}
+
+function showAutoSaveStatus(s) {
+  autoSaveStatus = s;
+  const el = document.getElementById('autosave-status');
+  if (!el) return;
+  if (s === 'saving') {
+    el.textContent = 'Saving…';
+    el.style.color = 'var(--muted)';
+  } else if (s === 'saved') {
+    el.textContent = '✓ Saved';
+    el.style.color = '#4ec994';
+    setTimeout(() => { if (autoSaveStatus === 'saved') el.textContent = ''; }, 2500);
+  }
+}
+
 function resetForm() {
+  editingId = null;
+  clearTimeout(autoSaveTimer);
   GRADES.forEach(g => {
     counts[g] = 0;
     const el = document.getElementById('gcn-' + g);
@@ -1215,6 +1313,7 @@ function resetForm() {
   document.getElementById('log-date').value = todayStr();
   document.getElementById('form-error').classList.remove('show');
   updatePreview();
+  updateFormMode();
 }
 
 // ── Render: history ────────────────────────────────────────────────────────
@@ -1250,6 +1349,7 @@ function renderHistory(sessions) {
           <div class="sc-meta">${relDate(s.date)}${dur} · ${tc} climb${tc !== 1 ? 's' : ''}</div>
         </div>
         <div class="sc-actions">
+          <button class="btn btn-ghost btn-sm edit-btn" data-id="${s.id}">Edit</button>
           <button class="btn btn-danger btn-sm del-btn" data-id="${s.id}">Delete</button>
         </div>
       </div>
@@ -1259,6 +1359,12 @@ function renderHistory(sessions) {
   }).join('');
 
   el.querySelectorAll('.del-btn').forEach(b => b.addEventListener('click', () => askDelete(b.dataset.id)));
+  el.querySelectorAll('.edit-btn').forEach(b => b.addEventListener('click', () => {
+    const sess = loadSessions().find(s => s.id === b.dataset.id);
+    if (!sess) return;
+    loadSessionIntoForm(sess);
+    switchTab('log');
+  }));
 }
 
 // ── Delete flow ────────────────────────────────────────────────────────────
@@ -1296,6 +1402,7 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
   if (tab === 'dashboard') { setTimeout(() => redrawCharts(loadSessions()), 10); }
+  if (tab === 'log') { checkAndLoadTodaySession(); }
 }
 document.getElementById('nav-tabs').addEventListener('click', e => {
   if (e.target.classList.contains('tab-btn')) switchTab(e.target.dataset.tab);
@@ -1329,13 +1436,25 @@ document.getElementById('save-btn').addEventListener('click', () => {
   sessions.sort((a, b) => a.date.localeCompare(b.date));
   saveSessions(sessions);
 
-  resetForm();
+  loadSessionIntoForm(session);
   renderAll(sessions);
   switchTab('dashboard');
   toast('Session saved!');
 });
 
 document.getElementById('reset-btn').addEventListener('click', resetForm);
+
+// ── Auto-save triggers ──────────────────────────────────────────────────────
+document.getElementById('log-duration').addEventListener('input', scheduleAutoSave);
+document.getElementById('log-notes').addEventListener('input', scheduleAutoSave);
+document.getElementById('log-date').addEventListener('change', e => {
+  if (editingId) {
+    scheduleAutoSave();
+  } else {
+    const sess = loadSessions().find(s => s.date === e.target.value);
+    if (sess) loadSessionIntoForm(sess);
+  }
+});
 
 // ── Gym settings ───────────────────────────────────────────────────────────
 document.getElementById('gym-toggle').addEventListener('click', function () {
@@ -1407,6 +1526,8 @@ renderCounters();
 renderGymGrid();
 const sessions = loadSessions();
 renderAll(sessions);
+checkAndLoadTodaySession();
+updateFormMode();
 
 window.addEventListener('resize', () => {
   if (document.getElementById('tab-dashboard').classList.contains('active')) {
