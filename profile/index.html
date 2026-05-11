@@ -1196,8 +1196,6 @@
           var calAvg = s.calDays ? Math.round(s.calTotal / s.calDays) : 0;
           var avgProt = s.calProteinDays ? Math.round(s.calProteinTotal / s.calProteinDays) : 0;
 
-          var activeGoals = Object.values(data.jGoals).filter(function(g) { return g && g.status === 'active'; });
-
           // Weight delta (month only)
           var weightStr = null, weightDelta = null;
           if (period === 'month' && s.weightLast) {
@@ -1304,17 +1302,6 @@
                 var deltaCol = weightDelta.startsWith('-') ? '#7ab87a' : '#c4864a';
                 t('14px "DM Serif Text", Georgia, serif', deltaCol, '0px', weightDelta + ' this month', PAD_X, y + 14); y += 22;
               }
-              y += 8;
-            }
-
-            // ── Active goals ──────────────────────────────────────────────────
-            if (activeGoals.length > 0) {
-              divider(y); y += 19;
-              sectionLabel('ACTIVE GOALS', y); y += 19;
-              activeGoals.slice(0, 5).forEach(function(g) {
-                var gtxt = ('\xb7 ' + (g.text || 'Untitled')).slice(0, 64);
-                t('13px "DM Serif Text", Georgia, serif', '#9a8a76', '0px', gtxt, PAD_X, y + 13); y += 21;
-              });
               y += 8;
             }
 
