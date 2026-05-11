@@ -933,6 +933,10 @@
       </div>
     </div>
     <div class="form-group">
+      <label class="form-label">Completed on</label>
+      <input type="date" class="form-input" id="modalCompletedDate">
+    </div>
+    <div class="form-group">
       <label class="form-label">Notes</label>
       <textarea class="form-input" id="modalNotes" rows="3" placeholder="How did it go? Any observations..."></textarea>
     </div>
@@ -1423,6 +1427,7 @@ function openDayModal(weekNum, dayOfWeek) {
   document.getElementById('modalTime').value = existing?.time || '';
   document.getElementById('modalKm').value = existing?.km || '';
   document.getElementById('modalNotes').value = existing?.notes || '';
+  document.getElementById('modalCompletedDate').value = existing?.completedDate || dateKey(today());
 
   updateModalButtons(modalStatus);
   document.getElementById('modalOverlay').classList.remove('hidden');
@@ -1444,9 +1449,11 @@ function saveModal() {
   const time = parseInt(document.getElementById('modalTime').value) || null;
   const km = parseFloat(document.getElementById('modalKm').value) || null;
   const notes = document.getElementById('modalNotes').value.trim() || null;
+  const completedDateRaw = document.getElementById('modalCompletedDate').value;
+  const completedDate = completedDateRaw && completedDateRaw !== modalDate ? completedDateRaw : null;
 
   if (modalStatus || time || km || notes) {
-    setDayData(modalDate, { status: modalStatus, time, km, notes });
+    setDayData(modalDate, { status: modalStatus, time, km, notes, completedDate });
   } else {
     setDayData(modalDate, null);
   }
@@ -1660,9 +1667,9 @@ function quickCheckin(status) {
   const dateStr = dateKey(t);
   const existing = getDayData(dateStr);
   if (existing?.status === status) {
-    setDayData(dateStr, existing.time || existing.notes ? { ...existing, status: null } : null);
+    setDayData(dateStr, existing.time || existing.notes ? { ...existing, status: null, completedDate: null } : null);
   } else {
-    setDayData(dateStr, { ...(existing || {}), status });
+    setDayData(dateStr, { ...(existing || {}), status, completedDate: null });
   }
   render();
 }
@@ -1789,7 +1796,7 @@ function renderWeekProgress() {
         <div class="${dotCls}">${label}</div>
         <div class="wp-day-icon">${typeIcon}</div>
         <div class="wp-day-label wt-${workout.type}">${workout.short}</div>
-        <div class="wp-day-date">${formatDate(date)}</div>
+        <div class="wp-day-date">${dd?.completedDate ? formatDate(new Date(dd.completedDate + 'T00:00:00')) : formatDate(date)}</div>
       </div>
     `;
   }
@@ -1949,11 +1956,13 @@ function renderProgress() {
       const workout = PLAN[wd.weekNum-1][wd.dayOfWeek];
       const statusColor = val.status === 'completed' ? 'var(--success)' : val.status === 'skipped' ? 'var(--danger)' : val.status === 'modified' ? 'var(--warning)' : 'var(--text2)';
       const statusLabel = val.status === 'completed' ? 'Done' : val.status === 'skipped' ? 'Skip' : val.status === 'modified' ? 'Mod' : '—';
+      const displayDate = val.completedDate ? new Date(val.completedDate + 'T00:00:00') : d;
+      const planDateNote = val.completedDate ? ` <span style="color:var(--text2);font-size:10px;">(planned ${formatDate(d)})</span>` : '';
       html += `
         <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);">
           <span style="font-size:11px;font-weight:700;color:${statusColor};width:32px;flex-shrink:0;padding-top:2px;">${statusLabel}</span>
           <div>
-            <div style="font-size:13px;font-weight:600;">${formatDate(d)} — ${workout.short}</div>
+            <div style="font-size:13px;font-weight:600;">${formatDate(displayDate)} — ${workout.short}${planDateNote}</div>
             <div style="font-size:11px;color:var(--text2);">
               Week ${wd.weekNum}${val.time ? ` · ${val.time} min` : ''}${val.km ? ` · ${val.km} km` : ''}
               ${val.notes ? `· "${val.notes}"` : ''}
@@ -2334,11 +2343,14 @@ function openWeekDetail(weekNum) {
     }
     if (dd?.notes) metaParts.push('"' + dd.notes + '"');
 
+    const completedOnStr = dd?.completedDate
+      ? ` <span style="color:var(--text2);font-size:10px;">(done ${formatDate(new Date(dd.completedDate + 'T00:00:00'))})</span>`
+      : '';
     daysHtml += `
       <div class="week-detail-day" onclick="closeWeekDetail();openDayModal(${weekNum},${d})">
         <span class="week-detail-day-status" style="color:${statusColor}">${statusLabel}</span>
         <div class="week-detail-day-info">
-          <div class="week-detail-day-name">${DOW[d]} ${formatDate(date)} · <span class="wt-${workout.type}">${workout.short}</span></div>
+          <div class="week-detail-day-name">${DOW[d]} ${formatDate(date)} · <span class="wt-${workout.type}">${workout.short}</span>${completedOnStr}</div>
           ${metaParts.length ? `<div class="week-detail-day-meta">${metaParts.join(' · ')}</div>` : ''}
         </div>
       </div>`;
