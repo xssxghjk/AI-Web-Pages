@@ -743,7 +743,7 @@
       var activeGoals = Object.values(data.jGoals).filter(function(g) { return g && g.status === 'active'; });
       lines.push('ACTIVE GOALS');
       if (activeGoals.length) {
-        activeGoals.forEach(function(g) { lines.push('  · ' + (g.title || 'Untitled')); });
+        activeGoals.forEach(function(g) { lines.push('  · ' + (g.text || 'Untitled')); });
       } else {
         lines.push('  No active goals.');
       }
@@ -852,7 +852,7 @@
       return active.map(function(g) {
         return '<div class="goal-item">' +
           '<span class="goal-dot"></span>' +
-          '<span class="goal-title">' + esc(g.title || 'Untitled goal') + '</span>' +
+          '<span class="goal-title">' + esc(g.text || 'Untitled goal') + '</span>' +
           '</div>';
       }).join('');
     }
