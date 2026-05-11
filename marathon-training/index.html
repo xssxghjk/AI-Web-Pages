@@ -1747,19 +1747,37 @@ function renderWeekProgress() {
   if (btnNext) btnNext.disabled = weekNum >= 20;
   if (btnToday) btnToday.style.opacity = isCurrentWeek ? '0.4' : '1';
 
+  // Build a map: effectiveDate → { entry, dayIdx } for all workouts logged this week.
+  // Uses completedDate as the effective date when set, so the dot appears on the actual completion day.
+  const doneByDate = {};
+  for (let d2 = 0; d2 < 7; d2++) {
+    const scheduledDate = dateKey(getDateForWeekDay(weekNum, d2));
+    const entry = getDayData(scheduledDate);
+    if (entry && entry.status) {
+      const effectiveDate = entry.completedDate || scheduledDate;
+      if (!doneByDate[effectiveDate]) doneByDate[effectiveDate] = { entry, dayIdx: d2 };
+    }
+  }
+
   let dotsHtml = '';
   for (let d = 0; d < 7; d++) {
     const workout = PLAN[weekNum - 1][d];
     const date = getDateForWeekDay(weekNum, d);
     const dateStr = dateKey(date);
-    const dd = getDayData(dateStr);
+
+    // Use the workout that was effectively done on this column's date (completedDate override)
+    const effective = doneByDate[dateStr] || null;
+    const dd = effective ? effective.entry : null;
+    const clickDayIdx = effective ? effective.dayIdx : d;
+    const clickWorkout = PLAN[weekNum - 1][clickDayIdx];
+
     const isToday = dateStr === dateKey(t);
     const isPast = date < t;
     const isRest = workout.type === 'rest';
 
     let dotCls = 'wp-dot';
     let label = '';
-    if (isRest) {
+    if (isRest && !effective) {
       dotCls += ' wp-rest';
       label = 'Rest';
     } else if (dd?.status === 'completed') {
@@ -1787,16 +1805,17 @@ function renderWeekProgress() {
       label = '·';
     }
 
-    const clickHandler = isRest ? '' : `onclick="openDayModal(${weekNum}, ${d})"`;
+    const canClick = clickWorkout.type !== 'rest';
+    const clickHandler = canClick ? `onclick="openDayModal(${weekNum}, ${clickDayIdx})"` : '';
     const typeIcon = '';
 
     dotsHtml += `
-      <div class="wp-day ${isToday ? 'wp-day-today' : ''}" ${clickHandler} style="${isRest ? '' : 'cursor:pointer'}">
+      <div class="wp-day ${isToday ? 'wp-day-today' : ''}" ${clickHandler} style="${canClick ? 'cursor:pointer' : ''}">
         <div class="wp-day-name">${DOW[d]}</div>
         <div class="${dotCls}">${label}</div>
         <div class="wp-day-icon">${typeIcon}</div>
         <div class="wp-day-label wt-${workout.type}">${workout.short}</div>
-        <div class="wp-day-date">${dd?.completedDate ? formatDate(new Date(dd.completedDate + 'T00:00:00')) : formatDate(date)}</div>
+        <div class="wp-day-date">${formatDate(date)}</div>
       </div>
     `;
   }
