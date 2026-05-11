@@ -562,7 +562,8 @@
       var mDays = data.marathon.days || {};
       Object.entries(mDays).forEach(function(kv) {
         var iso = kv[0], d = kv[1];
-        if (iso < since || iso > today) return;
+        var effectiveDate = (d && d.completedDate) || iso;
+        if (effectiveDate < since || effectiveDate > today) return;
         if (d && (d.status === 'completed' || d.status === 'modified')) {
           stats.runs++;
           stats.runKm += parseFloat(d.km || 0);
@@ -625,10 +626,11 @@
       // Marathon
       Object.entries(data.marathon.days || {}).forEach(function(kv) {
         var iso = kv[0], d = kv[1];
-        if (iso < cutoff || iso > today) return;
+        var effectiveDate = (d && d.completedDate) || iso;
+        if (effectiveDate < cutoff || effectiveDate > today) return;
         if (d && (d.status === 'completed' || d.status === 'modified')) {
           var sub = d.km ? d.km + ' km' : d.time ? d.time + ' min' : 'Run completed';
-          items.push({ date: iso, type: 'run', title: 'Marathon Run', meta: sub });
+          items.push({ date: effectiveDate, type: 'run', title: 'Marathon Run', meta: sub });
         }
       });
 

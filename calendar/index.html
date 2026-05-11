@@ -186,6 +186,13 @@
       line-height: 1;
     }
     .cal-day.today .cal-day-num { color: var(--accent); }
+    .cal-run-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--ongoing);
+      margin: 2px auto 0;
+    }
 
     .cal-trip-bar {
       position: absolute;
@@ -820,6 +827,17 @@
     const BOTTOM_PAD = 6;   // padding below last bar
     const MIN_CELL_H = 48;  // minimum cell height (no trips)
 
+    // Build set of dates where a marathon run was actually completed (uses completedDate override when set)
+    const marathonRunDates = new Set();
+    try {
+      const _mwd = JSON.parse(localStorage.getItem('c2hm_v1') || '{}');
+      Object.entries(_mwd.days || {}).forEach(([iso, d]) => {
+        if (d && (d.status === 'completed' || d.status === 'modified')) {
+          marathonRunDates.add(d.completedDate || iso);
+        }
+      });
+    } catch(e) {}
+
     function buildGridHTML(year, month) {
       const firstDay = new Date(year, month, 1);
       const lastDay  = new Date(year, month + 1, 0);
@@ -883,8 +901,11 @@
           const isoKey = date.getFullYear() + '-' +
             String(date.getMonth() + 1).padStart(2, '0') + '-' +
             String(date.getDate()).padStart(2, '0');
+          const hasRun = marathonRunDates.has(isoKey);
           return `<div class="cal-day${isToday ? ' today' : ''}${hasTrip ? ' has-trip' : ''}" style="height:${cellH}px">` +
-            `<div class="cal-day-num">${date.getDate()}</div></div>`;
+            `<div class="cal-day-num">${date.getDate()}</div>` +
+            (hasRun ? '<div class="cal-run-dot"></div>' : '') +
+            `</div>`;
         }).join('');
 
         const barsHtml = weekBars.map(({ trip, colStart, colEnd, overflowLeft, overflowRight, slot }) => {
@@ -1305,7 +1326,9 @@
             try { caloWeights     = JSON.parse(localStorage.getItem('calorie_weights')      || '{}'); } catch {}
 
             const entries    = calorieLog[dateStr] || [];
-            const dayWorkout = (workoutData.days || {})[dateStr] || null;
+            const _mDays = workoutData.days || {};
+            const dayWorkout = _mDays[dateStr] ||
+              Object.values(_mDays).find(d => d && d.completedDate === dateStr) || null;
 
             // Exact weigh-in for this day (shown in report if present)
             const dayWeighIn = (caloWeights[dateStr] && caloWeights[dateStr] > 0) ? caloWeights[dateStr] : null;
