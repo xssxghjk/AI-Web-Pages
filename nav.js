@@ -218,6 +218,7 @@
     if (/\/calorie-tracker(\/|$)/.test(p))        return 'calorie-tracker';
     if (/\/workout(\/|$)/.test(p))                return 'workout';
     if (/\/project-stats(\/|$)/.test(p))          return 'project-stats';
+    if (/\/profile(\/|$)/.test(p))               return 'profile';
     return null;
   }
 
@@ -255,8 +256,10 @@
     sidebar.className = 'sidebar';
     sidebar.innerHTML =
       '<div class="sidebar-header">' +
-        '<img src="' + NAV_BASE + 'assets/logo-64.png" class="sidebar-logo" alt="">' +
-        '<span class="sidebar-brand">xssxghjk</span>' +
+        '<a href="' + NAV_BASE + 'profile/" class="sidebar-header-link" style="display:flex;align-items:center;gap:0.6rem;text-decoration:none;min-width:0">' +
+          '<img src="' + NAV_BASE + 'assets/logo-64.png" class="sidebar-logo" alt="">' +
+          '<span class="sidebar-brand">xssxghjk</span>' +
+        '</a>' +
       '</div>' +
       '<nav class="sidebar-nav">' + linksHtml + '</nav>' +
       statsFooter;
@@ -272,8 +275,10 @@
         '<span class="hb-bar"></span>' +
         '<span class="hb-bar"></span>' +
       '</button>' +
-      '<img src="' + NAV_BASE + 'assets/logo-64.png" class="mobile-logo" alt="">' +
-      '<span class="mobile-brand">xssxghjk</span>';
+      '<a href="' + NAV_BASE + 'profile/" style="display:flex;align-items:center;gap:0.5rem;text-decoration:none;min-width:0">' +
+        '<img src="' + NAV_BASE + 'assets/logo-64.png" class="mobile-logo" alt="">' +
+        '<span class="mobile-brand">xssxghjk</span>' +
+      '</a>';
 
     // Wrap all current body children in .app-layout > .page-content
     var appLayout   = document.createElement('div');
@@ -328,8 +333,10 @@
     drawer.setAttribute('aria-label', 'Navigation menu');
     drawer.innerHTML =
       '<div class="mobile-nav-drawer-header">' +
-        '<img src="' + NAV_BASE + 'assets/logo-64.png" class="mobile-logo" alt="">' +
-        '<span class="sidebar-brand">xssxghjk</span>' +
+        '<a href="' + NAV_BASE + 'profile/" style="display:flex;align-items:center;gap:0.5rem;text-decoration:none;min-width:0">' +
+          '<img src="' + NAV_BASE + 'assets/logo-64.png" class="mobile-logo" alt="">' +
+          '<span class="sidebar-brand">xssxghjk</span>' +
+        '</a>' +
         '<button class="mobile-nav-close" id="mobile-nav-close"' +
           ' aria-label="Close navigation">' +
           '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">' +
