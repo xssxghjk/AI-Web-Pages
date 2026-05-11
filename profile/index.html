@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>xssxghjk — Dashboard</title>
+  <script src="../nav.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #161210;
+      --surface:   #1e1a14;
+      --surface2:  #26211a;
+      --border:    #302820;
+      --border2:   #403530;
+      --accent:    #c4864a;
+      --accent-d:  rgba(196,134,74,0.09);
+      --accent-b:  rgba(196,134,74,0.24);
+      --text:      #ece3d4;
+      --text2:     #9a8a76;
+      --muted:     #7a6e60;
+      --muted2:    #5a4e40;
+      --green:     #6a9a6a;
+      --green-b:   rgba(106,154,106,0.18);
+    }
+
+    html { overflow-x: hidden; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      min-height: 100vh;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 15% 0%, rgba(196,134,74,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 85% 100%, rgba(90,70,50,0.08) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+
+    body > * { position: relative; z-index: 1; }
+
+    /* ── HERO ── */
+    .hero {
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 2rem 2rem;
+      background: linear-gradient(180deg, rgba(196,134,74,0.04) 0%, transparent 100%);
+    }
+    .hero-inner { max-width: 1100px; margin: 0 auto; }
+
+    .hero-top {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2.4rem, 7vw, 4.5rem);
+      font-weight: 700;
+      font-style: italic;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--text);
+    }
+    .hero-name span { color: var(--accent); }
+
+    .hero-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .hero-date {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-style: italic;
+      letter-spacing: 0.04em;
+      line-height: 1.7;
+    }
+    .hero-subtitle {
+      font-size: 0.7rem;
+      color: var(--muted2);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-top: 0.2rem;
+    }
+
+    /* ── STATS GRID ── */
+    .stats-section {
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+    }
+    .stats-inner { max-width: 1100px; margin: 0 auto; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.85rem 1rem;
+      transition: border-color 0.15s;
+    }
+    .stat-card:hover { border-color: var(--border2); }
+
+    .stat-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      font-style: italic;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+    .stat-value.accent { color: var(--accent); }
+    .stat-value.green  { color: var(--green); }
+
+    .stat-sub {
+      font-size: 0.65rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 0.3rem;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.75rem 2rem 0;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 2rem;
+    }
+    @media (max-width: 860px) {
+      .content-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── SECTION HEADERS ── */
+    .section-head {
+      font-size: 0.58rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      font-style: italic;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.85rem;
+    }
+
+    /* ── ACTIVITY FEED ── */
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      margin-top: 0.35rem;
+      flex-shrink: 0;
+    }
+    .dot-run      { background: #7a9de8; }
+    .dot-workout  { background: #e87838; }
+    .dot-boulder  { background: #4ec994; }
+    .dot-journal  { background: var(--accent); }
+    .dot-calorie  { background: #7ab87a; }
+
+    .activity-body { flex: 1; min-width: 0; }
+    .activity-title {
+      font-size: 0.84rem;
+      color: var(--text);
+      line-height: 1.35;
+    }
+    .activity-meta {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 0.1rem;
+    }
+
+    .activity-age {
+      font-size: 0.65rem;
+      color: var(--muted2);
+      font-style: italic;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 0.3rem;
+    }
+
+    /* ── GOALS ── */
+    .goal-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: var(--surface);
+      margin-bottom: 0.45rem;
+      transition: border-color 0.15s;
+    }
+    .goal-item:hover { border-color: var(--border2); }
+    .goal-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: 0.45rem;
+      flex-shrink: 0;
+    }
+    .goal-title {
+      font-size: 0.82rem;
+      color: var(--text2);
+      line-height: 1.4;
+    }
+
+    .no-data {
+      font-size: 0.8rem;
+      color: var(--muted2);
+      font-style: italic;
+      padding: 1.25rem 0;
+    }
+
+    /* ── REPORTS SECTION ── */
+    .reports-zone {
+      max-width: 1100px;
+      margin: 2rem auto 0;
+      padding: 0 2rem;
+    }
+
+    .reports-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-style: italic;
+      color: var(--muted2);
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 0.3rem 0;
+      transition: color 0.15s;
+      font-family: 'DM Serif Text', Georgia, serif;
+    }
+    .reports-toggle:hover { color: var(--muted); }
+    .reports-toggle svg { transition: transform 0.2s; }
+    .reports-toggle.open svg { transform: rotate(180deg); }
+
+    .reports-panel {
+      margin-top: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .reports-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+    .report-tab {
+      flex: 1;
+      padding: 0.7rem 0.5rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-style: italic;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+      font-family: 'DM Serif Text', Georgia, serif;
+    }
+    .report-tab:hover { color: var(--text2); }
+    .report-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .report-body {
+      padding: 1.25rem 1.5rem 1rem;
+    }
+
+    .report-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    .report-stat {
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.6rem 0.75rem;
+    }
+    .report-stat-label {
+      font-size: 0.55rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      font-style: italic;
+      margin-bottom: 0.3rem;
+    }
+    .report-stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .report-download-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+      margin-top: 0.75rem;
+    }
+    .report-period-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-style: italic;
+      flex: 1;
+    }
+    .btn-download {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-style: italic;
+      color: var(--accent);
+      background: var(--accent-d);
+      border: 1px solid var(--accent-b);
+      border-radius: 2px;
+      padding: 0.35rem 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      font-family: 'DM Serif Text', Georgia, serif;
+    }
+    .btn-download:hover {
+      background: rgba(196,134,74,0.16);
+      border-color: rgba(196,134,74,0.42);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      max-width: 1100px;
+      margin: 2rem auto 0;
+      padding: 1.25rem 2rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.72rem;
+      color: var(--muted2);
+      font-style: italic;
+      flex-wrap: wrap;
+    }
+    footer a { color: var(--muted); text-decoration: none; transition: color 0.15s; }
+    footer a:hover { color: var(--text2); }
+
+    @media (max-width: 640px) {
+      .hero        { padding: 1.5rem 1rem 1.25rem; }
+      .stats-section { padding: 1.25rem 1rem; }
+      .main        { padding: 1.25rem 1rem 0; }
+      .reports-zone { padding: 0 1rem; }
+      footer       { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="hero-top">
+        <div class="hero-name">xssxg<span>h</span>jk</div>
+        <div class="hero-right">
+          <div class="hero-date" id="hero-date"></div>
+          <div class="hero-subtitle">Personal Dashboard</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="stats-section">
+    <div class="stats-inner">
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card"><div class="stat-label">Loading…</div><div class="stat-value">—</div></div>
+      </div>
+    </div>
+  </section>
+
+  <main class="main">
+    <div class="content-grid">
+      <div class="col-main">
+        <div class="section-head">Recent Activity</div>
+        <div id="activity-feed"><div class="no-data">Loading…</div></div>
+      </div>
+      <div class="col-side">
+        <div class="section-head">Active Goals</div>
+        <div id="goals-list"><div class="no-data">Loading…</div></div>
+        <div id="tcg-section" style="margin-top:1.75rem"></div>
+      </div>
+    </div>
+  </main>
+
+  <div class="reports-zone">
+    <button class="reports-toggle" id="reports-toggle" aria-expanded="false">
+      <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+        <path d="M1.5 3L4.5 6L7.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Reports
+    </button>
+    <div class="reports-panel" id="reports-panel" hidden>
+      <div class="reports-tabs">
+        <button class="report-tab active" data-period="week">Week</button>
+        <button class="report-tab" data-period="month">Month</button>
+        <button class="report-tab" data-period="year">Year</button>
+      </div>
+      <div class="report-body" id="report-body">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span id="page-version"></span>
+    <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    function isoDate(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+    function todayIso() { return isoDate(new Date()); }
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function relAge(iso) {
+      var today = new Date(); today.setHours(0,0,0,0);
+      var d = new Date(iso + 'T00:00:00');
+      var n = Math.round((today - d) / 86400000);
+      if (n === 0) return 'today';
+      if (n === 1) return 'yesterday';
+      if (n < 7)  return n + 'd ago';
+      if (n < 31) return Math.floor(n / 7) + 'w ago';
+      return Math.floor(n / 30) + 'mo ago';
+    }
+    function fmtDate(iso) {
+      var d = new Date(iso + 'T00:00:00');
+      var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return M[d.getMonth()] + ' ' + d.getDate();
+    }
+    function weekStart() {
+      var d = new Date(); d.setHours(0,0,0,0);
+      d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      return isoDate(d);
+    }
+    function monthStart() {
+      var d = new Date();
+      return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-01';
+    }
+    function yearStart() { return new Date().getFullYear() + '-01-01'; }
+
+    function rangeLabel(period) {
+      var d = new Date();
+      if (period === 'week') {
+        var ws = new Date(weekStart() + 'T00:00:00');
+        var we = new Date(ws); we.setDate(ws.getDate() + 6);
+        var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return M[ws.getMonth()] + ' ' + ws.getDate() + ' – ' + M[we.getMonth()] + ' ' + we.getDate() + ', ' + d.getFullYear();
+      }
+      if (period === 'month') {
+        var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        return months[d.getMonth()] + ' ' + d.getFullYear();
+      }
+      return 'Year ' + d.getFullYear();
+    }
+
+    // ── Data loading ─────────────────────────────────────────────────────────
+    function loadAll() {
+      function get(k, fb) { try { return JSON.parse(localStorage.getItem(k) || 'null') || fb; } catch(e) { return fb; } }
+      return {
+        jEntries : get('journal_entries', {}),
+        jGoals   : get('journal_goals', {}),
+        marathon : get('c2hm_v1', {}),
+        workout  : get('workout_plan_v3', {}),
+        boulder  : get('bouldering_sessions', []),
+        calLog   : get('calorie_log', {}),
+        calW     : get('calorie_weights', {}),
+      };
+    }
+
+    // ── Stat computation ─────────────────────────────────────────────────────
+    function computeStats(data, since) {
+      var today = todayIso();
+      var stats = {
+        runs: 0, runKm: 0,
+        workouts: 0,
+        boulderSessions: 0, boulderMaxGrade: 0,
+        journalMorning: 0, journalEvening: 0, journalDays: 0,
+        calTotal: 0, calDays: 0,
+        activeGoals: 0,
+        weightLast: null,
+      };
+
+      // Goals
+      Object.values(data.jGoals).forEach(function(g) {
+        if (g && g.status === 'active') stats.activeGoals++;
+      });
+
+      // Journal
+      Object.entries(data.jEntries).forEach(function(kv) {
+        var iso = kv[0], e = kv[1];
+        if (iso < since || iso > today) return;
+        var hasMorning = !!(e && e.morning);
+        var hasEvening = !!(e && e.evening);
+        if (hasMorning || hasEvening) stats.journalDays++;
+        if (hasMorning) stats.journalMorning++;
+        if (hasEvening) stats.journalEvening++;
+      });
+
+      // Marathon
+      var mDays = data.marathon.days || {};
+      Object.entries(mDays).forEach(function(kv) {
+        var iso = kv[0], d = kv[1];
+        if (iso < since || iso > today) return;
+        if (d && (d.status === 'completed' || d.status === 'modified')) {
+          stats.runs++;
+          stats.runKm += parseFloat(d.km || 0);
+        }
+      });
+
+      // Workout
+      var wEntries = (data.workout && data.workout.entries) || {};
+      Object.entries(wEntries).forEach(function(kv) {
+        var iso = kv[0], e = kv[1];
+        if (iso < since || iso > today) return;
+        if (e && e.status === 'done') stats.workouts++;
+      });
+
+      // Bouldering
+      (data.boulder || []).forEach(function(s) {
+        if (!s || !s.date || s.date < since || s.date > today) return;
+        stats.boulderSessions++;
+        for (var g = 7; g >= 1; g--) {
+          if ((s.grades || {})[g] > 0) { if (g > stats.boulderMaxGrade) stats.boulderMaxGrade = g; break; }
+        }
+      });
+
+      // Calories
+      Object.entries(data.calLog).forEach(function(kv) {
+        var iso = kv[0], entries = kv[1];
+        if (iso < since || iso > today) return;
+        if (!Array.isArray(entries) || !entries.length) return;
+        var total = entries.reduce(function(s, e) { return s + (parseFloat(e.calories) || 0); }, 0);
+        stats.calTotal += total;
+        stats.calDays++;
+      });
+
+      // Latest weight
+      var wDates = Object.keys(data.calW).sort();
+      if (wDates.length) stats.weightLast = data.calW[wDates[wDates.length - 1]];
+
+      return stats;
+    }
+
+    // ── Recent activity feed ─────────────────────────────────────────────────
+    function buildActivity(data, limit) {
+      var items = [];
+      var today = todayIso();
+      var cutoff = isoDate(new Date(Date.now() - 60 * 86400000));
+
+      // Journal
+      Object.entries(data.jEntries).forEach(function(kv) {
+        var iso = kv[0], e = kv[1];
+        if (iso < cutoff || iso > today) return;
+        if (e && e.morning) {
+          var f = (e.morning.focus || '');
+          items.push({ date: iso, type: 'journal', title: 'Morning Journal', meta: f ? '“' + f.slice(0,60) + (f.length>60?'…':'”') : 'Morning entry' });
+        }
+        if (e && e.evening) {
+          items.push({ date: iso, type: 'journal', title: 'Evening Reflection', meta: 'Evening entry' });
+        }
+      });
+
+      // Marathon
+      Object.entries(data.marathon.days || {}).forEach(function(kv) {
+        var iso = kv[0], d = kv[1];
+        if (iso < cutoff || iso > today) return;
+        if (d && (d.status === 'completed' || d.status === 'modified')) {
+          var sub = d.km ? d.km + ' km' : d.time ? d.time + ' min' : 'Run completed';
+          items.push({ date: iso, type: 'run', title: 'Marathon Run', meta: sub });
+        }
+      });
+
+      // Workout
+      Object.entries((data.workout && data.workout.entries) || {}).forEach(function(kv) {
+        var iso = kv[0], e = kv[1];
+        if (iso < cutoff || iso > today) return;
+        if (e && e.status === 'done') {
+          var dur = e.duration ? e.duration + ' min' : '';
+          items.push({ date: iso, type: 'workout', title: 'Strength Session', meta: dur || 'Completed' });
+        }
+      });
+
+      // Bouldering
+      (data.boulder || []).forEach(function(s) {
+        if (!s || !s.date || s.date < cutoff || s.date > today) return;
+        var total = Object.values(s.grades || {}).reduce(function(a, b) { return a + (b || 0); }, 0);
+        var maxG = 0;
+        for (var g = 7; g >= 1; g--) { if ((s.grades || {})[g] > 0) { maxG = g; break; } }
+        items.push({ date: s.date, type: 'boulder', title: 'Bouldering Session', meta: total + ' climbs' + (maxG ? ' · max grade ' + maxG : '') });
+      });
+
+      // Sort by date desc, then cut
+      items.sort(function(a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+      return items.slice(0, limit || 15);
+    }
+
+    // ── Report text generation ───────────────────────────────────────────────
+    function periodDays(period) {
+      var today = new Date(); today.setHours(0,0,0,0);
+      var days = [];
+      var since = period === 'week' ? weekStart() : period === 'month' ? monthStart() : yearStart();
+      var d = new Date(since + 'T00:00:00');
+      while (isoDate(d) <= isoDate(today)) {
+        days.push(isoDate(d));
+        d.setDate(d.getDate() + 1);
+      }
+      return days;
+    }
+
+    function generateReport(data, period) {
+      var stats = computeStats(data, period === 'week' ? weekStart() : period === 'month' ? monthStart() : yearStart());
+      var days  = periodDays(period);
+      var label = rangeLabel(period);
+      var today = new Date();
+      var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      var generated = months[today.getMonth()] + ' ' + today.getDate() + ', ' + today.getFullYear();
+
+      var lines = [];
+      var pName = period === 'week' ? 'Weekly' : period === 'month' ? 'Monthly' : 'Yearly';
+      lines.push(pName + ' Report — ' + label);
+      lines.push('Generated: ' + generated);
+      lines.push('');
+      lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      lines.push('');
+
+      // Running
+      lines.push('RUNNING');
+      if (stats.runs > 0) {
+        lines.push('  Sessions : ' + stats.runs);
+        lines.push('  Distance : ' + (Math.round(stats.runKm * 10) / 10) + ' km');
+      } else {
+        lines.push('  No runs logged this ' + period + '.');
+      }
+      lines.push('');
+
+      // Strength
+      lines.push('STRENGTH TRAINING');
+      if (stats.workouts > 0) {
+        lines.push('  Sessions : ' + stats.workouts);
+      } else {
+        lines.push('  No sessions logged this ' + period + '.');
+      }
+      lines.push('');
+
+      // Bouldering
+      lines.push('BOULDERING');
+      if (stats.boulderSessions > 0) {
+        lines.push('  Sessions  : ' + stats.boulderSessions);
+        if (stats.boulderMaxGrade) lines.push('  Max grade : ' + stats.boulderMaxGrade);
+      } else {
+        lines.push('  No sessions logged this ' + period + '.');
+      }
+      lines.push('');
+
+      // Journal
+      lines.push('JOURNAL');
+      if (stats.journalDays > 0) {
+        lines.push('  Morning entries : ' + stats.journalMorning + ' / ' + days.length);
+        lines.push('  Evening entries : ' + stats.journalEvening + ' / ' + days.length);
+      } else {
+        lines.push('  No entries this ' + period + '.');
+      }
+      lines.push('');
+
+      // Calories
+      lines.push('NUTRITION');
+      if (stats.calDays > 0) {
+        var avg = Math.round(stats.calTotal / stats.calDays);
+        lines.push('  Days logged  : ' + stats.calDays + ' / ' + days.length);
+        lines.push('  Avg daily    : ' + avg.toLocaleString() + ' kcal');
+        lines.push('  Total        : ' + Math.round(stats.calTotal).toLocaleString() + ' kcal');
+      } else {
+        lines.push('  No data logged this ' + period + '.');
+      }
+      if (stats.weightLast) lines.push('  Latest weight: ' + stats.weightLast + ' kg');
+      lines.push('');
+
+      // Goals
+      var activeGoals = Object.values(data.jGoals).filter(function(g) { return g && g.status === 'active'; });
+      lines.push('ACTIVE GOALS');
+      if (activeGoals.length) {
+        activeGoals.forEach(function(g) { lines.push('  · ' + (g.title || 'Untitled')); });
+      } else {
+        lines.push('  No active goals.');
+      }
+      lines.push('');
+      lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      lines.push('xssxghjk · personal.dashboard');
+      lines.push('');
+
+      return lines.join('\n');
+    }
+
+    function downloadReport(text, filename) {
+      var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      var url  = URL.createObjectURL(blob);
+      var a    = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function() { URL.revokeObjectURL(url); a.remove(); }, 200);
+    }
+
+    // ── Render helpers ───────────────────────────────────────────────────────
+    function renderStats(data) {
+      var wk = weekStart();
+      var s  = computeStats(data, wk);
+      var today = todayIso();
+      var calAvg = s.calDays ? Math.round(s.calTotal / s.calDays) : 0;
+
+      // Count days in week so far
+      var d = new Date(wk + 'T00:00:00'), wDays = 0;
+      while (isoDate(d) <= today) { wDays++; d.setDate(d.getDate() + 1); }
+
+      var cards = [
+        {
+          label: 'Runs this week',
+          value: s.runs,
+          sub:   s.runKm > 0 ? (Math.round(s.runKm * 10) / 10) + ' km total' : 'no runs yet',
+          cls:   s.runs > 0 ? 'accent' : '',
+        },
+        {
+          label: 'Workouts this week',
+          value: s.workouts,
+          sub:   'sessions completed',
+          cls:   s.workouts > 0 ? 'green' : '',
+        },
+        {
+          label: 'Bouldering',
+          value: s.boulderSessions,
+          sub:   s.boulderMaxGrade ? 'max grade ' + s.boulderMaxGrade + ' this week' : 'no sessions this week',
+          cls:   s.boulderSessions > 0 ? 'accent' : '',
+        },
+        {
+          label: 'Journal entries',
+          value: s.journalMorning,
+          sub:   'mornings · ' + s.journalEvening + ' evenings',
+          cls:   s.journalMorning > 0 ? '' : '',
+        },
+        {
+          label: 'Avg calories',
+          value: calAvg > 0 ? calAvg.toLocaleString() : '—',
+          sub:   s.calDays > 0 ? 'kcal/day · ' + s.calDays + ' days logged' : 'no calorie data this week',
+          cls:   '',
+        },
+        {
+          label: 'Active goals',
+          value: s.activeGoals,
+          sub:   s.activeGoals === 1 ? 'goal in progress' : 'goals in progress',
+          cls:   s.activeGoals > 0 ? 'accent' : '',
+        },
+      ];
+
+      return cards.map(function(c) {
+        return '<div class="stat-card">' +
+          '<div class="stat-label">' + esc(c.label) + '</div>' +
+          '<div class="stat-value' + (c.cls ? ' ' + c.cls : '') + '">' + esc(String(c.value)) + '</div>' +
+          '<div class="stat-sub">' + esc(c.sub) + '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    function dotClass(type) {
+      if (type === 'run')     return 'dot-run';
+      if (type === 'workout') return 'dot-workout';
+      if (type === 'boulder') return 'dot-boulder';
+      if (type === 'journal') return 'dot-journal';
+      return 'dot-calorie';
+    }
+
+    function renderActivity(items) {
+      if (!items.length) return '<div class="no-data">No recent activity found. Start logging in any tracker.</div>';
+      return items.map(function(item) {
+        return '<div class="activity-item">' +
+          '<span class="activity-dot ' + dotClass(item.type) + '"></span>' +
+          '<span class="activity-body">' +
+            '<span class="activity-title">' + esc(item.title) + '</span>' +
+            '<span class="activity-meta">' + esc(item.meta) + '</span>' +
+          '</span>' +
+          '<span class="activity-age">' + relAge(item.date) + '</span>' +
+          '</div>';
+      }).join('');
+    }
+
+    function renderGoals(data) {
+      var active = Object.values(data.jGoals).filter(function(g) { return g && g.status === 'active'; });
+      if (!active.length) return '<div class="no-data">No active goals. Set them in <a href="../journal/" style="color:var(--accent);text-decoration:none">Journal</a>.</div>';
+      return active.map(function(g) {
+        return '<div class="goal-item">' +
+          '<span class="goal-dot"></span>' +
+          '<span class="goal-title">' + esc(g.title || 'Untitled goal') + '</span>' +
+          '</div>';
+      }).join('');
+    }
+
+    function renderReportPanel(data, period) {
+      var since = period === 'week' ? weekStart() : period === 'month' ? monthStart() : yearStart();
+      var s = computeStats(data, since);
+      var days = periodDays(period);
+      var calAvg = s.calDays ? Math.round(s.calTotal / s.calDays) : 0;
+
+      var cards = [
+        { label: 'Runs',        value: String(s.runs) + (s.runKm > 0 ? ' · ' + (Math.round(s.runKm*10)/10) + ' km' : '') },
+        { label: 'Workouts',    value: String(s.workouts) },
+        { label: 'Bouldering',  value: String(s.boulderSessions) + (s.boulderMaxGrade ? ' · G' + s.boulderMaxGrade : '') },
+        { label: 'Journal',     value: s.journalMorning + '↑ ' + s.journalEvening + '↓' },
+        { label: 'Avg Calories',value: calAvg > 0 ? calAvg.toLocaleString() + ' kcal' : '—' },
+        { label: 'Goals',       value: String(s.activeGoals) + ' active' },
+      ];
+
+      var statsHtml = cards.map(function(c) {
+        return '<div class="report-stat">' +
+          '<div class="report-stat-label">' + esc(c.label) + '</div>' +
+          '<div class="report-stat-value">' + esc(c.value) + '</div>' +
+          '</div>';
+      }).join('');
+
+      return '<div class="report-stats">' + statsHtml + '</div>' +
+        '<div class="report-download-row">' +
+          '<span class="report-period-label">' + esc(rangeLabel(period)) + '</span>' +
+          '<button class="btn-download" id="btn-dl-' + period + '">Download ↓</button>' +
+        '</div>';
+    }
+
+    // ── Hero date ────────────────────────────────────────────────────────────
+    (function () {
+      var d = new Date();
+      var DOW = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      var MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      document.getElementById('hero-date').textContent =
+        DOW[d.getDay()] + ', ' + MON[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+    })();
+
+    // ── Main render ──────────────────────────────────────────────────────────
+    var appData = loadAll();
+
+    document.getElementById('stats-grid').innerHTML    = renderStats(appData);
+    document.getElementById('activity-feed').innerHTML  = renderActivity(buildActivity(appData, 15));
+    document.getElementById('goals-list').innerHTML     = renderGoals(appData);
+
+    // TCG section: recent results summary
+    (function () {
+      var tcg = document.getElementById('tcg-section');
+      tcg.innerHTML = '<div class="section-head">Tournament Records</div>' +
+        '<div style="font-size:0.78rem;color:var(--muted);font-style:italic;padding:0.5rem 0">' +
+        'View full reports and tournament history in ' +
+        '<a href="../tcg-tournament-reports/" style="color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(196,134,74,0.3)">Tournament Reports</a>.' +
+        '</div>';
+    })();
+
+    // ── Reports panel ────────────────────────────────────────────────────────
+    var currentPeriod = 'week';
+    var reportsOpen   = false;
+
+    function renderCurrentReport() {
+      document.getElementById('report-body').innerHTML = renderReportPanel(appData, currentPeriod);
+      var btn = document.getElementById('btn-dl-' + currentPeriod);
+      if (btn) {
+        btn.addEventListener('click', function () {
+          var today = new Date();
+          var fname = currentPeriod + '-report-' + todayIso() + '.txt';
+          downloadReport(generateReport(appData, currentPeriod), fname);
+        });
+      }
+    }
+
+    document.getElementById('reports-toggle').addEventListener('click', function () {
+      reportsOpen = !reportsOpen;
+      var panel = document.getElementById('reports-panel');
+      var btn   = this;
+      if (reportsOpen) {
+        panel.hidden = false;
+        btn.setAttribute('aria-expanded', 'true');
+        btn.classList.add('open');
+        renderCurrentReport();
+      } else {
+        panel.hidden = true;
+        btn.setAttribute('aria-expanded', 'false');
+        btn.classList.remove('open');
+      }
+    });
+
+    document.querySelectorAll('.report-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        document.querySelectorAll('.report-tab').forEach(function (t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        currentPeriod = tab.dataset.period;
+        renderCurrentReport();
+      });
+    });
+
+    // ── Version footer ───────────────────────────────────────────────────────
+    fetch('../version.json').then(function(r) { return r.json(); }).then(function(v) {
+      var e = document.getElementById('page-version');
+      if (e) e.textContent = 'v' + v.version;
+    }).catch(function() {});
+
+  })();
+  </script>
+
+</body>
+</html>
