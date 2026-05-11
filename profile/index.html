@@ -54,14 +54,14 @@
     /* ── HERO ── */
     .hero {
       border-bottom: 1px solid var(--border);
-      padding: 2.5rem 2rem 2rem;
+      padding: 2rem 2rem 1.5rem;
       background: linear-gradient(180deg, rgba(196,134,74,0.04) 0%, transparent 100%);
     }
     .hero-inner { max-width: 1100px; margin: 0 auto; }
 
     .hero-top {
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: space-between;
       gap: 1rem;
       flex-wrap: wrap;
@@ -69,7 +69,7 @@
 
     .hero-name {
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: clamp(2.4rem, 7vw, 4.5rem);
+      font-size: clamp(2rem, 6vw, 3.8rem);
       font-weight: 700;
       font-style: italic;
       letter-spacing: -0.03em;
@@ -78,24 +78,75 @@
     }
     .hero-name span { color: var(--accent); }
 
-    .hero-right {
-      text-align: right;
-      flex-shrink: 0;
+    .hero-center {
+      flex: 1;
+      min-width: 0;
     }
     .hero-date {
       font-size: 0.78rem;
       color: var(--muted);
       font-style: italic;
       letter-spacing: 0.04em;
-      line-height: 1.7;
     }
     .hero-subtitle {
-      font-size: 0.7rem;
+      font-size: 0.62rem;
       color: var(--muted2);
-      letter-spacing: 0.14em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      margin-top: 0.2rem;
+      margin-top: 0.15rem;
     }
+
+    /* ── EXPORT BUTTON ── */
+    .export-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.32rem 0.75rem;
+      border-radius: 2px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.65rem;
+      font-style: italic;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .export-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-d); }
+    .export-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+
+    /* ── TAB BAR ── */
+    .tab-bar {
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      background: var(--surface);
+      position: relative;
+      z-index: 1;
+    }
+    .tab-bar-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+    }
+    .tab-btn {
+      padding: 0.7rem 1.25rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-style: italic;
+      color: var(--muted2);
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+      font-family: 'DM Serif Text', Georgia, serif;
+      margin-bottom: -1px;
+    }
+    .tab-btn:hover { color: var(--text2); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
     /* ── STATS GRID ── */
     .stats-section {
@@ -120,7 +171,7 @@
     .stat-card:hover { border-color: var(--border2); }
 
     .stat-label {
-      font-size: 0.58rem;
+      font-size: 0.56rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--muted2);
@@ -130,20 +181,39 @@
 
     .stat-value {
       font-family: 'Space Mono', monospace;
-      font-size: 1.45rem;
+      font-size: 1.3rem;
       font-weight: 700;
       color: var(--text);
-      line-height: 1;
+      line-height: 1.1;
     }
+    .stat-value.sm { font-size: 1rem; }
     .stat-value.accent { color: var(--accent); }
     .stat-value.green  { color: var(--green); }
+    .stat-value.blue   { color: #5ab4cc; }
 
     .stat-sub {
-      font-size: 0.65rem;
+      font-size: 0.63rem;
       color: var(--muted);
       font-style: italic;
-      margin-top: 0.3rem;
+      margin-top: 0.32rem;
+      line-height: 1.4;
     }
+
+    .stat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.12rem 0.35rem;
+      border-radius: 1px;
+      margin-top: 0.35rem;
+      font-style: normal;
+    }
+    .badge-green  { background: var(--green-b); color: var(--green); }
+    .badge-accent { background: var(--accent-d); color: var(--accent); }
+    .badge-muted  { background: rgba(90,78,64,0.3); color: var(--muted2); }
 
     /* ── MAIN CONTENT ── */
     .main {
@@ -252,130 +322,6 @@
       padding: 1.25rem 0;
     }
 
-    /* ── REPORTS SECTION ── */
-    .reports-zone {
-      max-width: 1100px;
-      margin: 2rem auto 0;
-      padding: 0 2rem;
-    }
-
-    .reports-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      font-style: italic;
-      color: var(--muted2);
-      cursor: pointer;
-      border: none;
-      background: none;
-      padding: 0.3rem 0;
-      transition: color 0.15s;
-      font-family: 'DM Serif Text', Georgia, serif;
-    }
-    .reports-toggle:hover { color: var(--muted); }
-    .reports-toggle svg { transition: transform 0.2s; }
-    .reports-toggle.open svg { transform: rotate(180deg); }
-
-    .reports-panel {
-      margin-top: 1rem;
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      background: var(--surface);
-      overflow: hidden;
-    }
-
-    .reports-tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border);
-    }
-    .report-tab {
-      flex: 1;
-      padding: 0.7rem 0.5rem;
-      font-size: 0.72rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      font-style: italic;
-      color: var(--muted);
-      cursor: pointer;
-      border: none;
-      background: none;
-      border-bottom: 2px solid transparent;
-      transition: color 0.15s, border-color 0.15s;
-      font-family: 'DM Serif Text', Georgia, serif;
-    }
-    .report-tab:hover { color: var(--text2); }
-    .report-tab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
-
-    .report-body {
-      padding: 1.25rem 1.5rem 1rem;
-    }
-
-    .report-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 0.6rem;
-      margin-bottom: 1rem;
-    }
-    .report-stat {
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      padding: 0.6rem 0.75rem;
-    }
-    .report-stat-label {
-      font-size: 0.55rem;
-      letter-spacing: 0.13em;
-      text-transform: uppercase;
-      color: var(--muted2);
-      font-style: italic;
-      margin-bottom: 0.3rem;
-    }
-    .report-stat-value {
-      font-family: 'Space Mono', monospace;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .report-download-row {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid var(--border);
-      margin-top: 0.75rem;
-    }
-    .report-period-label {
-      font-size: 0.7rem;
-      color: var(--muted);
-      font-style: italic;
-      flex: 1;
-    }
-    .btn-download {
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      font-style: italic;
-      color: var(--accent);
-      background: var(--accent-d);
-      border: 1px solid var(--accent-b);
-      border-radius: 2px;
-      padding: 0.35rem 0.9rem;
-      cursor: pointer;
-      transition: background 0.15s, border-color 0.15s;
-      font-family: 'DM Serif Text', Georgia, serif;
-    }
-    .btn-download:hover {
-      background: rgba(196,134,74,0.16);
-      border-color: rgba(196,134,74,0.42);
-    }
-
     /* ── FOOTER ── */
     footer {
       max-width: 1100px;
@@ -395,10 +341,14 @@
     footer a:hover { color: var(--text2); }
 
     @media (max-width: 640px) {
-      .hero        { padding: 1.5rem 1rem 1.25rem; }
-      .stats-section { padding: 1.25rem 1rem; }
+      .hero        { padding: 1.25rem 1rem 1rem; }
+      .tab-bar     { padding: 0 0.5rem; }
+      .tab-btn     { padding: 0.65rem 0.9rem; font-size: 0.58rem; }
+      .stats-section { padding: 1.1rem 1rem; }
+      .stats-grid  { grid-template-columns: 1fr 1fr; }
+      .stat-value  { font-size: 1.15rem; }
+      .stat-value.sm { font-size: 0.9rem; }
       .main        { padding: 1.25rem 1rem 0; }
-      .reports-zone { padding: 0 1rem; }
       footer       { padding: 1rem; }
     }
   </style>
@@ -409,13 +359,25 @@
     <div class="hero-inner">
       <div class="hero-top">
         <div class="hero-name">xssxg<span>h</span>jk</div>
-        <div class="hero-right">
+        <div class="hero-center">
           <div class="hero-date" id="hero-date"></div>
           <div class="hero-subtitle">Personal Dashboard</div>
         </div>
+        <button class="export-btn" id="export-btn">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 6l3 3 3-3M2 11h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span id="export-label">Weekly Report</span>
+        </button>
       </div>
     </div>
   </header>
+
+  <div class="tab-bar">
+    <div class="tab-bar-inner">
+      <button class="tab-btn" data-tab="day">Day</button>
+      <button class="tab-btn active" data-tab="week">Week</button>
+      <button class="tab-btn" data-tab="month">Month</button>
+    </div>
+  </div>
 
   <section class="stats-section">
     <div class="stats-inner">
@@ -438,25 +400,6 @@
       </div>
     </div>
   </main>
-
-  <div class="reports-zone">
-    <button class="reports-toggle" id="reports-toggle" aria-expanded="false">
-      <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
-        <path d="M1.5 3L4.5 6L7.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      Reports
-    </button>
-    <div class="reports-panel" id="reports-panel" hidden>
-      <div class="reports-tabs">
-        <button class="report-tab active" data-period="week">Week</button>
-        <button class="report-tab" data-period="month">Month</button>
-        <button class="report-tab" data-period="year">Year</button>
-      </div>
-      <div class="report-body" id="report-body">
-        <!-- rendered by JS -->
-      </div>
-    </div>
-  </div>
 
   <footer>
     <span id="page-version"></span>
@@ -484,11 +427,6 @@
       if (n < 31) return Math.floor(n / 7) + 'w ago';
       return Math.floor(n / 30) + 'mo ago';
     }
-    function fmtDate(iso) {
-      var d = new Date(iso + 'T00:00:00');
-      var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      return M[d.getMonth()] + ' ' + d.getDate();
-    }
     function weekStart() {
       var d = new Date(); d.setHours(0,0,0,0);
       d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
@@ -498,21 +436,20 @@
       var d = new Date();
       return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-01';
     }
-    function yearStart() { return new Date().getFullYear() + '-01-01'; }
-
     function rangeLabel(period) {
       var d = new Date();
+      var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      if (period === 'day') {
+        var DOW = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        return DOW[d.getDay()] + ', ' + FULL[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      }
       if (period === 'week') {
         var ws = new Date(weekStart() + 'T00:00:00');
         var we = new Date(ws); we.setDate(ws.getDate() + 6);
-        var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        return M[ws.getMonth()] + ' ' + ws.getDate() + ' – ' + M[we.getMonth()] + ' ' + we.getDate() + ', ' + d.getFullYear();
+        return MON[ws.getMonth()] + ' ' + ws.getDate() + ' – ' + MON[we.getMonth()] + ' ' + we.getDate() + ', ' + d.getFullYear();
       }
-      if (period === 'month') {
-        var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-        return months[d.getMonth()] + ' ' + d.getFullYear();
-      }
-      return 'Year ' + d.getFullYear();
+      return FULL[d.getMonth()] + ' ' + d.getFullYear();
     }
 
     // ── Data loading ─────────────────────────────────────────────────────────
@@ -529,25 +466,26 @@
       };
     }
 
-    // ── Stat computation ─────────────────────────────────────────────────────
+    // ── Period stat computation ───────────────────────────────────────────────
     function computeStats(data, since) {
       var today = todayIso();
       var stats = {
         runs: 0, runKm: 0,
         workouts: 0,
         boulderSessions: 0, boulderMaxGrade: 0,
+        boulderTotalClimbs: 0,
         journalMorning: 0, journalEvening: 0, journalDays: 0,
         calTotal: 0, calDays: 0,
+        calProteinTotal: 0, calProteinDays: 0,
         activeGoals: 0,
-        weightLast: null,
+        weightLast: null, weightFirst: null,
+        workoutTypes: [],
       };
 
-      // Goals
       Object.values(data.jGoals).forEach(function(g) {
         if (g && g.status === 'active') stats.activeGoals++;
       });
 
-      // Journal
       Object.entries(data.jEntries).forEach(function(kv) {
         var iso = kv[0], e = kv[1];
         if (iso < since || iso > today) return;
@@ -558,7 +496,6 @@
         if (hasEvening) stats.journalEvening++;
       });
 
-      // Marathon
       var mDays = data.marathon.days || {};
       Object.entries(mDays).forEach(function(kv) {
         var iso = kv[0], d = kv[1];
@@ -570,47 +507,365 @@
         }
       });
 
-      // Workout
+      var ST_NAMES = ['Push', 'Pull', 'Legs'];
+      var sched = (data.workout && Array.isArray(data.workout.schedule) && data.workout.schedule.length === 3)
+        ? data.workout.schedule : [1, 3, 5];
       var wEntries = (data.workout && data.workout.entries) || {};
       Object.entries(wEntries).forEach(function(kv) {
         var iso = kv[0], e = kv[1];
         if (iso < since || iso > today) return;
-        if (e && e.status === 'done') stats.workouts++;
+        if (e && e.status === 'done') {
+          stats.workouts++;
+          var parts = iso.split('-').map(Number);
+          var dow = new Date(parts[0], parts[1]-1, parts[2]).getDay();
+          var sidx = sched.indexOf(dow);
+          if (sidx >= 0 && stats.workoutTypes.indexOf(ST_NAMES[sidx]) === -1) {
+            stats.workoutTypes.push(ST_NAMES[sidx]);
+          }
+        }
       });
 
-      // Bouldering
       (data.boulder || []).forEach(function(s) {
         if (!s || !s.date || s.date < since || s.date > today) return;
         stats.boulderSessions++;
+        var climbs = Object.values(s.grades || {}).reduce(function(a, b) { return a + (b || 0); }, 0);
+        stats.boulderTotalClimbs += climbs;
         for (var g = 7; g >= 1; g--) {
           if ((s.grades || {})[g] > 0) { if (g > stats.boulderMaxGrade) stats.boulderMaxGrade = g; break; }
         }
       });
 
-      // Calories
       Object.entries(data.calLog).forEach(function(kv) {
         var iso = kv[0], entries = kv[1];
         if (iso < since || iso > today) return;
         if (!Array.isArray(entries) || !entries.length) return;
         var total = entries.reduce(function(s, e) { return s + (parseFloat(e.calories) || 0); }, 0);
+        var prot  = entries.reduce(function(s, e) { return s + (parseFloat(e.protein)  || 0); }, 0);
         stats.calTotal += total;
         stats.calDays++;
+        if (prot > 0) { stats.calProteinTotal += prot; stats.calProteinDays++; }
       });
 
-      // Latest weight
-      var wDates = Object.keys(data.calW).sort();
-      if (wDates.length) stats.weightLast = data.calW[wDates[wDates.length - 1]];
+      var wDates = Object.keys(data.calW).filter(function(d) { return d >= since && d <= today && data.calW[d] > 0; }).sort();
+      if (wDates.length) {
+        stats.weightFirst = data.calW[wDates[0]];
+        stats.weightLast  = data.calW[wDates[wDates.length - 1]];
+      }
 
       return stats;
     }
 
-    // ── Recent activity feed ─────────────────────────────────────────────────
+    // ── Day stat computation ─────────────────────────────────────────────────
+    var ST_TYPES_DAY = ['Push', 'Pull', 'Legs'];
+
+    function computeStatsDay(data) {
+      var iso = todayIso();
+
+      // Weight for calorie burn estimates
+      var weightKg = (data.marathon && data.marathon.weightKg) || 75;
+      var wAllDates = Object.keys(data.calW).filter(function(d) { return d <= iso && data.calW[d] > 0; }).sort();
+      if (wAllDates.length) weightKg = data.calW[wAllDates[wAllDates.length - 1]];
+
+      // Calories
+      var calEntries = Array.isArray(data.calLog[iso]) ? data.calLog[iso] : [];
+      var calIn      = calEntries.reduce(function(s, e) { return s + (parseFloat(e.calories) || 0); }, 0);
+      var calProtein = calEntries.reduce(function(s, e) { return s + (parseFloat(e.protein)  || 0); }, 0);
+
+      // Run
+      var mDays = (data.marathon && data.marathon.days) || {};
+      var runEntry = mDays[iso] || null;
+      if (!runEntry) {
+        runEntry = Object.values(mDays).find(function(d) { return d && d.completedDate === iso; }) || null;
+      }
+      var runCal = 0;
+      if (runEntry) {
+        if (runEntry.km)   runCal = Math.round(weightKg * parseFloat(runEntry.km));
+        else if (runEntry.time) runCal = Math.round(8.0 * weightKg * parseFloat(runEntry.time) / 60);
+      }
+
+      // Strength
+      var sched = (data.workout && Array.isArray(data.workout.schedule) && data.workout.schedule.length === 3)
+        ? data.workout.schedule : [1, 3, 5];
+      var todayDow = new Date().getDay();
+      var sidx = sched.indexOf(todayDow);
+      var isStrengthDay  = sidx >= 0;
+      var scheduledType  = isStrengthDay ? ST_TYPES_DAY[sidx] : null;
+      var wEntries = (data.workout && data.workout.entries) || {};
+      var strengthEntry  = wEntries[iso] || null;
+      var strengthDone   = !!(strengthEntry && strengthEntry.status === 'done');
+      var strengthType   = strengthDone && isStrengthDay ? ST_TYPES_DAY[sidx] : (strengthDone ? 'Strength' : null);
+      var strengthCal    = 0;
+      if (strengthDone) {
+        strengthCal = Math.round(3.0 * weightKg * ((strengthEntry.duration || 60) / 60));
+      }
+
+      // Bouldering
+      var boulderSession = (data.boulder || []).find(function(s) { return s && s.date === iso; }) || null;
+      var boulderCal = 0;
+      if (boulderSession) {
+        boulderCal = Math.round(2.0 * weightKg * ((boulderSession.duration || 90) / 60));
+      }
+
+      // Journal
+      var dayEntry  = (data.jEntries || {})[iso] || {};
+      var hasMorning = !!(dayEntry && dayEntry.morning);
+      var hasEvening = !!(dayEntry && dayEntry.evening);
+      var morningFocus = (dayEntry.morning && dayEntry.morning.focus) ? dayEntry.morning.focus.slice(0, 55) : '';
+
+      var totalBurned = runCal + strengthCal + boulderCal;
+
+      return {
+        iso, calIn: Math.round(calIn), calProtein: Math.round(calProtein),
+        calItemCount: calEntries.length,
+        totalBurned, runCal, strengthCal, boulderCal,
+        netCal: Math.round(calIn - totalBurned),
+        runEntry, isStrengthDay, scheduledType, strengthEntry, strengthDone, strengthType,
+        boulderSession, hasMorning, hasEvening, morningFocus,
+        weightKg,
+      };
+    }
+
+    // ── Render helpers ───────────────────────────────────────────────────────
+    function mkCard(label, value, sub, cls, badge) {
+      var bHtml = badge ? '<div class="stat-badge badge-' + badge.type + '">' + esc(badge.text) + '</div>' : '';
+      return '<div class="stat-card">' +
+        '<div class="stat-label">' + esc(label) + '</div>' +
+        '<div class="stat-value' + (cls ? ' ' + cls : '') + '">' + esc(String(value)) + '</div>' +
+        (sub ? '<div class="stat-sub">' + esc(sub) + '</div>' : '') +
+        bHtml +
+        '</div>';
+    }
+
+    function renderStatsDay(data) {
+      var s = computeStatsDay(data);
+
+      // Card: Calories In
+      var calVal  = s.calIn > 0 ? s.calIn.toLocaleString() + ' kcal' : '—';
+      var calSub  = s.calItemCount > 0 ? s.calItemCount + ' item' + (s.calItemCount !== 1 ? 's' : '') + ' logged' : 'nothing logged yet';
+      var calCls  = s.calIn > 0 ? 'accent' : '';
+
+      // Card: Protein
+      var protVal = s.calProtein > 0 ? s.calProtein + 'g' : '—';
+      var protSub = s.calProtein > 0 ? 'protein today' : 'no protein data';
+
+      // Card: Burned
+      var burnParts = [];
+      if (s.runCal > 0) burnParts.push('run ' + s.runCal.toLocaleString());
+      if (s.strengthCal > 0) burnParts.push('str ' + s.strengthCal.toLocaleString());
+      if (s.boulderCal > 0) burnParts.push('bld ' + s.boulderCal.toLocaleString());
+      var burnVal = s.totalBurned > 0 ? s.totalBurned.toLocaleString() + ' kcal' : '—';
+      var burnSub = burnParts.length ? burnParts.join(' · ') : 'no activity yet';
+
+      // Card: Net
+      var hasNet   = s.calIn > 0 || s.totalBurned > 0;
+      var netRaw   = hasNet ? s.netCal : null;
+      var netVal   = hasNet ? (s.netCal >= 0 ? '+' + s.netCal.toLocaleString() : s.netCal.toLocaleString()) + ' kcal' : '—';
+      var netCls   = netRaw !== null ? (netRaw < -50 ? 'green' : (netRaw > 300 ? 'accent' : '')) : '';
+      var netSub   = netRaw !== null ? (netRaw < -50 ? 'calorie deficit' : (netRaw > 300 ? 'calorie surplus' : 'roughly balanced')) : 'log food & activity';
+
+      // Card: Run
+      var runVal, runSub, runCls, runBadge;
+      var re = s.runEntry;
+      if (re && (re.status === 'completed' || re.status === 'modified')) {
+        runVal  = re.km ? re.km + ' km' : (re.time ? re.time + ' min' : 'Done');
+        var parts = [];
+        if (re.km && re.time) parts.push(re.time + ' min');
+        if (s.runCal > 0) parts.push('~' + s.runCal.toLocaleString() + ' kcal');
+        runSub  = parts.join(' · ') || 'completed';
+        runCls  = 'green';
+        runBadge = { type: 'green', text: re.status === 'modified' ? 'Modified' : '✓ Done' };
+      } else if (re && re.status === 'skipped') {
+        runVal = 'Skipped'; runSub = 'rest day logged'; runCls = ''; runBadge = { type: 'muted', text: 'Skipped' };
+      } else {
+        runVal = '—'; runSub = 'no run logged yet'; runCls = ''; runBadge = null;
+      }
+
+      // Card: Strength
+      var strVal, strSub, strCls, strBadge;
+      if (s.strengthDone) {
+        strVal  = s.strengthType ? s.strengthType : 'Strength';
+        var sparts = [];
+        if (s.strengthEntry.duration) sparts.push(s.strengthEntry.duration + ' min');
+        if (s.strengthCal > 0) sparts.push('~' + s.strengthCal.toLocaleString() + ' kcal');
+        strSub  = sparts.join(' · ') || 'session done';
+        strCls  = 'green';
+        strBadge = { type: 'green', text: '✓ Done' };
+      } else if (s.isStrengthDay) {
+        strVal  = s.scheduledType || 'Strength';
+        strSub  = 'scheduled today — not yet logged';
+        strCls  = 'accent';
+        strBadge = { type: 'accent', text: 'Pending' };
+      } else {
+        strVal = 'Rest Day'; strSub = 'no strength today'; strCls = ''; strBadge = null;
+      }
+
+      // Card: Journal
+      var jDone = (s.hasMorning ? 1 : 0) + (s.hasEvening ? 1 : 0);
+      var jVal, jSub, jCls, jBadge;
+      if (jDone === 2) {
+        jVal = 'Both Done'; jSub = s.morningFocus ? '"' + s.morningFocus + '"' : 'morning & evening logged';
+        jCls = 'green'; jBadge = { type: 'green', text: '✓ Complete' };
+      } else if (s.hasMorning) {
+        jVal = 'Morning ✓'; jSub = s.morningFocus ? '"' + s.morningFocus + '"' : 'evening still pending';
+        jCls = 'accent'; jBadge = { type: 'accent', text: 'Partial' };
+      } else if (s.hasEvening) {
+        jVal = 'Evening ✓'; jSub = 'morning was missed';
+        jCls = 'accent'; jBadge = { type: 'accent', text: 'Partial' };
+      } else {
+        jVal = 'Pending'; jSub = 'no entries today'; jCls = ''; jBadge = null;
+      }
+
+      return [
+        mkCard('Calories In',  calVal,  calSub,  calCls,  null),
+        mkCard('Protein',      protVal, protSub, '',      null),
+        mkCard('Burned',       burnVal, burnSub, '',      null),
+        mkCard('Net Calories', netVal,  netSub,  netCls,  null),
+        mkCard('Run',          runVal,  runSub,  runCls,  runBadge),
+        mkCard('Strength',     strVal,  strSub,  strCls,  strBadge),
+        mkCard('Journal',      jVal,    jSub,    jCls,    jBadge),
+      ].join('');
+    }
+
+    function renderStatsWeek(data) {
+      var since = weekStart();
+      var s = computeStats(data, since);
+      var today = todayIso();
+
+      // Days elapsed in week
+      var d = new Date(since + 'T00:00:00'), wDays = 0;
+      while (isoDate(d) <= today) { wDays++; d.setDate(d.getDate() + 1); }
+
+      var avgKm  = s.runs > 0 ? Math.round(s.runKm / s.runs * 10) / 10 : 0;
+      var calAvg = s.calDays ? Math.round(s.calTotal / s.calDays) : 0;
+      var avgProt = s.calProteinDays ? Math.round(s.calProteinTotal / s.calProteinDays) : 0;
+
+      // Run card
+      var runVal = s.runs + ' run' + (s.runs !== 1 ? 's' : '');
+      var runSub = s.runKm > 0
+        ? (Math.round(s.runKm * 10) / 10) + ' km · avg ' + avgKm + ' km/run'
+        : 'no runs this week';
+      var runCls = s.runs > 0 ? 'accent' : '';
+
+      // Strength card
+      var strVal = s.workouts + ' session' + (s.workouts !== 1 ? 's' : '');
+      var strSub = s.workoutTypes.length > 0
+        ? s.workoutTypes.join(' · ') + ' completed'
+        : 'no sessions this week';
+      var strCls = s.workouts > 0 ? 'green' : '';
+
+      // Boulder card
+      var bldVal = s.boulderSessions + ' session' + (s.boulderSessions !== 1 ? 's' : '');
+      var bldParts = [];
+      if (s.boulderTotalClimbs > 0) bldParts.push(s.boulderTotalClimbs + ' climbs');
+      if (s.boulderMaxGrade > 0)   bldParts.push('max grade ' + s.boulderMaxGrade);
+      var bldSub = bldParts.length ? bldParts.join(' · ') : 'no sessions this week';
+      var bldCls = s.boulderSessions > 0 ? 'blue' : '';
+
+      // Journal card
+      var jVal = s.journalMorning + '/' + wDays;
+      var jSub = 'mornings · ' + s.journalEvening + '/' + wDays + ' evenings';
+      var jRate = wDays > 0 ? Math.round((s.journalMorning / wDays) * 100) : 0;
+      var jCls  = jRate >= 80 ? 'green' : (jRate >= 50 ? 'accent' : '');
+
+      // Calories card
+      var calVal = calAvg > 0 ? calAvg.toLocaleString() + ' kcal' : '—';
+      var calSub = s.calDays > 0
+        ? s.calDays + '/' + wDays + ' days tracked' + (avgProt > 0 ? ' · ' + avgProt + 'g protein avg' : '')
+        : 'no nutrition data';
+
+      // Goals card
+      var activeGoals = Object.values(data.jGoals).filter(function(g) { return g && g.status === 'active'; });
+      var goalVal = s.activeGoals;
+      var goalSub = activeGoals.length
+        ? activeGoals.slice(0, 2).map(function(g) { return g.text || 'Untitled'; }).join(' · ').slice(0, 60)
+        : 'no active goals';
+      var goalCls = s.activeGoals > 0 ? 'accent' : '';
+
+      return [
+        mkCard('Running',       runVal,  runSub,  runCls,  null),
+        mkCard('Strength',      strVal,  strSub,  strCls,  null),
+        mkCard('Bouldering',    bldVal,  bldSub,  bldCls,  null),
+        mkCard('Journal',       jVal,    jSub,    jCls,    null),
+        mkCard('Avg Calories',  calVal,  calSub,  '',      null),
+        mkCard('Active Goals',  goalVal, goalSub, goalCls, null),
+      ].join('');
+    }
+
+    function renderStatsMonth(data) {
+      var since = monthStart();
+      var s = computeStats(data, since);
+      var today = todayIso();
+      var now = new Date();
+
+      // Days elapsed in month and total days in month
+      var d = new Date(since + 'T00:00:00'), mDaysElapsed = 0;
+      while (isoDate(d) <= today) { mDaysElapsed++; d.setDate(d.getDate() + 1); }
+      var totalDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+      var avgKm = s.runs > 0 ? Math.round(s.runKm / s.runs * 10) / 10 : 0;
+      var weeksElapsed = mDaysElapsed / 7;
+      var runsPerWeek  = s.runs > 0 && weeksElapsed > 0 ? Math.round(s.runs / weeksElapsed * 10) / 10 : 0;
+      var calAvg = s.calDays ? Math.round(s.calTotal / s.calDays) : 0;
+      var journalRate = mDaysElapsed > 0 ? Math.round((s.journalMorning / mDaysElapsed) * 100) : 0;
+
+      // Weight delta
+      var weightStr = '—', weightSub = 'no weigh-ins this month';
+      if (s.weightLast) {
+        weightStr = s.weightLast.toFixed(1) + ' kg';
+        if (s.weightFirst && s.weightFirst !== s.weightLast) {
+          var delta = (s.weightLast - s.weightFirst).toFixed(1);
+          weightSub = (parseFloat(delta) < 0 ? '' : '+') + delta + ' kg this month';
+        } else {
+          weightSub = 'latest weigh-in';
+        }
+      }
+      var weightCls = s.weightLast && s.weightFirst && s.weightLast < s.weightFirst ? 'green' : '';
+
+      return [
+        mkCard('Running',
+          s.runs + ' run' + (s.runs !== 1 ? 's' : ''),
+          s.runKm > 0
+            ? (Math.round(s.runKm * 10) / 10) + ' km · avg ' + runsPerWeek + '/week'
+            : 'no runs this month',
+          s.runs > 0 ? 'accent' : '', null),
+
+        mkCard('Strength',
+          s.workouts + ' session' + (s.workouts !== 1 ? 's' : ''),
+          s.workouts > 0
+            ? 'completed this month'
+            : 'no strength sessions',
+          s.workouts > 0 ? 'green' : '', null),
+
+        mkCard('Bouldering',
+          s.boulderSessions + ' session' + (s.boulderSessions !== 1 ? 's' : ''),
+          s.boulderMaxGrade
+            ? (s.boulderTotalClimbs > 0 ? s.boulderTotalClimbs + ' climbs · ' : '') + 'max grade ' + s.boulderMaxGrade
+            : 'no sessions this month',
+          s.boulderSessions > 0 ? 'blue' : '', null),
+
+        mkCard('Journal',
+          journalRate + '%',
+          s.journalMorning + '/' + mDaysElapsed + ' mornings · ' + s.journalEvening + '/' + mDaysElapsed + ' evenings',
+          journalRate >= 70 ? 'green' : (journalRate >= 40 ? 'accent' : ''), null),
+
+        mkCard('Avg Calories',
+          calAvg > 0 ? calAvg.toLocaleString() + ' kcal' : '—',
+          s.calDays > 0
+            ? s.calDays + '/' + mDaysElapsed + ' days tracked this month'
+            : 'no nutrition data',
+          '', null),
+
+        mkCard('Weight',
+          weightStr, weightSub, weightCls, null),
+      ].join('');
+    }
+
+    // ── Activity feed ────────────────────────────────────────────────────────
     function buildActivity(data, limit) {
       var items = [];
       var today = todayIso();
       var cutoff = isoDate(new Date(Date.now() - 60 * 86400000));
 
-      // Journal
       Object.entries(data.jEntries).forEach(function(kv) {
         var iso = kv[0], e = kv[1];
         if (iso < cutoff || iso > today) return;
@@ -623,7 +878,6 @@
         }
       });
 
-      // Marathon
       Object.entries(data.marathon.days || {}).forEach(function(kv) {
         var iso = kv[0], d = kv[1];
         var effectiveDate = (d && d.completedDate) || iso;
@@ -634,7 +888,6 @@
         }
       });
 
-      // Workout
       Object.entries((data.workout && data.workout.entries) || {}).forEach(function(kv) {
         var iso = kv[0], e = kv[1];
         if (iso < cutoff || iso > today) return;
@@ -644,184 +897,16 @@
         }
       });
 
-      // Bouldering
       (data.boulder || []).forEach(function(s) {
         if (!s || !s.date || s.date < cutoff || s.date > today) return;
         var total = Object.values(s.grades || {}).reduce(function(a, b) { return a + (b || 0); }, 0);
         var maxG = 0;
         for (var g = 7; g >= 1; g--) { if ((s.grades || {})[g] > 0) { maxG = g; break; } }
-        items.push({ date: s.date, type: 'boulder', title: 'Bouldering Session', meta: total + ' climbs' + (maxG ? ' · max grade ' + maxG : '') });
+        items.push({ date: s.date, type: 'boulder', title: 'Bouldering Session', meta: total + ' climbs' + (maxG ? ' \xb7 max grade ' + maxG : '') });
       });
 
-      // Sort by date desc, then cut
       items.sort(function(a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
       return items.slice(0, limit || 15);
-    }
-
-    // ── Report text generation ───────────────────────────────────────────────
-    function periodDays(period) {
-      var today = new Date(); today.setHours(0,0,0,0);
-      var days = [];
-      var since = period === 'week' ? weekStart() : period === 'month' ? monthStart() : yearStart();
-      var d = new Date(since + 'T00:00:00');
-      while (isoDate(d) <= isoDate(today)) {
-        days.push(isoDate(d));
-        d.setDate(d.getDate() + 1);
-      }
-      return days;
-    }
-
-    function generateReport(data, period) {
-      var stats = computeStats(data, period === 'week' ? weekStart() : period === 'month' ? monthStart() : yearStart());
-      var days  = periodDays(period);
-      var label = rangeLabel(period);
-      var today = new Date();
-      var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-      var generated = months[today.getMonth()] + ' ' + today.getDate() + ', ' + today.getFullYear();
-
-      var lines = [];
-      var pName = period === 'week' ? 'Weekly' : period === 'month' ? 'Monthly' : 'Yearly';
-      lines.push(pName + ' Report — ' + label);
-      lines.push('Generated: ' + generated);
-      lines.push('');
-      lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      lines.push('');
-
-      // Running
-      lines.push('RUNNING');
-      if (stats.runs > 0) {
-        lines.push('  Sessions : ' + stats.runs);
-        lines.push('  Distance : ' + (Math.round(stats.runKm * 10) / 10) + ' km');
-      } else {
-        lines.push('  No runs logged this ' + period + '.');
-      }
-      lines.push('');
-
-      // Strength
-      lines.push('STRENGTH TRAINING');
-      if (stats.workouts > 0) {
-        lines.push('  Sessions : ' + stats.workouts);
-      } else {
-        lines.push('  No sessions logged this ' + period + '.');
-      }
-      lines.push('');
-
-      // Bouldering
-      lines.push('BOULDERING');
-      if (stats.boulderSessions > 0) {
-        lines.push('  Sessions  : ' + stats.boulderSessions);
-        if (stats.boulderMaxGrade) lines.push('  Max grade : ' + stats.boulderMaxGrade);
-      } else {
-        lines.push('  No sessions logged this ' + period + '.');
-      }
-      lines.push('');
-
-      // Journal
-      lines.push('JOURNAL');
-      if (stats.journalDays > 0) {
-        lines.push('  Morning entries : ' + stats.journalMorning + ' / ' + days.length);
-        lines.push('  Evening entries : ' + stats.journalEvening + ' / ' + days.length);
-      } else {
-        lines.push('  No entries this ' + period + '.');
-      }
-      lines.push('');
-
-      // Calories
-      lines.push('NUTRITION');
-      if (stats.calDays > 0) {
-        var avg = Math.round(stats.calTotal / stats.calDays);
-        lines.push('  Days logged  : ' + stats.calDays + ' / ' + days.length);
-        lines.push('  Avg daily    : ' + avg.toLocaleString() + ' kcal');
-        lines.push('  Total        : ' + Math.round(stats.calTotal).toLocaleString() + ' kcal');
-      } else {
-        lines.push('  No data logged this ' + period + '.');
-      }
-      if (stats.weightLast) lines.push('  Latest weight: ' + stats.weightLast + ' kg');
-      lines.push('');
-
-      // Goals
-      var activeGoals = Object.values(data.jGoals).filter(function(g) { return g && g.status === 'active'; });
-      lines.push('ACTIVE GOALS');
-      if (activeGoals.length) {
-        activeGoals.forEach(function(g) { lines.push('  · ' + (g.text || 'Untitled')); });
-      } else {
-        lines.push('  No active goals.');
-      }
-      lines.push('');
-      lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      lines.push('xssxghjk · personal.dashboard');
-      lines.push('');
-
-      return lines.join('\n');
-    }
-
-    function downloadReport(text, filename) {
-      var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-      var url  = URL.createObjectURL(blob);
-      var a    = document.createElement('a');
-      a.href = url; a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(function() { URL.revokeObjectURL(url); a.remove(); }, 200);
-    }
-
-    // ── Render helpers ───────────────────────────────────────────────────────
-    function renderStats(data) {
-      var wk = weekStart();
-      var s  = computeStats(data, wk);
-      var today = todayIso();
-      var calAvg = s.calDays ? Math.round(s.calTotal / s.calDays) : 0;
-
-      // Count days in week so far
-      var d = new Date(wk + 'T00:00:00'), wDays = 0;
-      while (isoDate(d) <= today) { wDays++; d.setDate(d.getDate() + 1); }
-
-      var cards = [
-        {
-          label: 'Runs this week',
-          value: s.runs,
-          sub:   s.runKm > 0 ? (Math.round(s.runKm * 10) / 10) + ' km total' : 'no runs yet',
-          cls:   s.runs > 0 ? 'accent' : '',
-        },
-        {
-          label: 'Workouts this week',
-          value: s.workouts,
-          sub:   'sessions completed',
-          cls:   s.workouts > 0 ? 'green' : '',
-        },
-        {
-          label: 'Bouldering',
-          value: s.boulderSessions,
-          sub:   s.boulderMaxGrade ? 'max grade ' + s.boulderMaxGrade + ' this week' : 'no sessions this week',
-          cls:   s.boulderSessions > 0 ? 'accent' : '',
-        },
-        {
-          label: 'Journal entries',
-          value: s.journalMorning,
-          sub:   'mornings · ' + s.journalEvening + ' evenings',
-          cls:   s.journalMorning > 0 ? '' : '',
-        },
-        {
-          label: 'Avg calories',
-          value: calAvg > 0 ? calAvg.toLocaleString() : '—',
-          sub:   s.calDays > 0 ? 'kcal/day · ' + s.calDays + ' days logged' : 'no calorie data this week',
-          cls:   '',
-        },
-        {
-          label: 'Active goals',
-          value: s.activeGoals,
-          sub:   s.activeGoals === 1 ? 'goal in progress' : 'goals in progress',
-          cls:   s.activeGoals > 0 ? 'accent' : '',
-        },
-      ];
-
-      return cards.map(function(c) {
-        return '<div class="stat-card">' +
-          '<div class="stat-label">' + esc(c.label) + '</div>' +
-          '<div class="stat-value' + (c.cls ? ' ' + c.cls : '') + '">' + esc(String(c.value)) + '</div>' +
-          '<div class="stat-sub">' + esc(c.sub) + '</div>' +
-          '</div>';
-      }).join('');
     }
 
     function dotClass(type) {
@@ -857,34 +942,451 @@
       }).join('');
     }
 
-    function renderReportPanel(data, period) {
-      var since = period === 'week' ? weekStart() : period === 'month' ? monthStart() : yearStart();
-      var s = computeStats(data, since);
-      var days = periodDays(period);
-      var calAvg = s.calDays ? Math.round(s.calTotal / s.calDays) : 0;
-
-      var cards = [
-        { label: 'Runs',        value: String(s.runs) + (s.runKm > 0 ? ' · ' + (Math.round(s.runKm*10)/10) + ' km' : '') },
-        { label: 'Workouts',    value: String(s.workouts) },
-        { label: 'Bouldering',  value: String(s.boulderSessions) + (s.boulderMaxGrade ? ' · G' + s.boulderMaxGrade : '') },
-        { label: 'Journal',     value: s.journalMorning + '↑ ' + s.journalEvening + '↓' },
-        { label: 'Avg Calories',value: calAvg > 0 ? calAvg.toLocaleString() + ' kcal' : '—' },
-        { label: 'Goals',       value: String(s.activeGoals) + ' active' },
-      ];
-
-      var statsHtml = cards.map(function(c) {
-        return '<div class="report-stat">' +
-          '<div class="report-stat-label">' + esc(c.label) + '</div>' +
-          '<div class="report-stat-value">' + esc(c.value) + '</div>' +
-          '</div>';
-      }).join('');
-
-      return '<div class="report-stats">' + statsHtml + '</div>' +
-        '<div class="report-download-row">' +
-          '<span class="report-period-label">' + esc(rangeLabel(period)) + '</span>' +
-          '<button class="btn-download" id="btn-dl-' + period + '">Download ↓</button>' +
-        '</div>';
+    // ── Canvas helpers ───────────────────────────────────────────────────────
+    function paintBg(ctx, W, H) {
+      ctx.fillStyle = '#1c1814';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(232,223,208,0.02)';
+      for (var px = 12; px < W; px += 24) {
+        for (var py = 12; py < H; py += 24) {
+          ctx.beginPath(); ctx.arc(px, py, 0.7, 0, Math.PI * 2); ctx.fill();
+        }
+      }
     }
+
+    // ── Daily report export (same as calendar) ───────────────────────────────
+    function generateDailyReport(dateStr) {
+      return new Promise(function(resolve) {
+        document.fonts.ready.then(function() {
+          var calorieLog = {}, workoutData = {}, strengthData = {}, caloWeights = {}, boulderSessions = [];
+          try { calorieLog      = JSON.parse(localStorage.getItem('calorie_log')         || '{}'); } catch(e) {}
+          try { workoutData     = JSON.parse(localStorage.getItem('c2hm_v1')             || '{}'); } catch(e) {}
+          try { strengthData    = JSON.parse(localStorage.getItem('workout_plan_v3')     || '{}'); } catch(e) {}
+          try { boulderSessions = JSON.parse(localStorage.getItem('bouldering_sessions') || '[]'); } catch(e) {}
+          try { caloWeights     = JSON.parse(localStorage.getItem('calorie_weights')     || '{}'); } catch(e) {}
+
+          var entries    = calorieLog[dateStr] || [];
+          var _mDays     = workoutData.days || {};
+          var dayWorkout = _mDays[dateStr] || Object.values(_mDays).find(function(d) { return d && d.completedDate === dateStr; }) || null;
+          var dayWeighIn = (caloWeights[dateStr] && caloWeights[dateStr] > 0) ? caloWeights[dateStr] : null;
+
+          var weightKg = workoutData.weightKg || null;
+          var wEntries = Object.entries(caloWeights).filter(function(kv) { return kv[0] <= dateStr && kv[1] > 0; }).sort(function(a,b) { return b[0].localeCompare(a[0]); });
+          if (wEntries.length) weightKg = wEntries[0][1];
+          if (!weightKg) weightKg = 75;
+
+          var MEAL_ORDER = ['breakfast','lunch','dinner','snack','other'];
+          var CAT_COLORS = { breakfast:'#d4924a', lunch:'#5ab4cc', dinner:'#c4864a', snack:'#7ab87a', other:'#7a6e60' };
+          var CAT_LABELS = { breakfast:'Breakfast', lunch:'Lunch', dinner:'Dinner', snack:'Snack', other:'Other' };
+          var grouped = {}; var totalCalIn = 0, totalProtein = 0;
+          entries.forEach(function(e) {
+            var cat = e.category || 'other';
+            if (!grouped[cat]) grouped[cat] = [];
+            grouped[cat].push(e);
+            totalCalIn  += e.calories || 0;
+            totalProtein += e.protein  || 0;
+          });
+          var activeCats = MEAL_ORDER.filter(function(c) { return grouped[c] && grouped[c].length > 0; });
+
+          var workoutCal = 0;
+          if (dayWorkout) {
+            if (dayWorkout.km && weightKg) workoutCal = Math.round(weightKg * dayWorkout.km);
+            else if (dayWorkout.time && weightKg) workoutCal = Math.round(8.0 * weightKg * dayWorkout.time / 60);
+          }
+
+          var strengthEntryMap = strengthData.entries || {};
+          var strengthEntry    = strengthEntryMap[dateStr] || null;
+          var ST_TYPES = [
+            { name: 'Push', muscles: 'Chest \xb7 Shoulders \xb7 Triceps' },
+            { name: 'Pull', muscles: 'Back \xb7 Biceps \xb7 Grip' },
+            { name: 'Legs', muscles: 'Glutes \xb7 Hamstrings \xb7 Hips' },
+          ];
+          var strengthSession = null;
+          if (strengthEntry && strengthEntry.status === 'done') {
+            var sSched = Array.isArray(strengthData.schedule) && strengthData.schedule.length === 3 ? strengthData.schedule : [1,3,5];
+            var sparts = dateStr.split('-').map(Number);
+            var sdow   = new Date(sparts[0], sparts[1]-1, sparts[2]).getDay();
+            var ssidx  = sSched.indexOf(sdow);
+            strengthSession = ssidx >= 0 ? ST_TYPES[ssidx] : { name: 'Strength', muscles: '' };
+          }
+          var strengthCal = 0;
+          if (strengthSession) strengthCal = Math.round(3.0 * weightKg * ((strengthEntry.duration || 60) / 60));
+
+          var boulderSession = boulderSessions.find(function(s) { return s.date === dateStr; }) || null;
+          var boulderCal = 0;
+          if (boulderSession) boulderCal = Math.round(2.0 * weightKg * ((boulderSession.duration || 90) / 60));
+
+          var dtParts  = dateStr.split('-').map(Number);
+          var dt       = new Date(dtParts[0], dtParts[1]-1, dtParts[2]);
+          var DOW      = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+          var MONL     = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+          var dateLabel = DOW[dt.getDay()] + ', ' + MONL[dt.getMonth()] + ' ' + dtParts[2] + ', ' + dtParts[0];
+
+          var W = 600, PAD_X = 38, PAD_TOP = 30, PAD_BOT = 38, IW = W - PAD_X * 2;
+
+          function paint(ctx) {
+            var y = PAD_TOP;
+            var totalBurn = workoutCal + strengthCal + boulderCal;
+            var net = Math.round(totalCalIn - totalBurn);
+
+            function r(color, x, yy, w, h) { if (!ctx) return; ctx.fillStyle = color; ctx.fillRect(x, yy, w, h); }
+            function t(font, color, ls, str, x, yy) { if (!ctx) return; ctx.font = font; ctx.fillStyle = color; ctx.letterSpacing = ls; ctx.fillText(str, x, yy); }
+            function tr(font, color, ls, str, rx, yy) {
+              if (!ctx) return;
+              ctx.font = font; ctx.letterSpacing = ls; ctx.fillStyle = color;
+              ctx.fillText(str, rx - ctx.measureText(str).width, yy);
+            }
+            function clampStr(str, maxPx, font, ls) {
+              if (!ctx) return str;
+              ctx.font = font; ctx.letterSpacing = ls;
+              var s = str;
+              while (ctx.measureText(s).width > maxPx && s.length > 1) s = s.slice(0, -1);
+              return s === str ? str : s + '…';
+            }
+            function divider(yy) { r('#3a3025', PAD_X, yy, IW, 1); }
+            function sectionLabel(str, yy) { t('700 9px "DM Serif Text", Georgia, serif', '#c4864a', '1.4px', str, PAD_X, yy + 9); }
+
+            if (ctx) {
+              var grad = ctx.createLinearGradient(PAD_X, 0, PAD_X + 220, 0);
+              grad.addColorStop(0, '#c4864a'); grad.addColorStop(1, 'rgba(196,134,74,0)');
+              ctx.fillStyle = grad; ctx.fillRect(PAD_X, y, 220, 3);
+            }
+            y += 13;
+            sectionLabel('DAILY REPORT', y); y += 16;
+            t('italic 700 24px "Cormorant Garamond", Georgia, serif', '#e8dfd0', '-0.24px', dateLabel, PAD_X, y + 24);
+            y += 42;
+            divider(y); y += 21;
+
+            var COL_W = Math.floor(IW / 3);
+            var heroStats = [
+              { label: 'CALORIES IN',    value: Math.round(totalCalIn).toLocaleString() + ' kcal', color: '#c4864a' },
+              { label: 'CALORIES BURNT', value: totalBurn > 0 ? totalBurn.toLocaleString() + ' kcal' : '—', color: '#5ab4cc' },
+              { label: 'PROTEIN',        value: totalProtein > 0 ? Math.round(totalProtein) + 'g' : '—', color: '#7ab87a' },
+            ];
+            heroStats.forEach(function(stat, i) {
+              var lx = PAD_X + COL_W * i;
+              t('700 8px "DM Serif Text", Georgia, serif', '#7a6e60', '1.2px', stat.label, lx, y + 8);
+              t('italic 700 22px "Cormorant Garamond", Georgia, serif', stat.color, '-0.22px', stat.value, lx, y + 40);
+            });
+            y += 60;
+            divider(y); y += 17;
+
+            t('700 9px "DM Serif Text", Georgia, serif', '#9a8a76', '1.1px', 'NET CALORIES', PAD_X, y + 9); y += 17;
+            t('italic 700 28px "Cormorant Garamond", Georgia, serif', '#e8dfd0', '-0.28px', net.toLocaleString() + ' kcal', PAD_X, y + 28); y += 48;
+
+            if (dayWeighIn) {
+              divider(y); y += 17;
+              sectionLabel('BODY WEIGHT', y); y += 17;
+              var wKgStr = dayWeighIn.toFixed(1) + ' kg';
+              t('italic 700 26px "Cormorant Garamond", Georgia, serif', '#a8c4e0', '-0.26px', wKgStr, PAD_X, y + 26);
+              var lbsStr = (dayWeighIn * 2.20462).toFixed(1) + ' lbs';
+              t('14px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', lbsStr, PAD_X + 90, y + 26);
+              y += 44;
+            }
+
+            if (activeCats.length > 0) {
+              divider(y); y += 17;
+              sectionLabel('MEALS', y); y += 19;
+              activeCats.forEach(function(cat) {
+                var ces = grouped[cat];
+                var catTotal = ces.reduce(function(s, e) { return s + (e.calories || 0); }, 0);
+                r(CAT_COLORS[cat], PAD_X, y + 5, 4, 14);
+                t('700 13px "DM Serif Text", Georgia, serif', '#e8dfd0', '0px', CAT_LABELS[cat], PAD_X + 10, y + 16);
+                tr('13px "DM Serif Text", Georgia, serif', '#9a8a76', '0px', Math.round(catTotal).toLocaleString() + ' kcal', PAD_X + IW, y + 16);
+                y += 26;
+                ces.forEach(function(e) {
+                  var entryFont = '11px "DM Serif Text", Georgia, serif';
+                  var calStr   = Math.round(e.calories || 0).toLocaleString() + ' kcal';
+                  var maxNamePx = IW - 14 - 66;
+                  var name = clampStr(e.name || 'Unnamed', maxNamePx, entryFont, '0px');
+                  t(entryFont, '#7a6e60', '0px', name, PAD_X + 14, y + 11);
+                  tr(entryFont, '#7a6e60', '0px', calStr, PAD_X + IW, y + 11);
+                  y += 18;
+                });
+                y += 4;
+              });
+              y += 4;
+            }
+
+            if (dayWorkout && dayWorkout.status) {
+              divider(y); y += 17;
+              sectionLabel('RUNNING', y); y += 19;
+              var SC = { completed:'#7ab87a', modified:'#d4924a', skipped:'#c46a6a' };
+              var SL = { completed:'✓ Completed', modified:'◎ Modified', skipped:'✗ Skipped' };
+              t('700 14px "DM Serif Text", Georgia, serif', SC[dayWorkout.status] || '#9a8a76', '0px', SL[dayWorkout.status] || dayWorkout.status, PAD_X, y + 14); y += 22;
+              var parts = [];
+              if (dayWorkout.km)   parts.push(dayWorkout.km + ' km');
+              if (dayWorkout.time) parts.push(dayWorkout.time + ' min');
+              if (workoutCal > 0)  parts.push('∼' + workoutCal.toLocaleString() + ' kcal burned');
+              if (parts.length > 0) { t('12px "DM Serif Text", Georgia, serif', '#9a8a76', '0px', parts.join('  \xb7  '), PAD_X, y + 12); y += 20; }
+              if (dayWorkout.notes) { t('italic 11px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', '"' + dayWorkout.notes + '"', PAD_X, y + 11); y += 19; }
+            }
+
+            if (strengthSession) {
+              divider(y); y += 17;
+              sectionLabel('STRENGTH TRAINING', y); y += 19;
+              t('700 14px "DM Serif Text", Georgia, serif', '#7ab87a', '0px', '✓ ' + strengthSession.name + ' Session', PAD_X, y + 14); y += 20;
+              if (strengthSession.muscles) { t('11px "DM Serif Text", Georgia, serif', '#9a8a76', '0px', strengthSession.muscles, PAD_X, y + 11); y += 17; }
+              var sParts = [];
+              if (strengthEntry.duration) sParts.push(strengthEntry.duration + ' min');
+              if (strengthCal > 0) sParts.push('∼' + strengthCal.toLocaleString() + ' kcal burned');
+              if (sParts.length > 0) { t('12px "DM Serif Text", Georgia, serif', '#9a8a76', '0px', sParts.join('  \xb7  '), PAD_X, y + 12); y += 22; }
+            }
+
+            if (boulderSession) {
+              divider(y); y += 17;
+              sectionLabel('BOULDERING', y); y += 19;
+              t('700 14px "DM Serif Text", Georgia, serif', '#7ab87a', '0px', '✓ Session', PAD_X, y + 14); y += 20;
+              var bParts = [];
+              if (boulderSession.duration) bParts.push(boulderSession.duration + ' min');
+              if (boulderCal > 0) bParts.push('∼' + boulderCal.toLocaleString() + ' kcal burned');
+              var totalClimbs = Object.values(boulderSession.grades || {}).reduce(function(s, c) { return s + c; }, 0);
+              if (totalClimbs > 0) bParts.push(totalClimbs + ' climb' + (totalClimbs !== 1 ? 's' : ''));
+              if (bParts.length > 0) { t('12px "DM Serif Text", Georgia, serif', '#9a8a76', '0px', bParts.join('  \xb7  '), PAD_X, y + 12); y += 20; }
+              if (boulderSession.notes) {
+                var noteFont = 'italic 11px "DM Serif Text", Georgia, serif';
+                var noteStr  = clampStr('"' + boulderSession.notes + '"', IW - 4, noteFont, '0px');
+                t(noteFont, '#7a6e60', '0px', noteStr, PAD_X, y + 11); y += 19;
+              }
+            }
+
+            return y + PAD_BOT;
+          }
+
+          var totalH = paint(null);
+          var DPR = 2;
+          var canvas = document.createElement('canvas');
+          canvas.width  = W * DPR; canvas.height = totalH * DPR;
+          var ctx = canvas.getContext('2d');
+          ctx.scale(DPR, DPR);
+          paintBg(ctx, W, totalH);
+          paint(ctx);
+
+          canvas.toBlob(function(blob) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = 'daily-report-' + dateStr + '.png';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(function() { URL.revokeObjectURL(url); }, 2000);
+            resolve();
+          }, 'image/png');
+        });
+      });
+    }
+
+    // ── Period (week / month) report export ──────────────────────────────────
+    function generatePeriodReport(period) {
+      return new Promise(function(resolve) {
+        document.fonts.ready.then(function() {
+          var data  = loadAll();
+          var since = period === 'week' ? weekStart() : monthStart();
+          var s     = computeStats(data, since);
+          var today = todayIso();
+          var now   = new Date();
+          var MONL  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+          var generated = MONL[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+          var pLabel = period === 'week' ? 'WEEKLY' : 'MONTHLY';
+          var label  = rangeLabel(period);
+
+          // Days elapsed
+          var d = new Date(since + 'T00:00:00'), periodDayCount = 0;
+          while (isoDate(d) <= today) { periodDayCount++; d.setDate(d.getDate() + 1); }
+
+          var avgKm  = s.runs > 0 ? Math.round(s.runKm / s.runs * 10) / 10 : 0;
+          var calAvg = s.calDays ? Math.round(s.calTotal / s.calDays) : 0;
+          var avgProt = s.calProteinDays ? Math.round(s.calProteinTotal / s.calProteinDays) : 0;
+
+          var activeGoals = Object.values(data.jGoals).filter(function(g) { return g && g.status === 'active'; });
+
+          // Weight delta (month only)
+          var weightStr = null, weightDelta = null;
+          if (period === 'month' && s.weightLast) {
+            weightStr = s.weightLast.toFixed(1) + ' kg';
+            if (s.weightFirst && s.weightFirst !== s.weightLast) {
+              var dl = (s.weightLast - s.weightFirst);
+              weightDelta = (dl < 0 ? '' : '+') + dl.toFixed(1) + ' kg';
+            }
+          }
+
+          var W = 600, PAD_X = 38, PAD_TOP = 30, PAD_BOT = 42, IW = W - PAD_X * 2;
+
+          function paint(ctx) {
+            var y = PAD_TOP;
+
+            function r(color, x, yy, w, h) { if (!ctx) return; ctx.fillStyle = color; ctx.fillRect(x, yy, w, h); }
+            function t(font, color, ls, str, x, yy) { if (!ctx) return; ctx.font = font; ctx.fillStyle = color; ctx.letterSpacing = ls; ctx.fillText(str, x, yy); }
+            function divider(yy) { r('#3a3025', PAD_X, yy, IW, 1); }
+            function sectionLabel(str, yy) { t('700 9px "DM Serif Text", Georgia, serif', '#c4864a', '1.4px', str, PAD_X, yy + 9); }
+
+            // Accent gradient
+            if (ctx) {
+              var grad = ctx.createLinearGradient(PAD_X, 0, PAD_X + 220, 0);
+              grad.addColorStop(0, '#c4864a'); grad.addColorStop(1, 'rgba(196,134,74,0)');
+              ctx.fillStyle = grad; ctx.fillRect(PAD_X, y, 220, 3);
+            }
+            y += 13;
+
+            sectionLabel(pLabel + ' REPORT', y); y += 16;
+            t('italic 700 24px "Cormorant Garamond", Georgia, serif', '#e8dfd0', '-0.24px', label, PAD_X, y + 24); y += 34;
+            t('italic 11px "DM Serif Text", Georgia, serif', '#5a4e40', '0px', 'Generated: ' + generated, PAD_X, y + 11); y += 24;
+
+            divider(y); y += 21;
+
+            // ── 3-column hero stats ───────────────────────────────────────────
+            var COL_W = Math.floor(IW / 3);
+            var heroStats = [
+              {
+                label: 'RUNNING',
+                value: s.runs + ' run' + (s.runs !== 1 ? 's' : ''),
+                detail: s.runKm > 0 ? (Math.round(s.runKm*10)/10) + ' km' + (avgKm ? ' \xb7 avg ' + avgKm + ' km' : '') : 'no runs',
+                color: s.runs > 0 ? '#c4864a' : '#5a4e40',
+              },
+              {
+                label: 'STRENGTH',
+                value: s.workouts + ' session' + (s.workouts !== 1 ? 's' : ''),
+                detail: s.workoutTypes.length ? s.workoutTypes.join(' \xb7 ') : 'no sessions',
+                color: s.workouts > 0 ? '#7ab87a' : '#5a4e40',
+              },
+              {
+                label: 'BOULDERING',
+                value: s.boulderSessions + ' session' + (s.boulderSessions !== 1 ? 's' : ''),
+                detail: s.boulderMaxGrade
+                  ? (s.boulderTotalClimbs > 0 ? s.boulderTotalClimbs + ' climbs \xb7 ' : '') + 'max G' + s.boulderMaxGrade
+                  : 'no sessions',
+                color: s.boulderSessions > 0 ? '#5ab4cc' : '#5a4e40',
+              },
+            ];
+
+            heroStats.forEach(function(stat, i) {
+              var lx = PAD_X + COL_W * i;
+              t('700 8px "DM Serif Text", Georgia, serif', '#7a6e60', '1.2px', stat.label, lx, y + 8);
+              t('italic 700 19px "Cormorant Garamond", Georgia, serif', stat.color, '-0.19px', stat.value, lx, y + 30);
+              t('11px "DM Serif Text", Georgia, serif', '#4a3e30', '0px', stat.detail, lx, y + 46);
+            });
+            y += 62;
+
+            divider(y); y += 19;
+
+            // ── Journal ───────────────────────────────────────────────────────
+            sectionLabel('JOURNAL', y); y += 19;
+            t('14px "DM Serif Text", Georgia, serif', '#9a8a76', '0px',
+              'Morning: ' + s.journalMorning + ' / ' + periodDayCount + ' days', PAD_X, y + 14); y += 22;
+            t('14px "DM Serif Text", Georgia, serif', '#9a8a76', '0px',
+              'Evening: ' + s.journalEvening + ' / ' + periodDayCount + ' days', PAD_X, y + 14); y += 26;
+
+            divider(y); y += 19;
+
+            // ── Nutrition ─────────────────────────────────────────────────────
+            sectionLabel('NUTRITION', y); y += 19;
+            if (s.calDays > 0) {
+              t('italic 700 22px "Cormorant Garamond", Georgia, serif', '#c4864a', '-0.22px',
+                calAvg.toLocaleString() + ' kcal avg / day', PAD_X, y + 22); y += 32;
+              t('14px "DM Serif Text", Georgia, serif', '#7a6e60', '0px',
+                'Days tracked: ' + s.calDays + ' / ' + periodDayCount, PAD_X, y + 14); y += 22;
+              t('14px "DM Serif Text", Georgia, serif', '#7a6e60', '0px',
+                'Total: ' + Math.round(s.calTotal).toLocaleString() + ' kcal', PAD_X, y + 14); y += 22;
+              if (avgProt > 0) {
+                t('14px "DM Serif Text", Georgia, serif', '#7a6e60', '0px',
+                  'Avg protein: ' + avgProt + 'g / day', PAD_X, y + 14); y += 22;
+              }
+            } else {
+              t('italic 13px "DM Serif Text", Georgia, serif', '#5a4e40', '0px',
+                'No nutrition data this ' + period + '.', PAD_X, y + 13); y += 21;
+            }
+            y += 10;
+
+            // ── Weight (month only) ───────────────────────────────────────────
+            if (period === 'month' && weightStr) {
+              divider(y); y += 19;
+              sectionLabel('BODY WEIGHT', y); y += 19;
+              t('italic 700 22px "Cormorant Garamond", Georgia, serif', '#a8c4e0', '-0.22px', weightStr, PAD_X, y + 22); y += 32;
+              if (weightDelta) {
+                var deltaCol = weightDelta.startsWith('-') ? '#7ab87a' : '#c4864a';
+                t('14px "DM Serif Text", Georgia, serif', deltaCol, '0px', weightDelta + ' this month', PAD_X, y + 14); y += 22;
+              }
+              y += 8;
+            }
+
+            // ── Active goals ──────────────────────────────────────────────────
+            if (activeGoals.length > 0) {
+              divider(y); y += 19;
+              sectionLabel('ACTIVE GOALS', y); y += 19;
+              activeGoals.slice(0, 5).forEach(function(g) {
+                var gtxt = ('\xb7 ' + (g.text || 'Untitled')).slice(0, 64);
+                t('13px "DM Serif Text", Georgia, serif', '#9a8a76', '0px', gtxt, PAD_X, y + 13); y += 21;
+              });
+              y += 8;
+            }
+
+            // ── Footer ────────────────────────────────────────────────────────
+            divider(y); y += 14;
+            t('italic 700 10px "DM Serif Text", Georgia, serif', '#5a4e40', '0.8px',
+              'xssxghjk \xb7 personal.dashboard', PAD_X, y + 10);
+            y += 10;
+
+            return y + PAD_BOT;
+          }
+
+          var totalH = paint(null);
+          var DPR = 2;
+          var canvas = document.createElement('canvas');
+          canvas.width  = W * DPR; canvas.height = totalH * DPR;
+          var ctx = canvas.getContext('2d');
+          ctx.scale(DPR, DPR);
+          paintBg(ctx, W, totalH);
+          paint(ctx);
+
+          canvas.toBlob(function(blob) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = period + '-report-' + todayIso() + '.png';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(function() { URL.revokeObjectURL(url); }, 2000);
+            resolve();
+          }, 'image/png');
+        });
+      });
+    }
+
+    // ── Tab system ───────────────────────────────────────────────────────────
+    var currentTab = 'week';
+    var TAB_LABELS = { day: 'Daily Report', week: 'Weekly Report', month: 'Monthly Report' };
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.tab === tab);
+      });
+      renderCurrentStats();
+      document.getElementById('export-label').textContent = TAB_LABELS[tab] || 'Export';
+    }
+
+    function renderCurrentStats() {
+      var grid = document.getElementById('stats-grid');
+      if      (currentTab === 'day')   grid.innerHTML = renderStatsDay(appData);
+      else if (currentTab === 'week')  grid.innerHTML = renderStatsWeek(appData);
+      else if (currentTab === 'month') grid.innerHTML = renderStatsMonth(appData);
+    }
+
+    // ── Export handler ───────────────────────────────────────────────────────
+    document.getElementById('export-btn').addEventListener('click', function() {
+      var btn = this;
+      btn.disabled = true;
+      btn.querySelector('#export-label').textContent = 'Generating…';
+      var p;
+      if (currentTab === 'day')        p = generateDailyReport(todayIso());
+      else if (currentTab === 'week')  p = generatePeriodReport('week');
+      else                             p = generatePeriodReport('month');
+      p.then(function() {
+        btn.disabled = false;
+        btn.querySelector('#export-label').textContent = TAB_LABELS[currentTab];
+      });
+    });
+
+    // ── Tab click handlers ───────────────────────────────────────────────────
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() { switchTab(btn.dataset.tab); });
+    });
 
     // ── Hero date ────────────────────────────────────────────────────────────
     (function () {
@@ -897,12 +1399,11 @@
 
     // ── Main render ──────────────────────────────────────────────────────────
     var appData = loadAll();
+    switchTab('week');
 
-    document.getElementById('stats-grid').innerHTML    = renderStats(appData);
     document.getElementById('activity-feed').innerHTML  = renderActivity(buildActivity(appData, 15));
     document.getElementById('goals-list').innerHTML     = renderGoals(appData);
 
-    // TCG section: recent results summary
     (function () {
       var tcg = document.getElementById('tcg-section');
       tcg.innerHTML = '<div class="section-head">Tournament Records</div>' +
@@ -912,48 +1413,7 @@
         '</div>';
     })();
 
-    // ── Reports panel ────────────────────────────────────────────────────────
-    var currentPeriod = 'week';
-    var reportsOpen   = false;
-
-    function renderCurrentReport() {
-      document.getElementById('report-body').innerHTML = renderReportPanel(appData, currentPeriod);
-      var btn = document.getElementById('btn-dl-' + currentPeriod);
-      if (btn) {
-        btn.addEventListener('click', function () {
-          var today = new Date();
-          var fname = currentPeriod + '-report-' + todayIso() + '.txt';
-          downloadReport(generateReport(appData, currentPeriod), fname);
-        });
-      }
-    }
-
-    document.getElementById('reports-toggle').addEventListener('click', function () {
-      reportsOpen = !reportsOpen;
-      var panel = document.getElementById('reports-panel');
-      var btn   = this;
-      if (reportsOpen) {
-        panel.hidden = false;
-        btn.setAttribute('aria-expanded', 'true');
-        btn.classList.add('open');
-        renderCurrentReport();
-      } else {
-        panel.hidden = true;
-        btn.setAttribute('aria-expanded', 'false');
-        btn.classList.remove('open');
-      }
-    });
-
-    document.querySelectorAll('.report-tab').forEach(function (tab) {
-      tab.addEventListener('click', function () {
-        document.querySelectorAll('.report-tab').forEach(function (t) { t.classList.remove('active'); });
-        tab.classList.add('active');
-        currentPeriod = tab.dataset.period;
-        renderCurrentReport();
-      });
-    });
-
-    // ── Version footer ───────────────────────────────────────────────────────
+    // ── Version ──────────────────────────────────────────────────────────────
     fetch('../version.json').then(function(r) { return r.json(); }).then(function(v) {
       var e = document.getElementById('page-version');
       if (e) e.textContent = 'v' + v.version;
