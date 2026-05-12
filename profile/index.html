@@ -250,6 +250,91 @@
     .badge-accent { background: var(--accent-d); color: var(--accent); }
     .badge-muted  { background: rgba(90,78,64,0.3); color: var(--muted2); }
 
+    /* ── DAY ROUTINE CHECKLIST ── */
+    .day-routine {
+      margin-top: 0.85rem;
+      padding-top: 0.7rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+    .day-routine-hd {
+      font-size: 0.52rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      font-style: italic;
+      flex-shrink: 0;
+      padding-right: 0.4rem;
+      border-right: 1px solid var(--border);
+    }
+    .day-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.28rem;
+      font-size: 0.64rem;
+      font-style: italic;
+      color: var(--muted);
+      padding: 0.15rem 0.44rem;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      background: transparent;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+      font-family: 'DM Serif Text', Georgia, serif;
+    }
+    .day-chip:hover { border-color: var(--border2); color: var(--text2); }
+    .day-chip.done { color: var(--muted2); border-color: transparent; }
+    .day-chip-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .day-chip-dot.pending { background: var(--accent); opacity: 0.7; }
+    .day-chip-dot.done    { background: var(--green); opacity: 0.55; }
+
+    /* ── DAY FOCUS BLOCK ── */
+    .day-focus-block {
+      margin-bottom: 1.1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .day-focus-kicker {
+      font-size: 0.52rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      font-style: italic;
+      margin-bottom: 0.45rem;
+    }
+    .day-focus-text {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.35rem, 3vw, 1.85rem);
+      font-weight: 700;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+    .day-intention-text {
+      font-size: 0.82rem;
+      font-style: italic;
+      color: var(--muted);
+      margin-top: 0.35rem;
+      line-height: 1.45;
+    }
+    .day-focus-empty {
+      font-size: 0.78rem;
+      font-style: italic;
+      color: var(--muted2);
+      padding: 0.75rem 0;
+    }
+    .day-focus-empty a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(196,134,74,0.3); }
+    .day-focus-empty a:hover { border-bottom-color: var(--accent); }
+
     /* ── MAIN CONTENT ── */
     .main {
       max-width: 1100px;
@@ -446,8 +531,8 @@
 
   <div class="tab-bar">
     <div class="tab-bar-inner">
-      <button class="tab-btn" data-tab="day">Day</button>
-      <button class="tab-btn active" data-tab="week">Week</button>
+      <button class="tab-btn active" data-tab="day">Day</button>
+      <button class="tab-btn" data-tab="week">Week</button>
       <button class="tab-btn" data-tab="month">Month</button>
       <button class="tab-btn" data-tab="year">Year</button>
       <div class="tab-nav">
@@ -460,9 +545,11 @@
 
   <section class="stats-section">
     <div class="stats-inner">
+      <div id="day-focus" style="display:none"></div>
       <div class="stats-grid" id="stats-grid">
         <div class="stat-card"><div class="stat-label">Loading…</div><div class="stat-value">—</div></div>
       </div>
+      <div class="day-routine" id="day-routine" style="display:none"></div>
     </div>
   </section>
 
@@ -1099,6 +1186,61 @@
       ].join('');
     }
 
+    // ── Day focus & intention ────────────────────────────────────────────────
+    function renderDayFocus() {
+      var el = document.getElementById('day-focus');
+      if (!el) return;
+      var show = currentTab === 'day' && currentOffset === 0;
+      el.style.display = show ? '' : 'none';
+      if (!show) return;
+
+      var dayEntry = (appData.jEntries || {})[todayIso()] || {};
+      var morning  = dayEntry.morning || {};
+      var focus     = morning.focus || '';
+      var intention = morning.intention || '';
+
+      if (focus) {
+        var html = '<div class="day-focus-block">' +
+          '<div class="day-focus-kicker">Today\'s Focus</div>' +
+          '<div class="day-focus-text">' + esc(focus) + '</div>';
+        if (intention) {
+          html += '<div class="day-intention-text">' + esc(intention) + '</div>';
+        }
+        html += '</div>';
+        el.innerHTML = html;
+      } else {
+        el.innerHTML = '<div class="day-focus-block">' +
+          '<div class="day-focus-kicker">Today\'s Focus</div>' +
+          '<div class="day-focus-empty">Morning entry not written yet. <a href="../journal/">Set your focus →</a></div>' +
+          '</div>';
+      }
+    }
+
+    // ── Day routine checklist ────────────────────────────────────────────────
+    function renderDayRoutine() {
+      var el = document.getElementById('day-routine');
+      if (!el) return;
+      var show = currentTab === 'day' && currentOffset === 0;
+      el.style.display = show ? '' : 'none';
+      if (!show) return;
+
+      var s = computeStatsDay(appData, todayIso());
+      var hasGoals = Object.values(appData.jGoals).some(function(g) { return g && g.status === 'active'; });
+      var items = [];
+      if (hasGoals) items.push({ label: '☀ Morning', done: s.hasMorning, href: '../journal/' });
+      if (s.isStrengthDay) items.push({ label: '💪 ' + (s.scheduledType || 'Strength'), done: s.strengthDone, href: '../workout/' });
+      if (hasGoals) items.push({ label: '🌙 Evening', done: s.hasEvening, href: '../journal/' });
+
+      if (!items.length) { el.style.display = 'none'; return; }
+
+      var html = '<span class="day-routine-hd">Today</span>';
+      items.forEach(function(item) {
+        html += '<a class="day-chip' + (item.done ? ' done' : '') + '" href="' + esc(item.href) + '">' +
+          '<span class="day-chip-dot ' + (item.done ? 'done' : 'pending') + '"></span>' + esc(item.label) + '</a>';
+      });
+      el.innerHTML = html;
+    }
+
     // ── Activity feed ────────────────────────────────────────────────────────
     function buildActivity(data, limit) {
       var items = [];
@@ -1575,7 +1717,7 @@
     }
 
     // ── Tab system ───────────────────────────────────────────────────────────
-    var currentTab = 'week';
+    var currentTab = 'day';
     var TAB_LABELS = { day: 'Daily Report', week: 'Weekly Report', month: 'Monthly Report', year: 'Year Report' };
 
     function updateNav() {
@@ -1600,6 +1742,8 @@
       else if (currentTab === 'week')  grid.innerHTML = renderStatsWeek(appData, currentOffset);
       else if (currentTab === 'month') grid.innerHTML = renderStatsMonth(appData, currentOffset);
       else if (currentTab === 'year')  grid.innerHTML = renderStatsYear(appData, currentOffset);
+      renderDayFocus();
+      renderDayRoutine();
     }
 
     // ── Export handler ───────────────────────────────────────────────────────
@@ -1648,7 +1792,7 @@
 
     // ── Main render ──────────────────────────────────────────────────────────
     var appData = loadAll();
-    switchTab('week');
+    switchTab('day');
     updateNav();
 
     document.getElementById('activity-feed').innerHTML  = renderActivity(buildActivity(appData, 15));

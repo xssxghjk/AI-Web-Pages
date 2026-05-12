@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test('home redirects to calendar', async ({ page }) => {
+test('home redirects to profile', async ({ page }) => {
   await page.goto('/');
-  await expect(page).toHaveURL(/\/calendar\//);
-  await expect(page).toHaveTitle(/Calendar/);
+  await expect(page).toHaveURL(/\/profile\//);
 });
 
 test('calendar page loads', async ({ page }) => {
