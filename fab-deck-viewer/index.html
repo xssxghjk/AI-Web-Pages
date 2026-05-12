@@ -2512,6 +2512,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   let analysisSubTab = 'numbers';
   let sideboardSubTab = 'guide';
   let simHandSize = 4;
+  let currentDeckReadOnly = false;
   let simDrDetails = false;
 
   function _comb(n, k) {
@@ -2550,6 +2551,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     countEl.style.display = totalCardCount ? '' : 'none';
 
     // Preset: show badge, hide mutating controls
+    currentDeckReadOnly = !!deck.preset;
     const presetBadgeEl = document.getElementById('detail-preset-badge');
     presetBadgeEl.style.display = deck.preset ? '' : 'none';
     document.getElementById('btn-delete-deck').style.display = deck.preset ? 'none' : '';
@@ -2689,11 +2691,13 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     nameEl.textContent = entry.name;
     wrap.appendChild(nameEl);
 
-    wrap.style.cursor = 'pointer';
-    wrap.addEventListener('click', e => {
-      e.stopPropagation();
-      showCardContextMenu(e, entry);
-    });
+    if (!currentDeckReadOnly) {
+      wrap.style.cursor = 'pointer';
+      wrap.addEventListener('click', e => {
+        e.stopPropagation();
+        showCardContextMenu(e, entry);
+      });
+    }
 
     return wrap;
   }
