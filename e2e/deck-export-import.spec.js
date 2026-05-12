@@ -170,7 +170,7 @@ test.describe('deck export / import', () => {
     fs.unlinkSync(tmpPath);
   });
 
-  test('creating a new deck does not show warnings for existing decks in the list', async ({ page }) => {
+  test('adding a new deck does not show warnings for existing decks in the list', async ({ page }) => {
     await seedDeck(page, SEED_DECK);
     await page.goto('/fab-deck-viewer/');
 
@@ -199,5 +199,89 @@ test.describe('deck export / import', () => {
     // (db is mocked empty so all card lookups fail — warnings must be suppressed)
     const warnings = page.locator('.deck-row-equip-warn');
     await expect(warnings).toHaveCount(0);
+  });
+});
+
+test.describe('deck validation after delete', () => {
+  const POOL_DECK = {
+    id: 'sage-pool-deck-test',
+    name: 'SAGE Pool Deck',
+    // 45 colored cards — a pool deck with off-color sideboard options (> 40)
+    decklist: '45x Fry (red)',
+    cardCount: 45,
+    savedAt: new Date().toISOString(),
+  };
+
+  const DECK_TO_DELETE = {
+    id: 'deck-to-delete-test',
+    name: 'Deck To Delete',
+    decklist: '3x Fry (red)',
+    cardCount: 3,
+    savedAt: new Date().toISOString(),
+  };
+
+  test.beforeEach(async ({ page }) => {
+    // Mock db with Fry as a colored card so all lookups succeed
+    await page.route('**/card.json', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([
+        {
+          name: 'Fry',
+          pitch: '1',
+          cost: '0',
+          power: '3',
+          defense: '3',
+          color: 'red',
+          types: ['Action', 'Attack Action'],
+          card_keywords: [],
+          printings: [{ image_url: null, rarity: 'C' }],
+        },
+      ]),
+    }));
+
+    await page.addInitScript((decks) => {
+      localStorage.setItem('fab_saved_decks_v1', JSON.stringify(decks));
+    }, [POOL_DECK, DECK_TO_DELETE]);
+  });
+
+  test('deleting a deck does not show a false validation warning on remaining decks with more than 40 colored cards', async ({ page }) => {
+    await page.goto('/fab-deck-viewer/');
+
+    // Click "Deck To Delete" to trigger db load via viewDeck → ensureDb
+    await page.locator('.deck-row:not(.deck-row-preset)', { hasText: 'Deck To Delete' }).click();
+    await page.waitForSelector('#detail-name', { state: 'visible' });
+
+    // Delete via actions menu
+    await page.click('#btn-deck-actions');
+    await page.waitForSelector('#btn-delete-deck', { state: 'visible' });
+    await page.click('#btn-delete-deck');
+
+    // Confirm deletion
+    await page.waitForSelector('#delete-confirm-checkbox', { state: 'visible' });
+    await page.check('#delete-confirm-checkbox');
+    await page.click('#delete-deck-confirm');
+
+    // Should be back on the list view showing only SAGE Pool Deck
+    await page.waitForSelector('#deck-list', { state: 'visible' });
+    await expect(page.locator('.deck-row', { hasText: 'SAGE Pool Deck' })).toBeVisible();
+
+    // No deck-count warning should appear — pool decks with > 40 colored cards are valid
+    await expect(page.locator('.deck-row-equip-warn', { hasText: /Silver Age deck has/ })).toHaveCount(0);
+  });
+
+  test('deck list still warns when a deck has fewer than 40 colored cards', async ({ page }) => {
+    await page.goto('/fab-deck-viewer/');
+
+    // View Deck To Delete (3 colored cards) to trigger db load
+    await page.locator('.deck-row:not(.deck-row-preset)', { hasText: 'Deck To Delete' }).click();
+    await page.waitForSelector('#detail-name', { state: 'visible' });
+
+    // Go back to list
+    await page.click('#btn-back-from-detail');
+    await page.waitForSelector('#deck-list', { state: 'visible' });
+
+    // "Deck To Delete" has only 3 colored cards — should warn (missing 37)
+    await expect(page.locator('.deck-row-equip-warn', { hasText: /Silver Age deck has 3 deck cards/ })).toBeVisible();
   });
 });
