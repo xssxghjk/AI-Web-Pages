@@ -38,6 +38,9 @@
       --fab-event: #a07ae8;
       --fab-event-bg: rgba(160,122,232,0.10);
       --fab-event-border: rgba(160,122,232,0.25);
+      --local-event: #d4697a;
+      --local-event-bg: rgba(212,105,122,0.10);
+      --local-event-border: rgba(212,105,122,0.25);
     }
 
     html { scroll-behavior: smooth; }
@@ -178,6 +181,8 @@
     }
     .cal-day.today { border-color: var(--accent); background: var(--accent-dim); }
     .cal-day.has-trip { border-color: var(--border2); }
+    .cal-day:not(.empty) { cursor: pointer; }
+    .cal-day:not(.empty):not(.today):hover { border-color: var(--local-event-border); background: rgba(212,105,122,0.04); }
     .cal-day-num {
       font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: 0.75rem;
@@ -227,6 +232,7 @@
     .cal-trip-bar.s-past      { background: var(--past-bg);      color: var(--past);      border: 1px solid var(--past-border); }
     .cal-trip-bar.s-planning  { background: var(--planning-bg);  color: var(--planning);  border: 1px solid var(--planning-border); }
     .cal-trip-bar.s-fab-event { background: var(--fab-event-bg); color: var(--fab-event); border: 1px solid var(--fab-event-border); }
+    .cal-trip-bar.s-local-event { background: var(--local-event-bg); color: var(--local-event); border: 1px solid var(--local-event-border); }
 
     /* ── LEGEND ── */
     .cal-legend {
@@ -256,6 +262,7 @@
     .cal-legend-dot.s-past      { background: var(--past); }
     .cal-legend-dot.s-planning  { background: var(--planning); }
     .cal-legend-dot.s-fab-event { background: var(--fab-event); }
+    .cal-legend-dot.s-local-event { background: var(--local-event); }
 
     /* ── SWIPE VIEWPORT ── */
     .cal-viewport {
@@ -611,6 +618,7 @@
     .tsi-dot-pending { background: var(--accent); opacity: 0.7; }
     .tsi-dot-done    { background: var(--ongoing); opacity: 0.55; }
     .tsi-dot-skipped { background: var(--muted-2); opacity: 0.55; }
+    .tsi-dot-event   { background: #d4697a; opacity: 0.8; }
     .today-strip-link {
       margin-left: auto;
       font-size: 0.6rem;
@@ -706,6 +714,27 @@
     <div class="fab-popup-actions" id="fab-popup-actions"></div>
   </div>
 
+  <!-- Local Event Create/Edit Modal -->
+  <div class="dreport-overlay" id="lev-overlay">
+    <div class="dreport-modal">
+      <div class="dreport-title" id="lev-modal-title">New Event</div>
+      <div class="dreport-sub">Name the event and set its date range.</div>
+      <input type="text" class="dreport-date" id="lev-name" placeholder="Event name…" maxlength="60" style="margin-bottom:0.5rem;font-style:normal">
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.9rem">
+        <input type="date" class="dreport-date" id="lev-start" style="flex:1;margin-bottom:0">
+        <input type="date" class="dreport-date" id="lev-end" style="flex:1;margin-bottom:0">
+      </div>
+      <div class="dreport-actions">
+        <button class="dreport-cancel" id="lev-delete" style="color:var(--local-event);border-color:var(--local-event-border);display:none">Delete</button>
+        <button class="dreport-cancel" id="lev-cancel">Cancel</button>
+        <button class="dreport-go" id="lev-save">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Daily Report Export Modal -->
   <div class="dreport-overlay" id="dreport-overlay">
     <div class="dreport-modal">
@@ -759,6 +788,15 @@
     if (strengthStatus) items.push({ label: '💪 ' + strengthStatus.name, status: strengthStatus.done ? 'done' : 'pending', href: '../workout/' });
     if (hasGoals) items.push({ label: '🌙 Evening', status: hasEvening ? 'done' : 'pending', href: '../journal/' });
 
+    // Local calendar events active today
+    var calLocalEvs = [];
+    try { calLocalEvs = JSON.parse(localStorage.getItem('cal_local_events') || '[]'); } catch(e) {}
+    calLocalEvs.forEach(function(ev) {
+      if (ev.startDate <= iso && ev.endDate >= iso) {
+        items.push({ label: ev.name, status: 'event', href: null });
+      }
+    });
+
     if (!items.length) return;
 
     var strip = document.getElementById('today-strip');
@@ -766,8 +804,14 @@
     var html = '';
     items.forEach(function (item) {
       var dotCls = 'tsi-dot-' + item.status;
-      html += '<a class="tsi' + (item.status === 'done' ? ' tsi-done' : '') + '" href="' + item.href + '">' +
-        '<span class="tsi-dot ' + dotCls + '"></span>' + item.label + '</a>';
+      var isDone = item.status === 'done';
+      if (item.href) {
+        html += '<a class="tsi' + (isDone ? ' tsi-done' : '') + '" href="' + item.href + '">' +
+          '<span class="tsi-dot ' + dotCls + '"></span>' + item.label + '</a>';
+      } else {
+        html += '<span class="tsi' + (isDone ? ' tsi-done' : '') + '">' +
+          '<span class="tsi-dot ' + dotCls + '"></span>' + item.label + '</span>';
+      }
     });
     container.innerHTML = html;
     strip.style.display = '';
@@ -783,6 +827,19 @@
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+    }
+
+    let localEvents = [];
+    try { localEvents = JSON.parse(localStorage.getItem('cal_local_events') || '[]'); } catch(e) {}
+
+    function saveLocalEventsAndRefresh(evs) {
+      localEvents = evs;
+      localStorage.setItem('cal_local_events', JSON.stringify(evs));
+      renderCalendar();
+    }
+
+    function generateId() {
+      return Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
     }
 
     const today = new Date();
@@ -851,6 +908,23 @@
         return s <= lastDay && e >= firstDay;
       });
 
+      const localEventsThisMonth = localEvents.filter(ev => {
+        const s = localDate(ev.startDate);
+        const e = localDate(ev.endDate);
+        return s <= lastDay && e >= firstDay;
+      }).map(ev => ({
+        id: ev.id,
+        title: ev.name,
+        startDate: ev.startDate,
+        endDate: ev.endDate,
+        status: 'local-event',
+        isLocal: true,
+        link: null,
+        displayDates: ev.startDate,
+      }));
+
+      const allBarsThisMonth = [...tripsThisMonth, ...localEventsThisMonth];
+
       const totalWeeks = Math.ceil((startOffset + lastDay.getDate()) / 7);
       let html = `<div class="cal-dow-row">${DOW.map(d => `<div class="cal-dow">${d}</div>`).join('')}</div>`;
 
@@ -863,7 +937,7 @@
         });
 
         const weekBars = [];
-        tripsThisMonth.forEach(trip => {
+        allBarsThisMonth.forEach(trip => {
           const tripStart = localDate(trip.startDate);
           const tripEnd   = localDate(trip.endDate);
           let colStart = -1, colEnd = -1;
@@ -902,7 +976,7 @@
             String(date.getMonth() + 1).padStart(2, '0') + '-' +
             String(date.getDate()).padStart(2, '0');
           const hasRun = marathonRunDates.has(isoKey);
-          return `<div class="cal-day${isToday ? ' today' : ''}${hasTrip ? ' has-trip' : ''}" style="height:${cellH}px">` +
+          return `<div class="cal-day${isToday ? ' today' : ''}${hasTrip ? ' has-trip' : ''}" data-iso="${isoKey}" style="height:${cellH}px">` +
             `<div class="cal-day-num">${date.getDate()}</div>` +
             (hasRun ? '<div class="cal-run-dot"></div>' : '') +
             `</div>`;
@@ -915,6 +989,10 @@
             overflowLeft ? 'overflow-left' : '', overflowRight ? 'overflow-right' : ''].filter(Boolean).join(' ');
           const styleAttr = `--c:${colStart};--s:${span};top:${topPx}px;height:${BAR_H}px`;
           const titleAttr = `${esc(trip.title)} · ${esc(trip.displayDates)}`;
+          if (trip.isLocal) {
+            return `<button class="${classes}" data-local-event-id="${esc(trip.id)}" title="${esc(trip.title)}"` +
+              ` style="${styleAttr}"><span class="bar-label">${esc(trip.title)}</span></button>`;
+          }
           if (trip.status === 'fab-event') {
             return `<button class="${classes}" data-event-id="${esc(trip.id)}" title="${titleAttr}"` +
               ` style="${styleAttr}"><span class="bar-label">${esc(trip.title)}</span></button>`;
@@ -938,6 +1016,7 @@
       const items = [];
       if (tripStatus) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-${esc(tripStatus)}"></div><span>Trips</span></div>`);
       if (hasFabEvent) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-fab-event"></div><span>FaB Events</span></div>`);
+      if (localEvents.length > 0) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-local-event"></div><span>My Events</span></div>`);
       legend.innerHTML = items.join('');
     }
 
@@ -1150,10 +1229,21 @@
       }
       // Click outside popup closes it
       if (popup.classList.contains('open') && !popup.contains(e.target)) { closeFabPopup(); popup._activeBtn = null; }
+
+      // Local event bar click → open edit modal
+      const localTrigger = e.target.closest('[data-local-event-id]');
+      if (localTrigger) { openEditEventModal(localTrigger.dataset.localEventId); return; }
+
+      // Day cell click → open create event modal
+      if (!levOverlay.classList.contains('open')) {
+        const dayCell = e.target.closest('.cal-day:not(.empty)');
+        if (dayCell && dayCell.dataset.iso) { openCreateEventModal(dayCell.dataset.iso); }
+      }
     });
 
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
+        if (levOverlay.classList.contains('open')) { closeLevModal(); return; }
         if (iframeModal.classList.contains('open')) { closeIframeModal(); return; }
         closeFabPopup(); popup._activeBtn = null;
       }
@@ -1642,6 +1732,73 @@
         });
       }
     })();
+
+    // ── LOCAL EVENT MODAL ─────────────────────────────────────────────────────
+    const levOverlay    = document.getElementById('lev-overlay');
+    const levModalTitle = document.getElementById('lev-modal-title');
+    const levName       = document.getElementById('lev-name');
+    const levStart      = document.getElementById('lev-start');
+    const levEnd        = document.getElementById('lev-end');
+    const levDelete     = document.getElementById('lev-delete');
+    const levCancel     = document.getElementById('lev-cancel');
+    const levSave       = document.getElementById('lev-save');
+    let editingEventId  = null;
+
+    function openCreateEventModal(isoDate) {
+      editingEventId = null;
+      levModalTitle.textContent = 'New Event';
+      levName.value  = '';
+      levStart.value = isoDate;
+      levEnd.value   = isoDate;
+      levDelete.style.display = 'none';
+      levOverlay.classList.add('open');
+      requestAnimationFrame(() => levName.focus());
+    }
+
+    function openEditEventModal(evId) {
+      const ev = localEvents.find(e => e.id === evId);
+      if (!ev) return;
+      editingEventId = evId;
+      levModalTitle.textContent = 'Edit Event';
+      levName.value  = ev.name;
+      levStart.value = ev.startDate;
+      levEnd.value   = ev.endDate;
+      levDelete.style.display = '';
+      levOverlay.classList.add('open');
+      requestAnimationFrame(() => levName.focus());
+    }
+
+    function closeLevModal() { levOverlay.classList.remove('open'); editingEventId = null; }
+
+    levCancel.addEventListener('click', closeLevModal);
+    levOverlay.addEventListener('click', e => { if (e.target === levOverlay) closeLevModal(); });
+
+    levDelete.addEventListener('click', () => {
+      if (!editingEventId) return;
+      saveLocalEventsAndRefresh(localEvents.filter(e => e.id !== editingEventId));
+      closeLevModal();
+    });
+
+    levStart.addEventListener('change', () => { if (levEnd.value < levStart.value) levEnd.value = levStart.value; });
+    levEnd.addEventListener('change',   () => { if (levEnd.value < levStart.value) levStart.value = levEnd.value; });
+
+    [levName, levStart, levEnd].forEach(el => {
+      el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); levSave.click(); } });
+    });
+
+    levSave.addEventListener('click', () => {
+      const name = levName.value.trim();
+      if (!name) { levName.focus(); levName.style.borderColor = 'var(--local-event)'; return; }
+      levName.style.borderColor = '';
+      const start = levStart.value;
+      const end   = levEnd.value >= start ? levEnd.value : start;
+      if (editingEventId) {
+        saveLocalEventsAndRefresh(localEvents.map(e => e.id === editingEventId ? { ...e, name, startDate: start, endDate: end } : e));
+      } else {
+        saveLocalEventsAndRefresh([...localEvents, { id: generateId(), name, startDate: start, endDate: end }]);
+      }
+      closeLevModal();
+    });
 
     // Intercept FAB popup internal links (prep / report — not external event page)
     popupActions.addEventListener('click', e => {
