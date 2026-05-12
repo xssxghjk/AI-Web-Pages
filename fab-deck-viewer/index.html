@@ -2025,6 +2025,32 @@
   </div>
 </div>
 
+<!-- ── Rename Deck Modal ── -->
+<div id="rename-deck-backdrop" class="cat-popup-backdrop" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="rename-deck-title">
+  <div class="cat-popup" style="max-width:400px">
+    <div class="cat-popup-header">
+      <span class="cat-popup-title" id="rename-deck-title">Rename Deck</span>
+      <button class="cat-popup-close" id="rename-deck-close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M3 3l10 10M13 3L3 13"/>
+        </svg>
+      </button>
+    </div>
+    <div class="cat-popup-body">
+      <div class="delete-confirm-body">
+        <div class="sb-editor-field">
+          <label style="font-size:0.78rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);">New name</label>
+          <input type="text" id="rename-deck-input" maxlength="80" autocomplete="off" />
+        </div>
+        <div class="delete-confirm-actions">
+          <button class="btn-primary" id="rename-deck-confirm">Rename</button>
+          <button class="btn-secondary" id="rename-deck-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Add Card Modal ── -->
 <div id="add-card-backdrop" class="cat-popup-backdrop" style="display:none;" role="dialog" aria-modal="true" aria-label="Add Card">
   <div class="cat-popup" style="max-width:480px">
@@ -2161,6 +2187,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       <div class="detail-page-actions">
         <button class="btn-secondary" id="btn-export-deck" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">Export</button>
         <button class="btn-secondary" id="btn-gem-export" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">GEM Export</button>
+        <button class="btn-ghost" id="btn-rename-deck" style="font-size:0.8rem;padding:0.45rem 0.9rem;">Rename</button>
         <button class="btn-danger" id="btn-delete-deck">Delete</button>
       </div>
     </div>
@@ -2558,8 +2585,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     currentDeckReadOnly = !!deck.preset;
     const presetBadgeEl = document.getElementById('detail-preset-badge');
     presetBadgeEl.style.display = deck.preset ? '' : 'none';
-    document.getElementById('btn-delete-deck').style.display = deck.preset ? 'none' : '';
-    document.getElementById('btn-add-card').style.display    = deck.preset ? 'none' : '';
+    document.getElementById('btn-delete-deck').style.display  = deck.preset ? 'none' : '';
+    document.getElementById('btn-rename-deck').style.display  = deck.preset ? 'none' : '';
+    document.getElementById('btn-add-card').style.display     = deck.preset ? 'none' : '';
 
     // Reset tabs to Decklist
     document.getElementById('tab-btn-decklist').className = 'tab-btn active';
@@ -5570,6 +5598,43 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   document.getElementById('btn-delete-deck').addEventListener('click', openDeleteModal);
 
+  /* ── Rename deck modal ──────────────────────────────────────────────── */
+  function openRenameModal() {
+    if (!currentDeckId) return;
+    const deck = loadDecks().find(d => d.id === currentDeckId);
+    if (!deck || deck.preset) return;
+    document.getElementById('rename-deck-input').value = deck.name || '';
+    document.getElementById('rename-deck-backdrop').style.display = 'flex';
+    setTimeout(() => document.getElementById('rename-deck-input').focus(), 50);
+  }
+  function closeRenameModal() {
+    document.getElementById('rename-deck-backdrop').style.display = 'none';
+  }
+
+  document.getElementById('rename-deck-close').addEventListener('click', closeRenameModal);
+  document.getElementById('rename-deck-cancel').addEventListener('click', closeRenameModal);
+  document.getElementById('rename-deck-backdrop').addEventListener('click', function (e) {
+    if (e.target === this) closeRenameModal();
+  });
+  document.getElementById('rename-deck-input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') document.getElementById('rename-deck-confirm').click();
+  });
+  document.getElementById('rename-deck-confirm').addEventListener('click', () => {
+    if (!currentDeckId) return;
+    const newName = document.getElementById('rename-deck-input').value.trim();
+    if (!newName) return;
+    const decks = loadDecks();
+    const idx = decks.findIndex(d => d.id === currentDeckId);
+    if (idx === -1 || decks[idx].preset) return;
+    decks[idx].name = newName;
+    saveDecks(decks);
+    document.getElementById('detail-name').textContent = newName;
+    renderList();
+    closeRenameModal();
+    showToast('Deck renamed.');
+  });
+  document.getElementById('btn-rename-deck').addEventListener('click', openRenameModal);
+
   /* ── Category popup handlers ─────────────────────────────────────── */
   document.getElementById('cat-popup-close').addEventListener('click', closeCategoryPopup);
 
@@ -5592,6 +5657,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     }
     if (e.key === 'Escape' && document.getElementById('delete-deck-backdrop').style.display !== 'none') {
       closeDeleteModal();
+    }
+    if (e.key === 'Escape' && document.getElementById('rename-deck-backdrop').style.display !== 'none') {
+      closeRenameModal();
     }
   });
 
