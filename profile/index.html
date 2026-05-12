@@ -195,6 +195,7 @@
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 0.75rem;
     }
+    #today-view + .stats-grid { margin-top: 1.4rem; }
 
     .stat-card {
       background: var(--surface);
@@ -259,6 +260,7 @@
 
     /* events block */
     .today-events-block {
+      margin-top: 1.2rem;
       margin-bottom: 1rem;
       padding-bottom: 1rem;
       border-bottom: 1px solid var(--border);
@@ -318,6 +320,18 @@
       color: var(--accent);
       opacity: 0.6;
       flex-shrink: 0;
+    }
+
+    /* tasks title */
+    .today-tasks-kicker {
+      font-size: 0.52rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-style: italic;
+      margin-top: 1.2rem;
+      margin-bottom: 0.55rem;
+      opacity: 0.75;
     }
 
     /* compact routine rows */
@@ -399,10 +413,14 @@
 
     /* ── DAY FOCUS BLOCK ── */
     .day-focus-block {
+      display: flex;
+      gap: 2rem;
       margin-bottom: 1.1rem;
       padding-bottom: 1rem;
       border-bottom: 1px solid var(--border);
     }
+    .day-focus-col { flex: 1; min-width: 0; }
+    .day-intention-col { flex: 1; min-width: 0; }
     .day-focus-kicker {
       font-size: 0.52rem;
       letter-spacing: 0.16em;
@@ -427,7 +445,6 @@
       text-transform: uppercase;
       color: var(--muted2);
       font-style: italic;
-      margin-top: 0.85rem;
       margin-bottom: 0.3rem;
     }
     .day-intention-text {
@@ -578,13 +595,13 @@
 
   <section class="stats-section">
     <div class="stats-inner">
-      <div id="day-focus" style="display:none"></div>
-      <div class="stats-grid" id="stats-grid">
-        <div class="stat-card"><div class="stat-label">Loading…</div><div class="stat-value">—</div></div>
-      </div>
       <div id="today-view" style="display:none">
+        <div id="day-focus"></div>
         <div id="today-events" style="display:none"></div>
         <div id="today-routine"></div>
+      </div>
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card"><div class="stat-label">Loading…</div><div class="stat-value">—</div></div>
       </div>
     </div>
   </section>
@@ -1215,9 +1232,6 @@
     function renderDayFocus() {
       var el = document.getElementById('day-focus');
       if (!el) return;
-      var show = currentTab === 'day' && currentOffset === 0;
-      el.style.display = show ? '' : 'none';
-      if (!show) return;
 
       var dayEntry = (appData.jEntries || {})[todayIso()] || {};
       var morning  = dayEntry.morning || {};
@@ -1226,19 +1240,24 @@
 
       if (focus) {
         var html = '<div class="day-focus-block">' +
-          '<div class="day-focus-kicker">Today\'s Focus</div>' +
-          '<div class="day-focus-text">' + esc(focus) + '</div>';
+          '<div class="day-focus-col">' +
+          '<div class="day-focus-kicker">Today\'s Goal</div>' +
+          '<div class="day-focus-text">' + esc(focus) + '</div>' +
+          '</div>';
         if (intention) {
-          html += '<div class="day-intention-kicker">Daily Intention</div>' +
-            '<div class="day-intention-text">' + esc(intention) + '</div>';
+          html += '<div class="day-intention-col">' +
+            '<div class="day-intention-kicker">Daily Intention</div>' +
+            '<div class="day-intention-text">' + esc(intention) + '</div>' +
+            '</div>';
         }
         html += '</div>';
         el.innerHTML = html;
       } else {
         el.innerHTML = '<div class="day-focus-block">' +
-          '<div class="day-focus-kicker">Today\'s Focus</div>' +
+          '<div class="day-focus-col">' +
+          '<div class="day-focus-kicker">Today\'s Goal</div>' +
           '<div class="day-focus-empty">Morning entry not written yet. <a href="../journal/">Set your focus →</a></div>' +
-          '</div>';
+          '</div></div>';
       }
     }
 
@@ -1316,13 +1335,11 @@
           todayEvents.forEach(function(ev) {
             if (ev.link) {
               evHtml += '<a class="today-event-card" href="' + esc(ev.link) + '" target="_blank" rel="noopener">' +
-                '<span class="today-event-card-icon">◆</span>' +
                 '<span class="today-event-card-body"><span class="today-event-card-title">' + esc(ev.title) + '</span></span>' +
                 '<span class="today-event-card-arrow">→</span>' +
                 '</a>';
             } else {
               evHtml += '<div class="today-event-card">' +
-                '<span class="today-event-card-icon">◆</span>' +
                 '<span class="today-event-card-body"><span class="today-event-card-title">' + esc(ev.title) + '</span></span>' +
                 '</div>';
             }
@@ -1377,7 +1394,7 @@
         if (!todayEvents.length) el.style.display = 'none';
         return;
       }
-      var html = '<div class="today-routine-groups">';
+      var html = '<div class="today-tasks-kicker">Tasks</div><div class="today-routine-groups">';
       groups.forEach(function(g) {
         html += '<div class="today-routine-group">';
         html += '<div class="today-routine-group-label">' + esc(g.label) + '</div>';
