@@ -131,13 +131,20 @@
       padding-bottom: 1.25rem;
       border-bottom: 2px solid var(--text);
     }
+    .detail-nav-row {
+      margin-bottom: 0.75rem;
+    }
+    .detail-page-header {
+      align-items: flex-start;
+      min-width: 0;
+    }
     .detail-page-actions {
       display: flex; align-items: center; gap: 0.5rem;
-      margin-left: auto;
+      margin-left: auto; flex-shrink: 0;
     }
     @media (max-width: 600px) {
-      .detail-page-header { flex-wrap: wrap; gap: 0.5rem 0; }
-      .detail-page-actions { width: 100%; margin-left: 0; justify-content: flex-end; flex-wrap: wrap; }
+      .detail-page-header { flex-wrap: nowrap; gap: 0.5rem; }
+      .detail-page-actions { margin-left: auto; }
     }
 
     /* ── Deck actions context menu ── */
@@ -579,15 +586,14 @@
 
     /* ── Detail view header ── */
     .detail-head {
-      margin-bottom: 1.25rem;
-      padding-bottom: 1.25rem;
-      border-bottom: 1px solid var(--border);
+      flex: 1; min-width: 0;
     }
     .detail-head-name {
       font-family: 'Cormorant Garamond', Georgia, serif;
       font-style: italic;
       font-size: clamp(1.2rem, 2.5vw, 1.6rem);
       font-weight: 900; letter-spacing: -0.01em;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .detail-head-date {
       margin-top: 0.3rem;
@@ -2214,11 +2220,25 @@ Header lines, section labels, and footers are ignored automatically."></textarea
      ══════════════════════════════════════════ -->
 <div id="view-detail" class="view" style="display:none;">
   <div class="page">
-    <div class="page-header detail-page-header">
+    <div class="detail-nav-row">
       <button class="btn-ghost btn-back" id="btn-back-from-detail">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 2L4 7l5 5"/></svg>
         My Decks
       </button>
+    </div>
+
+    <div class="page-header detail-page-header">
+      <div class="detail-head">
+        <span class="detail-preset-badge" id="detail-preset-badge" style="display:none;">
+          <svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l2.1 4.3 4.7.7-3.4 3.3.8 4.7L8 11.5l-4.2 2.5.8-4.7L1.2 6l4.7-.7z"/></svg>
+          Preset · read-only
+        </span>
+        <div class="detail-head-name" id="detail-name"></div>
+        <div class="detail-head-date">
+          <span id="detail-date"></span>
+          <span id="detail-card-count" class="detail-card-count"></span>
+        </div>
+      </div>
       <div class="detail-page-actions">
         <div class="deck-actions-wrap" id="deck-actions-wrap">
           <button class="deck-actions-trigger" id="btn-deck-actions" aria-haspopup="true" aria-expanded="false">
@@ -2228,24 +2248,12 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           <div class="deck-actions-menu" id="deck-actions-menu" hidden>
             <button class="deck-actions-item" id="btn-export-deck">Export</button>
             <button class="deck-actions-item" id="btn-gem-export">GEM Export</button>
-            <button class="deck-actions-item" id="btn-copy-deck">Copy Deck</button>
+            <button class="deck-actions-item" id="btn-copy-deck">Create a Copy</button>
             <div class="deck-actions-sep deck-actions-sep-edit" id="deck-actions-sep-edit"></div>
             <button class="deck-actions-item" id="btn-rename-deck">Rename</button>
             <button class="deck-actions-item deck-actions-item--danger" id="btn-delete-deck">Delete</button>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="detail-head">
-      <span class="detail-preset-badge" id="detail-preset-badge" style="display:none;">
-        <svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l2.1 4.3 4.7.7-3.4 3.3.8 4.7L8 11.5l-4.2 2.5.8-4.7L1.2 6l4.7-.7z"/></svg>
-        Preset · read-only
-      </span>
-      <div class="detail-head-name" id="detail-name"></div>
-      <div class="detail-head-date">
-        <span id="detail-date"></span>
-        <span id="detail-card-count" class="detail-card-count"></span>
       </div>
     </div>
 
