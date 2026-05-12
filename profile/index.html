@@ -148,6 +148,41 @@
     .tab-btn:hover { color: var(--text2); }
     .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
+    .tab-nav {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.3rem 0;
+    }
+    .nav-arrow {
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      cursor: pointer;
+      width: 22px;
+      height: 22px;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      line-height: 1;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+    .nav-arrow:hover:not([disabled]) { color: var(--accent); border-color: var(--accent); background: var(--accent-d); }
+    .nav-arrow[disabled] { opacity: 0.28; cursor: not-allowed; }
+    .nav-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.56rem;
+      color: var(--text2);
+      white-space: nowrap;
+      min-width: 130px;
+      text-align: center;
+      letter-spacing: 0.03em;
+    }
+
     /* ── STATS GRID ── */
     .stats-section {
       border-bottom: 1px solid var(--border);
@@ -342,8 +377,11 @@
 
     @media (max-width: 640px) {
       .hero        { padding: 1.25rem 1rem 1rem; }
-      .tab-bar     { padding: 0 0.5rem; }
-      .tab-btn     { padding: 0.65rem 0.9rem; font-size: 0.58rem; }
+      .tab-bar     { padding: 0 0.5rem; flex-wrap: wrap; }
+      .tab-bar-inner { flex-wrap: wrap; gap: 0; }
+      .tab-btn     { padding: 0.65rem 0.7rem; font-size: 0.56rem; }
+      .tab-nav     { width: 100%; padding: 0.3rem 0.2rem 0.45rem; border-top: 1px solid var(--border); justify-content: center; margin-left: 0; }
+      .nav-label   { min-width: 100px; font-size: 0.54rem; }
       .stats-section { padding: 1.1rem 1rem; }
       .stats-grid  { grid-template-columns: 1fr 1fr; }
       .stat-value  { font-size: 1.15rem; }
@@ -376,6 +414,12 @@
       <button class="tab-btn" data-tab="day">Day</button>
       <button class="tab-btn active" data-tab="week">Week</button>
       <button class="tab-btn" data-tab="month">Month</button>
+      <button class="tab-btn" data-tab="year">Year</button>
+      <div class="tab-nav">
+        <button class="nav-arrow" id="nav-prev" title="Previous">&#8592;</button>
+        <span class="nav-label" id="nav-label"></span>
+        <button class="nav-arrow" id="nav-next" title="Next" disabled>&#8594;</button>
+      </div>
     </div>
   </div>
 
@@ -452,6 +496,53 @@
       return FULL[d.getMonth()] + ' ' + d.getFullYear();
     }
 
+    // ── Offset-aware helpers ─────────────────────────────────────────────────
+    var currentOffset = 0;
+
+    function offsetDayIso(n) {
+      var d = new Date(); d.setHours(0,0,0,0);
+      d.setDate(d.getDate() + n);
+      return isoDate(d);
+    }
+    function offsetWeekStart(n) {
+      var d = new Date(); d.setHours(0,0,0,0);
+      d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + n * 7);
+      return isoDate(d);
+    }
+    function offsetMonthStart(n) {
+      var now = new Date();
+      var total = now.getMonth() + n;
+      var y = now.getFullYear() + Math.floor(total / 12);
+      var m = ((total % 12) + 12) % 12;
+      return y + '-' + pad(m + 1) + '-01';
+    }
+    function getPeriodLabel(tab, offset) {
+      var MON  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      if (tab === 'day') {
+        if (offset === 0) return 'Today';
+        if (offset === -1) return 'Yesterday';
+        var d = new Date(); d.setDate(d.getDate() + offset);
+        return MON[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      }
+      if (tab === 'week') {
+        var ws = new Date(offsetWeekStart(offset) + 'T00:00:00');
+        var we = new Date(ws); we.setDate(ws.getDate() + 6);
+        var wkLabel = ws.getMonth() === we.getMonth()
+          ? MON[ws.getMonth()] + ' ' + ws.getDate() + '–' + we.getDate()
+          : MON[ws.getMonth()] + ' ' + ws.getDate() + ' – ' + MON[we.getMonth()] + ' ' + we.getDate();
+        return wkLabel + ', ' + we.getFullYear();
+      }
+      if (tab === 'month') {
+        var ms = offsetMonthStart(offset).split('-');
+        return FULL[parseInt(ms[1]) - 1] + ' ' + ms[0];
+      }
+      if (tab === 'year') {
+        return String(new Date().getFullYear() + offset);
+      }
+      return '';
+    }
+
     // ── Data loading ─────────────────────────────────────────────────────────
     function loadAll() {
       function get(k, fb) { try { return JSON.parse(localStorage.getItem(k) || 'null') || fb; } catch(e) { return fb; } }
@@ -467,8 +558,9 @@
     }
 
     // ── Period stat computation ───────────────────────────────────────────────
-    function computeStats(data, since) {
+    function computeStats(data, since, until) {
       var today = todayIso();
+      var end = (until && until < today) ? until : today;
       var stats = {
         runs: 0, runKm: 0,
         workouts: 0,
@@ -488,7 +580,7 @@
 
       Object.entries(data.jEntries).forEach(function(kv) {
         var iso = kv[0], e = kv[1];
-        if (iso < since || iso > today) return;
+        if (iso < since || iso > end) return;
         var hasMorning = !!(e && e.morning);
         var hasEvening = !!(e && e.evening);
         if (hasMorning || hasEvening) stats.journalDays++;
@@ -500,7 +592,7 @@
       Object.entries(mDays).forEach(function(kv) {
         var iso = kv[0], d = kv[1];
         var effectiveDate = (d && d.completedDate) || iso;
-        if (effectiveDate < since || effectiveDate > today) return;
+        if (effectiveDate < since || effectiveDate > end) return;
         if (d && (d.status === 'completed' || d.status === 'modified')) {
           stats.runs++;
           stats.runKm += parseFloat(d.km || 0);
@@ -513,7 +605,7 @@
       var wEntries = (data.workout && data.workout.entries) || {};
       Object.entries(wEntries).forEach(function(kv) {
         var iso = kv[0], e = kv[1];
-        if (iso < since || iso > today) return;
+        if (iso < since || iso > end) return;
         if (e && e.status === 'done') {
           stats.workouts++;
           var parts = iso.split('-').map(Number);
@@ -526,7 +618,7 @@
       });
 
       (data.boulder || []).forEach(function(s) {
-        if (!s || !s.date || s.date < since || s.date > today) return;
+        if (!s || !s.date || s.date < since || s.date > end) return;
         stats.boulderSessions++;
         var climbs = Object.values(s.grades || {}).reduce(function(a, b) { return a + (b || 0); }, 0);
         stats.boulderTotalClimbs += climbs;
@@ -537,7 +629,7 @@
 
       Object.entries(data.calLog).forEach(function(kv) {
         var iso = kv[0], entries = kv[1];
-        if (iso < since || iso > today) return;
+        if (iso < since || iso > end) return;
         if (!Array.isArray(entries) || !entries.length) return;
         var total = entries.reduce(function(s, e) { return s + (parseFloat(e.calories) || 0); }, 0);
         var prot  = entries.reduce(function(s, e) { return s + (parseFloat(e.protein)  || 0); }, 0);
@@ -546,7 +638,7 @@
         if (prot > 0) { stats.calProteinTotal += prot; stats.calProteinDays++; }
       });
 
-      var wDates = Object.keys(data.calW).filter(function(d) { return d >= since && d <= today && data.calW[d] > 0; }).sort();
+      var wDates = Object.keys(data.calW).filter(function(d) { return d >= since && d <= end && data.calW[d] > 0; }).sort();
       if (wDates.length) {
         stats.weightFirst = data.calW[wDates[0]];
         stats.weightLast  = data.calW[wDates[wDates.length - 1]];
@@ -558,8 +650,8 @@
     // ── Day stat computation ─────────────────────────────────────────────────
     var ST_TYPES_DAY = ['Push', 'Pull', 'Legs'];
 
-    function computeStatsDay(data) {
-      var iso = todayIso();
+    function computeStatsDay(data, dateStr) {
+      var iso = dateStr || todayIso();
 
       // Weight for calorie burn estimates
       var weightKg = (data.marathon && data.marathon.weightKg) || 75;
@@ -586,7 +678,8 @@
       // Strength
       var sched = (data.workout && Array.isArray(data.workout.schedule) && data.workout.schedule.length === 3)
         ? data.workout.schedule : [1, 3, 5];
-      var todayDow = new Date().getDay();
+      var isoParts = iso.split('-').map(Number);
+      var todayDow = new Date(isoParts[0], isoParts[1]-1, isoParts[2]).getDay();
       var sidx = sched.indexOf(todayDow);
       var isStrengthDay  = sidx >= 0;
       var scheduledType  = isStrengthDay ? ST_TYPES_DAY[sidx] : null;
@@ -636,8 +729,8 @@
         '</div>';
     }
 
-    function renderStatsDay(data) {
-      var s = computeStatsDay(data);
+    function renderStatsDay(data, offset) {
+      var s = computeStatsDay(data, offsetDayIso(offset || 0));
 
       // Card: Calories In
       var calVal  = s.calIn > 0 ? s.calIn.toLocaleString() + ' kcal' : '—';
@@ -726,14 +819,17 @@
       ].join('');
     }
 
-    function renderStatsWeek(data) {
-      var since = weekStart();
-      var s = computeStats(data, since);
+    function renderStatsWeek(data, offset) {
+      var since = offsetWeekStart(offset || 0);
+      var weDate = new Date(since + 'T00:00:00'); weDate.setDate(weDate.getDate() + 6);
+      var until = isoDate(weDate);
       var today = todayIso();
+      var effectiveEnd = until < today ? until : today;
+      var s = computeStats(data, since, effectiveEnd);
 
       // Days elapsed in week
       var d = new Date(since + 'T00:00:00'), wDays = 0;
-      while (isoDate(d) <= today) { wDays++; d.setDate(d.getDate() + 1); }
+      while (isoDate(d) <= effectiveEnd) { wDays++; d.setDate(d.getDate() + 1); }
 
       var avgKm  = s.runs > 0 ? Math.round(s.runKm / s.runs * 10) / 10 : 0;
       var calAvg = s.calDays ? Math.round(s.calTotal / s.calDays) : 0;
@@ -791,16 +887,19 @@
       ].join('');
     }
 
-    function renderStatsMonth(data) {
-      var since = monthStart();
-      var s = computeStats(data, since);
+    function renderStatsMonth(data, offset) {
+      var since = offsetMonthStart(offset || 0);
+      var mParts = since.split('-').map(Number);
+      var lastDay = new Date(mParts[0], mParts[1], 0);
+      var until = isoDate(lastDay);
       var today = todayIso();
-      var now = new Date();
+      var effectiveEnd = until < today ? until : today;
+      var s = computeStats(data, since, effectiveEnd);
 
       // Days elapsed in month and total days in month
       var d = new Date(since + 'T00:00:00'), mDaysElapsed = 0;
-      while (isoDate(d) <= today) { mDaysElapsed++; d.setDate(d.getDate() + 1); }
-      var totalDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      while (isoDate(d) <= effectiveEnd) { mDaysElapsed++; d.setDate(d.getDate() + 1); }
+      var totalDaysInMonth = lastDay.getDate();
 
       var avgKm = s.runs > 0 ? Math.round(s.runKm / s.runs * 10) / 10 : 0;
       var weeksElapsed = mDaysElapsed / 7;
@@ -852,6 +951,72 @@
           calAvg > 0 ? calAvg.toLocaleString() + ' kcal' : '—',
           s.calDays > 0
             ? s.calDays + '/' + mDaysElapsed + ' days tracked this month'
+            : 'no nutrition data',
+          '', null),
+
+        mkCard('Weight',
+          weightStr, weightSub, weightCls, null),
+      ].join('');
+    }
+
+    function renderStatsYear(data, offset) {
+      var yr = new Date().getFullYear() + (offset || 0);
+      var since = yr + '-01-01';
+      var until = yr + '-12-31';
+      var today = todayIso();
+      var effectiveEnd = until < today ? until : today;
+      var s = computeStats(data, since, effectiveEnd);
+
+      var d = new Date(since + 'T00:00:00'), yDaysElapsed = 0;
+      while (isoDate(d) <= effectiveEnd) { yDaysElapsed++; d.setDate(d.getDate() + 1); }
+
+      var monthsElapsed = Math.max(1, yDaysElapsed / 30.44);
+      var runsPerMonth  = s.runs > 0 ? (Math.round(s.runs / monthsElapsed * 10) / 10) : 0;
+      var calAvg        = s.calDays ? Math.round(s.calTotal / s.calDays) : 0;
+      var journalRate   = yDaysElapsed > 0 ? Math.round((s.journalMorning / yDaysElapsed) * 100) : 0;
+      var avgProt       = s.calProteinDays ? Math.round(s.calProteinTotal / s.calProteinDays) : 0;
+
+      var weightStr = '—', weightSub = 'no weigh-ins this year';
+      if (s.weightLast) {
+        weightStr = s.weightLast.toFixed(1) + ' kg';
+        if (s.weightFirst && s.weightFirst !== s.weightLast) {
+          var delta = (s.weightLast - s.weightFirst).toFixed(1);
+          weightSub = (parseFloat(delta) < 0 ? '' : '+') + delta + ' kg this year';
+        } else {
+          weightSub = 'latest weigh-in';
+        }
+      }
+      var weightCls = s.weightLast && s.weightFirst && s.weightLast < s.weightFirst ? 'green' : '';
+
+      return [
+        mkCard('Running',
+          s.runs + ' run' + (s.runs !== 1 ? 's' : ''),
+          s.runKm > 0
+            ? (Math.round(s.runKm * 10) / 10) + ' km · ' + runsPerMonth + '/month avg'
+            : 'no runs this year',
+          s.runs > 0 ? 'accent' : '', null),
+
+        mkCard('Strength',
+          s.workouts + ' session' + (s.workouts !== 1 ? 's' : ''),
+          s.workouts > 0 ? 'across ' + yr : 'no strength sessions',
+          s.workouts > 0 ? 'green' : '', null),
+
+        mkCard('Bouldering',
+          s.boulderSessions + ' session' + (s.boulderSessions !== 1 ? 's' : ''),
+          s.boulderMaxGrade
+            ? (s.boulderTotalClimbs > 0 ? s.boulderTotalClimbs + ' climbs · ' : '') + 'max grade ' + s.boulderMaxGrade
+            : 'no sessions this year',
+          s.boulderSessions > 0 ? 'blue' : '', null),
+
+        mkCard('Journal',
+          journalRate + '%',
+          s.journalMorning + '/' + yDaysElapsed + ' mornings · ' + s.journalEvening + '/' + yDaysElapsed + ' evenings',
+          journalRate >= 70 ? 'green' : (journalRate >= 40 ? 'accent' : ''), null),
+
+        mkCard('Avg Calories',
+          calAvg > 0 ? calAvg.toLocaleString() + ' kcal' : '—',
+          s.calDays > 0
+            ? s.calDays + ' days tracked' + (avgProt > 0 ? ' · ' + avgProt + 'g protein avg' : '')
             : 'no nutrition data',
           '', null),
 
@@ -1337,22 +1502,30 @@
 
     // ── Tab system ───────────────────────────────────────────────────────────
     var currentTab = 'week';
-    var TAB_LABELS = { day: 'Daily Report', week: 'Weekly Report', month: 'Monthly Report' };
+    var TAB_LABELS = { day: 'Daily Report', week: 'Weekly Report', month: 'Monthly Report', year: 'Year Report' };
+
+    function updateNav() {
+      document.getElementById('nav-label').textContent = getPeriodLabel(currentTab, currentOffset);
+      document.getElementById('nav-next').disabled = currentOffset >= 0;
+    }
 
     function switchTab(tab) {
       currentTab = tab;
+      currentOffset = 0;
       document.querySelectorAll('.tab-btn').forEach(function(b) {
         b.classList.toggle('active', b.dataset.tab === tab);
       });
       renderCurrentStats();
+      updateNav();
       document.getElementById('export-label').textContent = TAB_LABELS[tab] || 'Export';
     }
 
     function renderCurrentStats() {
       var grid = document.getElementById('stats-grid');
-      if      (currentTab === 'day')   grid.innerHTML = renderStatsDay(appData);
-      else if (currentTab === 'week')  grid.innerHTML = renderStatsWeek(appData);
-      else if (currentTab === 'month') grid.innerHTML = renderStatsMonth(appData);
+      if      (currentTab === 'day')   grid.innerHTML = renderStatsDay(appData, currentOffset);
+      else if (currentTab === 'week')  grid.innerHTML = renderStatsWeek(appData, currentOffset);
+      else if (currentTab === 'month') grid.innerHTML = renderStatsMonth(appData, currentOffset);
+      else if (currentTab === 'year')  grid.innerHTML = renderStatsYear(appData, currentOffset);
     }
 
     // ── Export handler ───────────────────────────────────────────────────────
@@ -1361,9 +1534,10 @@
       btn.disabled = true;
       btn.querySelector('#export-label').textContent = 'Generating…';
       var p;
-      if (currentTab === 'day')        p = generateDailyReport(todayIso());
+      if (currentTab === 'day')        p = generateDailyReport(offsetDayIso(currentOffset));
       else if (currentTab === 'week')  p = generatePeriodReport('week');
-      else                             p = generatePeriodReport('month');
+      else if (currentTab === 'month') p = generatePeriodReport('month');
+      else                             p = generatePeriodReport('month'); // year: no dedicated export
       p.then(function() {
         btn.disabled = false;
         btn.querySelector('#export-label').textContent = TAB_LABELS[currentTab];
@@ -1373,6 +1547,20 @@
     // ── Tab click handlers ───────────────────────────────────────────────────
     document.querySelectorAll('.tab-btn').forEach(function(btn) {
       btn.addEventListener('click', function() { switchTab(btn.dataset.tab); });
+    });
+
+    // ── Arrow navigation handlers ────────────────────────────────────────────
+    document.getElementById('nav-prev').addEventListener('click', function() {
+      currentOffset--;
+      renderCurrentStats();
+      updateNav();
+    });
+    document.getElementById('nav-next').addEventListener('click', function() {
+      if (currentOffset < 0) {
+        currentOffset++;
+        renderCurrentStats();
+        updateNav();
+      }
     });
 
     // ── Hero date ────────────────────────────────────────────────────────────
@@ -1387,6 +1575,7 @@
     // ── Main render ──────────────────────────────────────────────────────────
     var appData = loadAll();
     switchTab('week');
+    updateNav();
 
     document.getElementById('activity-feed').innerHTML  = renderActivity(buildActivity(appData, 15));
     document.getElementById('goals-list').innerHTML     = renderGoals(appData);
