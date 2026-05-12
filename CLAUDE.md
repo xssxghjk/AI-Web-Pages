@@ -21,6 +21,8 @@ npm test
 
 This runs all Playwright e2e tests across both desktop (`chromium`) and mobile (`mobile-chrome`) projects. All tests must pass before a push is made.
 
+**Fix all test failures before pushing, regardless of whether the failures were introduced by your changes or were pre-existing.** If tests are failing before you start, fix them as part of your work.
+
 **Never force anything.** Do not use `--force`, `--force-with-lease`, `git reset --hard`, or any destructive git operation. Always resolve conflicts cleanly through a proper merge and commit.
 
 ## Tool Usage

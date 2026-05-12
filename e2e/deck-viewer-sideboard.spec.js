@@ -43,7 +43,7 @@ async function seedDecks(page, decks) {
 
 async function openDeckSideboard(page) {
   await page.goto('/fab-deck-viewer/');
-  await page.click('.deck-row');
+  await page.locator('.deck-row:not(.deck-row-preset)').first().click();
   // Wait for detail view
   await page.waitForSelector('#tab-btn-sideboard', { state: 'visible' });
   await page.click('#tab-btn-sideboard');
@@ -63,7 +63,7 @@ test.describe('sideboard guide', () => {
   test('1: sideboard tab is visible on deck detail page', async ({ page }) => {
     await seedDeck(page, SEED_DECK);
     await page.goto('/fab-deck-viewer/');
-    await page.click('.deck-row');
+    await page.locator('.deck-row:not(.deck-row-preset)').first().click();
     await expect(page.locator('#tab-btn-sideboard')).toBeVisible();
   });
 
@@ -233,14 +233,14 @@ test.describe('sideboard guide', () => {
     await page.goto('/fab-deck-viewer/');
 
     // Open first deck (index 0 = SEED_DECK_2, has Kayo matchup)
-    await page.locator('.deck-row').first().click();
+    await page.locator('.deck-row:not(.deck-row-preset)').first().click();
     await page.waitForSelector('#tab-btn-sideboard', { state: 'visible' });
     await page.click('#tab-btn-sideboard');
     await expect(page.locator('#sideboard-content')).toContainText('Kayo');
 
     // Go back and open second deck (no matchups)
     await page.click('#btn-back-from-detail');
-    await page.locator('.deck-row').nth(1).click();
+    await page.locator('.deck-row:not(.deck-row-preset)').nth(1).click();
     await page.waitForSelector('#tab-btn-sideboard', { state: 'visible' });
     await page.click('#tab-btn-sideboard');
 
