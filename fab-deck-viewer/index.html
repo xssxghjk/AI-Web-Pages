@@ -2134,6 +2134,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       </button>
       <div class="detail-page-actions">
         <button class="btn-secondary" id="btn-export-deck" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">Export</button>
+        <button class="btn-secondary" id="btn-gem-export" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">GEM Export</button>
         <button class="btn-danger" id="btn-delete-deck">Delete</button>
       </div>
     </div>
@@ -5578,6 +5579,30 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     if (deck) {
       exportDeck(deck);
       showToast('Deck exported — check your downloads.');
+    }
+  });
+
+  /* ── GEM export ───────────────────────────────────────────────────── */
+  function buildGemText(pairs) {
+    const pitchLabel = { red: '(red)', yellow: '(yel)', blue: '(blu)' };
+    return pairs
+      .filter(p => p.entry.qty > 0)
+      .map(({ entry, card }) => {
+        const color = card ? card.color : null;
+        const suffix = pitchLabel[color] ? ` ${pitchLabel[color]}` : '';
+        return `${entry.qty} ${entry.name}${suffix}`;
+      })
+      .join('\n');
+  }
+
+  document.getElementById('btn-gem-export').addEventListener('click', async () => {
+    if (!currentDeckPairs.length) return;
+    const text = buildGemText(currentDeckPairs);
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('GEM decklist copied to clipboard.');
+    } catch {
+      showToast('Clipboard unavailable — try from a secure (HTTPS) context.', true);
     }
   });
 
