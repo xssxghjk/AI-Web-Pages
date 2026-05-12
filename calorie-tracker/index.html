@@ -2413,7 +2413,7 @@ function renderTopFoods() {
       freq[k].totalCal += e.calories || 0;
     });
   });
-  const sorted = Object.values(freq).sort((a, b) => b.count - a.count).slice(0, 7);
+  const sorted = Object.values(freq).sort((a, b) => b.totalCal - a.totalCal).slice(0, 7);
   const container = document.getElementById('top-foods-list');
   if (sorted.length === 0) {
     container.innerHTML = '<div class="empty-state" style="padding:20px 0">No data yet.</div>';
