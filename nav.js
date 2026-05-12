@@ -138,7 +138,17 @@
       'color:#5a5040;cursor:pointer;padding:0.2rem 0.55rem;border-radius:2px;' +
       'font-family:"DM Serif Text",Georgia,serif;font-size:0.75rem;' +
       'transition:border-color 0.15s,color 0.15s;line-height:1}' +
-    '.nav-morning-reminder-dismiss:hover{border-color:#5a5040;color:#9a8a76}';
+    '.nav-morning-reminder-dismiss:hover{border-color:#5a5040;color:#9a8a76}' +
+
+    /* weekly backup reminder */
+    '.nav-backup-reminder{background:#1a1c18;border-bottom:1px solid rgba(134,174,100,0.25);' +
+      'padding:0.55rem 1.25rem;display:flex;align-items:center;gap:1rem;' +
+      'font-size:0.72rem;color:#9a8a76;font-family:"DM Serif Text",Georgia,serif;line-height:1.4}' +
+    '.nav-backup-reminder p{margin:0;flex:1;min-width:0}' +
+    '.nav-backup-reminder-btn{background:none;border:none;padding:0;cursor:pointer;' +
+      'color:#86ae64;font-family:"DM Serif Text",Georgia,serif;font-size:0.72rem;' +
+      'border-bottom:1px solid rgba(134,174,100,0.4);transition:color 0.15s,border-color 0.15s}' +
+    '.nav-backup-reminder-btn:hover{color:#a0c87e;border-bottom-color:rgba(134,174,100,0.7)}';
   document.head.appendChild(style);
 
   // ── Inject favicon ───────────────────────────────────────────────────────
@@ -345,6 +355,9 @@
     // Morning routine reminder
     checkMorningReminder(pageContent);
 
+    // Weekly backup reminder
+    checkBackupReminder(pageContent);
+
     // Mobile nav overlay (backdrop)
     var overlay = document.createElement('div');
     overlay.className = 'mobile-nav-overlay';
@@ -456,6 +469,71 @@
         }
       } catch (e) { clearInterval(poll); }
     }, 5000);
+  }
+
+  // ── Weekly Backup Reminder ───────────────────────────────────────────────
+  function checkBackupReminder(container) {
+    function isoWeekKey() {
+      var d = new Date();
+      var utc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      var day = utc.getUTCDay() || 7;
+      utc.setUTCDate(utc.getUTCDate() + 4 - day);
+      var yearStart = new Date(Date.UTC(utc.getUTCFullYear(), 0, 1));
+      var wk = Math.ceil((((utc - yearStart) / 86400000) + 1) / 7);
+      return utc.getUTCFullYear() + '-W' + (wk < 10 ? '0' + wk : '' + wk);
+    }
+
+    var storageKey = 'nav_backup_w_' + isoWeekKey();
+    if (localStorage.getItem(storageKey)) return;
+
+    function doExport() {
+      var data = {};
+      try {
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          try { data[k] = JSON.parse(localStorage.getItem(k)); } catch (e) { data[k] = localStorage.getItem(k); }
+        }
+      } catch (e) {}
+      var d = new Date();
+      function p2(n) { return n < 10 ? '0' + n : '' + n; }
+      var iso = d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+      var json = JSON.stringify(data, null, 2);
+      var blob = new Blob([json], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'localstorage-' + iso + '.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+      localStorage.setItem(storageKey, 'done');
+      var banner = document.getElementById('nav-backup-reminder');
+      if (banner) banner.remove();
+    }
+
+    var banner = document.createElement('div');
+    banner.className = 'nav-backup-reminder';
+    banner.id = 'nav-backup-reminder';
+    banner.innerHTML =
+      '<p><span style="opacity:0.55;margin-right:0.35em">&#128190;</span>' +
+      'Weekly backup reminder &mdash; ' +
+      '<button class="nav-backup-reminder-btn" id="nav-backup-download">Download backup</button></p>' +
+      '<button class="nav-morning-reminder-dismiss" aria-label="Dismiss">&times;</button>';
+
+    var morning = container.querySelector('#nav-morning-reminder');
+    var mh = container.querySelector('.mobile-header');
+    if (morning && morning.nextSibling) {
+      container.insertBefore(banner, morning.nextSibling);
+    } else if (mh && mh.nextSibling) {
+      container.insertBefore(banner, mh.nextSibling);
+    } else {
+      container.insertBefore(banner, container.firstChild);
+    }
+
+    document.getElementById('nav-backup-download').addEventListener('click', doExport);
+
+    banner.querySelector('.nav-morning-reminder-dismiss').addEventListener('click', function () {
+      localStorage.setItem(storageKey, 'dismissed');
+      banner.remove();
+    });
   }
 
   if (document.readyState === 'loading') {
