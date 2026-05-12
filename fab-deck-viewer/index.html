@@ -5590,7 +5590,8 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       .map(({ entry, card }) => {
         const color = card ? card.color : null;
         const suffix = pitchLabel[color] ? ` ${pitchLabel[color]}` : '';
-        return `${entry.qty} ${entry.name}${suffix}`;
+        const gemName = entry.name.replace(' // ', '||');
+        return `${entry.qty} ${gemName}${suffix}`;
       })
       .join('\n');
   }
