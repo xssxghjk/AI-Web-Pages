@@ -357,6 +357,41 @@
       padding: 1.25rem 0;
     }
 
+    /* ── STORAGE SECTION ── */
+    .storage-actions { display: flex; flex-direction: column; gap: 0.45rem; }
+
+    .storage-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.42rem 0.8rem;
+      border-radius: 2px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.72rem;
+      font-style: italic;
+      width: 100%;
+      text-align: left;
+    }
+    .storage-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-d); }
+    .storage-btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+    .storage-btn.danger:hover { border-color: #c46a6a; color: #c46a6a; background: rgba(196,106,106,0.09); }
+
+    .storage-status {
+      font-size: 0.68rem;
+      font-style: italic;
+      margin-top: 0.5rem;
+      color: var(--muted);
+      min-height: 1.1em;
+      line-height: 1.4;
+    }
+    .storage-status.ok  { color: var(--green); }
+    .storage-status.err { color: #c46a6a; }
+
     /* ── FOOTER ── */
     footer {
       max-width: 1100px;
@@ -441,6 +476,22 @@
         <div class="section-head">Active Goals</div>
         <div id="goals-list"><div class="no-data">Loading…</div></div>
         <div id="tcg-section" style="margin-top:1.75rem"></div>
+
+        <div style="margin-top:1.75rem">
+          <div class="section-head">Data</div>
+          <div class="storage-actions">
+            <button class="storage-btn" id="ls-export-btn">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 6l3 3 3-3M2 11h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Export local storage
+            </button>
+            <button class="storage-btn danger" id="ls-import-btn">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 11V4M3 6L6 3l3 3M2 1h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Import local storage
+            </button>
+            <input type="file" id="ls-import-file" accept=".json" style="display:none">
+          </div>
+          <div id="storage-status" class="storage-status"></div>
+        </div>
       </div>
     </div>
   </main>
@@ -1617,6 +1668,76 @@
       var e = document.getElementById('page-version');
       if (e) e.textContent = 'v' + v.version;
     }).catch(function() {});
+
+    // ── Local storage export / import ────────────────────────────────────────
+    (function () {
+      var statusEl = document.getElementById('storage-status');
+
+      function setStatus(msg, cls) {
+        statusEl.textContent = msg;
+        statusEl.className = 'storage-status' + (cls ? ' ' + cls : '');
+        if (msg) setTimeout(function() {
+          if (statusEl.textContent === msg) { statusEl.textContent = ''; statusEl.className = 'storage-status'; }
+        }, 6000);
+      }
+
+      document.getElementById('ls-export-btn').addEventListener('click', function() {
+        var data = {};
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          try { data[k] = JSON.parse(localStorage.getItem(k)); } catch(e) { data[k] = localStorage.getItem(k); }
+        }
+        var keys = Object.keys(data);
+        var json = JSON.stringify(data, null, 2);
+        var blob = new Blob([json], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = 'localstorage-' + todayIso() + '.json';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function() { URL.revokeObjectURL(url); }, 2000);
+        setStatus('Exported ' + keys.length + ' key' + (keys.length !== 1 ? 's' : '') + '.', 'ok');
+      });
+
+      var fileInput = document.getElementById('ls-import-file');
+
+      document.getElementById('ls-import-btn').addEventListener('click', function() {
+        fileInput.value = '';
+        fileInput.click();
+      });
+
+      fileInput.addEventListener('change', function() {
+        var file = this.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+          var data;
+          try { data = JSON.parse(ev.target.result); } catch(err) {
+            setStatus('Could not parse file — must be valid JSON.', 'err');
+            return;
+          }
+          if (typeof data !== 'object' || Array.isArray(data) || data === null) {
+            setStatus('Expected a JSON object at the top level.', 'err');
+            return;
+          }
+          var keys = Object.keys(data);
+          if (!window.confirm('Import ' + keys.length + ' key' + (keys.length !== 1 ? 's' : '') + ' into local storage?\n\nExisting keys with the same name will be overwritten.')) return;
+          var count = 0;
+          keys.forEach(function(k) {
+            try {
+              var val = typeof data[k] === 'string' ? data[k] : JSON.stringify(data[k]);
+              localStorage.setItem(k, val);
+              count++;
+            } catch(err) {}
+          });
+          setStatus('Imported ' + count + ' key' + (count !== 1 ? 's' : '') + '. Refreshing…', 'ok');
+          appData = loadAll();
+          renderCurrentStats();
+          document.getElementById('activity-feed').innerHTML = renderActivity(buildActivity(appData, 15));
+          document.getElementById('goals-list').innerHTML = renderGoals(appData);
+        };
+        reader.readAsText(file);
+      });
+    })();
 
   })();
   </script>
