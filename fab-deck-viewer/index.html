@@ -2462,10 +2462,9 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const n = 60 - deckCards;
       return [`Classic Constructed deck has ${deckCards} deck card${deckCards !== 1 ? 's' : ''} — needs at least 60 (missing ${n})`];
     }
-    if (format === 'sage' && deckCards !== 40) {
-      const diff = 40 - deckCards;
-      const detail = diff > 0 ? `missing ${diff}` : `${-diff} too many`;
-      return [`Silver Age deck has ${deckCards} deck card${deckCards !== 1 ? 's' : ''} — needs exactly 40 (${detail})`];
+    if (format === 'sage' && deckCards < 40) {
+      const n = 40 - deckCards;
+      return [`Silver Age deck has ${deckCards} deck card${deckCards !== 1 ? 's' : ''} — needs at least 40 (missing ${n})`];
     }
     return [];
   }
