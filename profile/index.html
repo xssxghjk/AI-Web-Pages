@@ -318,12 +318,21 @@
       color: var(--text);
       line-height: 1.25;
       letter-spacing: -0.02em;
+      white-space: pre-wrap;
+    }
+    .day-intention-kicker {
+      font-size: 0.52rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      font-style: italic;
+      margin-top: 0.85rem;
+      margin-bottom: 0.3rem;
     }
     .day-intention-text {
       font-size: 0.82rem;
       font-style: italic;
       color: var(--muted);
-      margin-top: 0.35rem;
       line-height: 1.45;
     }
     .day-focus-empty {
@@ -1204,7 +1213,8 @@
           '<div class="day-focus-kicker">Today\'s Focus</div>' +
           '<div class="day-focus-text">' + esc(focus) + '</div>';
         if (intention) {
-          html += '<div class="day-intention-text">' + esc(intention) + '</div>';
+          html += '<div class="day-intention-kicker">Daily Intention</div>' +
+            '<div class="day-intention-text">' + esc(intention) + '</div>';
         }
         html += '</div>';
         el.innerHTML = html;
