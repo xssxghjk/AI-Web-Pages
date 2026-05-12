@@ -250,17 +250,24 @@
     .badge-accent { background: var(--accent-d); color: var(--accent); }
     .badge-muted  { background: rgba(90,78,64,0.3); color: var(--muted2); }
 
-    /* ── DAY ROUTINE CHECKLIST ── */
-    .day-routine {
+    /* ── TODAY VIEW ── */
+    .today-view {
       margin-top: 0.85rem;
       padding-top: 0.7rem;
       border-top: 1px solid var(--border);
+    }
+
+    /* events strip */
+    .today-events-row {
       display: flex;
       align-items: center;
       gap: 0.35rem;
       flex-wrap: wrap;
+      margin-bottom: 0.65rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border);
     }
-    .day-routine-hd {
+    .today-events-hd {
       font-size: 0.52rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
@@ -269,32 +276,101 @@
       flex-shrink: 0;
       padding-right: 0.4rem;
       border-right: 1px solid var(--border);
+      margin-right: 0.05rem;
     }
-    .day-chip {
+    .today-event-pill {
       display: inline-flex;
       align-items: center;
-      gap: 0.28rem;
-      font-size: 0.64rem;
+      font-size: 0.62rem;
       font-style: italic;
-      color: var(--muted);
-      padding: 0.15rem 0.44rem;
+      color: var(--accent);
+      padding: 0.1rem 0.38rem;
       border-radius: 2px;
-      border: 1px solid var(--border);
-      background: transparent;
-      text-decoration: none;
-      transition: border-color 0.15s, color 0.15s;
+      border: 1px solid var(--accent-b);
+      background: var(--accent-d);
       white-space: nowrap;
       font-family: 'DM Serif Text', Georgia, serif;
+      text-decoration: none;
+      transition: border-color 0.15s;
     }
-    .day-chip:hover { border-color: var(--border2); color: var(--text2); }
-    .day-chip.done { color: var(--muted2); border-color: transparent; }
-    .day-chip-dot {
-      width: 4px; height: 4px;
-      border-radius: 50%;
+    .today-event-pill:hover { border-color: var(--accent); }
+
+    /* compact routine rows */
+    .today-routine-groups { display: flex; flex-direction: column; gap: 0.55rem; }
+    .today-routine-group-label {
+      font-size: 0.52rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted3);
+      font-style: italic;
+      margin-bottom: 0.22rem;
+      padding-left: 0.05rem;
+    }
+    .today-routine-item {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.38rem 0.6rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.15s, background 0.15s;
+      margin-bottom: 0.18rem;
+    }
+    .today-routine-item:hover { border-color: var(--border2); background: var(--surface2); }
+    .today-routine-item.is-done {
+      border-color: var(--done-border, rgba(106,154,106,0.18));
+      background: var(--done-bg, rgba(106,154,106,0.07));
+    }
+    .today-routine-item.is-skipped { opacity: 0.6; }
+    .today-ri-icon {
+      font-size: 0.82rem;
       flex-shrink: 0;
+      width: 1.1rem;
+      text-align: center;
+      opacity: 0.58;
+      line-height: 1;
     }
-    .day-chip-dot.pending { background: var(--accent); opacity: 0.7; }
-    .day-chip-dot.done    { background: var(--green); opacity: 0.55; }
+    .today-ri-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.03rem;
+    }
+    .today-ri-label {
+      font-size: 0.76rem;
+      color: var(--text);
+      line-height: 1.25;
+    }
+    .today-routine-item.is-done .today-ri-label { color: var(--muted); }
+    .today-ri-sub {
+      font-size: 0.61rem;
+      color: var(--muted2);
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+    .today-ri-badge {
+      flex-shrink: 0;
+      font-size: 0.52rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-style: italic;
+      padding: 0.1rem 0.32rem;
+      border-radius: 2px;
+    }
+    .today-ri-badge.badge-done {
+      color: var(--green);
+      border: 1px solid rgba(106,154,106,0.18);
+      background: rgba(106,154,106,0.07);
+    }
+    .today-ri-badge.badge-pending { color: var(--muted2); border: 1px solid var(--border); }
+    .today-ri-badge.badge-skipped { color: var(--muted2); border: 1px solid rgba(122,106,90,0.18); }
 
     /* ── DAY FOCUS BLOCK ── */
     .day-focus-block {
@@ -558,7 +634,10 @@
       <div class="stats-grid" id="stats-grid">
         <div class="stat-card"><div class="stat-label">Loading…</div><div class="stat-value">—</div></div>
       </div>
-      <div class="day-routine" id="day-routine" style="display:none"></div>
+      <div id="today-view" style="display:none">
+        <div id="today-events" style="display:none"></div>
+        <div id="today-routine"></div>
+      </div>
     </div>
   </section>
 
@@ -597,6 +676,7 @@
     <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">GitHub</a>
   </footer>
 
+  <script src="../trips/trips.js"></script>
   <script>
   (function () {
     'use strict';
@@ -1226,29 +1306,152 @@
       }
     }
 
-    // ── Day routine checklist ────────────────────────────────────────────────
-    function renderDayRoutine() {
-      var el = document.getElementById('day-routine');
+    // ── Today view: calendar events + compact routine ────────────────────────
+    var MARATHON_REST_TV = [
+      [0,1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[1,5],
+      [1,5],[1,5],[1,5],[1,5],[1,5],[1,5],[0,1,5],[1,5],[0,1,5],[1,3,5,6]
+    ];
+
+    function renderTodayView() {
+      var el = document.getElementById('today-view');
       if (!el) return;
       var show = currentTab === 'day' && currentOffset === 0;
       el.style.display = show ? '' : 'none';
       if (!show) return;
 
-      var s = computeStatsDay(appData, todayIso());
+      var iso = todayIso();
+      var todayDate = new Date(); todayDate.setHours(0,0,0,0);
+      var s = computeStatsDay(appData, iso);
       var hasGoals = Object.values(appData.jGoals).some(function(g) { return g && g.status === 'active'; });
-      var items = [];
-      if (hasGoals) items.push({ label: '☀ Morning', done: s.hasMorning, href: '../journal/' });
-      if (s.isStrengthDay) items.push({ label: '💪 ' + (s.scheduledType || 'Strength'), done: s.strengthDone, href: '../workout/' });
-      if (hasGoals) items.push({ label: '🌙 Evening', done: s.hasEvening, href: '../journal/' });
 
-      if (!items.length) { el.style.display = 'none'; return; }
+      // Marathon run schedule check
+      var marathonRun = null;
+      var mData = appData.marathon || {};
+      if (mData.planStart) {
+        var mDays = mData.days || {};
+        var mPlanStart = mData.planStart;
+        if (!mData.version && new Date().getTimezoneOffset() < 0) {
+          function shiftIsoTV(d) {
+            var p = d.split('-').map(Number);
+            var nd = new Date(p[0], p[1]-1, p[2]+1);
+            return nd.getFullYear() + '-' + (nd.getMonth()+1<10?'0':'') + (nd.getMonth()+1) + '-' + (nd.getDate()<10?'0':'') + nd.getDate();
+          }
+          var shifted = {};
+          for (var k in mDays) if (Object.prototype.hasOwnProperty.call(mDays, k)) shifted[shiftIsoTV(k)] = mDays[k];
+          mDays = shifted;
+          mPlanStart = shiftIsoTV(mPlanStart);
+        }
+        var planStart = new Date(mPlanStart + 'T00:00:00');
+        var week1Sun  = new Date(planStart.getTime() - planStart.getDay() * 86400000);
+        week1Sun.setHours(0,0,0,0);
+        var diffDays = Math.round((todayDate.getTime() - week1Sun.getTime()) / 86400000);
+        var weekIdx  = Math.floor(diffDays / 7);
+        var dow      = todayDate.getDay();
+        if (weekIdx >= 0 && weekIdx < 20 && !MARATHON_REST_TV[weekIdx].includes(dow) && todayDate.getTime() >= planStart.getTime()) {
+          var md = mDays[iso] || null;
+          var rStatus = 'pending';
+          if (md && (md.status === 'completed' || md.status === 'modified')) rStatus = 'done';
+          else if (md && md.status === 'skipped') rStatus = 'skipped';
+          var rSub = md && md.km ? md.km + ' km' : (md && md.time ? md.time + ' min' : 'Scheduled run');
+          marathonRun = { status: rStatus, sub: rSub };
+        }
+      }
 
-      var html = '<span class="day-routine-hd">Today</span>';
-      items.forEach(function(item) {
-        html += '<a class="day-chip' + (item.done ? ' done' : '') + '" href="' + esc(item.href) + '">' +
-          '<span class="day-chip-dot ' + (item.done ? 'done' : 'pending') + '"></span>' + esc(item.label) + '</a>';
+      // Calendar events for today
+      var todayEvents = [];
+      if (typeof ALL_EVENTS !== 'undefined') {
+        ALL_EVENTS.forEach(function(ev) {
+          if (ev.startDate <= iso && ev.endDate >= iso)
+            todayEvents.push({ title: ev.title, link: ev.link || null });
+        });
+      }
+      var calLocalEvs = [];
+      try { calLocalEvs = JSON.parse(localStorage.getItem('cal_local_events') || '[]'); } catch(e) {}
+      calLocalEvs.forEach(function(ev) {
+        if (ev.startDate <= iso && ev.endDate >= iso)
+          todayEvents.push({ title: ev.name, link: null });
       });
-      el.innerHTML = html;
+
+      // Render events strip
+      var eventsEl = document.getElementById('today-events');
+      if (eventsEl) {
+        if (todayEvents.length) {
+          var evHtml = '<div class="today-events-row"><span class="today-events-hd">Events</span>';
+          todayEvents.forEach(function(ev) {
+            if (ev.link) {
+              evHtml += '<a class="today-event-pill" href="' + esc(ev.link) + '" target="_blank" rel="noopener">' + esc(ev.title) + '</a>';
+            } else {
+              evHtml += '<span class="today-event-pill">' + esc(ev.title) + '</span>';
+            }
+          });
+          evHtml += '</div>';
+          eventsEl.innerHTML = evHtml;
+          eventsEl.style.display = '';
+        } else {
+          eventsEl.innerHTML = '';
+          eventsEl.style.display = 'none';
+        }
+      }
+
+      // Build routine groups
+      var groups = [];
+      var dayEntry = (appData.jEntries || {})[iso] || {};
+
+      if (hasGoals) {
+        var mSub = '';
+        if (s.hasMorning && dayEntry.morning && dayEntry.morning.focus) {
+          var f = dayEntry.morning.focus;
+          mSub = '"' + (f.length > 55 ? f.slice(0,55) + '…' : f) + '"';
+        } else if (!s.hasMorning) {
+          mSub = 'Set intentions for the day';
+        }
+        groups.push({ label: 'Morning', items: [{ icon: '☀', label: 'Morning Journal', sub: mSub, href: '../journal/', status: s.hasMorning ? 'done' : 'pending' }] });
+      }
+
+      var trainingItems = [];
+      if (marathonRun) {
+        trainingItems.push({ icon: '🏃', label: 'Marathon Run', sub: marathonRun.sub, href: '../marathon-training/', status: marathonRun.status });
+      }
+      if (s.isStrengthDay) {
+        trainingItems.push({ icon: '💪', label: s.scheduledType || 'Strength', sub: '', href: '../workout/', status: s.strengthDone ? 'done' : 'pending' });
+      }
+      if (trainingItems.length) groups.push({ label: 'Training', items: trainingItems });
+
+      if (hasGoals) {
+        var eSub = '';
+        if (s.hasEvening) eSub = 'Reflection complete';
+        else if (s.hasMorning && dayEntry.morning && dayEntry.morning.goalConnections && dayEntry.morning.goalConnections.length) {
+          eSub = 'Review your progress on ' + dayEntry.morning.goalConnections.length + ' goal' + (dayEntry.morning.goalConnections.length !== 1 ? 's' : '');
+        } else { eSub = 'Reflect and log your day'; }
+        groups.push({ label: 'Evening', items: [{ icon: '🌙', label: 'Evening Reflection', sub: eSub, href: '../journal/', status: s.hasEvening ? 'done' : 'pending' }] });
+      }
+
+      // Render routine
+      var routineEl = document.getElementById('today-routine');
+      if (!routineEl) return;
+      if (!groups.length) {
+        routineEl.innerHTML = '';
+        if (!todayEvents.length) el.style.display = 'none';
+        return;
+      }
+      var html = '<div class="today-routine-groups">';
+      groups.forEach(function(g) {
+        html += '<div class="today-routine-group">';
+        html += '<div class="today-routine-group-label">' + esc(g.label) + '</div>';
+        g.items.forEach(function(item) {
+          var cls = 'today-routine-item' + (item.status === 'done' ? ' is-done' : '') + (item.status === 'skipped' ? ' is-skipped' : '');
+          var bdgCls = item.status === 'done' ? 'badge-done' : item.status === 'skipped' ? 'badge-skipped' : 'badge-pending';
+          var bdgTxt = item.status === 'done' ? 'done' : item.status === 'skipped' ? 'skipped' : 'pending';
+          html += '<a class="' + cls + '" href="' + esc(item.href) + '">';
+          html += '<span class="today-ri-icon">' + item.icon + '</span>';
+          html += '<span class="today-ri-body"><span class="today-ri-label">' + esc(item.label) + '</span>';
+          if (item.sub) html += '<span class="today-ri-sub">' + esc(item.sub) + '</span>';
+          html += '</span><span class="today-ri-badge ' + bdgCls + '">' + bdgTxt + '</span></a>';
+        });
+        html += '</div>';
+      });
+      html += '</div>';
+      routineEl.innerHTML = html;
     }
 
     // ── Activity feed ────────────────────────────────────────────────────────
@@ -1753,7 +1956,7 @@
       else if (currentTab === 'month') grid.innerHTML = renderStatsMonth(appData, currentOffset);
       else if (currentTab === 'year')  grid.innerHTML = renderStatsYear(appData, currentOffset);
       renderDayFocus();
-      renderDayRoutine();
+      renderTodayView();
     }
 
     // ── Export handler ───────────────────────────────────────────────────────
