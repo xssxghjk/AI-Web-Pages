@@ -2526,12 +2526,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         const pairs = entries.map(e => ({ entry: e, card: lookup(e.name, e.hint) }));
         const { format, deckCards } = detectFormat(pairs);
         formatLabel = format === 'cc' ? 'CC · ' : 'SAGE · ';
-        const rowWarns = [];
-        const missingEquip = getMissingEquipment(pairs);
-        if (missingEquip.length > 0) rowWarns.push(`⚠ Missing: ${missingEquip.join(', ')}`);
-        for (const w of deckCountWarnings(format, deckCards)) rowWarns.push(`⚠ ${w}`);
-        if (rowWarns.length > 0) {
-          equipWarnHtml = rowWarns.map(w => `<div class="deck-row-equip-warn">${w}</div>`).join('');
+        const hasUnknownCards = pairs.some(p => !p.card);
+        if (!hasUnknownCards) {
+          const rowWarns = [];
+          const missingEquip = getMissingEquipment(pairs);
+          if (missingEquip.length > 0) rowWarns.push(`⚠ Missing: ${missingEquip.join(', ')}`);
+          for (const w of deckCountWarnings(format, deckCards)) rowWarns.push(`⚠ ${w}`);
+          if (rowWarns.length > 0) {
+            equipWarnHtml = rowWarns.map(w => `<div class="deck-row-equip-warn">${w}</div>`).join('');
+          }
         }
       }
 
@@ -5597,6 +5600,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   /* ── Detail handlers ──────────────────────────────────────────────── */
   document.getElementById('btn-back-from-detail').addEventListener('click', () => {
+    renderList();
     showView('view-list');
   });
 
@@ -5901,6 +5905,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   window.addEventListener('popstate', async (e) => {
     const state = e.state;
     if (!state || state.view === 'view-list') {
+      renderList();
       showView('view-list', { skipHistory: true });
     } else if (state.view === 'view-import') {
       document.getElementById('decklist').value  = '';

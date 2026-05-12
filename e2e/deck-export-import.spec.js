@@ -169,4 +169,35 @@ test.describe('deck export / import', () => {
 
     fs.unlinkSync(tmpPath);
   });
+
+  test('creating a new deck does not show warnings for existing decks in the list', async ({ page }) => {
+    await seedDeck(page, SEED_DECK);
+    await page.goto('/fab-deck-viewer/');
+
+    // View the existing deck first to load the db
+    await page.locator('.deck-row:not(.deck-row-preset)').first().click();
+    await page.waitForSelector('#detail-name', { state: 'visible' });
+
+    // Navigate back to the list
+    await page.click('#btn-back-from-detail');
+    await page.waitForSelector('#deck-list', { state: 'visible' });
+
+    // Go to import form and create a new deck
+    await page.click('#btn-go-import');
+    await page.fill('#deck-name', 'New Test Deck');
+    await page.fill('#decklist', '3 Fry (red)\n3 Pummel (red)');
+    await page.click('#btn-import');
+
+    // Should navigate to detail view of the new deck
+    await page.waitForSelector('#detail-name', { state: 'visible' });
+
+    // Navigate back to the list
+    await page.click('#btn-back-from-detail');
+    await page.waitForSelector('#deck-list', { state: 'visible' });
+
+    // No deck-row-equip-warn divs should be visible for decks with unrecognized cards
+    // (db is mocked empty so all card lookups fail — warnings must be suppressed)
+    const warnings = page.locator('.deck-row-equip-warn');
+    await expect(warnings).toHaveCount(0);
+  });
 });
