@@ -257,43 +257,68 @@
       border-top: 1px solid var(--border);
     }
 
-    /* events strip */
-    .today-events-row {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      flex-wrap: wrap;
-      margin-bottom: 0.65rem;
-      padding-bottom: 0.6rem;
+    /* events block */
+    .today-events-block {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
       border-bottom: 1px solid var(--border);
     }
-    .today-events-hd {
+    .today-events-kicker {
       font-size: 0.52rem;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: var(--muted2);
-      font-style: italic;
-      flex-shrink: 0;
-      padding-right: 0.4rem;
-      border-right: 1px solid var(--border);
-      margin-right: 0.05rem;
-    }
-    .today-event-pill {
-      display: inline-flex;
-      align-items: center;
-      font-size: 0.62rem;
-      font-style: italic;
       color: var(--accent);
-      padding: 0.1rem 0.38rem;
+      font-style: italic;
+      margin-bottom: 0.55rem;
+      opacity: 0.75;
+    }
+    .today-event-card {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.85rem 1.1rem;
       border-radius: 2px;
       border: 1px solid var(--accent-b);
-      background: var(--accent-d);
-      white-space: nowrap;
-      font-family: 'DM Serif Text', Georgia, serif;
+      background: linear-gradient(135deg, rgba(196,134,74,0.09) 0%, rgba(196,134,74,0.04) 100%);
+      margin-bottom: 0.45rem;
       text-decoration: none;
-      transition: border-color 0.15s;
+      transition: border-color 0.18s, background 0.18s;
+      position: relative;
+      overflow: hidden;
     }
-    .today-event-pill:hover { border-color: var(--accent); }
+    .today-event-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--accent);
+      border-radius: 2px 0 0 2px;
+    }
+    .today-event-card:hover { border-color: var(--accent); background: linear-gradient(135deg, rgba(196,134,74,0.15) 0%, rgba(196,134,74,0.07) 100%); }
+    .today-event-card:last-child { margin-bottom: 0; }
+    .today-event-card-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      opacity: 0.7;
+      line-height: 1;
+    }
+    .today-event-card-body { flex: 1; min-width: 0; }
+    .today-event-card-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+    a.today-event-card .today-event-card-title { color: var(--accent); }
+    .today-event-card-arrow {
+      font-size: 0.75rem;
+      color: var(--accent);
+      opacity: 0.6;
+      flex-shrink: 0;
+    }
 
     /* compact routine rows */
     .today-routine-groups { display: flex; flex-direction: column; gap: 0.55rem; }
@@ -428,12 +453,7 @@
     }
 
     .content-grid {
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 2rem;
-    }
-    @media (max-width: 860px) {
-      .content-grid { grid-template-columns: 1fr; }
+      max-width: 480px;
     }
 
     /* ── SECTION HEADERS ── */
@@ -446,78 +466,6 @@
       padding-bottom: 0.6rem;
       border-bottom: 1px solid var(--border);
       margin-bottom: 0.85rem;
-    }
-
-    /* ── ACTIVITY FEED ── */
-    .activity-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      padding: 0.65rem 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .activity-item:last-child { border-bottom: none; }
-
-    .activity-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      margin-top: 0.35rem;
-      flex-shrink: 0;
-    }
-    .dot-run      { background: #7a9de8; }
-    .dot-workout  { background: #e87838; }
-    .dot-boulder  { background: #4ec994; }
-    .dot-journal  { background: var(--accent); }
-    .dot-calorie  { background: #7ab87a; }
-
-    .activity-body { flex: 1; min-width: 0; }
-    .activity-title {
-      font-size: 0.84rem;
-      color: var(--text);
-      line-height: 1.35;
-    }
-    .activity-meta {
-      font-size: 0.7rem;
-      color: var(--muted);
-      font-style: italic;
-      margin-top: 0.1rem;
-    }
-
-    .activity-age {
-      font-size: 0.65rem;
-      color: var(--muted2);
-      font-style: italic;
-      white-space: nowrap;
-      flex-shrink: 0;
-      margin-top: 0.3rem;
-    }
-
-    /* ── GOALS ── */
-    .goal-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.6rem;
-      padding: 0.6rem 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      background: var(--surface);
-      margin-bottom: 0.45rem;
-      transition: border-color 0.15s;
-    }
-    .goal-item:hover { border-color: var(--border2); }
-    .goal-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--accent);
-      margin-top: 0.45rem;
-      flex-shrink: 0;
-    }
-    .goal-title {
-      font-size: 0.82rem;
-      color: var(--text2);
-      line-height: 1.4;
     }
 
     .no-data {
@@ -643,31 +591,19 @@
 
   <main class="main">
     <div class="content-grid">
-      <div class="col-main">
-        <div class="section-head">Recent Activity</div>
-        <div id="activity-feed"><div class="no-data">Loading…</div></div>
+      <div class="section-head">Data</div>
+      <div class="storage-actions">
+        <button class="storage-btn" id="ls-export-btn">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 6l3 3 3-3M2 11h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Export local storage
+        </button>
+        <button class="storage-btn danger" id="ls-import-btn">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 11V4M3 6L6 3l3 3M2 1h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Import local storage
+        </button>
+        <input type="file" id="ls-import-file" accept=".json" style="display:none">
       </div>
-      <div class="col-side">
-        <div class="section-head">Active Goals</div>
-        <div id="goals-list"><div class="no-data">Loading…</div></div>
-        <div id="tcg-section" style="margin-top:1.75rem"></div>
-
-        <div style="margin-top:1.75rem">
-          <div class="section-head">Data</div>
-          <div class="storage-actions">
-            <button class="storage-btn" id="ls-export-btn">
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 6l3 3 3-3M2 11h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Export local storage
-            </button>
-            <button class="storage-btn danger" id="ls-import-btn">
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 11V4M3 6L6 3l3 3M2 1h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Import local storage
-            </button>
-            <input type="file" id="ls-import-file" accept=".json" style="display:none">
-          </div>
-          <div id="storage-status" class="storage-status"></div>
-        </div>
-      </div>
+      <div id="storage-status" class="storage-status"></div>
     </div>
   </main>
 
@@ -1372,16 +1308,23 @@
           todayEvents.push({ title: ev.name, link: null });
       });
 
-      // Render events strip
+      // Render events block
       var eventsEl = document.getElementById('today-events');
       if (eventsEl) {
         if (todayEvents.length) {
-          var evHtml = '<div class="today-events-row"><span class="today-events-hd">Events</span>';
+          var evHtml = '<div class="today-events-block"><div class="today-events-kicker">Today\'s Events</div>';
           todayEvents.forEach(function(ev) {
             if (ev.link) {
-              evHtml += '<a class="today-event-pill" href="' + esc(ev.link) + '" target="_blank" rel="noopener">' + esc(ev.title) + '</a>';
+              evHtml += '<a class="today-event-card" href="' + esc(ev.link) + '" target="_blank" rel="noopener">' +
+                '<span class="today-event-card-icon">◆</span>' +
+                '<span class="today-event-card-body"><span class="today-event-card-title">' + esc(ev.title) + '</span></span>' +
+                '<span class="today-event-card-arrow">→</span>' +
+                '</a>';
             } else {
-              evHtml += '<span class="today-event-pill">' + esc(ev.title) + '</span>';
+              evHtml += '<div class="today-event-card">' +
+                '<span class="today-event-card-icon">◆</span>' +
+                '<span class="today-event-card-body"><span class="today-event-card-title">' + esc(ev.title) + '</span></span>' +
+                '</div>';
             }
           });
           evHtml += '</div>';
@@ -1455,87 +1398,6 @@
     }
 
     // ── Activity feed ────────────────────────────────────────────────────────
-    function buildActivity(data, limit) {
-      var items = [];
-      var today = todayIso();
-      var cutoff = isoDate(new Date(Date.now() - 60 * 86400000));
-
-      Object.entries(data.jEntries).forEach(function(kv) {
-        var iso = kv[0], e = kv[1];
-        if (iso < cutoff || iso > today) return;
-        if (e && e.morning) {
-          var f = (e.morning.focus || '');
-          items.push({ date: iso, type: 'journal', title: 'Morning Journal', meta: f ? '“' + f.slice(0,60) + (f.length>60?'…':'”') : 'Morning entry' });
-        }
-        if (e && e.evening) {
-          items.push({ date: iso, type: 'journal', title: 'Evening Reflection', meta: 'Evening entry' });
-        }
-      });
-
-      Object.entries(data.marathon.days || {}).forEach(function(kv) {
-        var iso = kv[0], d = kv[1];
-        var effectiveDate = (d && d.completedDate) || iso;
-        if (effectiveDate < cutoff || effectiveDate > today) return;
-        if (d && (d.status === 'completed' || d.status === 'modified')) {
-          var sub = d.km ? d.km + ' km' : d.time ? d.time + ' min' : 'Run completed';
-          items.push({ date: effectiveDate, type: 'run', title: 'Marathon Run', meta: sub });
-        }
-      });
-
-      Object.entries((data.workout && data.workout.entries) || {}).forEach(function(kv) {
-        var iso = kv[0], e = kv[1];
-        if (iso < cutoff || iso > today) return;
-        if (e && e.status === 'done') {
-          var dur = e.duration ? e.duration + ' min' : '';
-          items.push({ date: iso, type: 'workout', title: 'Strength Session', meta: dur || 'Completed' });
-        }
-      });
-
-      (data.boulder || []).forEach(function(s) {
-        if (!s || !s.date || s.date < cutoff || s.date > today) return;
-        var total = Object.values(s.grades || {}).reduce(function(a, b) { return a + (b || 0); }, 0);
-        var maxG = 0;
-        for (var g = 7; g >= 1; g--) { if ((s.grades || {})[g] > 0) { maxG = g; break; } }
-        items.push({ date: s.date, type: 'boulder', title: 'Bouldering Session', meta: total + ' climbs' + (maxG ? ' \xb7 max grade ' + maxG : '') });
-      });
-
-      items.sort(function(a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
-      return items.slice(0, limit || 15);
-    }
-
-    function dotClass(type) {
-      if (type === 'run')     return 'dot-run';
-      if (type === 'workout') return 'dot-workout';
-      if (type === 'boulder') return 'dot-boulder';
-      if (type === 'journal') return 'dot-journal';
-      return 'dot-calorie';
-    }
-
-    function renderActivity(items) {
-      if (!items.length) return '<div class="no-data">No recent activity found. Start logging in any tracker.</div>';
-      return items.map(function(item) {
-        return '<div class="activity-item">' +
-          '<span class="activity-dot ' + dotClass(item.type) + '"></span>' +
-          '<span class="activity-body">' +
-            '<span class="activity-title">' + esc(item.title) + '</span>' +
-            '<span class="activity-meta">' + esc(item.meta) + '</span>' +
-          '</span>' +
-          '<span class="activity-age">' + relAge(item.date) + '</span>' +
-          '</div>';
-      }).join('');
-    }
-
-    function renderGoals(data) {
-      var active = Object.values(data.jGoals).filter(function(g) { return g && g.status === 'active'; });
-      if (!active.length) return '<div class="no-data">No active goals. Set them in <a href="../journal/" style="color:var(--accent);text-decoration:none">Journal</a>.</div>';
-      return active.map(function(g) {
-        return '<div class="goal-item">' +
-          '<span class="goal-dot"></span>' +
-          '<span class="goal-title">' + esc(g.text || 'Untitled goal') + '</span>' +
-          '</div>';
-      }).join('');
-    }
-
     // ── Canvas helpers ───────────────────────────────────────────────────────
     function paintBg(ctx, W, H) {
       ctx.fillStyle = '#1c1814';
@@ -2008,18 +1870,6 @@
     switchTab('day');
     updateNav();
 
-    document.getElementById('activity-feed').innerHTML  = renderActivity(buildActivity(appData, 15));
-    document.getElementById('goals-list').innerHTML     = renderGoals(appData);
-
-    (function () {
-      var tcg = document.getElementById('tcg-section');
-      tcg.innerHTML = '<div class="section-head">Tournament Records</div>' +
-        '<div style="font-size:0.78rem;color:var(--muted);font-style:italic;padding:0.5rem 0">' +
-        'View full reports and tournament history in ' +
-        '<a href="../tcg-tournament-reports/" style="color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(196,134,74,0.3)">Tournament Reports</a>.' +
-        '</div>';
-    })();
-
     // ── Version ──────────────────────────────────────────────────────────────
     fetch('../version.json').then(function(r) { return r.json(); }).then(function(v) {
       var e = document.getElementById('page-version');
@@ -2089,8 +1939,6 @@
           setStatus('Imported ' + count + ' key' + (count !== 1 ? 's' : '') + '. Refreshing…', 'ok');
           appData = loadAll();
           renderCurrentStats();
-          document.getElementById('activity-feed').innerHTML = renderActivity(buildActivity(appData, 15));
-          document.getElementById('goals-list').innerHTML = renderGoals(appData);
         };
         reader.readAsText(file);
       });
