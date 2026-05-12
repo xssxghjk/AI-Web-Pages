@@ -534,6 +534,20 @@ const TRIPS = [
   // ── PASTE YOUR NEXT TRIP HERE (soonest/newest first) ──────────────────────
 
   {
+    id: 'france-road-trip-2026',
+    title: 'France Road Trip',
+    destination: 'France',
+    region: 'Europe',
+    status: 'upcoming',
+    startDate: '2026-06-04',
+    endDate: '2026-06-07',
+    displayDates: 'Jun 4 – 7, 2026',
+    description: 'Road trip by car to France, departing June 4th and returning June 7th.',
+    link: null,
+    tags: ['Leisure', 'Road Trip', 'Europe'],
+  },
+
+  {
     id: 'german-nationals-2026',
     title: 'DE Nationals Weekend',
     destination: 'Gelsenkirchen, Germany',
