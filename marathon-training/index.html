@@ -1747,15 +1747,26 @@ function renderWeekProgress() {
   if (btnNext) btnNext.disabled = weekNum >= 20;
   if (btnToday) btnToday.style.opacity = isCurrentWeek ? '0.4' : '1';
 
-  // Build a map: effectiveDate → { entry, dayIdx } for all workouts logged this week.
-  // Uses completedDate as the effective date when set, so the dot appears on the actual completion day.
+  // Pre-compute this week's date strings for quick membership checks.
+  const weekDates = new Set();
+  for (let d2 = 0; d2 < 7; d2++) weekDates.add(dateKey(getDateForWeekDay(weekNum, d2)));
+
+  // Build a map: effectiveDate → { entry, dayIdx, sourceWeek } for workouts whose
+  // effective date (completedDate if set, else scheduled date) falls in this week.
+  // Scan the current week first (priority), then adjacent weeks so workouts completed
+  // across a week boundary still appear on the correct column.
   const doneByDate = {};
-  for (let d2 = 0; d2 < 7; d2++) {
-    const scheduledDate = dateKey(getDateForWeekDay(weekNum, d2));
-    const entry = getDayData(scheduledDate);
-    if (entry && entry.status) {
-      const effectiveDate = entry.completedDate || scheduledDate;
-      if (!doneByDate[effectiveDate]) doneByDate[effectiveDate] = { entry, dayIdx: d2 };
+  for (const scanWeek of [weekNum, weekNum - 1, weekNum + 1]) {
+    if (scanWeek < 1 || scanWeek > 20) continue;
+    for (let d2 = 0; d2 < 7; d2++) {
+      const scheduledDate = dateKey(getDateForWeekDay(scanWeek, d2));
+      const entry = getDayData(scheduledDate);
+      if (entry && entry.status) {
+        const effectiveDate = entry.completedDate || scheduledDate;
+        if (weekDates.has(effectiveDate) && !doneByDate[effectiveDate]) {
+          doneByDate[effectiveDate] = { entry, dayIdx: d2, sourceWeek: scanWeek };
+        }
+      }
     }
   }
 
@@ -1767,9 +1778,15 @@ function renderWeekProgress() {
 
     // Use the workout that was effectively done on this column's date (completedDate override)
     const effective = doneByDate[dateStr] || null;
-    const dd = effective ? effective.entry : null;
+    // Fallback: if the scheduled entry has a status but its completedDate landed in another
+    // week (so it didn't make it into doneByDate), still show its status here rather than
+    // marking the column missed.
+    const scheduledEntry = getDayData(dateStr);
+    const crossWeekEntry = !effective && scheduledEntry?.status && scheduledEntry.completedDate && !weekDates.has(scheduledEntry.completedDate) ? scheduledEntry : null;
+    const dd = effective ? effective.entry : crossWeekEntry;
     const clickDayIdx = effective ? effective.dayIdx : d;
-    const clickWorkout = PLAN[weekNum - 1][clickDayIdx];
+    const clickWeekNum = effective ? effective.sourceWeek : weekNum;
+    const clickWorkout = PLAN[clickWeekNum - 1][clickDayIdx];
 
     const isToday = dateStr === dateKey(t);
     const isPast = date < t;
@@ -1806,7 +1823,7 @@ function renderWeekProgress() {
     }
 
     const canClick = clickWorkout.type !== 'rest';
-    const clickHandler = canClick ? `onclick="openDayModal(${weekNum}, ${clickDayIdx})"` : '';
+    const clickHandler = canClick ? `onclick="openDayModal(${clickWeekNum}, ${clickDayIdx})"` : '';
     const typeIcon = '';
 
     dotsHtml += `
