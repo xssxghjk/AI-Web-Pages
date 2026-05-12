@@ -39,7 +39,7 @@ test.describe('deck export / import', () => {
   test('export button is visible on deck detail page', async ({ page }) => {
     await seedDeck(page, SEED_DECK);
     await page.goto('/fab-deck-viewer/');
-    await page.click('.deck-row');
+    await page.locator('.deck-row:not(.deck-row-preset)').first().click();
     await page.waitForSelector('#btn-export-deck', { state: 'visible' });
     await expect(page.locator('#btn-export-deck')).toBeVisible();
   });
@@ -47,7 +47,7 @@ test.describe('deck export / import', () => {
   test('export triggers a file download with correct filename', async ({ page }) => {
     await seedDeck(page, SEED_DECK);
     await page.goto('/fab-deck-viewer/');
-    await page.click('.deck-row');
+    await page.locator('.deck-row:not(.deck-row-preset)').first().click();
     await page.waitForSelector('#btn-export-deck', { state: 'visible' });
 
     const [download] = await Promise.all([
@@ -61,7 +61,7 @@ test.describe('deck export / import', () => {
   test('exported file contains deck name, decklist, and sideboard guide', async ({ page }) => {
     await seedDeck(page, SEED_DECK);
     await page.goto('/fab-deck-viewer/');
-    await page.click('.deck-row');
+    await page.locator('.deck-row:not(.deck-row-preset)').first().click();
     await page.waitForSelector('#btn-export-deck', { state: 'visible' });
 
     const [download] = await Promise.all([

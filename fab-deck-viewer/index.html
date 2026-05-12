@@ -2264,11 +2264,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     window.scrollTo({ top: 0, behavior: 'instant' });
     if (!opts.skipHistory) {
       const state = { view: id };
-      if (id === 'view-detail') state.deckId = currentDeckId;
+      let url = location.pathname;
+      if (id === 'view-detail') {
+        state.deckId = currentDeckId;
+        url = location.pathname + '?deck=' + encodeURIComponent(currentDeckId);
+      }
       if (opts.replace) {
-        history.replaceState(state, '');
+        history.replaceState(state, '', url);
       } else {
-        history.pushState(state, '');
+        history.pushState(state, '', url);
       }
     }
   }
@@ -2476,7 +2480,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   }
 
   /* ── Detail view ──────────────────────────────────────────────────── */
-  async function viewDeck(id, { skipHistory = false } = {}) {
+  async function viewDeck(id, { skipHistory = false, replace = false } = {}) {
     const deck = loadDecks().find(d => d.id === id);
     if (!deck) return;
     currentDeckId = id;
@@ -2489,7 +2493,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
       const pairs   = entries.map(e => ({ entry: e, card: lookup(e.name, e.hint) }));
       hideLoading();
       renderDetail(deck, pairs);
-      showView('view-detail', { skipHistory });
+      showView('view-detail', { skipHistory, replace });
     } catch (e) {
       hideLoading();
       alert('Error: ' + e.message);
@@ -5729,7 +5733,12 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   /* ── Init ─────────────────────────────────────────────────────────── */
   renderList();
-  showView('view-list', { replace: true });
+  const _deckFromUrl = new URLSearchParams(location.search).get('deck');
+  if (_deckFromUrl) {
+    viewDeck(_deckFromUrl, { replace: true }).catch(() => showView('view-list', { replace: true }));
+  } else {
+    showView('view-list', { replace: true });
+  }
 
 })();
 </script>
