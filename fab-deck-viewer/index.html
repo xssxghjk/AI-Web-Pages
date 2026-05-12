@@ -1100,6 +1100,32 @@
       opacity: 0.9;
     }
 
+    .deck-preset-badge {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      padding: 1px 6px; border-radius: 2px;
+      font-size: 0.6rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      font-family: 'DM Serif Text', Georgia, serif; font-style: normal;
+      color: var(--muted); border: 1px solid var(--border-2);
+      background: var(--surface-2);
+      margin-bottom: 0.4rem; vertical-align: middle;
+    }
+    .deck-preset-badge svg { opacity: 0.7; }
+
+    .deck-row.deck-row-preset { border-top-color: var(--muted); }
+    .deck-row.deck-row-preset:hover { border-color: var(--border-2); }
+
+    .detail-preset-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 2px 8px; border-radius: 2px;
+      font-size: 0.65rem; font-weight: 600;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      font-family: 'DM Serif Text', Georgia, serif; font-style: normal;
+      color: var(--muted); border: 1px solid var(--border-2);
+      background: var(--surface-2);
+      margin-bottom: 0.5rem;
+    }
+
     .sb-rating-badge {
       display: inline-flex; align-items: center;
       padding: 1px 7px; border-radius: 2px;
@@ -2140,6 +2166,10 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     </div>
 
     <div class="detail-head">
+      <span class="detail-preset-badge" id="detail-preset-badge" style="display:none;">
+        <svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l2.1 4.3 4.7.7-3.4 3.3.8 4.7L8 11.5l-4.2 2.5.8-4.7L1.2 6l4.7-.7z"/></svg>
+        Preset · read-only
+      </span>
       <div class="detail-head-name" id="detail-name"></div>
       <div class="detail-head-date">
         <span id="detail-date"></span>
@@ -2196,6 +2226,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 </footer>
 <script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='v'+v.version}).catch(()=>{});</script>
 <script>(function(){var u=0;try{for(var k in localStorage){if(Object.prototype.hasOwnProperty.call(localStorage,k))u+=(k.length+localStorage[k].length)*2}}catch(e){}var kb=(u/1024).toFixed(1),pct=+(u/(5*1024*1024)*100).toFixed(1),el=document.getElementById('storage-size');if(el){el.textContent='Storage: '+kb+' KB / 5 MB';el.style.opacity=0.65;el.title=pct+'% used';if(pct>90)el.style.color='#f87171';else if(pct>70)el.style.color='#fbbf24';}})();</script>
+<script src="decklists/index.js"></script>
 
 <script>
 (function () {
@@ -2209,11 +2240,17 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   /* ── Storage ──────────────────────────────────────────────────────── */
   const STORAGE_KEY = 'fab_saved_decks_v1';
-  function loadDecks() {
+  function loadUserDecks() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
     catch { return []; }
   }
-  function saveDecks(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+  function loadDecks() {
+    const presets = (window.PRESET_DECKS || []);
+    return [...presets, ...loadUserDecks()];
+  }
+  function saveDecks(d) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(d.filter(dk => !dk.preset)));
+  }
 
   /* ── View routing ─────────────────────────────────────────────────── */
   let currentDeckId = null;
@@ -2379,10 +2416,11 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
   /* ── List view ────────────────────────────────────────────────────── */
   function renderList() {
-    const decks  = loadDecks();
-    const list   = document.getElementById('deck-list');
-    const empty  = document.getElementById('list-empty');
-    list.innerHTML = '';
+    const decks     = loadDecks();
+    const userDecks = loadUserDecks();
+    const list      = document.getElementById('deck-list');
+    const empty     = document.getElementById('list-empty');
+    list.innerHTML  = '';
 
     if (decks.length === 0) {
       empty.style.display = 'flex';
@@ -2392,7 +2430,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     decks.forEach(deck => {
       const row = document.createElement('div');
-      row.className = 'deck-row';
+      row.className = deck.preset ? 'deck-row deck-row-preset' : 'deck-row';
 
       const countNum = deck.cardCount || 0;
       const date  = new Date(deck.savedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
@@ -2413,11 +2451,15 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         }
       }
 
+      const presetBadgeHtml = deck.preset
+        ? `<div><span class="deck-preset-badge"><svg width="8" height="8" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l2.1 4.3 4.7.7-3.4 3.3.8 4.7L8 11.5l-4.2 2.5.8-4.7L1.2 6l4.7-.7z"/></svg>Preset</span></div>`
+        : '';
       const countHtml = countNum
         ? `<div class="deck-row-count">${countNum} cards<span class="deck-row-count-sep"></span><span style="font-family:'DM Serif Text',Georgia,serif;font-style:italic;font-weight:400;color:var(--muted)">${formatLabel}${date}</span></div>`
         : `<div class="deck-row-count" style="color:var(--muted)">${formatLabel}${date}</div>`;
       row.innerHTML = `
         <div class="deck-row-body">
+          ${presetBadgeHtml}
           <div class="deck-row-name">${esc(deck.name)}</div>
           ${countHtml}
           ${equipWarnHtml}
@@ -2506,6 +2548,12 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const countEl = document.getElementById('detail-card-count');
     countEl.textContent = totalCardCount ? `${totalCardCount} cards` : '';
     countEl.style.display = totalCardCount ? '' : 'none';
+
+    // Preset: show badge, hide mutating controls
+    const presetBadgeEl = document.getElementById('detail-preset-badge');
+    presetBadgeEl.style.display = deck.preset ? '' : 'none';
+    document.getElementById('btn-delete-deck').style.display = deck.preset ? 'none' : '';
+    document.getElementById('btn-add-card').style.display    = deck.preset ? 'none' : '';
 
     // Reset tabs to Decklist
     document.getElementById('tab-btn-decklist').className = 'tab-btn active';
@@ -3247,7 +3295,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   function saveSideboardGuide(deckId, guide) {
     const decks = loadDecks();
     const deck = decks.find(d => d.id === deckId);
-    if (!deck) return;
+    if (!deck || deck.preset) return;
     deck.sideboardGuide = guide;
     saveDecks(decks);
   }
@@ -3594,11 +3642,13 @@ Header lines, section labels, and footers are ignored automatically."></textarea
           <div class="empty-state-sub">Add a matchup to start building your guide</div>
         </div>
       `;
-      const addBtn = document.createElement('button');
-      addBtn.className = 'btn-primary sb-add-btn';
-      addBtn.textContent = '+ Add matchup';
-      addBtn.addEventListener('click', () => openMatchupEditor(deck, deckPairs, null));
-      container.querySelector('.empty-state').appendChild(addBtn);
+      if (!deck.preset) {
+        const addBtn = document.createElement('button');
+        addBtn.className = 'btn-primary sb-add-btn';
+        addBtn.textContent = '+ Add matchup';
+        addBtn.addEventListener('click', () => openMatchupEditor(deck, deckPairs, null));
+        container.querySelector('.empty-state').appendChild(addBtn);
+      }
       return;
     }
 
@@ -3648,10 +3698,13 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     const actionsRow = document.createElement('div');
     actionsRow.className = 'sb-actions-row';
 
-    const addBtn = document.createElement('button');
-    addBtn.className = 'btn-secondary sb-add-btn';
-    addBtn.textContent = '+ Add matchup';
-    addBtn.addEventListener('click', () => openMatchupEditor(deck, deckPairs, null));
+    if (!deck.preset) {
+      const addBtn = document.createElement('button');
+      addBtn.className = 'btn-secondary sb-add-btn';
+      addBtn.textContent = '+ Add matchup';
+      addBtn.addEventListener('click', () => openMatchupEditor(deck, deckPairs, null));
+      actionsRow.appendChild(addBtn);
+    }
 
     const pdfBtn = document.createElement('button');
     pdfBtn.className = 'btn-secondary';
@@ -3659,7 +3712,6 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     pdfBtn.textContent = 'Export PDF';
     pdfBtn.addEventListener('click', () => exportSideboardPdf(deck, guide, deckPairs));
 
-    actionsRow.appendChild(addBtn);
     actionsRow.appendChild(pdfBtn);
     container.appendChild(actionsRow);
 
@@ -3812,7 +3864,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
 
     bodyEl.innerHTML = html;
 
-    if (deck) {
+    if (deck && !deck.preset) {
       const editBtn = document.createElement('button');
       editBtn.className = 'btn-primary sb-matchup-edit-btn';
       editBtn.type = 'button';
