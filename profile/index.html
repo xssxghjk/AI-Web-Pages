@@ -250,6 +250,7 @@
     .badge-green  { background: var(--green-b); color: var(--green); }
     .badge-accent { background: var(--accent-d); color: var(--accent); }
     .badge-muted  { background: rgba(90,78,64,0.3); color: var(--muted2); }
+    .badge-blue   { background: rgba(90,180,204,0.12); color: #5ab4cc; }
 
     /* ── TODAY VIEW ── */
     .today-view {
@@ -976,6 +977,22 @@
         strVal = 'Rest Day'; strSub = 'no strength today'; strCls = ''; strBadge = null;
       }
 
+      // Card: Bouldering
+      var bldVal, bldSub, bldCls, bldBadge;
+      if (s.boulderSession) {
+        var bldParts = [];
+        if (s.boulderSession.duration) bldParts.push(s.boulderSession.duration + ' min');
+        if (s.boulderCal > 0) bldParts.push('~' + s.boulderCal.toLocaleString() + ' kcal');
+        var totalClimbs = Object.values(s.boulderSession.grades || {}).reduce(function(a, c) { return a + c; }, 0);
+        if (totalClimbs > 0) bldParts.push(totalClimbs + ' climb' + (totalClimbs !== 1 ? 's' : ''));
+        bldVal   = 'Session Done';
+        bldSub   = bldParts.join(' · ') || 'session logged';
+        bldCls   = 'blue';
+        bldBadge = { type: 'blue', text: '✓ Done' };
+      } else {
+        bldVal = '—'; bldSub = 'no session today'; bldCls = ''; bldBadge = null;
+      }
+
       // Card: Journal
       var jDone = (s.hasMorning ? 1 : 0) + (s.hasEvening ? 1 : 0);
       var jVal, jSub, jCls, jBadge;
@@ -999,6 +1016,7 @@
         mkCard('Net Calories', netVal,  netSub,  netCls,  null),
         mkCard('Run',          runVal,  runSub,  runCls,  runBadge),
         mkCard('Strength',     strVal,  strSub,  strCls,  strBadge),
+        mkCard('Bouldering',   bldVal,  bldSub,  bldCls,  bldBadge),
         mkCard('Journal',      jVal,    jSub,    jCls,    jBadge),
       ].join('');
     }
