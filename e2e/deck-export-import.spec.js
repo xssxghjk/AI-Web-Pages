@@ -40,7 +40,8 @@ test.describe('deck export / import', () => {
     await seedDeck(page, SEED_DECK);
     await page.goto('/fab-deck-viewer/');
     await page.locator('.deck-row:not(.deck-row-preset)').first().click();
-    await page.waitForSelector('#btn-export-deck', { state: 'visible' });
+    await page.waitForSelector('#btn-deck-actions', { state: 'visible' });
+    await page.click('#btn-deck-actions');
     await expect(page.locator('#btn-export-deck')).toBeVisible();
   });
 
@@ -48,6 +49,8 @@ test.describe('deck export / import', () => {
     await seedDeck(page, SEED_DECK);
     await page.goto('/fab-deck-viewer/');
     await page.locator('.deck-row:not(.deck-row-preset)').first().click();
+    await page.waitForSelector('#btn-deck-actions', { state: 'visible' });
+    await page.click('#btn-deck-actions');
     await page.waitForSelector('#btn-export-deck', { state: 'visible' });
 
     const [download] = await Promise.all([
@@ -62,6 +65,8 @@ test.describe('deck export / import', () => {
     await seedDeck(page, SEED_DECK);
     await page.goto('/fab-deck-viewer/');
     await page.locator('.deck-row:not(.deck-row-preset)').first().click();
+    await page.waitForSelector('#btn-deck-actions', { state: 'visible' });
+    await page.click('#btn-deck-actions');
     await page.waitForSelector('#btn-export-deck', { state: 'visible' });
 
     const [download] = await Promise.all([

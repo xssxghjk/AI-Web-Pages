@@ -139,6 +139,41 @@
       .detail-page-header { flex-wrap: wrap; gap: 0.5rem 0; }
       .detail-page-actions { width: 100%; margin-left: 0; justify-content: flex-end; flex-wrap: wrap; }
     }
+
+    /* ── Deck actions context menu ── */
+    .deck-actions-wrap { position: relative; }
+    .deck-actions-trigger {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; padding: 0.45rem 1rem; letter-spacing: 0.04em;
+      background: var(--surface-2); border: 1px solid var(--border-2); color: var(--text);
+    }
+    .deck-actions-trigger:hover { background: var(--border); }
+    .deck-actions-trigger svg { opacity: 0.7; transition: transform 0.15s; }
+    .deck-actions-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
+    .deck-actions-menu {
+      position: absolute; right: 0; top: calc(100% + 6px);
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      border-radius: 2px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      min-width: 168px;
+      z-index: 200;
+      padding: 0.3rem 0;
+    }
+    .deck-actions-menu[hidden] { display: none; }
+    .deck-actions-item {
+      display: block; width: 100%;
+      text-align: left; background: none; border: none;
+      padding: 0.55rem 1.1rem;
+      color: var(--text); font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.85rem; cursor: pointer; border-radius: 0;
+      letter-spacing: 0.01em;
+    }
+    .deck-actions-item:hover { background: var(--border); transform: none; }
+    .deck-actions-item:active { transform: none; }
+    .deck-actions-item--danger { color: var(--red-c); }
+    .deck-actions-item--danger:hover { background: rgba(224,80,64,0.07); }
+    .deck-actions-sep { height: 1px; background: var(--border); margin: 0.3rem 0; }
     .page-header-title {
       font-family: 'Cormorant Garamond', Georgia, serif;
       font-style: italic;
@@ -2185,10 +2220,20 @@ Header lines, section labels, and footers are ignored automatically."></textarea
         My Decks
       </button>
       <div class="detail-page-actions">
-        <button class="btn-secondary" id="btn-export-deck" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">Export</button>
-        <button class="btn-secondary" id="btn-gem-export" style="font-size:0.8rem;padding:0.45rem 1rem;letter-spacing:0.04em;">GEM Export</button>
-        <button class="btn-ghost" id="btn-rename-deck" style="font-size:0.8rem;padding:0.45rem 0.9rem;">Rename</button>
-        <button class="btn-danger" id="btn-delete-deck">Delete</button>
+        <div class="deck-actions-wrap" id="deck-actions-wrap">
+          <button class="deck-actions-trigger" id="btn-deck-actions" aria-haspopup="true" aria-expanded="false">
+            Actions
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3.5l3 3 3-3"/></svg>
+          </button>
+          <div class="deck-actions-menu" id="deck-actions-menu" hidden>
+            <button class="deck-actions-item" id="btn-export-deck">Export</button>
+            <button class="deck-actions-item" id="btn-gem-export">GEM Export</button>
+            <button class="deck-actions-item" id="btn-copy-deck">Copy Deck</button>
+            <div class="deck-actions-sep deck-actions-sep-edit" id="deck-actions-sep-edit"></div>
+            <button class="deck-actions-item" id="btn-rename-deck">Rename</button>
+            <button class="deck-actions-item deck-actions-item--danger" id="btn-delete-deck">Delete</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2585,9 +2630,11 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     currentDeckReadOnly = !!deck.preset;
     const presetBadgeEl = document.getElementById('detail-preset-badge');
     presetBadgeEl.style.display = deck.preset ? '' : 'none';
-    document.getElementById('btn-delete-deck').style.display  = deck.preset ? 'none' : '';
-    document.getElementById('btn-rename-deck').style.display  = deck.preset ? 'none' : '';
-    document.getElementById('btn-add-card').style.display     = deck.preset ? 'none' : '';
+    const editOnlyDisplay = deck.preset ? 'none' : '';
+    document.getElementById('btn-delete-deck').style.display       = editOnlyDisplay;
+    document.getElementById('btn-rename-deck').style.display       = editOnlyDisplay;
+    document.getElementById('deck-actions-sep-edit').style.display = editOnlyDisplay;
+    document.getElementById('btn-add-card').style.display          = deck.preset ? 'none' : '';
 
     // Reset tabs to Decklist
     document.getElementById('tab-btn-decklist').className = 'tab-btn active';
@@ -5545,6 +5592,62 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     showView('view-list');
   });
 
+  /* ── Deck actions context menu ──────────────────────────────────────── */
+  function openDeckActionsMenu() {
+    const menu = document.getElementById('deck-actions-menu');
+    const btn  = document.getElementById('btn-deck-actions');
+    menu.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+  }
+  function closeDeckActionsMenu() {
+    const menu = document.getElementById('deck-actions-menu');
+    const btn  = document.getElementById('btn-deck-actions');
+    menu.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
+  }
+
+  document.getElementById('btn-deck-actions').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const menu = document.getElementById('deck-actions-menu');
+    if (menu.hidden) openDeckActionsMenu(); else closeDeckActionsMenu();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('deck-actions-wrap').contains(e.target)) {
+      closeDeckActionsMenu();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !document.getElementById('deck-actions-menu').hidden) {
+      closeDeckActionsMenu();
+      document.getElementById('btn-deck-actions').focus();
+    }
+  }, true);
+
+  /* ── Copy deck ──────────────────────────────────────────────────────── */
+  document.getElementById('btn-copy-deck').addEventListener('click', async () => {
+    closeDeckActionsMenu();
+    if (!currentDeckId) return;
+    const deck = loadDecks().find(d => d.id === currentDeckId);
+    if (!deck) return;
+    const guide = getSideboardGuide(deck);
+    const newDeck = {
+      id:           Date.now().toString(36) + Math.random().toString(36).slice(2),
+      name:         (deck.name || 'Untitled Deck') + ' copy',
+      decklist:     deck.decklist,
+      cardCount:    deck.cardCount,
+      savedAt:      new Date().toISOString(),
+      sideboardGuide: guide.length ? JSON.parse(JSON.stringify(guide)) : [],
+    };
+    const decks = loadDecks();
+    decks.unshift(newDeck);
+    saveDecks(decks);
+    renderList();
+    showToast('Deck copied.');
+    await viewDeck(newDeck.id);
+  });
+
   /* ── Toast utility ─────────────────────────────────────────────────── */
   let toastTimer = null;
   function showToast(msg, isError = false) {
@@ -5596,7 +5699,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     showToast('Deck deleted.');
   });
 
-  document.getElementById('btn-delete-deck').addEventListener('click', openDeleteModal);
+  document.getElementById('btn-delete-deck').addEventListener('click', () => { closeDeckActionsMenu(); openDeleteModal(); });
 
   /* ── Rename deck modal ──────────────────────────────────────────────── */
   function openRenameModal() {
@@ -5633,7 +5736,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
     closeRenameModal();
     showToast('Deck renamed.');
   });
-  document.getElementById('btn-rename-deck').addEventListener('click', openRenameModal);
+  document.getElementById('btn-rename-deck').addEventListener('click', () => { closeDeckActionsMenu(); openRenameModal(); });
 
   /* ── Category popup handlers ─────────────────────────────────────── */
   document.getElementById('cat-popup-close').addEventListener('click', closeCategoryPopup);
@@ -5702,6 +5805,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   }
 
   document.getElementById('btn-export-deck').addEventListener('click', () => {
+    closeDeckActionsMenu();
     if (!currentDeckId) return;
     const deck = loadDecks().find(d => d.id === currentDeckId);
     if (deck) {
@@ -5725,6 +5829,7 @@ Header lines, section labels, and footers are ignored automatically."></textarea
   }
 
   document.getElementById('btn-gem-export').addEventListener('click', async () => {
+    closeDeckActionsMenu();
     if (!currentDeckPairs.length) return;
     const text = buildGemText(currentDeckPairs);
     try {
