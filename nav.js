@@ -314,6 +314,34 @@
     appLayout.appendChild(pageContent);
     document.body.appendChild(appLayout);
 
+    // Storage percentage display — shown in every page footer
+    (function () {
+      var u = 0;
+      try {
+        for (var k in localStorage) {
+          if (Object.prototype.hasOwnProperty.call(localStorage, k))
+            u += (k.length + localStorage[k].length) * 2;
+        }
+      } catch (e) {}
+      var pct = +(u / (5 * 1024 * 1024) * 100).toFixed(1);
+      var el = document.getElementById('storage-size');
+      if (!el) {
+        var footerEl = document.querySelector('footer');
+        if (footerEl) {
+          el = document.createElement('span');
+          el.id = 'storage-size';
+          el.style.marginLeft = '0.5rem';
+          footerEl.appendChild(el);
+        }
+      }
+      if (el) {
+        el.textContent = 'Storage: ' + pct + '%';
+        el.style.opacity = '0.65';
+        if (pct > 90) el.style.color = '#f87171';
+        else if (pct > 70) el.style.color = '#fbbf24';
+      }
+    })();
+
     // Morning routine reminder
     checkMorningReminder(pageContent);
 
