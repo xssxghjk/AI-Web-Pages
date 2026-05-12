@@ -5,7 +5,7 @@ window.PRESET_DECKS = [
     name: 'Briar-PEN',
     savedAt: '2026-05-12T00:00:00.000Z',
     preset: true,
-    cardCount: 49,
+    cardCount: 55,
     decklist: "Name: Brage\nHero: Briar\nFormat: Silver Age\n\nArena cards\n1x Beckoning Haunt\n1x Blade Beckoner Boots\n1x Blade Beckoner Helm\n1x Blade Beckoner Plating\n1x Garland of Spring\n1x Helm of Might and Magic\n1x Nullrune Boots\n1x Star Fall\n1x Swiftstrike Bracers\n\nDeck cards\n2x Arcane Polarity (red)\n2x Arcane Seeds // Life (red)\n2x Arcanic Shockwave (red)\n1x Electrify (red)\n2x Electrostatic Discharge (red)\n2x Entwine Lightning (red)\n2x Flittering Charge (red)\n1x Jack Be Nimble (red)\n2x Lightning Surge (red)\n2x Nimblism (red)\n2x Photon Rush (red)\n2x Ravenous Rabble (red)\n1x Rootbound Carapace (red)\n2x Scar for a Scar (red)\n2x Second Strike (red)\n2x Sigil of Suffering (red)\n2x Sizzle (red)\n1x Skyzyk (red)\n2x Snatch (red)\n2x Sprout Strength (red)\n2x Static Shock (red)\n2x Weave Lightning (red)\n1 Arcane Polarity (yellow)\n2x Flourish (yellow)\n1x Sigil of Voltaris (blue)\n\nMade with ❤️ at the FaBrary\nSee the full deck @ https://fabrary.net/decks/01KKVW6JK07DNVCGWXMED0KE9Z\n1 Bloodied Oval\n1 Scepter of Pain",
     sideboardGuide: [
       { id: "kayo", hero: "Kayo", rating: "favoured", goFirst: "second", note: "Keep D-React in arsenal if possible\nUse 1 blade beckoner early to not miss the value once claw attacks\nThreaten lethal as soon as possible, abuse breakpoints\nBe wary of pummel", cardsOutRaw: "1 Blade Beckoner Plating\n1 Helm of Might and Magic\n1 Nullrune Boots\n1 Swiftstrike Bracers\n2 Arcane Polarity (red)\n1 Electrify (red)\n1 Arcane Polarity (yellow)\n1 Bloodied Oval\n1 Scepter of Pain" },

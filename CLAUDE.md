@@ -21,28 +21,6 @@ npm test
 
 This runs all Playwright e2e tests across both desktop (`chromium`) and mobile (`mobile-chrome`) projects. All tests must pass before a push is made.
 
-## Pushing Changes
-
-Always merge directly into `main` and push. Do not open pull requests. The workflow is:
-
-```bash
-git fetch origin main
-git checkout main
-git merge --no-ff <feature-branch>
-# if conflicts arise, resolve every file manually, then:
-git add <resolved-files>
-git commit
-git push -u origin main
-```
-
-If you are already on main (e.g. working directly there), just commit and push:
-
-```bash
-git push -u origin main
-```
-
-Fix all conflicts yourself without asking for help — do not leave them unresolved.
-
 **Never force anything.** Do not use `--force`, `--force-with-lease`, `git reset --hard`, or any destructive git operation. Always resolve conflicts cleanly through a proper merge and commit.
 
 ## Tool Usage
