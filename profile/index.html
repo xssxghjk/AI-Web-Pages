@@ -866,8 +866,15 @@
       // Calories card
       var calVal = calAvg > 0 ? calAvg.toLocaleString() + ' kcal' : '—';
       var calSub = s.calDays > 0
-        ? s.calDays + '/' + wDays + ' days tracked' + (avgProt > 0 ? ' · ' + avgProt + 'g protein avg' : '')
+        ? s.calDays + '/' + wDays + ' days tracked'
         : 'no nutrition data';
+
+      // Protein card
+      var protVal = avgProt > 0 ? avgProt + 'g' : '—';
+      var protSub = s.calProteinDays > 0
+        ? s.calProteinDays + '/' + wDays + ' days tracked'
+        : 'no protein data';
+      var protCls = avgProt >= 150 ? 'green' : (avgProt > 0 ? 'accent' : '');
 
       // Goals card
       var activeGoals = Object.values(data.jGoals).filter(function(g) { return g && g.status === 'active'; });
@@ -883,6 +890,7 @@
         mkCard('Bouldering',    bldVal,  bldSub,  bldCls,  null),
         mkCard('Journal',       jVal,    jSub,    jCls,    null),
         mkCard('Avg Calories',  calVal,  calSub,  '',      null),
+        mkCard('Avg Protein',   protVal, protSub, protCls, null),
         mkCard('Active Goals',  goalVal, goalSub, goalCls, null),
       ].join('');
     }
@@ -905,6 +913,7 @@
       var weeksElapsed = mDaysElapsed / 7;
       var runsPerWeek  = s.runs > 0 && weeksElapsed > 0 ? Math.round(s.runs / weeksElapsed * 10) / 10 : 0;
       var calAvg = s.calDays ? Math.round(s.calTotal / s.calDays) : 0;
+      var avgProt = s.calProteinDays ? Math.round(s.calProteinTotal / s.calProteinDays) : 0;
       var journalRate = mDaysElapsed > 0 ? Math.round((s.journalMorning / mDaysElapsed) * 100) : 0;
 
       // Weight delta
@@ -953,6 +962,13 @@
             ? s.calDays + '/' + mDaysElapsed + ' days tracked this month'
             : 'no nutrition data',
           '', null),
+
+        mkCard('Avg Protein',
+          avgProt > 0 ? avgProt + 'g' : '—',
+          s.calProteinDays > 0
+            ? s.calProteinDays + '/' + mDaysElapsed + ' days tracked'
+            : 'no protein data',
+          avgProt >= 150 ? 'green' : (avgProt > 0 ? 'accent' : ''), null),
 
         mkCard('Weight',
           weightStr, weightSub, weightCls, null),
@@ -1016,9 +1032,16 @@
         mkCard('Avg Calories',
           calAvg > 0 ? calAvg.toLocaleString() + ' kcal' : '—',
           s.calDays > 0
-            ? s.calDays + ' days tracked' + (avgProt > 0 ? ' · ' + avgProt + 'g protein avg' : '')
+            ? s.calDays + ' days tracked'
             : 'no nutrition data',
           '', null),
+
+        mkCard('Avg Protein',
+          avgProt > 0 ? avgProt + 'g' : '—',
+          s.calProteinDays > 0
+            ? s.calProteinDays + ' days tracked'
+            : 'no protein data',
+          avgProt >= 150 ? 'green' : (avgProt > 0 ? 'accent' : ''), null),
 
         mkCard('Weight',
           weightStr, weightSub, weightCls, null),
