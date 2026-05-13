@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&display=swap">
   <script src="../nav.js"></script>
+  <script src="../activity-calc.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1450,10 +1451,7 @@
 
             // ── Process marathon workout ───────────────────────────────────
             let workoutCal = 0;
-            if (dayWorkout) {
-              if (dayWorkout.km && weightKg)        workoutCal = Math.round(weightKg * dayWorkout.km);
-              else if (dayWorkout.time && weightKg) workoutCal = Math.round(8.0 * weightKg * dayWorkout.time / 60);
-            }
+            if (dayWorkout) workoutCal = ActivityCalc.runningKcal(weightKg, dayWorkout.km, dayWorkout.time) || 0;
 
             // ── Process strength training ──────────────────────────────────
             const strengthEntryMap = strengthData.entries || {};
@@ -1472,21 +1470,13 @@
               const sidx = sched.indexOf(sdow);
               strengthSession = sidx >= 0 ? ST_TYPES[sidx] : { name: 'Strength', muscles: '' };
             }
-            // MET 3.0: conservative for strength training with rest periods
             let strengthCal = 0;
-            if (strengthSession) {
-              const sdur = (strengthEntry.duration || 60) / 60;
-              strengthCal = Math.round(3.0 * weightKg * sdur);
-            }
+            if (strengthSession) strengthCal = ActivityCalc.strengthKcal(weightKg, strengthEntry.duration) || 0;
 
             // ── Process bouldering ─────────────────────────────────────────
-            const boulderSession = boulderSessions.find(s => s.date === dateStr) || null;
-            // MET 2.0: very conservative — long rests between short active bursts
-            let boulderCal = 0;
-            if (boulderSession) {
-              const bdur = (boulderSession.duration || 90) / 60;
-              boulderCal = Math.round(2.0 * weightKg * bdur);
-            }
+            const daySessions  = boulderSessions.filter(s => s.date === dateStr);
+            const boulderSession = daySessions[0] || null;
+            const boulderCal   = ActivityCalc.boulderingKcal(weightKg, daySessions);
 
             // ── Format date label ──────────────────────────────────────────
             const [Y, Mo, D] = dateStr.split('-').map(Number);
