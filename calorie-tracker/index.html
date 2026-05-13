@@ -784,9 +784,14 @@ canvas { display: block; width: 100%; }
         <div class="dash-card-title">Weekly Overview</div>
         <div class="chart-legend">
           <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Calories</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Protein (g)</div>
         </div>
         <canvas id="chart-weekly" height="160"></canvas>
+        <div class="chart-subsection">
+          <div class="chart-legend" style="margin-bottom:6px">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Protein (g)</div>
+          </div>
+          <canvas id="chart-protein-weekly" height="110"></canvas>
+        </div>
         <div class="chart-subsection">
           <div class="chart-legend" style="margin-bottom:6px">
             <div class="legend-item"><div class="legend-dot" style="background:#c4864a"></div>Weight (kg)</div>
@@ -806,9 +811,14 @@ canvas { display: block; width: 100%; }
         </div>
         <div class="chart-legend">
           <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Calories</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Protein (g)</div>
         </div>
         <canvas id="chart-monthly" height="140"></canvas>
+        <div class="chart-subsection">
+          <div class="chart-legend" style="margin-bottom:6px">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Protein (g)</div>
+          </div>
+          <canvas id="chart-protein-monthly" height="110"></canvas>
+        </div>
         <div class="chart-subsection">
           <div class="chart-legend" style="margin-bottom:6px">
             <div class="legend-item"><div class="legend-dot" style="background:#c4864a"></div>Weight (kg)</div>
@@ -2298,9 +2308,7 @@ function drawChart(canvasId, data, opts = {}) {
   const n     = data.length;
   if (n === 0) return;
 
-  const maxCal  = Math.max(...data.map(d => d.cal),  1);
-  const maxProt = Math.max(...data.map(d => d.prot), 1);
-  const maxVal  = Math.max(maxCal, maxProt * 10);
+  const maxCal = Math.max(...data.map(d => d.cal), 1);
 
   ctx.clearRect(0, 0, W, H);
 
@@ -2321,29 +2329,17 @@ function drawChart(canvasId, data, opts = {}) {
   }
 
   const barGroupW = cW / n;
-  const barW      = Math.max(4, Math.min(barGroupW * 0.32, 18));
-  const gap       = Math.max(2, barGroupW * 0.06);
+  const barW      = Math.max(4, Math.min(barGroupW * 0.55, 24));
 
   data.forEach((d, i) => {
     const cx = pad.left + i * barGroupW + barGroupW / 2;
 
     // Cal bar
     const calH = d.cal > 0 ? Math.max(2, (d.cal / maxCal) * cH) : 0;
-    const cx1  = cx - barW - gap / 2;
     ctx.fillStyle = opts.calColor || '#c4864a';
     ctx.globalAlpha = d.hasData ? 0.85 : 0.2;
     ctx.beginPath();
-    ctx.roundRect(cx1, pad.top + cH - calH, barW, calH, [2, 2, 0, 0]);
-    ctx.fill();
-
-    // Prot bar (scaled for visual comparison: protein * 10)
-    const protScaled = d.prot * 10;
-    const protH = protScaled > 0 ? Math.max(2, (protScaled / maxCal) * cH) : 0;
-    const cx2   = cx + gap / 2;
-    ctx.fillStyle = opts.protColor || '#7ab87a';
-    ctx.globalAlpha = d.hasData ? 0.8 : 0.2;
-    ctx.beginPath();
-    ctx.roundRect(cx2, pad.top + cH - protH, barW, protH, [2, 2, 0, 0]);
+    ctx.roundRect(cx - barW / 2, pad.top + cH - calH, barW, calH, [2, 2, 0, 0]);
     ctx.fill();
     ctx.globalAlpha = 1;
 
@@ -2356,28 +2352,91 @@ function drawChart(canvasId, data, opts = {}) {
   });
 }
 
+function drawProteinChart(canvasId, data, opts = {}) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.style.width  = '';
+  canvas.style.height = '';
+  const W = canvas.offsetWidth;
+  if (!canvas.dataset.chartHeight) canvas.dataset.chartHeight = canvas.getAttribute('height') || '110';
+  const H = parseInt(canvas.dataset.chartHeight) || 110;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+
+  const pad  = { top: 12, right: 8, bottom: 28, left: 44 };
+  const cW   = W - pad.left - pad.right;
+  const cH   = H - pad.top  - pad.bottom;
+  const n    = data.length;
+  if (n === 0) return;
+
+  const maxProt = Math.max(...data.map(d => d.prot), 1);
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(58,48,37,0.8)';
+  ctx.lineWidth   = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + cH - (i / 4) * cH;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(pad.left + cW, y);
+    ctx.stroke();
+    const val = Math.round((i / 4) * maxProt);
+    ctx.fillStyle = '#5a5040';
+    ctx.font = '10px DM Serif Text, Georgia, serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(val + 'g', pad.left - 4, y + 3);
+  }
+
+  const barGroupW = cW / n;
+  const barW      = Math.max(4, Math.min(barGroupW * 0.55, 24));
+
+  data.forEach((d, i) => {
+    const cx    = pad.left + i * barGroupW + barGroupW / 2;
+    const protH = d.prot > 0 ? Math.max(2, (d.prot / maxProt) * cH) : 0;
+    ctx.fillStyle   = opts.protColor || '#7ab87a';
+    ctx.globalAlpha = d.hasData ? 0.8 : 0.2;
+    ctx.beginPath();
+    ctx.roundRect(cx - barW / 2, pad.top + cH - protH, barW, protH, [2, 2, 0, 0]);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    const label = opts.xLabel ? opts.xLabel(d, i) : d.date.slice(5);
+    ctx.fillStyle = '#5a5040';
+    ctx.font      = '9px DM Serif Text, Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, cx, H - pad.bottom + 12);
+  });
+}
+
 function drawWeeklyChart() {
   const data = getDailyTotals(7);
   const days  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  drawChart('chart-weekly', data, {
-    xLabel: (d) => {
-      const day = parseDate(d.date).getDay();
-      return days[day];
-    }
-  });
+  const xLabel = (d) => {
+    const day = parseDate(d.date).getDay();
+    return days[day];
+  };
+  drawChart('chart-weekly', data, { xLabel });
+  drawProteinChart('chart-protein-weekly', data, { xLabel });
   drawWeightSparkline('chart-weight-weekly', 7);
 }
 
 function drawMonthlyChart() {
   const data = getDailyTotals(monthlyRange);
-  drawChart('chart-monthly', data, {
-    xLabel: (d, i) => {
-      const total = data.length;
-      if (total <= 31) return d.date.slice(8);
-      if (i % 7 === 0) return d.date.slice(5);
-      return '';
-    }
-  });
+  const xLabel = (d, i) => {
+    const total = data.length;
+    if (total <= 31) return d.date.slice(8);
+    if (i % 7 === 0) return d.date.slice(5);
+    return '';
+  };
+  drawChart('chart-monthly', data, { xLabel });
+  drawProteinChart('chart-protein-monthly', data, { xLabel });
   drawWeightSparkline('chart-weight-monthly', monthlyRange);
 }
 
