@@ -2657,7 +2657,7 @@ function getBoulderingActivity(dateStr) {
     const details = daySessions.map(s => {
       const totalClimbs = GRADES.reduce((n,g) => n + (s.grades[g]||0), 0);
       const wavg = totalClimbs > 0 ? GRADES.reduce((n,g) => n + (s.grades[g]||0)*g, 0) / totalClimbs : 0;
-      const met = wavg <= 2 ? 3.5 : wavg <= 4 ? 4.5 : 5.5;
+      const met = wavg <= 2 ? 3.0 : wavg <= 4 ? 4.0 : 5.0;
       const duration = s.duration || 90;
       const kcal = w ? Math.round(met * w.kg * (duration / 60)) : null;
       return { totalClimbs, wavg, met, duration, durationEstimated: !s.duration, kcal };
