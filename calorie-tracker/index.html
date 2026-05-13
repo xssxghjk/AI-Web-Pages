@@ -2284,6 +2284,20 @@ function getDailyTotals(days) {
   return result;
 }
 
+function getWeeklyAverages(days) {
+  const daily = getDailyTotals(days);
+  const weeks = [];
+  for (let i = 0; i < daily.length; i += 7) {
+    const chunk = daily.slice(i, i + 7);
+    const logged = chunk.filter(d => d.hasData);
+    const hasData = logged.length > 0;
+    const cal  = hasData ? Math.round(logged.reduce((s, d) => s + d.cal,  0) / logged.length) : 0;
+    const prot = hasData ? Math.round(logged.reduce((s, d) => s + d.prot, 0) / logged.length) : 0;
+    weeks.push({ date: chunk[0].date, cal, prot, hasData });
+  }
+  return weeks;
+}
+
 function drawChart(canvasId, data, opts = {}) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
@@ -2428,12 +2442,11 @@ function drawWeeklyChart() {
 }
 
 function drawMonthlyChart() {
-  const data = getDailyTotals(monthlyRange);
-  const xLabel = (d, i) => {
-    const total = data.length;
-    if (total <= 31) return d.date.slice(8);
-    if (i % 7 === 0) return d.date.slice(5);
-    return '';
+  const data = getWeeklyAverages(monthlyRange);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const xLabel = (d) => {
+    const date = parseDate(d.date);
+    return months[date.getMonth()] + ' ' + date.getDate();
   };
   drawChart('chart-monthly', data, { xLabel });
   drawProteinChart('chart-protein-monthly', data, { xLabel });
