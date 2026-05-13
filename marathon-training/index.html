@@ -815,8 +815,25 @@
       <div class="section-sub" id="dashSubtitle">Your training at a glance</div>
     </div>
 
-    <!-- Today's Workout -->
-    <div id="todaySection"></div>
+    <!-- Next Week -->
+    <div class="card" id="thisWeekCard">
+      <div class="card-title" id="thisWeekTitle">Next Week</div>
+      <div id="thisWeekGrid"></div>
+    </div>
+
+    <!-- Overall Progress -->
+    <div class="card">
+      <div class="card-title">Overall Progress</div>
+      <div class="progress-label">
+        <span id="progWeekLabel">Week 1 of 20</span>
+        <span id="progPct">0%</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progBar" style="width:0%"></div></div>
+      <div class="progress-label" style="margin-top:6px;">
+        <span id="phaseLabel" style="color:var(--accent)"></span>
+        <span id="raceCountdown" style="color:var(--accent2)"></span>
+      </div>
+    </div>
 
     <!-- Race Countdown Hero -->
     <div class="race-hero" id="raceHero">
@@ -835,28 +852,8 @@
       </div>
     </div>
 
-    <!-- Stats -->
+    <!-- Stats Tiles -->
     <div class="stats-grid" id="statsGrid"></div>
-
-    <!-- Overall Progress -->
-    <div class="card">
-      <div class="card-title">Overall Progress</div>
-      <div class="progress-label">
-        <span id="progWeekLabel">Week 1 of 20</span>
-        <span id="progPct">0%</span>
-      </div>
-      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progBar" style="width:0%"></div></div>
-      <div class="progress-label" style="margin-top:6px;">
-        <span id="phaseLabel" style="color:var(--accent)"></span>
-        <span id="raceCountdown" style="color:var(--accent2)"></span>
-      </div>
-    </div>
-
-    <!-- This Week -->
-    <div class="card" id="thisWeekCard">
-      <div class="card-title">This Week</div>
-      <div id="thisWeekGrid"></div>
-    </div>
   </div>
 
   <!-- CALENDAR TAB -->
@@ -890,7 +887,6 @@
         <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--danger); opacity:0.7"></span> Skipped</span>
         <span class="heatmap-label"><span class="heatmap-dot" style="background:#1e3f6e;border:1px solid #2a5a90"></span> Paused</span>
         <span class="heatmap-label"><span class="heatmap-dot" style="background:rgba(196,16,46,0.35);border:1px solid rgba(196,16,46,0.55)"></span> Missed</span>
-        <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--border)"></span> Rest</span>
         <span class="heatmap-label"><span class="heatmap-dot" style="background:var(--surface2); border:1px solid var(--border)"></span> Upcoming</span>
       </div>
     </div>
@@ -1678,8 +1674,15 @@ function renderThisWeek() {
   const t = today();
   const wd = getWeekDayForDate(t);
   if (!wd) return;
-  const { weekNum } = wd;
-  renderWeekGrid(document.getElementById('thisWeekGrid'), weekNum, true);
+  const currentWeekNum = wd.weekNum;
+  const nextWeekNum = currentWeekNum < 20 ? currentWeekNum + 1 : currentWeekNum;
+  const titleEl = document.getElementById('thisWeekTitle');
+  if (titleEl) {
+    titleEl.textContent = currentWeekNum < 20
+      ? `Next Week — Week ${nextWeekNum}`
+      : `This Week — Week ${currentWeekNum}`;
+  }
+  renderWeekGrid(document.getElementById('thisWeekGrid'), nextWeekNum, true);
 }
 
 function renderWeekGrid(container, weekNum, compact) {
@@ -1869,13 +1872,13 @@ function renderHeatmap() {
     html += `<div class="heatmap-week" onclick="openWeekDetail(${w})" title="Week ${w} — click for details" style="cursor:pointer;border-radius:4px;transition:transform 0.1s;" onmouseenter="this.style.transform='scale(1.12)'" onmouseleave="this.style.transform='scale(1)'">`;
     for (let d = 0; d < 7; d++) {
       const workout = PLAN[w-1][d];
+      if (workout.type === 'rest') continue;
       const date = getDateForWeekDay(w, d);
       const dateStr = dateKey(date);
       const dd = getDayData(dateStr);
       const isFuture = date > t;
       let cls = '';
-      if (workout.type === 'rest') cls = 'hm-rest';
-      else if (isFuture) cls = 'hm-future';
+      if (isFuture) cls = 'hm-future';
       else if (dd?.status === 'completed') cls = 'hm-completed';
       else if (dd?.status === 'skipped') cls = 'hm-skipped';
       else if (dd?.status === 'modified') cls = 'hm-modified';
@@ -1883,7 +1886,7 @@ function renderHeatmap() {
       else cls = 'hm-missed';
 
       const title = `W${w} ${DOW[d]}: ${workout.short}`;
-      html += `<div class="heatmap-cell ${cls}" title="${title}"></div>`; // individual cells non-clickable
+      html += `<div class="heatmap-cell ${cls}" title="${title}"></div>`;
     }
     html += '</div>';
   }
@@ -1923,8 +1926,7 @@ function renderProgress() {
   const daysToRace = Math.max(0, Math.ceil((raceDate - today()) / 86400000));
   const totalWorkouts = PLAN.flat().filter(w => w.type !== 'rest').length;
 
-  let html = buildProgressCharts();
-  html += `
+  let html = `
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-value">${s.totalCompleted + s.totalModified}</div>
@@ -1942,7 +1944,8 @@ function renderProgress() {
         <div class="stat-value">${s.totalTime}m</div>
         <div class="stat-label">Total Time</div>
       </div>
-    </div>
+    </div>`;
+  html += buildProgressCharts();
   `;
 
   // Phase progress
@@ -2029,7 +2032,6 @@ function switchTab(tab) {
 function renderTab(tab) {
   if (tab === 'dashboard') {
     renderStats();
-    renderToday();
     renderThisWeek();
   } else if (tab === 'calendar') {
     renderWeekProgress();
@@ -2440,7 +2442,7 @@ function closeWeekDetailOutside(e) {
 // PROGRESS CHARTS (SVG)
 // ============================================================
 function buildBarChartSVG(bars, opts) {
-  const W = 480, H = 130;
+  const W = 480, H = 200;
   const padL = 32, padR = 8, padT = 8, padB = 28;
   const cW = W - padL - padR, cH = H - padT - padB;
   const N = bars.length;
@@ -2477,9 +2479,9 @@ function buildBarChartSVG(bars, opts) {
 
 function buildLineChartSVG(points, opts) {
   const valid = points.filter(p => p.value !== null && !isNaN(p.value));
-  if (valid.length < 2) return '<div style="color:var(--text2);font-size:13px;padding:8px 0;">Not enough run data with km tracked yet.</div>';
+  if (valid.length < 2) return '<div style="color:var(--text2);font-size:13px;padding:8px 0;">Not enough run data with km and time tracked yet.</div>';
 
-  const W = 480, H = 130;
+  const W = 480, H = 200;
   const padL = 36, padR = 8, padT = 10, padB = 28;
   const cW = W - padL - padR, cH = H - padT - padB;
   const N = points.length;
@@ -2531,12 +2533,12 @@ function buildProgressCharts() {
   const maxWeek = wd ? wd.weekNum : 0;
   if (maxWeek < 1) return '';
 
-  const kmData = [], timeData = [], paceData = [];
+  const kmData = [], timeData = [], speedData = [];
   for (let w = 1; w <= maxWeek; w++) {
     const s = calcWeekStats(w);
     kmData.push({ weekNum: w, value: s.totalKm || 0 });
     timeData.push({ weekNum: w, value: s.totalTime || 0 });
-    paceData.push({ weekNum: w, value: s.avgPace || null });
+    speedData.push({ weekNum: w, value: s.avgSpeed || null });
   }
 
   const maxKm = Math.max(...kmData.map(d => d.value), 0.001);
@@ -2544,7 +2546,7 @@ function buildProgressCharts() {
 
   const kmChart = buildBarChartSVG(kmData, { maxVal: maxKm, color: 'var(--run)', formatY: v => Math.round(v) + 'km' });
   const timeChart = buildBarChartSVG(timeData, { maxVal: maxTime, color: 'var(--cross)', formatY: v => Math.round(v) + 'm' });
-  const paceChart = buildLineChartSVG(paceData, { color: 'var(--warning)', formatY: v => fmtPace(v) });
+  const speedChart = buildLineChartSVG(speedData, { color: 'var(--warning)', formatY: v => v.toFixed(1) + ' k/h' });
 
   return `
     <div class="card">
@@ -2558,9 +2560,9 @@ function buildProgressCharts() {
       ${timeChart}
     </div>
     <div class="card">
-      <div class="card-title">Avg Run Pace</div>
-      <div style="font-size:11px;color:var(--text2);margin:-8px 0 10px;">Min/km per week from logged runs — lower is faster</div>
-      ${paceChart}
+      <div class="card-title">Avg Run Speed</div>
+      <div style="font-size:11px;color:var(--text2);margin:-8px 0 10px;">km/h per week from logged runs — higher is faster</div>
+      ${speedChart}
     </div>
   `;
 }
