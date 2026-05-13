@@ -2408,12 +2408,11 @@ function renderTopFoods() {
   Object.values(log).forEach(entries => {
     entries.forEach(e => {
       const k = e.name.toLowerCase();
-      if (!freq[k]) freq[k] = { name: e.name, count: 0, totalCal: 0 };
-      freq[k].count++;
-      freq[k].totalCal += e.calories || 0;
+      if (!freq[k]) freq[k] = { name: e.name, count: 0 };
+      freq[k].count += (e.quantity || 1);
     });
   });
-  const sorted = Object.values(freq).sort((a, b) => b.totalCal - a.totalCal).slice(0, 7);
+  const sorted = Object.values(freq).sort((a, b) => b.count - a.count).slice(0, 7);
   const container = document.getElementById('top-foods-list');
   if (sorted.length === 0) {
     container.innerHTML = '<div class="empty-state" style="padding:20px 0">No data yet.</div>';
@@ -2424,7 +2423,6 @@ function renderTopFoods() {
       <span class="top-food-rank">#${i + 1}</span>
       <span class="top-food-name">${esc(f.name)}</span>
       <span class="top-food-count">${f.count}×</span>
-      <span class="top-food-cal">${Math.round(f.totalCal)} kcal</span>
     </div>`).join('');
 }
 
