@@ -882,7 +882,7 @@
       var boulderSession = (data.boulder || []).find(function(s) { return s && s.date === iso; }) || null;
       var boulderCal = 0;
       if (boulderSession) {
-        boulderCal = Math.round(2.0 * weightKg * ((boulderSession.duration || 90) / 60));
+        boulderCal = Math.round(1.7 * weightKg * ((boulderSession.duration || 90) / 60));
       }
 
       // Journal

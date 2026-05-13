@@ -1481,11 +1481,11 @@
 
             // ── Process bouldering ─────────────────────────────────────────
             const boulderSession = boulderSessions.find(s => s.date === dateStr) || null;
-            // MET 2.0: very conservative — long rests between short active bursts
+            // effective MET 1.7: ~1/5 active climbing + ~4/5 rest
             let boulderCal = 0;
             if (boulderSession) {
               const bdur = (boulderSession.duration || 90) / 60;
-              boulderCal = Math.round(2.0 * weightKg * bdur);
+              boulderCal = Math.round(1.7 * weightKg * bdur);
             }
 
             // ── Format date label ──────────────────────────────────────────
