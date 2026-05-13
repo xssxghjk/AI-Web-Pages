@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calorie Tracker</title>
 <script src="../nav.js"></script>
+<script src="../activity-calc.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -2643,7 +2644,7 @@ function getRunningActivity(dateStr) {
     const day = data.days[dateStr];
     if (!day || !day.km) return null;
     const w = getClosestWeightForDate(dateStr);
-    return { hasData: true, weight: w, km: day.km, kcal: w ? Math.round(w.kg * day.km) : null };
+    return { hasData: true, weight: w, km: day.km, kcal: ActivityCalc.runningKcal(w?.kg, day.km) };
   } catch { return null; }
 }
 
@@ -2653,15 +2654,7 @@ function getBoulderingActivity(dateStr) {
     const daySessions = sessions.filter(s => s.date === dateStr);
     if (daySessions.length === 0) return null;
     const w = getClosestWeightForDate(dateStr);
-    const GRADES = [1,2,3,4,5,6,7];
-    const details = daySessions.map(s => {
-      const totalClimbs = GRADES.reduce((n,g) => n + (s.grades[g]||0), 0);
-      const wavg = totalClimbs > 0 ? GRADES.reduce((n,g) => n + (s.grades[g]||0)*g, 0) / totalClimbs : 0;
-      const met = wavg <= 2 ? 1.6 : wavg <= 4 ? 1.8 : 2.0;
-      const duration = s.duration || 90;
-      const kcal = w ? Math.round(met * w.kg * (duration / 60)) : null;
-      return { totalClimbs, wavg, met, duration, durationEstimated: !s.duration, kcal };
-    });
+    const details = daySessions.map(s => ActivityCalc.boulderingSessionKcal(w?.kg, s));
     const kcal = w ? details.reduce((n, d) => n + (d.kcal || 0), 0) : null;
     return { hasData: true, weight: w, details, kcal };
   } catch { return null; }
@@ -2679,9 +2672,9 @@ function getWorkoutActivity(dateStr) {
     const dow = new Date(dateStr + 'T00:00:00').getDay();
     const sessIdx = schedule.indexOf(dow);
     const sessionName = sessIdx >= 0 ? SESSION_NAMES[sessIdx] : 'Strength';
-    const met = 4.0;
+    const met = ActivityCalc.STRENGTH_MET;
     const duration = entry.duration || 60;
-    const kcal = w ? Math.round(met * w.kg * (duration / 60)) : null;
+    const kcal = ActivityCalc.strengthKcal(w?.kg, entry.duration);
     return { hasData: true, weight: w, sessionName, met, duration, durationEstimated: !entry.duration, kcal };
   } catch { return null; }
 }
@@ -2792,7 +2785,7 @@ function openSportDetails(type, date) {
       <div class="sport-detail-formula">
         <div class="sport-detail-formula-lbl">Formula</div>
         <div class="sport-detail-formula-expr">kcal = MET × weight (kg) × duration (h)</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5">MET = 4.0 (general strength/resistance training). Default duration: 60 min if not logged.</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5">MET = 3.0 (resistance training, includes rest periods). Default duration: 60 min if not logged.</div>
       </div>
       ${w ? `<table class="sport-detail-table">
         <thead><tr><th>Session</th><th>MET</th><th>Duration</th><th>Weight</th><th>kcal</th></tr></thead>

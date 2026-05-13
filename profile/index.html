@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>xssxghjk — Dashboard</title>
   <script src="../nav.js"></script>
+  <script src="../activity-calc.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -856,10 +857,7 @@
         runEntry = Object.values(mDays).find(function(d) { return d && d.completedDate === iso; }) || null;
       }
       var runCal = 0;
-      if (runEntry) {
-        if (runEntry.km)   runCal = Math.round(weightKg * parseFloat(runEntry.km));
-        else if (runEntry.time) runCal = Math.round(8.0 * weightKg * parseFloat(runEntry.time) / 60);
-      }
+      if (runEntry) runCal = ActivityCalc.runningKcal(weightKg, runEntry.km ? parseFloat(runEntry.km) : null, runEntry.time ? parseFloat(runEntry.time) : null) || 0;
 
       // Strength
       var sched = (data.workout && Array.isArray(data.workout.schedule) && data.workout.schedule.length === 3)
@@ -874,16 +872,12 @@
       var strengthDone   = !!(strengthEntry && strengthEntry.status === 'done');
       var strengthType   = strengthDone && isStrengthDay ? ST_TYPES_DAY[sidx] : (strengthDone ? 'Strength' : null);
       var strengthCal    = 0;
-      if (strengthDone) {
-        strengthCal = Math.round(3.0 * weightKg * ((strengthEntry.duration || 60) / 60));
-      }
+      if (strengthDone) strengthCal = ActivityCalc.strengthKcal(weightKg, strengthEntry.duration) || 0;
 
       // Bouldering
-      var boulderSession = (data.boulder || []).find(function(s) { return s && s.date === iso; }) || null;
-      var boulderCal = 0;
-      if (boulderSession) {
-        boulderCal = Math.round(1.7 * weightKg * ((boulderSession.duration || 90) / 60));
-      }
+      var boulderDaySessions = (data.boulder || []).filter(function(s) { return s && s.date === iso; });
+      var boulderSession = boulderDaySessions[0] || null;
+      var boulderCal = ActivityCalc.boulderingKcal(weightKg, boulderDaySessions) || 0;
 
       // Journal
       var dayEntry  = (data.jEntries || {})[iso] || {};
@@ -1485,10 +1479,7 @@
           var activeCats = MEAL_ORDER.filter(function(c) { return grouped[c] && grouped[c].length > 0; });
 
           var workoutCal = 0;
-          if (dayWorkout) {
-            if (dayWorkout.km && weightKg) workoutCal = Math.round(weightKg * dayWorkout.km);
-            else if (dayWorkout.time && weightKg) workoutCal = Math.round(8.0 * weightKg * dayWorkout.time / 60);
-          }
+          if (dayWorkout) workoutCal = ActivityCalc.runningKcal(weightKg, dayWorkout.km || null, dayWorkout.time || null) || 0;
 
           var strengthEntryMap = strengthData.entries || {};
           var strengthEntry    = strengthEntryMap[dateStr] || null;
@@ -1506,11 +1497,11 @@
             strengthSession = ssidx >= 0 ? ST_TYPES[ssidx] : { name: 'Strength', muscles: '' };
           }
           var strengthCal = 0;
-          if (strengthSession) strengthCal = Math.round(3.0 * weightKg * ((strengthEntry.duration || 60) / 60));
+          if (strengthSession) strengthCal = ActivityCalc.strengthKcal(weightKg, strengthEntry.duration) || 0;
 
-          var boulderSession = boulderSessions.find(function(s) { return s.date === dateStr; }) || null;
-          var boulderCal = 0;
-          if (boulderSession) boulderCal = Math.round(2.0 * weightKg * ((boulderSession.duration || 90) / 60));
+          var boulderDaySessions2 = boulderSessions.filter(function(s) { return s.date === dateStr; });
+          var boulderSession = boulderDaySessions2[0] || null;
+          var boulderCal = ActivityCalc.boulderingKcal(weightKg, boulderDaySessions2) || 0;
 
           var dtParts  = dateStr.split('-').map(Number);
           var dt       = new Date(dtParts[0], dtParts[1]-1, dtParts[2]);
