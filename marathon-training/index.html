@@ -815,6 +815,9 @@
       <div class="section-sub" id="dashSubtitle">Your training at a glance</div>
     </div>
 
+    <!-- Today's Plan (first tile) -->
+    <div id="todaySection"></div>
+
     <!-- Next Week -->
     <div class="card" id="thisWeekCard">
       <div class="card-title" id="thisWeekTitle">Next Week</div>
@@ -1637,9 +1640,14 @@ function renderToday() {
   }
 
   const intervals = workout.type === 'run' ? parseIntervals(workout.desc) : null;
-  const timerBtnHtml = intervals
-    ? `<button class="btn-checkin" onclick="openTimerForWorkout(${intervals.runDuration},${intervals.walkDuration},${intervals.reps})" style="width:100%;margin-bottom:10px;border-color:var(--success);color:var(--success);background:rgba(81,207,102,0.08);">Interval Timer · ${fmtDur(intervals.runDuration)} run / ${fmtDur(intervals.walkDuration)} walk × ${intervals.reps}</button>`
-    : '';
+  let timerBtnHtml = '';
+  if (intervals) {
+    timerBtnHtml = `<button class="btn-checkin" onclick="openTimerForWorkout(${intervals.runDuration},${intervals.walkDuration},${intervals.reps})" style="width:100%;margin-bottom:10px;border-color:var(--success);color:var(--success);background:rgba(81,207,102,0.08);">&#9654; Start Interval Timer · ${fmtDur(intervals.runDuration)} run / ${fmtDur(intervals.walkDuration)} walk × ${intervals.reps}</button>`;
+  } else if (workout.type === 'run' || workout.type === 'race') {
+    const targetSecs = parseWorkoutDuration(workout.desc);
+    const label = targetSecs > 0 ? `&#9654; Start Timer · ${Math.round(targetSecs/60)} min` : '&#9654; Start Stopwatch';
+    timerBtnHtml = `<button class="btn-checkin" onclick="openStopwatch(${targetSecs})" style="width:100%;margin-bottom:10px;border-color:var(--success);color:var(--success);background:rgba(81,207,102,0.08);">${label}</button>`;
+  }
 
   sec.innerHTML = `
     <div class="today-card">
@@ -1649,10 +1657,10 @@ function renderToday() {
       ${statusHtml}
       ${timerBtnHtml}
       <div class="checkin-buttons">
-        <button class="btn-checkin ${dd?.status === 'completed' ? 'active-completed' : ''}" onclick="quickCheckin('completed')">Completed</button>
-        <button class="btn-checkin ${dd?.status === 'skipped' ? 'active-skipped' : ''}" onclick="quickCheckin('skipped')">Skipped</button>
-        <button class="btn-checkin ${dd?.status === 'modified' ? 'active-modified' : ''}" onclick="quickCheckin('modified')">Modified</button>
-        <button class="btn-checkin" onclick="openDayModal(${weekNum}, ${dayOfWeek})" style="border-color:var(--accent);color:var(--accent);">Add Notes</button>
+        <button class="btn-checkin ${dd?.status === 'completed' ? 'active-completed' : ''}" onclick="quickCheckin('completed')">&#10003; Completed</button>
+        <button class="btn-checkin ${dd?.status === 'skipped' ? 'active-skipped' : ''}" onclick="quickCheckin('skipped')">&#10007; Skipped</button>
+        <button class="btn-checkin ${dd?.status === 'modified' ? 'active-modified' : ''}" onclick="quickCheckin('modified')">&#8764; Modified</button>
+        <button class="btn-checkin" onclick="openDayModal(${weekNum}, ${dayOfWeek})" style="border-color:var(--accent);color:var(--accent);">&#9998; Add Notes</button>
       </div>
     </div>
   `;
@@ -2030,6 +2038,7 @@ function switchTab(tab) {
 
 function renderTab(tab) {
   if (tab === 'dashboard') {
+    renderToday();
     renderStats();
     renderThisWeek();
   } else if (tab === 'calendar') {
@@ -2178,6 +2187,17 @@ function fmtDur(secs) {
   return secs % 60 === 0 ? `${secs / 60}min` : `${secs}sec`;
 }
 
+function parseWorkoutDuration(desc) {
+  // "105-110 min" → average; "30 min" → 30; "10/20/10" → 40 min; else 0
+  const rangeM = desc.match(/(\d+)\s*[-–]\s*(\d+)\s*min/i);
+  if (rangeM) return Math.round((parseInt(rangeM[1]) + parseInt(rangeM[2])) / 2) * 60;
+  const segM = desc.match(/\b(\d+)\/(\d+)\/(\d+)\b/);
+  if (segM) return (parseInt(segM[1]) + parseInt(segM[2]) + parseInt(segM[3])) * 60;
+  const minM = desc.match(/\b(\d+)\s*min\b/i);
+  if (minM) return parseInt(minM[1]) * 60;
+  return 0;
+}
+
 let timerInterval = null;
 let timerState = null;
 let wakeLock = null;
@@ -2209,8 +2229,34 @@ function openTimerForWorkout(runSec, walkSec, reps) {
   playBeep('run');
 }
 
+function openStopwatch(targetSecs) {
+  timerState = { phase: 'stopwatch', elapsed: 0, target: targetSecs, paused: false };
+  document.getElementById('timerSummary').textContent =
+    targetSecs > 0 ? `Target: ${Math.round(targetSecs / 60)} min` : 'Stopwatch';
+  document.getElementById('btnTimerPause').textContent = 'Pause';
+  document.getElementById('btnTimerPause').disabled = false;
+  document.getElementById('timerModal').classList.remove('hidden');
+  updateTimerDisplay();
+  requestWakeLock();
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(timerTick, 1000);
+}
+
 function timerTick() {
   if (!timerState || timerState.paused) return;
+
+  if (timerState.phase === 'stopwatch') {
+    timerState.elapsed++;
+    if (timerState.target > 0 && timerState.elapsed >= timerState.target) {
+      clearInterval(timerInterval); timerInterval = null;
+      timerState.phase = 'done';
+      playBeep('done');
+      releaseWakeLock();
+    }
+    updateTimerDisplay();
+    return;
+  }
+
   timerState.timeLeft--;
 
   if (timerState.timeLeft === 15) playBeep('warn');
@@ -2244,11 +2290,34 @@ function updateTimerDisplay() {
   const s = timerState;
   const card = document.getElementById('timerCard');
 
+  if (s.phase === 'stopwatch') {
+    card.className = 'timer-card';
+    document.getElementById('timerPhaseLabel').textContent = s.target > 0 ? 'WORKOUT' : 'STOPWATCH';
+    const m = Math.floor(s.elapsed / 60), sc = s.elapsed % 60;
+    document.getElementById('timerTime').textContent = `${m}:${String(sc).padStart(2, '0')}`;
+    if (s.target > 0) {
+      const remaining = Math.max(0, s.target - s.elapsed);
+      const rm = Math.floor(remaining / 60), rs = remaining % 60;
+      document.getElementById('timerRepLabel').textContent = `${rm}:${String(rs).padStart(2,'0')} remaining`;
+      document.getElementById('timerProgressFill').style.width = (s.elapsed / s.target * 100) + '%';
+    } else {
+      document.getElementById('timerRepLabel').textContent = '';
+      document.getElementById('timerProgressFill').style.width = '0%';
+    }
+    document.getElementById('btnTimerPause').disabled = false;
+    return;
+  }
+
   if (s.phase === 'done') {
     card.className = 'timer-card phase-done';
     document.getElementById('timerPhaseLabel').textContent = 'Workout Complete';
     document.getElementById('timerTime').textContent = 'Done!';
-    document.getElementById('timerRepLabel').textContent = `${s.totalReps} reps completed`;
+    if (s.totalReps !== undefined) {
+      document.getElementById('timerRepLabel').textContent = `${s.totalReps} reps completed`;
+    } else {
+      const m = Math.floor(s.elapsed / 60), sc = s.elapsed % 60;
+      document.getElementById('timerRepLabel').textContent = `${m}:${String(sc).padStart(2,'0')} elapsed`;
+    }
     document.getElementById('timerProgressFill').style.width = '100%';
     document.getElementById('btnTimerPause').disabled = true;
     return;
