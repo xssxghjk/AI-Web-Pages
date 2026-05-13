@@ -183,6 +183,14 @@
       text-align: center;
       letter-spacing: 0.03em;
     }
+    .nav-fraction {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.5rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      margin-top: 1px;
+    }
 
     /* ── STATS GRID ── */
     .stats-section {
@@ -703,6 +711,38 @@
       var m = ((total % 12) + 12) % 12;
       return y + '-' + pad(m + 1) + '-01';
     }
+    function getTimeFraction(tab, offset) {
+      if (tab === 'day') return null;
+      var today = new Date(); today.setHours(0,0,0,0);
+      if (tab === 'week') {
+        var since = new Date(offsetWeekStart(offset || 0) + 'T00:00:00');
+        var until = new Date(since); until.setDate(since.getDate() + 6);
+        var end = until < today ? until : today;
+        var elapsed = Math.round((end - since) / 86400000) + 1;
+        return elapsed + '/7 days';
+      }
+      if (tab === 'month') {
+        var sinceStr = offsetMonthStart(offset || 0);
+        var since = new Date(sinceStr + 'T00:00:00');
+        var parts = sinceStr.split('-').map(Number);
+        var lastDay = new Date(parts[0], parts[1], 0);
+        var end = lastDay < today ? lastDay : today;
+        var elapsed = Math.round((end - since) / 86400000) + 1;
+        return elapsed + '/' + lastDay.getDate() + ' days';
+      }
+      if (tab === 'year') {
+        var yr = today.getFullYear() + (offset || 0);
+        var since = new Date(yr + '-01-01T00:00:00');
+        var until = new Date(yr + '-12-31T00:00:00');
+        var isLeap = (yr % 4 === 0 && yr % 100 !== 0) || (yr % 400 === 0);
+        var total = isLeap ? 366 : 365;
+        var end = until < today ? until : today;
+        var elapsed = Math.round((end - since) / 86400000) + 1;
+        return elapsed + '/' + total + ' days';
+      }
+      return null;
+    }
+
     function getPeriodLabel(tab, offset) {
       var MON  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       var FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1829,7 +1869,10 @@
     var TAB_LABELS = { day: 'Daily Report', week: 'Weekly Report', month: 'Monthly Report', year: 'Year Report' };
 
     function updateNav() {
-      document.getElementById('nav-label').textContent = getPeriodLabel(currentTab, currentOffset);
+      var label = getPeriodLabel(currentTab, currentOffset);
+      var fraction = getTimeFraction(currentTab, currentOffset);
+      var el = document.getElementById('nav-label');
+      el.innerHTML = esc(label) + (fraction ? '<span class="nav-fraction">' + esc(fraction) + '</span>' : '');
       document.getElementById('nav-next').disabled = currentOffset >= 0;
     }
 
