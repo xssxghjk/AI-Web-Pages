@@ -792,7 +792,6 @@
 
 <nav class="nav-tabs" id="navTabs">
   <div class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</div>
-  <div class="nav-tab" data-tab="calendar" onclick="switchTab('calendar')">This Week</div>
   <div class="nav-tab" data-tab="heatmap" onclick="switchTab('heatmap')">Activity</div>
   <div class="nav-tab" data-tab="progress" onclick="switchTab('progress')">Progress</div>
 </nav>
@@ -815,14 +814,11 @@
       <div class="section-sub" id="dashSubtitle">Your training at a glance</div>
     </div>
 
-    <!-- Today's Plan (first tile) -->
-    <div id="todaySection"></div>
+    <!-- This Week -->
+    <div id="weekProgress"></div>
 
-    <!-- Next Week -->
-    <div class="card" id="thisWeekCard">
-      <div class="card-title" id="thisWeekTitle">Next Week</div>
-      <div id="thisWeekGrid"></div>
-    </div>
+    <!-- Today's Plan -->
+    <div id="todaySection"></div>
 
     <!-- Overall Progress -->
     <div class="card">
@@ -857,22 +853,6 @@
 
     <!-- Stats Tiles -->
     <div class="stats-grid" id="statsGrid"></div>
-  </div>
-
-  <!-- CALENDAR TAB -->
-  <div id="tab-calendar" class="hidden">
-    <div class="section-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-      <div>
-        <div class="section-title">Week Progress</div>
-        <div class="section-sub" id="calendarSub">Current training week</div>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center;padding-top:4px;">
-        <button class="btn btn-ghost btn-sm" id="btnPrevWeek" onclick="navCalendarWeek(-1)">&#8592; Prev</button>
-        <button class="btn btn-ghost btn-sm" id="btnTodayWeek" onclick="resetCalendarWeek()">Today</button>
-        <button class="btn btn-ghost btn-sm" id="btnNextWeek" onclick="navCalendarWeek(1)">Next &#8594;</button>
-      </div>
-    </div>
-    <div id="weekProgress"></div>
   </div>
 
   <!-- HEATMAP TAB -->
@@ -988,7 +968,6 @@
     <div id="weekDetailBody"></div>
     <div class="modal-footer" style="margin-top:16px;">
       <button class="btn btn-ghost" onclick="document.getElementById('weekDetailModal').classList.add('hidden')">Close</button>
-      <button class="btn btn-ghost" id="weekDetailCalBtn">View in Calendar</button>
     </div>
   </div>
 </div>
@@ -1678,21 +1657,6 @@ function quickCheckin(status) {
   render();
 }
 
-function renderThisWeek() {
-  const t = today();
-  const wd = getWeekDayForDate(t);
-  if (!wd) return;
-  const currentWeekNum = wd.weekNum;
-  const nextWeekNum = currentWeekNum < 20 ? currentWeekNum + 1 : currentWeekNum;
-  const titleEl = document.getElementById('thisWeekTitle');
-  if (titleEl) {
-    titleEl.textContent = currentWeekNum < 20
-      ? `Next Week — Week ${nextWeekNum}`
-      : `This Week — Week ${currentWeekNum}`;
-  }
-  renderWeekGrid(document.getElementById('thisWeekGrid'), nextWeekNum, true);
-}
-
 function renderWeekGrid(container, weekNum, compact) {
   const t = today();
   let html = '<div class="week-grid-scroll"><div class="week-grid">';
@@ -1748,8 +1712,8 @@ function renderWeekProgress() {
   const weekEnd = getDateForWeekDay(weekNum, 6);
   const isCurrentWeek = currentWeekNum === weekNum;
 
-  document.getElementById('calendarSub').textContent =
-    `Week ${weekNum} of 20 — ${formatDate(weekStart)} to ${formatDate(weekEnd)}`;
+  const calSub = document.getElementById('calendarSub');
+  if (calSub) calSub.textContent = `Week ${weekNum} of 20 — ${formatDate(weekStart)} to ${formatDate(weekEnd)}`;
 
   const btnPrev = document.getElementById('btnPrevWeek');
   const btnNext = document.getElementById('btnNextWeek');
@@ -2038,11 +2002,9 @@ function switchTab(tab) {
 
 function renderTab(tab) {
   if (tab === 'dashboard') {
+    renderWeekProgress();
     renderToday();
     renderStats();
-    renderThisWeek();
-  } else if (tab === 'calendar') {
-    renderWeekProgress();
   } else if (tab === 'heatmap') {
     renderHeatmap();
   } else if (tab === 'progress') {
@@ -2490,11 +2452,6 @@ function openWeekDetail(weekNum) {
     ${daysHtml}
   `;
 
-  document.getElementById('weekDetailCalBtn').onclick = () => {
-    calendarWeek = weekNum;
-    closeWeekDetail();
-    switchTab('calendar');
-  };
   document.getElementById('weekDetailModal').classList.remove('hidden');
 }
 
