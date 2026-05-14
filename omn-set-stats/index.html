@@ -670,6 +670,233 @@
       .cat-popup-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
+    /* ── Hand Simulator ── */
+    .sim-section { margin-bottom: 1.5rem; }
+
+    .sim-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .sim-hs-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .sim-label {
+      font-size: 0.78rem;
+      color: var(--muted-2);
+      white-space: nowrap;
+    }
+
+    input.sim-hs-slider {
+      -webkit-appearance: none;
+      width: 100px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border-2);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input.sim-hs-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 13px; height: 13px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    .sim-hs-val {
+      font-family: 'Cinzel', serif;
+      font-size: 0.82rem;
+      color: var(--accent);
+      min-width: 1.2rem;
+    }
+
+    .sim-draw-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 0.5rem 1.25rem;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: 2px;
+      color: var(--accent);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+    }
+
+    .sim-draw-btn:hover {
+      background: rgba(212,168,50,0.16);
+      color: #e8c050;
+      box-shadow: 0 0 12px rgba(212,168,50,0.2);
+    }
+
+    .sim-deck-info {
+      font-size: 0.65rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .sim-hand-area {
+      display: flex;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      min-height: 210px;
+      align-items: flex-start;
+    }
+
+    .sim-empty-state {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 190px;
+      color: var(--muted);
+      font-style: italic;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .sim-card-wrap {
+      flex-shrink: 0;
+      animation: simCardIn 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes simCardIn {
+      0%   { transform: translateY(28px) scale(0.87); opacity: 0; }
+      65%  { transform: translateY(-5px) scale(1.02); opacity: 1; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .sim-card {
+      width: 110px;
+      border-radius: 5px;
+      overflow: hidden;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border-2);
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+      cursor: default;
+      position: relative;
+    }
+
+    .sim-card:hover {
+      transform: translateY(-8px) scale(1.06);
+      border-color: var(--accent-border);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.65), 0 0 18px rgba(212,168,50,0.25);
+      z-index: 20;
+    }
+
+    .sim-card[data-color="red"]    { border-top: 2.5px solid var(--red-c); }
+    .sim-card[data-color="yellow"] { border-top: 2.5px solid var(--yellow-c); }
+    .sim-card[data-color="blue"]   { border-top: 2.5px solid var(--blue-c); }
+
+    .sim-card-img-wrap {
+      aspect-ratio: 7 / 10;
+      overflow: hidden;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .sim-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.2s;
+    }
+
+    .sim-card-no-img {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0.6rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.52rem;
+      color: var(--muted-2);
+      line-height: 1.4;
+    }
+
+    .sim-card-foot {
+      padding: 0.28rem 0.45rem;
+      background: rgba(0,0,0,0.55);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.25rem;
+    }
+
+    .sim-card-pitch {
+      font-family: 'Cinzel', serif;
+      font-size: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .sim-card-pitch.red    { color: var(--red-c); }
+    .sim-card-pitch.yellow { color: var(--yellow-c); }
+    .sim-card-pitch.blue   { color: var(--blue-c); }
+
+    .sim-card-rar {
+      font-family: 'Cinzel', serif;
+      font-size: 0.48rem;
+      color: var(--muted);
+    }
+
+    .sim-hand-stats {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      margin-top: 0.75rem;
+    }
+
+    .sim-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+    }
+
+    .sim-stat-val {
+      font-family: 'Cinzel', serif;
+      font-size: 1.2rem;
+      color: var(--accent);
+    }
+
+    .sim-stat-lbl {
+      font-size: 0.62rem;
+      color: var(--muted-2);
+      font-style: italic;
+    }
+
+    .sim-color-pips {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+      min-height: 1.2rem;
+    }
+
+    .sim-pip {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+    }
+
+    .sim-pip.red    { background: var(--red-c);    box-shadow: 0 0 4px var(--red-c); }
+    .sim-pip.yellow { background: var(--yellow-c); box-shadow: 0 0 4px var(--yellow-c); }
+    .sim-pip.blue   { background: var(--blue-c);   box-shadow: 0 0 4px var(--blue-c); }
+
     /* ── Footer ── */
     footer {
       margin-top: 2rem;
@@ -818,6 +1045,128 @@
           s.rarityCounts[card.rarity] = (s.rarityCounts[card.rarity] || 0) + 1;
       }
       return s;
+    }
+
+    /* ── Hand Simulator ─────────────────────────────────────────────────────── */
+
+    function simBuildPool(classCards, genericCards) {
+      const pool = [];
+      for (const c of classCards)  { const n = c.rarity === 'C' ? 3 : 1; for (let i = 0; i < n; i++) pool.push(c); }
+      for (const c of genericCards) { const n = c.rarity === 'C' ? 2 : 1; for (let i = 0; i < n; i++) pool.push(c); }
+      return pool;
+    }
+
+    function simShuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function simCardHtml(card, delay) {
+      const col = card.color || '';
+      const pitchClass = col === 'red' ? 'red' : col === 'yellow' ? 'yellow' : col === 'blue' ? 'blue' : '';
+      const pitchLabel = col === 'red' ? 'Pitch 1' : col === 'yellow' ? 'Pitch 2' : col === 'blue' ? 'Pitch 3' : '';
+      const imgHtml = card.image_url
+        ? `<img class="sim-card-img" src="${esc(card.image_url)}" alt="${esc(card.name)}" loading="lazy" onerror="this.style.opacity='0'">`
+        : '';
+      const rarLabel = card.rarity === 'S' ? 'SR' : card.rarity === 'R' ? 'R' : card.rarity === 'C' ? 'C' : '';
+      return `<div class="sim-card-wrap" style="animation-delay:${delay}ms">
+        <div class="sim-card" data-color="${esc(col)}">
+          <div class="sim-card-img-wrap">${imgHtml}<div class="sim-card-no-img">${esc(card.name)}</div></div>
+          <div class="sim-card-foot">
+            ${pitchLabel ? `<span class="sim-card-pitch ${pitchClass}">${esc(pitchLabel)}</span>` : '<span></span>'}
+            <span class="sim-card-rar">${esc(rarLabel)}</span>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function simRenderHand(groupKey, hand) {
+      const handEl  = document.getElementById('sim-hand-'   + groupKey);
+      const statsEl = document.getElementById('sim-hstats-' + groupKey);
+      if (!handEl) return;
+
+      if (hand.length === 0) {
+        handEl.innerHTML = '<div class="sim-empty-state">Pool too small to draw from</div>';
+        if (statsEl) statsEl.style.display = 'none';
+        return;
+      }
+
+      handEl.innerHTML = hand.map((c, i) => simCardHtml(c, i * 75)).join('');
+
+      const PV = { red: 1, yellow: 2, blue: 3 };
+      const totalPitch = hand.reduce((s, c) => s + (PV[c.color] || 0), 0);
+      const atkCards   = hand.filter(c => c.types.includes('Attack'));
+      const avgPow     = atkCards.length
+        ? (atkCards.reduce((s, c) => s + (c.power || 0), 0) / atkCards.length).toFixed(1)
+        : '—';
+      const nRed    = hand.filter(c => c.color === 'red').length;
+      const nYellow = hand.filter(c => c.color === 'yellow').length;
+      const nBlue   = hand.filter(c => c.color === 'blue').length;
+      const pips = [
+        ...Array(nBlue).fill('<span class="sim-pip blue"></span>'),
+        ...Array(nYellow).fill('<span class="sim-pip yellow"></span>'),
+        ...Array(nRed).fill('<span class="sim-pip red"></span>'),
+      ].join('');
+
+      if (statsEl) {
+        statsEl.innerHTML = `
+          <div class="sim-stat"><span class="sim-stat-val">${totalPitch}</span><span class="sim-stat-lbl">Total pitch</span></div>
+          <div style="width:1px;background:var(--border);align-self:stretch;margin:0.25rem 0"></div>
+          <div class="sim-stat"><span class="sim-stat-val">${hand.length}</span><span class="sim-stat-lbl">Cards drawn</span></div>
+          <div style="width:1px;background:var(--border);align-self:stretch;margin:0.25rem 0"></div>
+          <div class="sim-stat"><span class="sim-stat-val">${avgPow}</span><span class="sim-stat-lbl">Avg attack power</span></div>
+          <div style="width:1px;background:var(--border);align-self:stretch;margin:0.25rem 0"></div>
+          <div class="sim-stat"><div class="sim-color-pips">${pips}</div><span class="sim-stat-lbl">Color spread</span></div>`;
+        statsEl.style.display = 'flex';
+      }
+    }
+
+    function renderSimulator(groupKey, classCards, genericCards, panelEl) {
+      const pool = simBuildPool(classCards, genericCards);
+      const className = groupKey.charAt(0).toUpperCase() + groupKey.slice(1);
+      const simHtml = `<div class="analysis-section sim-section">
+        <div class="analysis-head">Hand Simulator — ${esc(className)} (OMN Limited Pool)</div>
+        <div class="analysis-body">
+          <div class="sim-controls">
+            <div class="sim-hs-wrap">
+              <span class="sim-label">Hand size</span>
+              <input type="range" class="sim-hs-slider" id="sim-hs-${groupKey}" min="1" max="7" value="4">
+              <span class="sim-hs-val" id="sim-hs-val-${groupKey}">4</span>
+            </div>
+            <button class="sim-draw-btn" id="sim-draw-${groupKey}">Draw Hand</button>
+            <span class="sim-deck-info">${classCards.length} class · ${genericCards.length} generic · pool of ${pool.length} cards</span>
+          </div>
+          <div class="sim-hand-area" id="sim-hand-${groupKey}">
+            <div class="sim-empty-state">Click "Draw Hand" to simulate a starting hand from the OMN card pool</div>
+          </div>
+          <div class="sim-hand-stats" id="sim-hstats-${groupKey}" style="display:none"></div>
+        </div>
+      </div>`;
+
+      panelEl.insertAdjacentHTML('afterbegin', simHtml);
+
+      let handSize = 4;
+      const hsSlider = document.getElementById('sim-hs-'     + groupKey);
+      const hsVal    = document.getElementById('sim-hs-val-' + groupKey);
+      const drawBtn  = document.getElementById('sim-draw-'   + groupKey);
+
+      if (hsSlider) {
+        hsSlider.addEventListener('input', function () {
+          handSize = parseInt(this.value);
+          if (hsVal) hsVal.textContent = handSize;
+        });
+      }
+
+      if (drawBtn) {
+        drawBtn.addEventListener('click', function () {
+          const shuffled = simShuffle(pool);
+          simRenderHand(groupKey, shuffled.slice(0, Math.min(handSize, shuffled.length)));
+        });
+      }
     }
 
     function section(title, bodyHtml) {
@@ -1246,6 +1595,10 @@
 
         for (const [key, cards] of Object.entries(groups)) {
           renderPanel(cards, document.getElementById('panel-' + key));
+        }
+
+        for (const key of ['illusionist', 'runeblade', 'wizard']) {
+          renderSimulator(key, groups[key] || [], groups.generic || [], document.getElementById('panel-' + key));
         }
 
         document.getElementById('loading-state').style.display = 'none';
