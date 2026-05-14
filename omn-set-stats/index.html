@@ -509,7 +509,7 @@
 
     const DB_URL = 'https://raw.githubusercontent.com/the-fab-cube/flesh-and-blood-cards/omens-of-the-third-age/json/english/card.json';
     const SET_CODE = 'OMN';
-    const EXCLUDED_RARITIES = new Set(['M', 'L', 'F']);
+    const EXCLUDED_RARITIES = new Set(['M', 'L', 'F', 'B']);
     const EXCLUDED_TYPES    = new Set(['Weapon', 'Equipment']);
     const HERO_CLASSES = [
       'Illusionist','Runeblade','Wizard','Lightning',
@@ -732,9 +732,7 @@
 
         for (const card of raw) {
           /* Must have an OMN printing */
-          const omnPrinting = (card.printings || []).find(p =>
-            p.set_printing_unique_id && p.set_printing_unique_id.startsWith(SET_CODE)
-          );
+          const omnPrinting = (card.printings || []).find(p => p.set_id === SET_CODE);
           if (!omnPrinting) continue;
 
           /* Exclude Majestic, Legendary, Fable */
