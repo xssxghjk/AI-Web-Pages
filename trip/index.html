@@ -109,14 +109,15 @@
     .event-row:last-child { border-bottom: none; }
 
     .event-row-date { font-style: italic; font-size: 0.78rem; color: var(--muted); white-space: nowrap; flex-shrink: 0; min-width: 130px; }
-    .event-row-main { flex: 1; }
+    .event-row-main { flex: 1; min-width: 0; }
     .event-row-name {
       font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: 1rem;
       font-weight: 700;
       font-style: italic;
+      overflow-wrap: break-word;
     }
-    .event-row-venue { font-size: 0.82rem; font-style: italic; color: var(--muted); margin-top: 0.1rem; }
+    .event-row-venue { font-size: 0.82rem; font-style: italic; color: var(--muted); margin-top: 0.1rem; overflow-wrap: break-word; }
 
     .event-row-badge {
       font-size: 0.6rem;
@@ -136,7 +137,7 @@
     .info-row:last-child { border-bottom: none; padding-bottom: 0; }
     .info-row:first-child { padding-top: 0; }
     .info-key { flex-shrink: 0; width: 7rem; font-size: 0.78rem; font-style: italic; color: var(--muted); padding-top: 0.05rem; }
-    .info-val { font-size: 0.88rem; color: var(--text); }
+    .info-val { font-size: 0.88rem; color: var(--text); min-width: 0; overflow-wrap: break-word; }
     .info-val .note { display: block; font-size: 0.78rem; font-style: italic; color: var(--muted); margin-top: 0.15rem; }
 
     /* ── TIMELINE ── */
@@ -195,8 +196,9 @@
       font-weight: 700;
       font-style: italic;
       margin-bottom: 0.15rem;
+      overflow-wrap: break-word;
     }
-    .tl-item p  { font-size: 0.82rem; font-style: italic; color: var(--muted); }
+    .tl-item p  { font-size: 0.82rem; font-style: italic; color: var(--muted); overflow-wrap: break-word; }
 
     /* ── CHECKLIST ── */
     .checklist { display: flex; flex-direction: column; gap: 0.4rem; }
