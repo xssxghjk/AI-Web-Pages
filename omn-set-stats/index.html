@@ -451,13 +451,11 @@
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
+      gap: 0.75rem;
       padding: 1.25rem;
     }
 
-    @media (max-width: 900px) { .cards-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 640px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 380px) { .cards-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
 
     .card-tile {
       background: var(--surface-2);
@@ -580,6 +578,98 @@
       line-height: 1.4;
     }
 
+    /* ── Clickable interactions ── */
+    .metric-tile--clickable {
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .metric-tile--clickable:hover {
+      border-color: var(--accent-border);
+      box-shadow: 0 0 0 1px var(--accent-border);
+    }
+    .metric-tile--clickable:hover .metric-val { color: #e8c050; }
+    .metric-tile--clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .hbar-row--clickable { cursor: pointer; border-radius: 2px; transition: background 0.12s; padding: 0.15rem 0.2rem; margin: -0.15rem -0.2rem; }
+    .hbar-row--clickable:hover { background: var(--accent-dim); }
+    .hbar-row--clickable:hover .hbar-label { color: var(--accent); }
+    .hbar-row--clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .vchart-col--clickable { cursor: pointer; border-radius: 2px; padding: 0.2rem; transition: background 0.12s; }
+    .vchart-col--clickable:hover { background: var(--accent-dim); }
+    .vchart-col--clickable:hover .vchart-fill { filter: brightness(1.25); }
+    .vchart-col--clickable:hover .vchart-label { color: var(--accent); }
+    .vchart-col--clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .pitch-seg-piece--clickable { cursor: pointer; transition: filter 0.12s; }
+    .pitch-seg-piece--clickable:hover { filter: brightness(1.18); }
+    .pitch-seg-piece--clickable:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+
+    .pitch-seg-legend--clickable { cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 2px; transition: background 0.12s; margin: -0.2rem -0.5rem; }
+    .pitch-seg-legend--clickable:hover { background: var(--accent-dim); color: var(--accent); }
+    .pitch-seg-legend--clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .ov-pill--clickable { cursor: pointer; transition: border-color 0.15s; }
+    .ov-pill--clickable:hover { border-color: var(--accent-border); }
+    .ov-pill--clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ── Card popup ── */
+    .cat-popup-backdrop {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(8,12,20,0.9);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 4vh 1rem 2rem;
+      overflow-y: auto;
+    }
+    .cat-popup {
+      background: var(--surface);
+      border: 1px solid var(--border-2);
+      border-top: 2px solid var(--accent);
+      border-radius: 2px;
+      width: 100%; max-width: 960px;
+      box-shadow: 0 24px 72px rgba(0,0,0,0.65);
+      flex-shrink: 0;
+    }
+    .cat-popup-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.9rem 1.25rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+    .cat-popup-title-wrap { display: flex; align-items: baseline; gap: 0.6rem; }
+    .cat-popup-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .cat-popup-count {
+      font-size: 0.68rem;
+      color: var(--muted-2);
+      font-style: italic;
+    }
+    .cat-popup-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted-2); padding: 0.35rem;
+      border-radius: 2px;
+      transition: color 0.15s, background 0.15s;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; line-height: 1;
+    }
+    .cat-popup-close:hover { color: var(--text); background: var(--border); }
+    .cat-popup-body { padding: 1.25rem; }
+    .cat-popup-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+    }
+    @media (max-width: 700px) {
+      .cat-popup-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
     /* ── Footer ── */
     footer {
       margin-top: 2rem;
@@ -645,10 +735,27 @@
     Data from the-fab-cube/flesh-and-blood-cards
   </footer>
 
+  <div id="cat-popup-backdrop" class="cat-popup-backdrop" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="cat-popup-title">
+    <div class="cat-popup">
+      <div class="cat-popup-header">
+        <div class="cat-popup-title-wrap">
+          <span class="cat-popup-title" id="cat-popup-title"></span>
+          <span class="cat-popup-count" id="cat-popup-count"></span>
+        </div>
+        <button class="cat-popup-close" id="cat-popup-close" aria-label="Close">&#x2715;</button>
+      </div>
+      <div class="cat-popup-body">
+        <div class="cat-popup-grid" id="cat-popup-grid"></div>
+      </div>
+    </div>
+  </div>
+
   <script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='v'+v.version;}).catch(()=>{});</script>
   <script>
   (function () {
     'use strict';
+
+    let currentPanelCards = [];
 
     const DB_URL = 'https://raw.githubusercontent.com/the-fab-cube/flesh-and-blood-cards/omens-of-the-third-age/json/english/card.json';
     const SET_CODE = 'OMN';
@@ -717,14 +824,24 @@
       return `<div class="analysis-section"><div class="analysis-head">${esc(title)}</div><div class="analysis-body">${bodyHtml}</div></div>`;
     }
 
-    function hbar(label, count, maxCount, color) {
+    function hbar(label, count, maxCount, color, filterType, filterKey) {
       const pct = maxCount ? (count / maxCount * 100) : 0;
       const fill = color ? `background:${color}` : 'background:var(--accent)';
-      return `<div class="hbar-row">
+      const clickable = filterType
+        ? ` hbar-row--clickable" data-filter-type="${esc(filterType)}" data-filter-key="${esc(filterKey != null ? filterKey : label)}" tabindex="0" role="button"`
+        : `"`;
+      return `<div class="hbar-row${clickable}>
         <div class="hbar-label">${esc(label)}</div>
         <div class="hbar-track"><div class="hbar-fill" data-pct="${pct.toFixed(1)}" style="width:0%;${fill}"></div></div>
         <div class="hbar-count">${count}</div>
       </div>`;
+    }
+
+    function metricTile(label, val, sub, filterType) {
+      const clickable = val !== '—' && filterType
+        ? ` metric-tile--clickable" data-filter-type="${esc(filterType)}" tabindex="0" role="button"`
+        : `"`;
+      return `<div class="metric-tile${clickable}><div class="metric-label">${label}</div><div class="metric-val">${val}</div><div class="metric-sub">${sub}</div></div>`;
     }
 
     function renderPanel(cards, panelEl) {
@@ -741,11 +858,11 @@
       const pitchTotal = red + yellow + blue;
       const noPitch = s.total - pitchTotal;
       html += `<div class="overview-row">
-        <div class="ov-pill"><span class="ov-val">${s.total}</span><span class="ov-label">Total Cards</span></div>
-        ${red    > 0 ? `<div class="ov-pill"><span class="ov-val" style="color:var(--red-c)">${red}</span><span class="ov-label">Red (pitch 1)</span></div>` : ''}
-        ${yellow > 0 ? `<div class="ov-pill"><span class="ov-val" style="color:var(--yellow-c)">${yellow}</span><span class="ov-label">Yellow (pitch 2)</span></div>` : ''}
-        ${blue   > 0 ? `<div class="ov-pill"><span class="ov-val" style="color:var(--blue-c)">${blue}</span><span class="ov-label">Blue (pitch 3)</span></div>` : ''}
-        ${noPitch > 0 ? `<div class="ov-pill"><span class="ov-val" style="color:var(--muted-2)">${noPitch}</span><span class="ov-label">No pitch</span></div>` : ''}
+        <div class="ov-pill ov-pill--clickable" data-filter-type="all" tabindex="0" role="button"><span class="ov-val">${s.total}</span><span class="ov-label">Total Cards</span></div>
+        ${red    > 0 ? `<div class="ov-pill ov-pill--clickable" data-filter-type="pitch-color" data-filter-key="red"    tabindex="0" role="button"><span class="ov-val" style="color:var(--red-c)">${red}</span><span class="ov-label">Red (pitch 1)</span></div>` : ''}
+        ${yellow > 0 ? `<div class="ov-pill ov-pill--clickable" data-filter-type="pitch-color" data-filter-key="yellow" tabindex="0" role="button"><span class="ov-val" style="color:var(--yellow-c)">${yellow}</span><span class="ov-label">Yellow (pitch 2)</span></div>` : ''}
+        ${blue   > 0 ? `<div class="ov-pill ov-pill--clickable" data-filter-type="pitch-color" data-filter-key="blue"   tabindex="0" role="button"><span class="ov-val" style="color:var(--blue-c)">${blue}</span><span class="ov-label">Blue (pitch 3)</span></div>` : ''}
+        ${noPitch > 0 ? `<div class="ov-pill ov-pill--clickable" data-filter-type="no-pitch" tabindex="0" role="button"><span class="ov-val" style="color:var(--muted-2)">${noPitch}</span><span class="ov-label">No pitch</span></div>` : ''}
       </div>`;
 
       /* Key Metrics */
@@ -755,10 +872,10 @@
       const avgDefense = s.defenseCards ? (s.defenseSum / s.defenseCards).toFixed(2) : '—';
 
       html += section('Key Metrics', `<div class="metric-grid">
-        <div class="metric-tile"><div class="metric-label">Avg Pitch</div><div class="metric-val">${avgPitch}</div><div class="metric-sub">${s.pitchCards} pitched cards</div></div>
-        <div class="metric-tile"><div class="metric-label">Avg Cost</div><div class="metric-val">${avgCost}</div><div class="metric-sub">${s.costCards} costed cards</div></div>
-        <div class="metric-tile"><div class="metric-label">Avg Power</div><div class="metric-val">${avgPower}</div><div class="metric-sub">${s.powerCards} attack cards</div></div>
-        <div class="metric-tile"><div class="metric-label">Avg Defense</div><div class="metric-val">${avgDefense}</div><div class="metric-sub">${s.defenseCards} defensive cards</div></div>
+        ${metricTile('Avg Pitch',   avgPitch,   `${s.pitchCards} pitched cards`,   'has-pitch')}
+        ${metricTile('Avg Cost',    avgCost,    `${s.costCards} costed cards`,     'has-cost')}
+        ${metricTile('Avg Power',   avgPower,   `${s.powerCards} attack cards`,    'has-power')}
+        ${metricTile('Avg Defense', avgDefense, `${s.defenseCards} defensive cards`, 'has-defense')}
       </div>`);
 
       /* Pitch Distribution + Cost Curve */
@@ -767,17 +884,17 @@
         const rPct = Math.round(red    / pitchTotal * 100);
         const yPct = Math.round(yellow / pitchTotal * 100);
         const bPct = 100 - rPct - yPct;
-        const piece = (count, flex, bg, textCol, pct) => count > 0
-          ? `<div class="pitch-seg-piece" style="flex:${flex};background:${bg};color:${textCol}">${pct > 9 ? pct + '%' : ''}</div>` : '';
+        const piece = (count, flex, bg, textCol, pct, color) => count > 0
+          ? `<div class="pitch-seg-piece pitch-seg-piece--clickable" style="flex:${flex};background:${bg};color:${textCol}" data-filter-type="pitch-color" data-filter-key="${color}" tabindex="0" role="button" aria-label="${color} cards">${pct > 9 ? pct + '%' : ''}</div>` : '';
         pitchHtml = `<div class="pitch-seg">
-          ${piece(red,    red,    'var(--red-c)',    '#fff',    rPct)}
-          ${piece(yellow, yellow, 'var(--yellow-c)', '#1a1200', yPct)}
-          ${piece(blue,   blue,   'var(--blue-c)',   '#fff',    bPct)}
+          ${piece(red,    red,    'var(--red-c)',    '#fff',    rPct, 'red')}
+          ${piece(yellow, yellow, 'var(--yellow-c)', '#1a1200', yPct, 'yellow')}
+          ${piece(blue,   blue,   'var(--blue-c)',   '#fff',    bPct, 'blue')}
         </div>
         <div class="pitch-seg-labels">
-          ${red    > 0 ? `<div class="pitch-seg-legend"><div class="pitch-seg-dot" style="background:var(--red-c)"></div>Red (pitch 1) — ${red} cards</div>` : ''}
-          ${yellow > 0 ? `<div class="pitch-seg-legend"><div class="pitch-seg-dot" style="background:var(--yellow-c)"></div>Yellow (pitch 2) — ${yellow} cards</div>` : ''}
-          ${blue   > 0 ? `<div class="pitch-seg-legend"><div class="pitch-seg-dot" style="background:var(--blue-c)"></div>Blue (pitch 3) — ${blue} cards</div>` : ''}
+          ${red    > 0 ? `<div class="pitch-seg-legend pitch-seg-legend--clickable" data-filter-type="pitch-color" data-filter-key="red"    tabindex="0" role="button"><div class="pitch-seg-dot" style="background:var(--red-c)"></div>Red (pitch 1) — ${red} cards</div>` : ''}
+          ${yellow > 0 ? `<div class="pitch-seg-legend pitch-seg-legend--clickable" data-filter-type="pitch-color" data-filter-key="yellow" tabindex="0" role="button"><div class="pitch-seg-dot" style="background:var(--yellow-c)"></div>Yellow (pitch 2) — ${yellow} cards</div>` : ''}
+          ${blue   > 0 ? `<div class="pitch-seg-legend pitch-seg-legend--clickable" data-filter-type="pitch-color" data-filter-key="blue"   tabindex="0" role="button"><div class="pitch-seg-dot" style="background:var(--blue-c)"></div>Blue (pitch 3) — ${blue} cards</div>` : ''}
         </div>`;
       }
 
@@ -792,7 +909,10 @@
         const cols = activeCostKeys.map(k => {
           const count = s.costDist[k] || 0;
           const pct = maxC ? (count / maxC * 100).toFixed(1) : 0;
-          return `<div class="vchart-col">
+          const clickable = count > 0
+            ? ` vchart-col--clickable" data-filter-type="cost" data-filter-key="${esc(k)}" tabindex="0" role="button" aria-label="Cost ${esc(k)}`
+            : ``;
+          return `<div class="vchart-col${clickable}">
             <div class="vchart-fill-wrap"><div class="vchart-fill" data-h="${pct}" style="height:0%"></div></div>
             <div class="vchart-label">${esc(k)}</div>
             <div class="vchart-count">${count > 0 ? count : ''}</div>
@@ -817,14 +937,14 @@
           const powerKeys = ['0','1','2','3','4','5','6','7','8','9+'];
           const maxP = Math.max(...Object.values(s.powerDist));
           const rows = powerKeys.filter(k => s.powerDist[k])
-            .map(k => hbar(k, s.powerDist[k], maxP, 'var(--red-c)')).join('');
+            .map(k => hbar(k, s.powerDist[k], maxP, 'var(--red-c)', 'power', k)).join('');
           html += section('Attack Power', `<div class="hbar-list">${rows}</div>`);
         }
         if (hasDefense) {
           const defenseKeys = ['0','1','2','3','4','5','6','7+'];
           const maxD = Math.max(...Object.values(s.defenseDist));
           const rows = defenseKeys.filter(k => s.defenseDist[k])
-            .map(k => hbar(k, s.defenseDist[k], maxD, 'var(--blue-c)')).join('');
+            .map(k => hbar(k, s.defenseDist[k], maxD, 'var(--blue-c)', 'defense', k)).join('');
           html += section('Defense', `<div class="hbar-list">${rows}</div>`);
         }
         html += '</div>';
@@ -837,12 +957,12 @@
         html += '<div class="analysis-row">';
         if (typeEntries.length > 0) {
           const maxT = typeEntries[0][1];
-          const rows = typeEntries.map(([t,c]) => hbar(t, c, maxT, null)).join('');
+          const rows = typeEntries.map(([t,c]) => hbar(t, c, maxT, null, 'type', t)).join('');
           html += section('Card Types', `<div class="hbar-list">${rows}</div>`);
         }
         if (kwEntries.length > 0) {
           const maxK = kwEntries[0][1];
-          const rows = kwEntries.map(([k,c]) => hbar(k, c, maxK, 'var(--yellow-c)')).join('');
+          const rows = kwEntries.map(([k,c]) => hbar(k, c, maxK, 'var(--yellow-c)', 'keyword', k)).join('');
           html += section('Keywords', `<div class="hbar-list">${rows}</div>`);
         }
         html += '</div>';
@@ -852,7 +972,7 @@
       const rarityEntries = RARITY_ORDER.map(r => [r, s.rarityCounts[r] || 0]).filter(([,c]) => c > 0);
       if (rarityEntries.length > 0) {
         const maxR = Math.max(...rarityEntries.map(([,c]) => c));
-        const rows = rarityEntries.map(([r,c]) => hbar(RARITY_LABELS[r] || r, c, maxR, RARITY_COLORS[r])).join('');
+        const rows = rarityEntries.map(([r,c]) => hbar(RARITY_LABELS[r] || r, c, maxR, RARITY_COLORS[r], 'rarity', r)).join('');
         html += section('Rarity', `<div class="hbar-list">${rows}</div>`);
       }
 
@@ -909,6 +1029,155 @@
       });
     }
 
+    /* ── Card popup ── */
+    function makePopupCardTile(card) {
+      const pitchClass = card.color === 'red' ? 'pitch-red' : card.color === 'yellow' ? 'pitch-yellow' : card.color === 'blue' ? 'pitch-blue' : '';
+      const pitchLabel = card.color === 'red' ? 'Pitch 1' : card.color === 'yellow' ? 'Pitch 2' : card.color === 'blue' ? 'Pitch 3' : '';
+      const chips = [
+        pitchLabel   ? `<span class="card-stat-chip ${pitchClass}">${esc(pitchLabel)}</span>` : '',
+        card.cost    != null ? `<span class="card-stat-chip stat-cost">Cost ${card.cost}</span>`  : '',
+        card.power   != null ? `<span class="card-stat-chip stat-pow">Pow ${card.power}</span>`   : '',
+        card.defense != null ? `<span class="card-stat-chip stat-def">Def ${card.defense}</span>` : '',
+      ].filter(Boolean).join('');
+      const typeStr = card.types.join(' · ');
+      const kwStr   = card.keywords.slice(0, 3).join(', ');
+      const imgHtml = card.image_url
+        ? `<img class="card-tile-img" src="${esc(card.image_url)}" alt="${esc(card.name)}" loading="lazy" onerror="this.classList.add('hidden')">`
+        : '';
+      return `<div class="card-tile rarity-${esc(card.rarity)}">
+        <div class="card-tile-img-wrap">${imgHtml}<div class="card-tile-no-img">${esc(card.name)}</div></div>
+        <div class="card-tile-body">
+          <div class="card-tile-name">${esc(card.name)}</div>
+          <div class="card-tile-types">${esc(typeStr)}</div>
+          ${chips ? `<div class="card-tile-stats">${chips}</div>` : ''}
+          ${kwStr ? `<div class="card-tile-keywords">${esc(kwStr)}</div>` : ''}
+          <div class="card-tile-rarity rarity-${esc(card.rarity)}">${esc(RARITY_LABELS[card.rarity] || card.rarity)}</div>
+        </div>
+      </div>`;
+    }
+
+    function openPopup(filterType, filterKey) {
+      let filtered, title;
+      if (filterType === 'all') {
+        filtered = currentPanelCards;
+        title = 'All Cards';
+      } else if (filterType === 'pitch-color') {
+        filtered = currentPanelCards.filter(c => c.color === filterKey);
+        const label = filterKey.charAt(0).toUpperCase() + filterKey.slice(1);
+        const pv = filterKey === 'red' ? 1 : filterKey === 'yellow' ? 2 : 3;
+        title = `${label} — Pitch ${pv}`;
+      } else if (filterType === 'no-pitch') {
+        filtered = currentPanelCards.filter(c => c.color !== 'red' && c.color !== 'yellow' && c.color !== 'blue');
+        title = 'No Pitch';
+      } else if (filterType === 'has-pitch') {
+        filtered = currentPanelCards.filter(c => c.pitch != null);
+        title = 'Pitched Cards';
+      } else if (filterType === 'has-cost') {
+        filtered = currentPanelCards.filter(c => c.cost != null);
+        title = 'Costed Cards';
+      } else if (filterType === 'has-power') {
+        filtered = currentPanelCards.filter(c => c.power != null);
+        title = 'Attack Cards';
+      } else if (filterType === 'has-defense') {
+        filtered = currentPanelCards.filter(c => c.defense != null);
+        title = 'Defensive Cards';
+      } else if (filterType === 'cost') {
+        if (filterKey === '7+') {
+          filtered = currentPanelCards.filter(c => c.cost != null && c.cost >= 7);
+        } else {
+          const v = parseInt(filterKey, 10);
+          filtered = currentPanelCards.filter(c => c.cost === v);
+        }
+        title = `Cost ${filterKey}`;
+      } else if (filterType === 'power') {
+        if (filterKey === '9+') {
+          filtered = currentPanelCards.filter(c => c.power != null && c.power >= 9);
+        } else {
+          const v = parseInt(filterKey, 10);
+          filtered = currentPanelCards.filter(c => c.power === v);
+        }
+        title = `Power ${filterKey}`;
+      } else if (filterType === 'defense') {
+        if (filterKey === '7+') {
+          filtered = currentPanelCards.filter(c => c.defense != null && c.defense >= 7);
+        } else {
+          const v = parseInt(filterKey, 10);
+          filtered = currentPanelCards.filter(c => c.defense === v);
+        }
+        title = `Defense ${filterKey}`;
+      } else if (filterType === 'type') {
+        if (filterKey === 'Non-Attack Action') {
+          filtered = currentPanelCards.filter(c => c.types.includes('Action') && !c.types.includes('Attack'));
+        } else {
+          filtered = currentPanelCards.filter(c => c.types.includes(filterKey));
+        }
+        title = filterKey;
+      } else if (filterType === 'keyword') {
+        filtered = currentPanelCards.filter(c => c.keywords.includes(filterKey));
+        title = filterKey;
+      } else if (filterType === 'rarity') {
+        filtered = currentPanelCards.filter(c => c.rarity === filterKey);
+        title = RARITY_LABELS[filterKey] || filterKey;
+      } else {
+        return;
+      }
+
+      document.getElementById('cat-popup-title').textContent = title;
+      document.getElementById('cat-popup-count').textContent = `${filtered.length} card${filtered.length !== 1 ? 's' : ''}`;
+      const grid = document.getElementById('cat-popup-grid');
+      grid.innerHTML = filtered.map(makePopupCardTile).join('');
+      const backdrop = document.getElementById('cat-popup-backdrop');
+      backdrop.style.display = 'flex';
+      backdrop.scrollTop = 0;
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePopup() {
+      document.getElementById('cat-popup-backdrop').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('cat-popup-close').addEventListener('click', closePopup);
+    document.getElementById('cat-popup-backdrop').addEventListener('click', function (e) {
+      if (e.target === this) closePopup();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && document.getElementById('cat-popup-backdrop').style.display !== 'none') closePopup();
+    });
+
+    document.getElementById('stats-content').addEventListener('click', function (e) {
+      const el = e.target.closest('[data-filter-type]');
+      if (!el) return;
+      openPopup(el.dataset.filterType, el.dataset.filterKey || '');
+    });
+    document.getElementById('stats-content').addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const el = e.target.closest('[data-filter-type]');
+      if (!el) return;
+      e.preventDefault();
+      openPopup(el.dataset.filterType, el.dataset.filterKey || '');
+    });
+
+    let allGroups = {};
+
+    /* Tab switching */
+    document.querySelectorAll('.tab-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+        document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('panel-' + tab).classList.add('active');
+
+        currentPanelCards = allGroups[tab] || [];
+
+        /* Re-animate bars for newly visible panel */
+        const panel = document.getElementById('panel-' + tab);
+        panel.querySelectorAll('.vchart-fill').forEach(function (b) { b.style.height = b.dataset.h + '%'; });
+        panel.querySelectorAll('.hbar-fill').forEach(function (b) { b.style.width = b.dataset.pct + '%'; });
+      });
+    });
+
     async function init() {
       try {
         const resp = await fetch(DB_URL);
@@ -964,6 +1233,9 @@
           groups[group].push(processed);
         }
 
+        allGroups = groups;
+        currentPanelCards = groups.illusionist;
+
         const total = Object.values(groups).reduce((a, g) => a + g.length, 0);
         document.getElementById('pill-total').textContent        = `${total} cards`;
         document.getElementById('pill-illusionist').textContent  = `Illusionist: ${groups.illusionist.length}`;
@@ -986,22 +1258,6 @@
         errEl.textContent = 'Failed to load card data: ' + err.message;
       }
     }
-
-    /* Tab switching */
-    document.querySelectorAll('.tab-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        const tab = btn.dataset.tab;
-        document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
-        document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
-        btn.classList.add('active');
-        document.getElementById('panel-' + tab).classList.add('active');
-
-        /* Re-animate bars for newly visible panel */
-        const panel = document.getElementById('panel-' + tab);
-        panel.querySelectorAll('.vchart-fill').forEach(function (b) { b.style.height = b.dataset.h + '%'; });
-        panel.querySelectorAll('.hbar-fill').forEach(function (b) { b.style.width = b.dataset.pct + '%'; });
-      });
-    });
 
     init();
   })();
