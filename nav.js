@@ -67,7 +67,8 @@
 
     /* mobile header */
     '.mobile-header{display:none;align-items:center;gap:0.75rem;padding:0 1rem;height:52px;' +
-      'background:var(--nav-bg);border-bottom:1px solid var(--nav-border);flex-shrink:0}' +
+      'background:var(--nav-bg);border-bottom:1px solid var(--nav-border);flex-shrink:0;' +
+      'position:sticky;top:0;z-index:50}' +
     '@media(max-width:700px){.mobile-header{display:flex}}' +
     '.hamburger-btn{display:flex;flex-direction:column;justify-content:center;gap:5px;' +
       'width:36px;height:36px;border:none;background:none;cursor:pointer;padding:6px;' +
