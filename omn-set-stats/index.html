@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OMN Set Stats — FaB</title>
+  <script src="../nav.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #080c14;
+      --surface:    #0e1420;
+      --surface-2:  #141c2c;
+      --border:     #1e2a3e;
+      --border-2:   #2a3a52;
+      --accent:     #d4a832;
+      --accent-dim: rgba(212,168,50,0.09);
+      --accent-border: rgba(212,168,50,0.28);
+      --blue-glow:  #7cb4e8;
+      --text:       #c8d8e8;
+      --muted:      #3a5468;
+      --muted-2:    #5a7888;
+      --red-c:      #e85050;
+      --yellow-c:   #d4a832;
+      --blue-c:     #5ab4e8;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Crimson Pro', Georgia, serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(124,180,232,0.07) 1px, transparent 1px),
+        radial-gradient(circle, rgba(212,168,50,0.04) 1px, transparent 1px);
+      background-size: 32px 32px, 80px 80px;
+      background-position: 0 0, 18px 42px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero, main, footer { position: relative; z-index: 1; }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 2.5rem 1.5rem 2rem;
+      border-bottom: 1px solid var(--border-2);
+      background: linear-gradient(180deg, rgba(124,180,232,0.05) 0%, transparent 100%);
+    }
+
+    .hero-inner { max-width: 1200px; margin: 0 auto; }
+
+    .hero-eyebrow {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.85rem;
+      opacity: 0.9;
+    }
+
+    .hero h1 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      color: var(--text);
+      margin-bottom: 0.6rem;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      color: var(--muted-2);
+      font-size: 0.95rem;
+      font-style: italic;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .hero-pills {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .hero-pill {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      padding: 0.3rem 0.8rem;
+      border: 1px solid var(--border-2);
+      border-radius: 2px;
+      color: var(--muted-2);
+      background: var(--surface);
+    }
+
+    .hero-pill.accent {
+      border-color: var(--accent-border);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    /* ── Loading ── */
+    .loading-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40vh;
+      flex-direction: column;
+      gap: 1.5rem;
+      color: var(--muted-2);
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+
+    .loading-rings { position: relative; width: 48px; height: 48px; }
+
+    .loading-ring {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      border: 2px solid transparent;
+    }
+
+    .loading-ring.r1 {
+      border-top-color: var(--accent);
+      border-right-color: rgba(212,168,50,0.2);
+      animation: spin 0.85s linear infinite;
+    }
+
+    .loading-ring.r2 {
+      inset: 9px;
+      border-bottom-color: var(--blue-glow);
+      border-left-color: rgba(124,180,232,0.15);
+      animation: spin 1.4s linear infinite reverse;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-msg {
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: var(--red-c);
+      font-style: italic;
+      font-size: 0.95rem;
+    }
+
+    /* ── Main content wrap ── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+    }
+
+    /* ── Tabs ── */
+    .tabs-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border-2);
+      margin: 2rem 0 2rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tabs-bar::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 0.9rem 1.35rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted-2);
+      cursor: pointer;
+      transition: color 0.18s, border-color 0.18s;
+      white-space: nowrap;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Overview row ── */
+    .overview-row {
+      display: flex;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.75rem;
+    }
+
+    .ov-pill {
+      padding: 0.55rem 1rem 0.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border-2);
+      border-radius: 2px;
+      text-align: center;
+      min-width: 90px;
+    }
+
+    .ov-val {
+      font-family: 'Cinzel', serif;
+      font-size: 1.2rem;
+      color: var(--accent);
+      display: block;
+      line-height: 1.2;
+    }
+
+    .ov-label {
+      font-size: 0.68rem;
+      color: var(--muted-2);
+      font-style: italic;
+      display: block;
+      margin-top: 0.1rem;
+    }
+
+    /* ── Analysis grid ── */
+    .analysis-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--border-2);
+      border-radius: 2px;
+      margin-bottom: 1rem;
+    }
+
+    .analysis-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .analysis-row .analysis-section { margin-bottom: 0; }
+
+    @media (max-width: 640px) {
+      .analysis-row { grid-template-columns: 1fr; }
+    }
+
+    .analysis-head {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted-2);
+      padding: 0.8rem 1.25rem 0.6rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .analysis-body { padding: 1.25rem; }
+
+    /* ── Metric grid ── */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 600px) {
+      .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .metric-tile {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.85rem 1rem;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 0.65rem;
+      font-style: italic;
+      color: var(--muted-2);
+      margin-bottom: 0.35rem;
+    }
+
+    .metric-val {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .metric-sub {
+      font-size: 0.62rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    /* ── Pitch segment ── */
+    .pitch-seg {
+      display: flex;
+      height: 30px;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 0.8rem;
+    }
+
+    .pitch-seg-piece {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 600;
+      font-family: 'Cinzel', serif;
+    }
+
+    .pitch-seg-labels {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .pitch-seg-legend {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--muted-2);
+    }
+
+    .pitch-seg-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Vertical bar chart (cost curve) ── */
+    .vchart {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.4rem;
+      height: 120px;
+    }
+
+    .vchart-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .vchart-fill-wrap {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .vchart-fill {
+      width: 100%;
+      background: var(--accent);
+      border-radius: 2px 2px 0 0;
+      transition: height 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+      min-height: 0;
+    }
+
+    .vchart-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      color: var(--muted-2);
+      margin-top: 0.3rem;
+    }
+
+    .vchart-count {
+      font-size: 0.6rem;
+      color: var(--muted);
+      height: 0.85rem;
+      line-height: 0.85rem;
+    }
+
+    /* ── Horizontal bar chart ── */
+    .hbar-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .hbar-row {
+      display: grid;
+      grid-template-columns: 6.5rem 1fr 2.2rem;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .hbar-label {
+      font-size: 0.78rem;
+      color: var(--muted-2);
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hbar-track {
+      background: var(--surface-2);
+      border-radius: 2px;
+      height: 7px;
+      overflow: hidden;
+    }
+
+    .hbar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .hbar-count {
+      font-size: 0.72rem;
+      color: var(--muted-2);
+      text-align: right;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 2rem;
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--muted-2);
+      font-style: italic;
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">Flesh &amp; Blood · Set Analysis</div>
+      <h1>Omens of a <em>New Age</em></h1>
+      <p class="hero-sub">Set OMN · Rare and below · Excluding Weapons &amp; Equipment · Grouped by class</p>
+      <div class="hero-pills">
+        <span class="hero-pill accent" id="pill-total">Loading…</span>
+        <span class="hero-pill" id="pill-illusionist">Illusionist</span>
+        <span class="hero-pill" id="pill-runeblade">Runeblade</span>
+        <span class="hero-pill" id="pill-wizard">Wizard</span>
+        <span class="hero-pill" id="pill-lightning">Lightning</span>
+        <span class="hero-pill" id="pill-generic">Generic</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div id="loading-state" class="loading-wrap">
+      <div class="loading-rings">
+        <div class="loading-ring r1"></div>
+        <div class="loading-ring r2"></div>
+      </div>
+      <div id="loading-label">Fetching card database…</div>
+    </div>
+
+    <div id="error-state" class="error-msg" style="display:none"></div>
+
+    <div id="stats-content" style="display:none">
+      <div class="tabs-bar">
+        <button class="tab-btn active" data-tab="illusionist">Illusionist</button>
+        <button class="tab-btn" data-tab="runeblade">Runeblade</button>
+        <button class="tab-btn" data-tab="wizard">Wizard</button>
+        <button class="tab-btn" data-tab="lightning">Lightning</button>
+        <button class="tab-btn" data-tab="generic">Generic</button>
+      </div>
+      <div id="panel-illusionist" class="tab-panel active"></div>
+      <div id="panel-runeblade" class="tab-panel"></div>
+      <div id="panel-wizard" class="tab-panel"></div>
+      <div id="panel-lightning" class="tab-panel"></div>
+      <div id="panel-generic" class="tab-panel"></div>
+    </div>
+  </main>
+
+  <footer>
+    <span id="page-version"></span>
+    <span style="margin:0 0.5rem;opacity:0.4">·</span>
+    Data from the-fab-cube/flesh-and-blood-cards
+  </footer>
+
+  <script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='v'+v.version;}).catch(()=>{});</script>
+  <script>
+  (function () {
+    'use strict';
+
+    const DB_URL = 'https://raw.githubusercontent.com/the-fab-cube/flesh-and-blood-cards/omens-of-the-third-age/json/english/card.json';
+    const SET_CODE = 'OMN';
+    const EXCLUDED_RARITIES = new Set(['M', 'L', 'F']);
+    const EXCLUDED_TYPES    = new Set(['Weapon', 'Equipment']);
+    const HERO_CLASSES = [
+      'Illusionist','Runeblade','Wizard','Lightning',
+      'Ninja','Warrior','Brute','Guardian','Ranger',
+      'Merchant','Mechanologist','Shapeshifter','Assassin','Bard','Draconic',
+    ];
+
+    const RARITY_LABELS = { C:'Common', R:'Rare', S:'Super Rare', T:'Token', P:'Promo' };
+    const RARITY_COLORS = { C:'#9ca3af', R:'#f87171', S:'#fb923c', T:'#6b7280', P:'#34d399' };
+    const RARITY_ORDER  = ['S','R','P','C','T'];
+
+    function esc(s) {
+      return String(s)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function computeStats(cards) {
+      const s = {
+        total: 0,
+        pitchCounts: { red: 0, yellow: 0, blue: 0 },
+        pitchSum: 0, pitchCards: 0,
+        costDist: {}, costSum: 0, costCards: 0,
+        powerDist: {}, powerSum: 0, powerCards: 0,
+        defenseDist: {}, defenseSum: 0, defenseCards: 0,
+        typeCounts: {}, keywordCounts: {}, rarityCounts: {},
+      };
+      for (const card of cards) {
+        s.total++;
+        const col = card.color;
+        if (col === 'red')         s.pitchCounts.red++;
+        else if (col === 'yellow') s.pitchCounts.yellow++;
+        else if (col === 'blue')   s.pitchCounts.blue++;
+
+        if (card.pitch != null) { s.pitchSum += card.pitch; s.pitchCards++; }
+        if (card.cost  != null) {
+          const k = String(card.cost >= 7 ? '7+' : card.cost);
+          s.costDist[k] = (s.costDist[k] || 0) + 1;
+          s.costSum += card.cost; s.costCards++;
+        }
+        if (card.power != null) {
+          const k = String(card.power >= 9 ? '9+' : card.power);
+          s.powerDist[k] = (s.powerDist[k] || 0) + 1;
+          s.powerSum += card.power; s.powerCards++;
+        }
+        if (card.defense != null) {
+          const k = String(card.defense >= 7 ? '7+' : card.defense);
+          s.defenseDist[k] = (s.defenseDist[k] || 0) + 1;
+          s.defenseSum += card.defense; s.defenseCards++;
+        }
+        for (const t of card.types) s.typeCounts[t] = (s.typeCounts[t] || 0) + 1;
+        if (card.types.includes('Action') && !card.types.includes('Attack'))
+          s.typeCounts['Non-Attack Action'] = (s.typeCounts['Non-Attack Action'] || 0) + 1;
+        for (const kw of card.keywords) s.keywordCounts[kw] = (s.keywordCounts[kw] || 0) + 1;
+        if (card.rarity && RARITY_LABELS[card.rarity])
+          s.rarityCounts[card.rarity] = (s.rarityCounts[card.rarity] || 0) + 1;
+      }
+      return s;
+    }
+
+    function section(title, bodyHtml) {
+      return `<div class="analysis-section"><div class="analysis-head">${esc(title)}</div><div class="analysis-body">${bodyHtml}</div></div>`;
+    }
+
+    function hbar(label, count, maxCount, color) {
+      const pct = maxCount ? (count / maxCount * 100) : 0;
+      const fill = color ? `background:${color}` : 'background:var(--accent)';
+      return `<div class="hbar-row">
+        <div class="hbar-label">${esc(label)}</div>
+        <div class="hbar-track"><div class="hbar-fill" data-pct="${pct.toFixed(1)}" style="width:0%;${fill}"></div></div>
+        <div class="hbar-count">${count}</div>
+      </div>`;
+    }
+
+    function renderPanel(cards, panelEl) {
+      if (cards.length === 0) {
+        panelEl.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted-2);font-style:italic;">No cards in this group.</div>';
+        return;
+      }
+
+      const s = computeStats(cards);
+      let html = '';
+
+      /* Overview pills */
+      const { red, yellow, blue } = s.pitchCounts;
+      const pitchTotal = red + yellow + blue;
+      const noPitch = s.total - pitchTotal;
+      html += `<div class="overview-row">
+        <div class="ov-pill"><span class="ov-val">${s.total}</span><span class="ov-label">Total Cards</span></div>
+        ${red    > 0 ? `<div class="ov-pill"><span class="ov-val" style="color:var(--red-c)">${red}</span><span class="ov-label">Red (pitch 1)</span></div>` : ''}
+        ${yellow > 0 ? `<div class="ov-pill"><span class="ov-val" style="color:var(--yellow-c)">${yellow}</span><span class="ov-label">Yellow (pitch 2)</span></div>` : ''}
+        ${blue   > 0 ? `<div class="ov-pill"><span class="ov-val" style="color:var(--blue-c)">${blue}</span><span class="ov-label">Blue (pitch 3)</span></div>` : ''}
+        ${noPitch > 0 ? `<div class="ov-pill"><span class="ov-val" style="color:var(--muted-2)">${noPitch}</span><span class="ov-label">No pitch</span></div>` : ''}
+      </div>`;
+
+      /* Key Metrics */
+      const avgPitch   = s.pitchCards   ? (s.pitchSum   / s.pitchCards).toFixed(2)   : '—';
+      const avgCost    = s.costCards    ? (s.costSum    / s.costCards).toFixed(2)    : '—';
+      const avgPower   = s.powerCards   ? (s.powerSum   / s.powerCards).toFixed(2)   : '—';
+      const avgDefense = s.defenseCards ? (s.defenseSum / s.defenseCards).toFixed(2) : '—';
+
+      html += section('Key Metrics', `<div class="metric-grid">
+        <div class="metric-tile"><div class="metric-label">Avg Pitch</div><div class="metric-val">${avgPitch}</div><div class="metric-sub">${s.pitchCards} pitched cards</div></div>
+        <div class="metric-tile"><div class="metric-label">Avg Cost</div><div class="metric-val">${avgCost}</div><div class="metric-sub">${s.costCards} costed cards</div></div>
+        <div class="metric-tile"><div class="metric-label">Avg Power</div><div class="metric-val">${avgPower}</div><div class="metric-sub">${s.powerCards} attack cards</div></div>
+        <div class="metric-tile"><div class="metric-label">Avg Defense</div><div class="metric-val">${avgDefense}</div><div class="metric-sub">${s.defenseCards} defensive cards</div></div>
+      </div>`);
+
+      /* Pitch Distribution + Cost Curve */
+      let pitchHtml = '';
+      if (pitchTotal > 0) {
+        const rPct = Math.round(red    / pitchTotal * 100);
+        const yPct = Math.round(yellow / pitchTotal * 100);
+        const bPct = 100 - rPct - yPct;
+        const piece = (count, flex, bg, textCol, pct) => count > 0
+          ? `<div class="pitch-seg-piece" style="flex:${flex};background:${bg};color:${textCol}">${pct > 9 ? pct + '%' : ''}</div>` : '';
+        pitchHtml = `<div class="pitch-seg">
+          ${piece(red,    red,    'var(--red-c)',    '#fff',    rPct)}
+          ${piece(yellow, yellow, 'var(--yellow-c)', '#1a1200', yPct)}
+          ${piece(blue,   blue,   'var(--blue-c)',   '#fff',    bPct)}
+        </div>
+        <div class="pitch-seg-labels">
+          ${red    > 0 ? `<div class="pitch-seg-legend"><div class="pitch-seg-dot" style="background:var(--red-c)"></div>Red (pitch 1) — ${red} cards</div>` : ''}
+          ${yellow > 0 ? `<div class="pitch-seg-legend"><div class="pitch-seg-dot" style="background:var(--yellow-c)"></div>Yellow (pitch 2) — ${yellow} cards</div>` : ''}
+          ${blue   > 0 ? `<div class="pitch-seg-legend"><div class="pitch-seg-dot" style="background:var(--blue-c)"></div>Blue (pitch 3) — ${blue} cards</div>` : ''}
+        </div>`;
+      }
+
+      let costHtml = '';
+      const costKeys = ['0','1','2','3','4','5','6','7+'];
+      const visCostKeys = costKeys.filter(k => s.costDist[k]);
+      if (visCostKeys.length > 0) {
+        const minI = costKeys.indexOf(visCostKeys[0]);
+        const maxI = costKeys.indexOf(visCostKeys[visCostKeys.length - 1]);
+        const activeCostKeys = costKeys.slice(minI, maxI + 1);
+        const maxC = Math.max(...activeCostKeys.map(k => s.costDist[k] || 0));
+        const cols = activeCostKeys.map(k => {
+          const count = s.costDist[k] || 0;
+          const pct = maxC ? (count / maxC * 100).toFixed(1) : 0;
+          return `<div class="vchart-col">
+            <div class="vchart-fill-wrap"><div class="vchart-fill" data-h="${pct}" style="height:0%"></div></div>
+            <div class="vchart-label">${esc(k)}</div>
+            <div class="vchart-count">${count > 0 ? count : ''}</div>
+          </div>`;
+        }).join('');
+        costHtml = `<div class="vchart">${cols}</div>`;
+      }
+
+      if (pitchHtml || costHtml) {
+        html += '<div class="analysis-row">';
+        if (pitchHtml) html += section('Pitch Distribution', pitchHtml);
+        if (costHtml)  html += section('Cost Curve', costHtml);
+        html += '</div>';
+      }
+
+      /* Attack Power + Defense */
+      const hasPower   = Object.keys(s.powerDist).length > 0;
+      const hasDefense = Object.keys(s.defenseDist).length > 0;
+      if (hasPower || hasDefense) {
+        html += '<div class="analysis-row">';
+        if (hasPower) {
+          const powerKeys = ['0','1','2','3','4','5','6','7','8','9+'];
+          const maxP = Math.max(...Object.values(s.powerDist));
+          const rows = powerKeys.filter(k => s.powerDist[k])
+            .map(k => hbar(k, s.powerDist[k], maxP, 'var(--red-c)')).join('');
+          html += section('Attack Power', `<div class="hbar-list">${rows}</div>`);
+        }
+        if (hasDefense) {
+          const defenseKeys = ['0','1','2','3','4','5','6','7+'];
+          const maxD = Math.max(...Object.values(s.defenseDist));
+          const rows = defenseKeys.filter(k => s.defenseDist[k])
+            .map(k => hbar(k, s.defenseDist[k], maxD, 'var(--blue-c)')).join('');
+          html += section('Defense', `<div class="hbar-list">${rows}</div>`);
+        }
+        html += '</div>';
+      }
+
+      /* Card Types + Keywords */
+      const typeEntries = Object.entries(s.typeCounts).sort((a,b) => b[1]-a[1]);
+      const kwEntries   = Object.entries(s.keywordCounts).sort((a,b) => b[1]-a[1]).slice(0, 16);
+      if (typeEntries.length > 0 || kwEntries.length > 0) {
+        html += '<div class="analysis-row">';
+        if (typeEntries.length > 0) {
+          const maxT = typeEntries[0][1];
+          const rows = typeEntries.map(([t,c]) => hbar(t, c, maxT, null)).join('');
+          html += section('Card Types', `<div class="hbar-list">${rows}</div>`);
+        }
+        if (kwEntries.length > 0) {
+          const maxK = kwEntries[0][1];
+          const rows = kwEntries.map(([k,c]) => hbar(k, c, maxK, 'var(--yellow-c)')).join('');
+          html += section('Keywords', `<div class="hbar-list">${rows}</div>`);
+        }
+        html += '</div>';
+      }
+
+      /* Rarity */
+      const rarityEntries = RARITY_ORDER.map(r => [r, s.rarityCounts[r] || 0]).filter(([,c]) => c > 0);
+      if (rarityEntries.length > 0) {
+        const maxR = Math.max(...rarityEntries.map(([,c]) => c));
+        const rows = rarityEntries.map(([r,c]) => hbar(RARITY_LABELS[r] || r, c, maxR, RARITY_COLORS[r])).join('');
+        html += section('Rarity', `<div class="hbar-list">${rows}</div>`);
+      }
+
+      panelEl.innerHTML = html;
+
+      requestAnimationFrame(() => {
+        panelEl.querySelectorAll('.vchart-fill').forEach(b => { b.style.height = b.dataset.h + '%'; });
+        panelEl.querySelectorAll('.hbar-fill').forEach(b => { b.style.width = b.dataset.pct + '%'; });
+      });
+    }
+
+    async function init() {
+      try {
+        const resp = await fetch(DB_URL);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        document.getElementById('loading-label').textContent = 'Parsing cards…';
+        const raw = await resp.json();
+
+        const groups = { illusionist: [], runeblade: [], wizard: [], lightning: [], generic: [] };
+
+        for (const card of raw) {
+          /* Must have an OMN printing */
+          const omnPrinting = (card.printings || []).find(p =>
+            p.set_printing_unique_id && p.set_printing_unique_id.startsWith(SET_CODE)
+          );
+          if (!omnPrinting) continue;
+
+          /* Exclude Majestic, Legendary, Fable */
+          if (EXCLUDED_RARITIES.has(omnPrinting.rarity)) continue;
+
+          const types = Array.isArray(card.types) ? card.types : [];
+
+          /* Exclude Weapon and Equipment */
+          if (types.some(t => EXCLUDED_TYPES.has(t))) continue;
+
+          const pitchNum = card.pitch   != null && card.pitch   !== '' ? parseInt(card.pitch,   10) : null;
+          const costNum  = card.cost    != null && card.cost    !== '' ? parseInt(card.cost,    10) : null;
+          const powNum   = card.power   != null && card.power   !== '' ? parseInt(card.power,   10) : null;
+          const defNum   = card.defense != null && card.defense !== '' ? parseInt(card.defense, 10) : null;
+
+          const processed = {
+            name:     card.name,
+            pitch:    isNaN(pitchNum) ? null : pitchNum,
+            cost:     isNaN(costNum)  ? null : costNum,
+            power:    isNaN(powNum)   ? null : powNum,
+            defense:  isNaN(defNum)   ? null : defNum,
+            color:    (card.color || '').toLowerCase(),
+            types,
+            keywords: Array.isArray(card.card_keywords) ? card.card_keywords.filter(Boolean) : [],
+            rarity:   omnPrinting.rarity,
+          };
+
+          /* Classify into group */
+          const classes      = types.filter(t => HERO_CLASSES.includes(t));
+          const nonLightning = classes.filter(c => c !== 'Lightning');
+
+          let group;
+          if (nonLightning.includes('Illusionist'))  group = 'illusionist';
+          else if (nonLightning.includes('Runeblade')) group = 'runeblade';
+          else if (nonLightning.includes('Wizard'))    group = 'wizard';
+          else if (nonLightning.length > 0)            group = 'generic';
+          else if (classes.includes('Lightning'))      group = 'lightning';
+          else                                         group = 'generic';
+
+          groups[group].push(processed);
+        }
+
+        const total = Object.values(groups).reduce((a, g) => a + g.length, 0);
+        document.getElementById('pill-total').textContent        = `${total} cards`;
+        document.getElementById('pill-illusionist').textContent  = `Illusionist: ${groups.illusionist.length}`;
+        document.getElementById('pill-runeblade').textContent    = `Runeblade: ${groups.runeblade.length}`;
+        document.getElementById('pill-wizard').textContent       = `Wizard: ${groups.wizard.length}`;
+        document.getElementById('pill-lightning').textContent    = `Lightning: ${groups.lightning.length}`;
+        document.getElementById('pill-generic').textContent      = `Generic: ${groups.generic.length}`;
+
+        for (const [key, cards] of Object.entries(groups)) {
+          renderPanel(cards, document.getElementById('panel-' + key));
+        }
+
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('stats-content').style.display = '';
+
+      } catch (err) {
+        document.getElementById('loading-state').style.display = 'none';
+        const errEl = document.getElementById('error-state');
+        errEl.style.display = '';
+        errEl.textContent = 'Failed to load card data: ' + err.message;
+      }
+    }
+
+    /* Tab switching */
+    document.querySelectorAll('.tab-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+        document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('panel-' + tab).classList.add('active');
+
+        /* Re-animate bars for newly visible panel */
+        const panel = document.getElementById('panel-' + tab);
+        panel.querySelectorAll('.vchart-fill').forEach(function (b) { b.style.height = b.dataset.h + '%'; });
+        panel.querySelectorAll('.hbar-fill').forEach(function (b) { b.style.width = b.dataset.pct + '%'; });
+      });
+    });
+
+    init();
+  })();
+  </script>
+</body>
+</html>
