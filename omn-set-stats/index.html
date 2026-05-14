@@ -897,6 +897,103 @@
     .sim-pip.yellow { background: var(--yellow-c); box-shadow: 0 0 4px var(--yellow-c); }
     .sim-pip.blue   { background: var(--blue-c);   box-shadow: 0 0 4px var(--blue-c); }
 
+    /* ── Simulator param controls ── */
+    .sim-param-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.65rem;
+      margin-bottom: 1.25rem;
+    }
+
+    @media (max-width: 700px) {
+      .sim-param-grid { grid-template-columns: 1fr; }
+    }
+
+    .sim-param-group {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.7rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .sim-param-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted-2);
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.1rem;
+    }
+
+    .sim-param-row {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .sim-param-label {
+      font-size: 0.67rem;
+      color: var(--muted-2);
+      min-width: 5.5rem;
+      flex-shrink: 0;
+      line-height: 1.3;
+    }
+
+    .sim-param-label.derived { font-style: italic; color: var(--muted); font-size: 0.6rem; }
+    .sim-param-label.blue    { color: var(--blue-c); }
+    .sim-param-label.yellow  { color: var(--yellow-c); }
+    .sim-param-label.red     { color: var(--red-c); }
+
+    .sim-param-slider {
+      -webkit-appearance: none;
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border-2);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .sim-param-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    .sim-param-slider.blue::-webkit-slider-thumb   { background: var(--blue-c); }
+    .sim-param-slider.yellow::-webkit-slider-thumb { background: var(--yellow-c); }
+    .sim-param-slider.red::-webkit-slider-thumb    { background: var(--red-c); }
+
+    .sim-param-val {
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      color: var(--text);
+      min-width: 2.4rem;
+      text-align: right;
+    }
+
+    .sim-param-val.derived { color: var(--muted); font-size: 0.6rem; }
+
+    .sim-color-bar {
+      display: flex;
+      height: 4px;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 0.25rem;
+    }
+
+    .sim-color-bar-seg { height: 100%; transition: flex 0.25s ease; }
+    .sim-color-bar-seg.blue   { background: var(--blue-c); }
+    .sim-color-bar-seg.yellow { background: var(--yellow-c); }
+    .sim-color-bar-seg.red    { background: var(--red-c); }
+
     /* ── Footer ── */
     footer {
       margin-top: 2rem;
@@ -1049,12 +1146,6 @@
 
     /* ── Hand Simulator ─────────────────────────────────────────────────────── */
 
-    function simBuildPool(classCards, genericCards) {
-      const pool = [];
-      for (const c of classCards)  { const n = c.rarity === 'C' ? 3 : 1; for (let i = 0; i < n; i++) pool.push(c); }
-      for (const c of genericCards) { const n = c.rarity === 'C' ? 2 : 1; for (let i = 0; i < n; i++) pool.push(c); }
-      return pool;
-    }
 
     function simShuffle(arr) {
       const a = arr.slice();
@@ -1125,21 +1216,89 @@
       }
     }
 
-    function renderSimulator(groupKey, classCards, genericCards, panelEl) {
-      const pool = simBuildPool(classCards, genericCards);
+    function renderSimulator(groupKey, classCards, nonClassCards, panelEl) {
+      function byRarColor(cards) {
+        const out = {
+          common: { blue: [], yellow: [], red: [], other: [] },
+          rare:   { blue: [], yellow: [], red: [], other: [] },
+        };
+        for (const c of cards) {
+          const rar = c.rarity === 'C' ? 'common' : 'rare';
+          const col = ['blue','yellow','red'].includes(c.color) ? c.color : 'other';
+          out[rar][col].push(c);
+        }
+        return out;
+      }
+
+      const classByRC    = byRarColor(classCards);
+      const nonclassByRC = byRarColor(nonClassCards);
       const className = groupKey.charAt(0).toUpperCase() + groupKey.slice(1);
+
       const simHtml = `<div class="analysis-section sim-section">
         <div class="analysis-head">Hand Simulator — ${esc(className)} (OMN Limited Pool)</div>
         <div class="analysis-body">
-          <div class="sim-controls">
+          <div class="sim-controls" style="margin-bottom:1rem">
             <div class="sim-hs-wrap">
               <span class="sim-label">Hand size</span>
               <input type="range" class="sim-hs-slider" id="sim-hs-${groupKey}" min="1" max="7" value="4">
               <span class="sim-hs-val" id="sim-hs-val-${groupKey}">4</span>
             </div>
             <button class="sim-draw-btn" id="sim-draw-${groupKey}">Draw Hand</button>
-            <span class="sim-deck-info">${classCards.length} class · ${genericCards.length} generic · pool of ${pool.length} cards</span>
+            <span class="sim-deck-info">${classCards.length} class · ${nonClassCards.length} non-class</span>
           </div>
+
+          <div class="sim-param-grid">
+            <div class="sim-param-group">
+              <div class="sim-param-title">Rarity Split</div>
+              <div class="sim-param-row">
+                <span class="sim-param-label">Commons</span>
+                <input type="range" class="sim-param-slider" id="sim-pcom-${groupKey}" min="0" max="100" value="80">
+                <span class="sim-param-val" id="sim-pcom-v-${groupKey}">80%</span>
+              </div>
+              <div class="sim-param-row">
+                <span class="sim-param-label derived">Rares (derived)</span>
+                <span class="sim-param-val derived" id="sim-prar-v-${groupKey}">20%</span>
+              </div>
+            </div>
+
+            <div class="sim-param-group">
+              <div class="sim-param-title">Class Split</div>
+              <div class="sim-param-row">
+                <span class="sim-param-label">Class cards</span>
+                <input type="range" class="sim-param-slider" id="sim-pcls-${groupKey}" min="0" max="100" value="60">
+                <span class="sim-param-val" id="sim-pcls-v-${groupKey}">60%</span>
+              </div>
+              <div class="sim-param-row">
+                <span class="sim-param-label derived">Non-class (derived)</span>
+                <span class="sim-param-val derived" id="sim-pncl-v-${groupKey}">40%</span>
+              </div>
+            </div>
+
+            <div class="sim-param-group">
+              <div class="sim-param-title">Color Distribution</div>
+              <div class="sim-param-row">
+                <span class="sim-param-label blue">Blue (pitch 3)</span>
+                <input type="range" class="sim-param-slider blue" id="sim-cbl-${groupKey}" min="0" max="100" value="35">
+                <span class="sim-param-val" id="sim-cbl-v-${groupKey}">35%</span>
+              </div>
+              <div class="sim-param-row">
+                <span class="sim-param-label yellow">Yellow (pitch 2)</span>
+                <input type="range" class="sim-param-slider yellow" id="sim-cye-${groupKey}" min="0" max="100" value="15">
+                <span class="sim-param-val" id="sim-cye-v-${groupKey}">15%</span>
+              </div>
+              <div class="sim-param-row">
+                <span class="sim-param-label red">Red (pitch 1)</span>
+                <input type="range" class="sim-param-slider red" id="sim-cre-${groupKey}" min="0" max="100" value="50">
+                <span class="sim-param-val" id="sim-cre-v-${groupKey}">50%</span>
+              </div>
+              <div class="sim-color-bar">
+                <div class="sim-color-bar-seg blue"   id="sim-cb-bl-${groupKey}" style="flex:35"></div>
+                <div class="sim-color-bar-seg yellow" id="sim-cb-ye-${groupKey}" style="flex:15"></div>
+                <div class="sim-color-bar-seg red"    id="sim-cb-re-${groupKey}" style="flex:50"></div>
+              </div>
+            </div>
+          </div>
+
           <div class="sim-hand-area" id="sim-hand-${groupKey}">
             <div class="sim-empty-state">Click "Draw Hand" to simulate a starting hand from the OMN card pool</div>
           </div>
@@ -1149,24 +1308,101 @@
 
       panelEl.insertAdjacentHTML('afterbegin', simHtml);
 
-      let handSize = 4;
-      const hsSlider = document.getElementById('sim-hs-'     + groupKey);
-      const hsVal    = document.getElementById('sim-hs-val-' + groupKey);
-      const drawBtn  = document.getElementById('sim-draw-'   + groupKey);
+      const sp = { handSize: 4, pctCommon: 80, pctClass: 60, rawBlue: 35, rawYellow: 15, rawRed: 50 };
 
-      if (hsSlider) {
-        hsSlider.addEventListener('input', function () {
-          handSize = parseInt(this.value);
-          if (hsVal) hsVal.textContent = handSize;
-        });
+      function normalizeColors() {
+        const t = sp.rawBlue + sp.rawYellow + sp.rawRed;
+        if (t === 0) return { blue: 33.33, yellow: 33.33, red: 33.34 };
+        return { blue: sp.rawBlue / t * 100, yellow: sp.rawYellow / t * 100, red: sp.rawRed / t * 100 };
       }
 
-      if (drawBtn) {
-        drawBtn.addEventListener('click', function () {
-          const shuffled = simShuffle(pool);
-          simRenderHand(groupKey, shuffled.slice(0, Math.min(handSize, shuffled.length)));
-        });
+      function updateColorUI() {
+        const ec = normalizeColors();
+        document.getElementById('sim-cbl-v-' + groupKey).textContent = Math.round(ec.blue)   + '%';
+        document.getElementById('sim-cye-v-' + groupKey).textContent = Math.round(ec.yellow) + '%';
+        document.getElementById('sim-cre-v-' + groupKey).textContent = Math.round(ec.red)    + '%';
+        document.getElementById('sim-cb-bl-' + groupKey).style.flex  = sp.rawBlue;
+        document.getElementById('sim-cb-ye-' + groupKey).style.flex  = sp.rawYellow;
+        document.getElementById('sim-cb-re-' + groupKey).style.flex  = sp.rawRed;
       }
+
+      function onColorSlider(key, val) {
+        const others = ['rawBlue','rawYellow','rawRed'].filter(k => k !== key);
+        const curSum = sp[others[0]] + sp[others[1]];
+        const rem = Math.max(0, 100 - val);
+        sp[key] = val;
+        if (curSum === 0) {
+          sp[others[0]] = Math.round(rem / 2);
+          sp[others[1]] = rem - sp[others[0]];
+        } else {
+          sp[others[0]] = Math.round(sp[others[0]] / curSum * rem);
+          sp[others[1]] = rem - sp[others[0]];
+        }
+        document.getElementById('sim-cbl-' + groupKey).value = sp.rawBlue;
+        document.getElementById('sim-cye-' + groupKey).value = sp.rawYellow;
+        document.getElementById('sim-cre-' + groupKey).value = sp.rawRed;
+        updateColorUI();
+      }
+
+      function pickRandom(pool) { return pool[Math.floor(Math.random() * pool.length)]; }
+
+      function drawOneCard() {
+        const isRare  = Math.random() * 100 >= sp.pctCommon;
+        const isClass = Math.random() * 100 < sp.pctClass;
+        const ec = normalizeColors();
+        const rv = Math.random() * 100;
+        const color = rv < ec.blue ? 'blue' : rv < ec.blue + ec.yellow ? 'yellow' : 'red';
+        const rar = isRare ? 'rare' : 'common';
+        const src = isClass ? classByRC : nonclassByRC;
+
+        const exact = src[rar][color];
+        if (exact && exact.length > 0) return pickRandom(exact);
+
+        const anyInGroup = [...src[rar].blue, ...src[rar].yellow, ...src[rar].red, ...src[rar].other];
+        if (anyInGroup.length > 0) return pickRandom(anyInGroup);
+
+        const fallback = [
+          ...classByRC.common.blue, ...classByRC.common.yellow, ...classByRC.common.red,
+          ...classByRC.rare.blue,   ...classByRC.rare.yellow,   ...classByRC.rare.red,
+          ...nonclassByRC.common.blue, ...nonclassByRC.common.yellow, ...nonclassByRC.common.red,
+          ...nonclassByRC.rare.blue,   ...nonclassByRC.rare.yellow,   ...nonclassByRC.rare.red,
+        ];
+        return fallback.length > 0 ? pickRandom(fallback) : null;
+      }
+
+      function drawAndRender() {
+        const hand = [];
+        for (let i = 0; i < sp.handSize; i++) {
+          const c = drawOneCard();
+          if (c) hand.push(c);
+        }
+        simRenderHand(groupKey, hand);
+      }
+
+      const $hs = document.getElementById('sim-hs-' + groupKey);
+      const $hsv = document.getElementById('sim-hs-val-' + groupKey);
+      if ($hs) $hs.addEventListener('input', function () { sp.handSize = parseInt(this.value); if ($hsv) $hsv.textContent = sp.handSize; });
+
+      const $pcom = document.getElementById('sim-pcom-' + groupKey);
+      if ($pcom) $pcom.addEventListener('input', function () {
+        sp.pctCommon = parseInt(this.value);
+        document.getElementById('sim-pcom-v-' + groupKey).textContent = sp.pctCommon + '%';
+        document.getElementById('sim-prar-v-' + groupKey).textContent = (100 - sp.pctCommon) + '%';
+      });
+
+      const $pcls = document.getElementById('sim-pcls-' + groupKey);
+      if ($pcls) $pcls.addEventListener('input', function () {
+        sp.pctClass = parseInt(this.value);
+        document.getElementById('sim-pcls-v-' + groupKey).textContent = sp.pctClass + '%';
+        document.getElementById('sim-pncl-v-' + groupKey).textContent = (100 - sp.pctClass) + '%';
+      });
+
+      document.getElementById('sim-cbl-' + groupKey).addEventListener('input', function () { onColorSlider('rawBlue',   parseInt(this.value)); });
+      document.getElementById('sim-cye-' + groupKey).addEventListener('input', function () { onColorSlider('rawYellow', parseInt(this.value)); });
+      document.getElementById('sim-cre-' + groupKey).addEventListener('input', function () { onColorSlider('rawRed',    parseInt(this.value)); });
+
+      const $draw = document.getElementById('sim-draw-' + groupKey);
+      if ($draw) $draw.addEventListener('click', drawAndRender);
     }
 
     function section(title, bodyHtml) {
@@ -1598,7 +1834,8 @@
         }
 
         for (const key of ['illusionist', 'runeblade', 'wizard']) {
-          renderSimulator(key, groups[key] || [], groups.generic || [], document.getElementById('panel-' + key));
+          const nonClassCards = [...(groups.lightning || []), ...(groups.generic || [])];
+          renderSimulator(key, groups[key] || [], nonClassCards, document.getElementById('panel-' + key));
         }
 
         document.getElementById('loading-state').style.display = 'none';
