@@ -781,49 +781,52 @@ canvas { display: block; width: 100%; }
 
       <!-- Food intake section -->
       <div class="dash-card full">
-        <div class="dash-card-title">Weekly Overview</div>
-        <div class="chart-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Calories</div>
-        </div>
-        <canvas id="chart-weekly" height="160"></canvas>
-        <div class="chart-subsection">
-          <div class="chart-legend" style="margin-bottom:6px">
-            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Protein (g)</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+          <div class="dash-card-title" style="margin-bottom:0" id="overview-card-title">Weekly Overview</div>
+          <div class="range-tabs" id="overview-mode-tabs">
+            <button class="range-tab active" data-overview="weekly">Weekly</button>
+            <button class="range-tab" data-overview="monthly">Monthly</button>
           </div>
-          <canvas id="chart-protein-weekly" height="110"></canvas>
         </div>
-        <div class="chart-subsection">
-          <div class="chart-legend" style="margin-bottom:6px">
-            <div class="legend-item"><div class="legend-dot" style="background:#c4864a"></div>Weight (kg)</div>
-          </div>
-          <canvas id="chart-weight-weekly" height="90"></canvas>
-        </div>
-      </div>
 
-      <div class="dash-card full">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
-          <div class="dash-card-title" style="margin-bottom:0">Monthly Overview</div>
-          <div class="range-tabs">
-            <button class="range-tab active" data-range="30">30d</button>
-            <button class="range-tab" data-range="60">60d</button>
-            <button class="range-tab" data-range="90">90d</button>
+        <!-- Weekly charts -->
+        <div id="overview-weekly">
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Calories</div>
+          </div>
+          <canvas id="chart-weekly" height="160"></canvas>
+          <div class="chart-subsection">
+            <div class="chart-legend" style="margin-bottom:6px">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Protein (g)</div>
+            </div>
+            <canvas id="chart-protein-weekly" height="110"></canvas>
+          </div>
+          <div class="chart-subsection">
+            <div class="chart-legend" style="margin-bottom:6px">
+              <div class="legend-item"><div class="legend-dot" style="background:#c4864a"></div>Weight (kg)</div>
+            </div>
+            <canvas id="chart-weight-weekly" height="90"></canvas>
           </div>
         </div>
-        <div class="chart-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Calories</div>
-        </div>
-        <canvas id="chart-monthly" height="140"></canvas>
-        <div class="chart-subsection">
-          <div class="chart-legend" style="margin-bottom:6px">
-            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Protein (g)</div>
+
+        <!-- Monthly charts -->
+        <div id="overview-monthly" style="display:none">
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Calories</div>
           </div>
-          <canvas id="chart-protein-monthly" height="110"></canvas>
-        </div>
-        <div class="chart-subsection">
-          <div class="chart-legend" style="margin-bottom:6px">
-            <div class="legend-item"><div class="legend-dot" style="background:#c4864a"></div>Weight (kg)</div>
+          <canvas id="chart-monthly" height="140"></canvas>
+          <div class="chart-subsection">
+            <div class="chart-legend" style="margin-bottom:6px">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Protein (g)</div>
+            </div>
+            <canvas id="chart-protein-monthly" height="110"></canvas>
           </div>
-          <canvas id="chart-weight-monthly" height="90"></canvas>
+          <div class="chart-subsection">
+            <div class="chart-legend" style="margin-bottom:6px">
+              <div class="legend-item"><div class="legend-dot" style="background:#c4864a"></div>Weight (kg)</div>
+            </div>
+            <canvas id="chart-weight-monthly" height="90"></canvas>
+          </div>
         </div>
       </div>
 
@@ -2020,13 +2023,16 @@ document.getElementById('preset-modal-save').addEventListener('click', () => {
 });
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
-document.querySelectorAll('.range-tab[data-range]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.range-tab[data-range]').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    monthlyRange = parseInt(btn.dataset.range);
-    drawMonthlyChart();
-  });
+document.getElementById('overview-mode-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('[data-overview]');
+  if (!btn) return;
+  document.querySelectorAll('#overview-mode-tabs .range-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const mode = btn.dataset.overview;
+  document.getElementById('overview-weekly').style.display = mode === 'weekly' ? '' : 'none';
+  document.getElementById('overview-monthly').style.display = mode === 'monthly' ? '' : 'none';
+  document.getElementById('overview-card-title').textContent = mode === 'weekly' ? 'Weekly Overview' : 'Monthly Overview';
+  if (mode === 'monthly') drawMonthlyChart();
 });
 
 document.getElementById('burned-range-tabs').addEventListener('click', e => {
