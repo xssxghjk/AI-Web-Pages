@@ -1268,7 +1268,6 @@
               <input type="range" class="sim-hs-slider" id="sim-hs-${groupKey}" min="1" max="7" value="4">
               <span class="sim-hs-val" id="sim-hs-val-${groupKey}">4</span>
             </div>
-            <button class="sim-draw-btn" id="sim-draw-${groupKey}">Draw Hand</button>
             <span class="sim-deck-info">${classCards.length} class · ${nonClassCards.length} non-class</span>
           </div>
 
@@ -1324,6 +1323,7 @@
             </div>
           </div>
 
+          <button class="sim-draw-btn" id="sim-draw-${groupKey}" style="margin-bottom:1rem">Draw Hand</button>
           <div class="sim-hand-area" id="sim-hand-${groupKey}">
             <div class="sim-empty-state">Click "Draw Hand" to simulate a starting hand from the OMN card pool</div>
           </div>
