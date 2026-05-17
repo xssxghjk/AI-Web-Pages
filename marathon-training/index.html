@@ -1814,12 +1814,20 @@ function renderWeekProgress() {
 
   container.innerHTML = `
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
         <div style="display:flex;align-items:center;gap:10px;">
           <span class="phase-badge ${phase.cls}">${phase.name}</span>
           <span style="font-size:13px;color:var(--text2);">Week ${weekNum}</span>
         </div>
         <span style="font-size:13px;font-weight:700;color:${pct === 100 ? 'var(--success)' : 'var(--text2)'};">${pct}% complete</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:6px;">
+        <span id="calendarSub" style="font-size:11px;color:var(--text2);"></span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button id="btnPrevWeek" class="btn btn-ghost btn-sm" onclick="navCalendarWeek(-1)" title="Previous week">&#8592;</button>
+          <button id="btnTodayWeek" class="btn btn-ghost btn-sm" onclick="resetCalendarWeek()" title="Jump to current week">Today</button>
+          <button id="btnNextWeek" class="btn btn-ghost btn-sm" onclick="navCalendarWeek(1)" title="Next week">&#8594;</button>
+        </div>
       </div>
       <div class="week-grid-scroll"><div class="wp-grid">${dotsHtml}</div></div>
       <div class="wp-legend">
