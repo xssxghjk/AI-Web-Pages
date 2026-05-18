@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 // Minimal fixture exercising every filter branch:
 //   - OMN card detected via set_id (NOT set_printing_unique_id)
 //   - Majestic rarity now INCLUDED (Legendary / B / F excluded)
-//   - Weapon / Equipment types excluded
-//   - Classification: Illusionist, Runeblade, Wizard, Lightning, Generic
+//   - Weapon types excluded; Equipment (C/R) goes into equipment tab
+//   - Classification: Illusionist, Runeblade, Wizard, Lightning, Generic, Equipment
 const FIXTURE = [
   // ── Should be INCLUDED ──────────────────────────────────────────────
   // Illusionist (Lightning+Illusionist → non-lightning class wins)
@@ -22,6 +22,8 @@ const FIXTURE = [
   { unique_id: 'l1', name: 'Lightning Card',     color: 'Yellow', pitch: '2', cost: '1', power: '3', defense: '2', types: ['Lightning','Action','Attack'],            card_keywords: [],          printings: [{ set_id: 'OMN', set_printing_unique_id: 'hash7', id: 'OMN401', rarity: 'C' }] },
   // Generic (no class)
   { unique_id: 'g1', name: 'Generic Card',       color: 'Blue',   pitch: '3', cost: '0', power: '',  defense: '3', types: ['Generic','Action'],                       card_keywords: [],          printings: [{ set_id: 'OMN', set_printing_unique_id: 'hash8', id: 'OMN501', rarity: 'C' }] },
+  // Equipment (C/R → included in equipment tab)
+  { unique_id: 'e1', name: 'Equipment Card',     color: '',       pitch: '',  cost: '',  power: '',  defense: '2', types: ['Generic','Equipment','Head'],              card_keywords: [],          printings: [{ set_id: 'OMN', set_printing_unique_id: 'hashE', id: 'OMN605', rarity: 'C' }] },
 
   // ── Should be EXCLUDED ─────────────────────────────────────────────
   // Legendary
@@ -30,8 +32,8 @@ const FIXTURE = [
   { unique_id: 'x3', name: 'Excluded Hero',      color: '',       pitch: '',  cost: '',  power: '',  defense: '',  types: ['Lightning','Illusionist','Hero','Young'],    card_keywords: [], printings: [{ set_id: 'OMN', set_printing_unique_id: 'hashC', id: 'OMN603', rarity: 'B' }] },
   // Weapon (even if rarity would pass)
   { unique_id: 'x4', name: 'Excluded Weapon',    color: '',       pitch: '',  cost: '',  power: '',  defense: '',  types: ['Lightning','Illusionist','Weapon','Orb','2H'], card_keywords: [], printings: [{ set_id: 'OMN', set_printing_unique_id: 'hashD', id: 'OMN604', rarity: 'C' }] },
-  // Equipment
-  { unique_id: 'x5', name: 'Excluded Equipment', color: '',       pitch: '',  cost: '',  power: '',  defense: '',  types: ['Generic','Equipment','Head'],                 card_keywords: [], printings: [{ set_id: 'OMN', set_printing_unique_id: 'hashE', id: 'OMN605', rarity: 'C' }] },
+  // Equipment with Legendary rarity (excluded by rarity filter)
+  { unique_id: 'x5', name: 'Excluded Equipment L', color: '',     pitch: '',  cost: '',  power: '',  defense: '',  types: ['Generic','Equipment','Head'],                 card_keywords: [], printings: [{ set_id: 'OMN', set_printing_unique_id: 'hashX', id: 'OMN606', rarity: 'L' }] },
   // Non-OMN card (different set_id)
   { unique_id: 'x6', name: 'Excluded Other Set', color: 'Red',    pitch: '1', cost: '2', power: '3', defense: '2', types: ['Generic','Action'],                        card_keywords: [],          printings: [{ set_id: 'EVO', set_printing_unique_id: 'hashF', id: 'EVO001', rarity: 'C' }] },
 ];
@@ -54,27 +56,38 @@ test('omn set stats filters and classifies cards correctly', async ({ page }) =>
     document.querySelector(`.tab-btn[data-tab="${t}"]`).click(), tab
   );
 
-  // Illusionist panel (active by default) shows 3 total cards (2 regular + 1 majestic)
+  // Illusionist panel (active by default) — Cards sub-tab is first, switch to Statistics to see pills
   const illusionistPanel = page.locator('#panel-illusionist');
+  await illusionistPanel.locator('.cls-sub-btn[data-sub="statistics"]').click();
   await expect(illusionistPanel.locator('.ov-pill').first().locator('.ov-val')).toHaveText('3');
 
   // Runeblade tab
   await clickTab('runeblade');
+  await page.locator('#panel-runeblade').locator('.cls-sub-btn[data-sub="statistics"]').click();
   await expect(page.locator('#panel-runeblade').locator('.ov-pill').first().locator('.ov-val')).toHaveText('2');
 
   // Wizard tab
   await clickTab('wizard');
+  await page.locator('#panel-wizard').locator('.cls-sub-btn[data-sub="statistics"]').click();
   await expect(page.locator('#panel-wizard').locator('.ov-pill').first().locator('.ov-val')).toHaveText('2');
 
   // Lightning tab
   await clickTab('lightning');
+  await page.locator('#panel-lightning').locator('.cls-sub-btn[data-sub="statistics"]').click();
   await expect(page.locator('#panel-lightning').locator('.ov-pill').first().locator('.ov-val')).toHaveText('1');
 
   // Generic tab
   await clickTab('generic');
+  await page.locator('#panel-generic').locator('.cls-sub-btn[data-sub="statistics"]').click();
   await expect(page.locator('#panel-generic').locator('.ov-pill').first().locator('.ov-val')).toHaveText('1');
 
-  // All Cards tab shows all 9 included cards (8 regular + 1 majestic)
+  // Equipment tab shows 1 common/rare equipment card
+  await clickTab('equipment');
+  await page.locator('#panel-equipment').locator('.cls-sub-btn[data-sub="statistics"]').click();
+  await expect(page.locator('#panel-equipment').locator('.ov-pill').first().locator('.ov-val')).toHaveText('1');
+
+  // All Cards tab shows all 10 included cards (9 regular/majestic + 1 equipment)
   await clickTab('all');
-  await expect(page.locator('#panel-all').locator('.ov-pill').first().locator('.ov-val')).toHaveText('9');
+  await page.locator('#panel-all').locator('.cls-sub-btn[data-sub="statistics"]').click();
+  await expect(page.locator('#panel-all').locator('.ov-pill').first().locator('.ov-val')).toHaveText('10');
 });

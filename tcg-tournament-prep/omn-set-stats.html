@@ -1224,6 +1224,7 @@
         <button class="tab-btn" data-tab="wizard">Wizard</button>
         <button class="tab-btn" data-tab="lightning">Lightning</button>
         <button class="tab-btn" data-tab="generic">Generic</button>
+        <button class="tab-btn" data-tab="equipment">Equipment</button>
         <button class="tab-btn" data-tab="all">All Cards</button>
       </div>
       <div id="panel-illusionist" class="tab-panel active"></div>
@@ -1231,6 +1232,7 @@
       <div id="panel-wizard" class="tab-panel"></div>
       <div id="panel-lightning" class="tab-panel"></div>
       <div id="panel-generic" class="tab-panel"></div>
+      <div id="panel-equipment" class="tab-panel"></div>
       <div id="panel-all" class="tab-panel"></div>
     </div>
   </main>
@@ -1266,7 +1268,7 @@
     const DB_URL = 'https://raw.githubusercontent.com/the-fab-cube/flesh-and-blood-cards/omens-of-the-third-age/json/english/card.json';
     const SET_CODE = 'OMN';
     const EXCLUDED_RARITIES = new Set(['L', 'F', 'B']);
-    const EXCLUDED_TYPES    = new Set(['Weapon', 'Equipment']);
+    const EXCLUDED_TYPES    = new Set(['Weapon']);
     const HERO_CLASSES = [
       'Illusionist','Runeblade','Wizard','Lightning',
       'Ninja','Warrior','Brute','Guardian','Ranger',
@@ -1435,7 +1437,7 @@
             <span class="sim-deck-info">${classCards.length} class · ${nonClassCards.length} non-class</span>
           </div>
 
-          <details class="sim-param-collapse" open>
+          <details class="sim-param-collapse">
             <summary>Parameters</summary>
           <div class="sim-param-grid">
             <div class="sim-param-group">
@@ -1642,17 +1644,11 @@
       return `<div class="metric-tile${clickable}><div class="metric-label">${label}</div><div class="metric-val">${val}</div><div class="metric-sub">${sub}</div></div>`;
     }
 
-    function renderPanel(cards, panelEl, pinnedCards) {
-      pinnedCards = pinnedCards || [];
-      if (cards.length === 0 && pinnedCards.length === 0) {
-        panelEl.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted-2);font-style:italic;">No cards in this group.</div>';
-        return;
-      }
-
+    function buildStatsHtml(cards) {
+      if (cards.length === 0) return '<div style="padding:2rem;text-align:center;color:var(--muted-2);font-style:italic;">No cards in this group.</div>';
       const s = computeStats(cards);
       let html = '';
 
-      /* Overview pills */
       const { red, yellow, blue } = s.pitchCounts;
       const pitchTotal = red + yellow + blue;
       const noPitch = s.total - pitchTotal;
@@ -1664,7 +1660,6 @@
         ${noPitch > 0 ? `<div class="ov-pill ov-pill--clickable" data-filter-type="no-pitch" tabindex="0" role="button"><span class="ov-val" style="color:var(--muted-2)">${noPitch}</span><span class="ov-label">No pitch</span></div>` : ''}
       </div>`;
 
-      /* Key Metrics */
       const avgPitch   = s.pitchCards   ? (s.pitchSum   / s.pitchCards).toFixed(2)   : '—';
       const avgCost    = s.costCards    ? (s.costSum    / s.costCards).toFixed(2)    : '—';
       const avgPower   = s.powerCards   ? (s.powerSum   / s.powerCards).toFixed(2)   : '—';
@@ -1677,7 +1672,6 @@
         ${metricTile('Avg Defense', avgDefense, `${s.defenseCards} defensive cards`, 'has-defense')}
       </div>`);
 
-      /* Pitch Distribution + Cost Curve */
       let pitchHtml = '';
       if (pitchTotal > 0) {
         const rPct = Math.round(red    / pitchTotal * 100);
@@ -1727,7 +1721,6 @@
         html += '</div>';
       }
 
-      /* Attack Power + Defense */
       const hasPower   = Object.keys(s.powerDist).length > 0;
       const hasDefense = Object.keys(s.defenseDist).length > 0;
       if (hasPower || hasDefense) {
@@ -1749,7 +1742,6 @@
         html += '</div>';
       }
 
-      /* Card Types + Keywords */
       const typeEntries = Object.entries(s.typeCounts).sort((a,b) => b[1]-a[1]);
       const kwEntries   = Object.entries(s.keywordCounts).sort((a,b) => b[1]-a[1]).slice(0, 16);
       if (typeEntries.length > 0 || kwEntries.length > 0) {
@@ -1767,7 +1759,6 @@
         html += '</div>';
       }
 
-      /* Rarity */
       const rarityEntries = RARITY_ORDER.map(r => [r, s.rarityCounts[r] || 0]).filter(([,c]) => c > 0);
       if (rarityEntries.length > 0) {
         const maxR = Math.max(...rarityEntries.map(([,c]) => c));
@@ -1775,7 +1766,11 @@
         html += section('Rarity', `<div class="hbar-list">${rows}</div>`);
       }
 
-      /* Card list */
+      return html;
+    }
+
+    function buildCardsHtml(cards, pinnedCards) {
+      pinnedCards = pinnedCards || [];
       const sortedCards = cards.slice().sort((a, b) => {
         const ro = RARITY_ORDER.indexOf(a.rarity) - RARITY_ORDER.indexOf(b.rarity);
         if (ro !== 0) return ro;
@@ -1822,7 +1817,7 @@
       });
       const pinnedTilesHtml = pinnedSorted.map(makePopupCardTile).join('');
 
-      html += `<div class="analysis-section" style="margin-top:1rem">
+      return `<div class="analysis-section" style="margin-top:1rem">
         ${pinnedSorted.length > 0 ? `
         <div class="cards-section-head" style="color:var(--accent);border-bottom-color:var(--accent-border)">Hero &amp; Signature Weapon</div>
         <div class="cards-grid" style="border-bottom:1px solid var(--border)">${pinnedTilesHtml}</div>
@@ -1830,12 +1825,37 @@
         <div class="cards-section-head">Cards (${sortedCards.length})</div>
         <div class="cards-grid">${cardTiles}</div>
       </div>`;
+    }
 
-      panelEl.innerHTML = html;
+    function animateBars(el) {
+      el.querySelectorAll('.vchart-fill').forEach(function (b) { b.style.height = b.dataset.h + '%'; });
+      el.querySelectorAll('.hbar-fill').forEach(function (b) { b.style.width = b.dataset.pct + '%'; });
+    }
 
-      requestAnimationFrame(() => {
-        panelEl.querySelectorAll('.vchart-fill').forEach(b => { b.style.height = b.dataset.h + '%'; });
-        panelEl.querySelectorAll('.hbar-fill').forEach(b => { b.style.width = b.dataset.pct + '%'; });
+    function setupPanel(key, cards, panelEl, pinnedCards) {
+      pinnedCards = pinnedCards || [];
+      if (cards.length === 0 && pinnedCards.length === 0) {
+        panelEl.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted-2);font-style:italic;">No cards in this group.</div>';
+        return;
+      }
+      panelEl.innerHTML =
+        '<div class="cls-sub-bar">' +
+          '<button class="cls-sub-btn active" data-sub="cards">Cards</button>' +
+          '<button class="cls-sub-btn" data-sub="statistics">Statistics</button>' +
+        '</div>' +
+        '<div id="sp-cards-' + key + '">' + buildCardsHtml(cards, pinnedCards) + '</div>' +
+        '<div id="sp-stats-' + key + '" style="display:none">' + buildStatsHtml(cards) + '</div>';
+
+      panelEl.querySelectorAll('.cls-sub-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          panelEl.querySelectorAll('.cls-sub-btn').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          const sub = btn.dataset.sub;
+          document.getElementById('sp-cards-' + key).style.display = sub === 'cards' ? '' : 'none';
+          const se = document.getElementById('sp-stats-' + key);
+          se.style.display = sub === 'statistics' ? '' : 'none';
+          if (sub === 'statistics') animateBars(se);
+        });
       });
     }
 
@@ -1978,30 +1998,25 @@
         document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
         btn.classList.add('active');
         document.getElementById('panel-' + tab).classList.add('active');
-
         currentPanelCards = allGroups[tab] || [];
-
-        /* Re-animate bars for newly visible panel */
-        const panel = document.getElementById('panel-' + tab);
-        panel.querySelectorAll('.vchart-fill').forEach(function (b) { b.style.height = b.dataset.h + '%'; });
-        panel.querySelectorAll('.hbar-fill').forEach(function (b) { b.style.width = b.dataset.pct + '%'; });
       });
     });
 
     function setupClassPanel(groupKey, classCards, nonClassCards, panelEl, pinnedCards) {
       panelEl.innerHTML =
         '<div class="cls-sub-bar">' +
-          '<button class="cls-sub-btn active" data-sub="analysis">Analysis</button>' +
+          '<button class="cls-sub-btn active" data-sub="cards">Cards</button>' +
+          '<button class="cls-sub-btn" data-sub="statistics">Statistics</button>' +
           '<button class="cls-sub-btn" data-sub="memory">Memory</button>' +
         '</div>' +
-        '<div id="cls-analysis-' + groupKey + '"></div>' +
+        '<div id="cls-cards-' + groupKey + '">' + buildCardsHtml(classCards, pinnedCards) + '</div>' +
+        '<div id="cls-stats-' + groupKey + '" style="display:none">' + buildStatsHtml(classCards) + '</div>' +
         '<div id="cls-memory-' + groupKey + '" style="display:none"></div>';
 
-      const analysisEl = document.getElementById('cls-analysis-' + groupKey);
-      const memoryEl   = document.getElementById('cls-memory-' + groupKey);
+      const statsEl  = document.getElementById('cls-stats-'  + groupKey);
+      const memoryEl = document.getElementById('cls-memory-' + groupKey);
 
-      renderPanel(classCards, analysisEl, pinnedCards);
-      renderSimulator(groupKey, classCards, nonClassCards, analysisEl);
+      renderSimulator(groupKey, classCards, nonClassCards, statsEl);
       renderMemoryGame(groupKey, classCards, nonClassCards, memoryEl);
 
       panelEl.querySelectorAll('.cls-sub-btn').forEach(function (btn) {
@@ -2009,8 +2024,11 @@
           panelEl.querySelectorAll('.cls-sub-btn').forEach(function (b) { b.classList.remove('active'); });
           btn.classList.add('active');
           const sub = btn.dataset.sub;
-          analysisEl.style.display = sub === 'analysis' ? '' : 'none';
-          memoryEl.style.display   = sub === 'memory'   ? '' : 'none';
+          document.getElementById('cls-cards-'  + groupKey).style.display = sub === 'cards'      ? '' : 'none';
+          const se = document.getElementById('cls-stats-' + groupKey);
+          se.style.display = sub === 'statistics' ? '' : 'none';
+          memoryEl.style.display = sub === 'memory' ? '' : 'none';
+          if (sub === 'statistics') animateBars(se);
         });
       });
     }
@@ -2106,7 +2124,7 @@
                 'style="background:var(--bg);border:1px solid var(--border-2);border-radius:2px;color:var(--text);font-family:\'Cormorant Garamond\',Georgia,serif;font-size:0.82rem;padding:0.55rem 0.85rem;width:100%;outline:none;" />' +
             '</div>' +
             '<div class="mem-form-group">' +
-              '<details class="sim-param-collapse" open>' +
+              '<details class="sim-param-collapse">' +
               '<summary>Hand Probabilities</summary>' +
               '<div class="sim-param-grid" style="margin-bottom:0">' +
                 '<div class="sim-param-group">' +
@@ -2398,7 +2416,7 @@
         document.getElementById('loading-label').textContent = 'Parsing cards…';
         const raw = await resp.json();
 
-        const groups = { illusionist: [], runeblade: [], wizard: [], lightning: [], generic: [], all: [] };
+        const groups = { illusionist: [], runeblade: [], wizard: [], lightning: [], generic: [], equipment: [], all: [] };
 
         for (const card of raw) {
           /* Must have an OMN printing */
@@ -2410,7 +2428,7 @@
 
           const types = Array.isArray(card.types) ? card.types : [];
 
-          /* Exclude Weapon and Equipment */
+          /* Exclude Weapons entirely */
           if (types.some(t => EXCLUDED_TYPES.has(t))) continue;
 
           const pitchNum = card.pitch   != null && card.pitch   !== '' ? parseInt(card.pitch,   10) : null;
@@ -2431,7 +2449,16 @@
             image_url: omnPrinting.image_url || null,
           };
 
-          /* Classify into group */
+          /* Equipment → equipment group (C/R only) */
+          if (types.includes('Equipment')) {
+            if (['C', 'R'].includes(omnPrinting.rarity)) {
+              groups.equipment.push(processed);
+              groups.all.push(processed);
+            }
+            continue;
+          }
+
+          /* Classify into class/generic group */
           const classes      = types.filter(t => HERO_CLASSES.includes(t));
           const nonLightning = classes.filter(c => c !== 'Lightning');
 
@@ -2489,14 +2516,15 @@
         for (const [key, cards] of Object.entries(groups)) {
           if (key === 'all') continue;
           const panelEl = document.getElementById('panel-' + key);
+          if (!panelEl) continue;
           if (['illusionist', 'runeblade', 'wizard'].includes(key)) {
             setupClassPanel(key, cards, genericCards, panelEl, heroWeaponGroups[key] || []);
           } else {
-            renderPanel(cards, panelEl, heroWeaponGroups[key] || []);
+            setupPanel(key, cards, panelEl, heroWeaponGroups[key] || []);
           }
         }
 
-        renderPanel(groups.all, document.getElementById('panel-all'));
+        setupPanel('all', groups.all, document.getElementById('panel-all'));
 
         document.getElementById('loading-state').style.display = 'none';
         document.getElementById('stats-content').style.display = '';
