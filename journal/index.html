@@ -664,6 +664,48 @@
 
   .hidden { display: none !important; }
 
+  /* ── TODOS ── */
+  .todo-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px; }
+  .todo-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 2px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    transition: border-color 0.12s;
+  }
+  .todo-item.done .todo-text { text-decoration: line-through; color: var(--muted); }
+  .todo-checkbox { width: 15px; height: 15px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
+  .todo-text { flex: 1; font-size: 13px; color: var(--text); line-height: 1.4; }
+  .todo-delete-btn {
+    width: 22px; height: 22px;
+    border: none; background: none;
+    color: var(--muted2);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 2px;
+    transition: color 0.12s;
+    flex-shrink: 0;
+    padding: 0;
+  }
+  .todo-delete-btn:hover { color: #c46a6a; }
+  .todo-input-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .todo-add-input { flex: 1; }
+  .todo-evening-progress { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .todo-done-count {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 44px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 620px) {
     .header-actions { display: none; }
@@ -842,6 +884,7 @@ var editingGoalId = null;
 var selectedMood  = null;
 var historyYear   = new Date().getFullYear();
 var historyMonth  = new Date().getMonth();
+var currentTodos  = [];
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
@@ -972,6 +1015,7 @@ function switchTab(tab) {
 function renderMorningTab(container) {
   var entry = getEntry(currentDate, 'morning') || {};
   var activeGoals = Object.values(goals).filter(function(g) { return g.status === 'active'; });
+  currentTodos = (entry.todos || []).map(function(t) { return Object.assign({}, t); });
 
   container.innerHTML =
     '<div class="tab-content">' +
@@ -988,6 +1032,17 @@ function renderMorningTab(container) {
           ' oninput="updateCharCount(\'focus\',500);scheduleMorningSave()">' +
           escHtml(entry.focus || '') + '</textarea>' +
         '<div class="char-count"><span id="count-focus">' + (entry.focus || '').length + '</span>/500</div>' +
+      '</div>' +
+      '<div class="form-group">' +
+        '<label class="form-label">Daily Todos</label>' +
+        '<p class="form-hint">Specific tasks you want to complete today.</p>' +
+        '<div class="todo-list" id="todo-list">' + renderTodoListHtml(currentTodos, true) + '</div>' +
+        '<div class="todo-input-row">' +
+          '<input type="text" class="form-input todo-add-input" id="todo-input"' +
+            ' placeholder="Add a task…" maxlength="120"' +
+            ' onkeydown="if(event.key===\'Enter\')addTodo()">' +
+          '<button class="btn btn-ghost btn-sm" onclick="addTodo()">Add</button>' +
+        '</div>' +
       '</div>' +
       '<div class="form-group">' +
         '<label class="form-label">Goal Connections</label>' +
@@ -1042,8 +1097,84 @@ function saveMorning() {
   setEntry(currentDate, 'morning', {
     focus: focusEl.value,
     intention: intentionEl ? intentionEl.value : '',
-    goalConnections: goalConnections
+    goalConnections: goalConnections,
+    todos: currentTodos
   });
+  showSaveStatus('saved');
+  setTimeout(function() { showSaveStatus('idle'); }, 2000);
+}
+
+// ── Todo helpers ─────────────────────────────────────────────────────────────
+function renderTodoListHtml(todos, showDelete) {
+  if (todos.length === 0) {
+    return '<p class="empty-hint">No todos added yet.</p>';
+  }
+  return todos.map(function(t) {
+    return '<div class="todo-item' + (t.done ? ' done' : '') + '" id="todo-' + t.id + '">' +
+      '<input type="checkbox" class="todo-checkbox" ' + (t.done ? 'checked' : '') +
+        ' onchange="toggleTodo(\'' + t.id + '\',this.checked)">' +
+      '<span class="todo-text">' + escHtml(t.text) + '</span>' +
+      (showDelete
+        ? '<button class="todo-delete-btn" onclick="deleteTodo(\'' + t.id + '\')" title="Remove">&times;</button>'
+        : '') +
+    '</div>';
+  }).join('');
+}
+
+function renderEveningTodosHtml() {
+  if (currentTodos.length === 0) {
+    return '<p class="empty-hint">No todos were added this morning.</p>';
+  }
+  var doneCount = currentTodos.filter(function(t) { return t.done; }).length;
+  var pct = Math.round(doneCount / currentTodos.length * 100);
+  return '<div class="todo-evening-progress">' +
+    '<div class="progress-bar-wrap">' +
+      '<div class="progress-bar-fill" style="width:' + pct + '%"></div>' +
+    '</div>' +
+    '<span class="todo-done-count">' + doneCount + '/' + currentTodos.length + '</span>' +
+  '</div>' +
+  '<div class="todo-list">' + renderTodoListHtml(currentTodos, false) + '</div>';
+}
+
+function renderTodosInMorning() {
+  var listEl = document.getElementById('todo-list');
+  if (listEl) listEl.innerHTML = renderTodoListHtml(currentTodos, true);
+}
+
+function addTodo() {
+  var input = document.getElementById('todo-input');
+  if (!input) return;
+  var text = input.value.trim();
+  if (!text) return;
+  currentTodos.push({ id: genId(), text: text, done: false });
+  input.value = '';
+  saveTodosImmediate();
+  renderTodosInMorning();
+  input.focus();
+}
+
+function deleteTodo(id) {
+  currentTodos = currentTodos.filter(function(t) { return t.id !== id; });
+  saveTodosImmediate();
+  renderTodosInMorning();
+}
+
+function toggleTodo(id, done) {
+  for (var i = 0; i < currentTodos.length; i++) {
+    if (currentTodos[i].id === id) { currentTodos[i].done = done; break; }
+  }
+  saveTodosImmediate();
+  var item = document.getElementById('todo-' + id);
+  if (item) {
+    if (done) item.classList.add('done'); else item.classList.remove('done');
+  }
+  var eveningEl = document.getElementById('evening-todos');
+  if (eveningEl) eveningEl.innerHTML = renderEveningTodosHtml();
+}
+
+function saveTodosImmediate() {
+  var existing = getEntry(currentDate, 'morning') || {};
+  setEntry(currentDate, 'morning', Object.assign({}, existing, { todos: currentTodos }));
   showSaveStatus('saved');
   setTimeout(function() { showSaveStatus('idle'); }, 2000);
 }
@@ -1052,6 +1183,7 @@ function saveMorning() {
 function renderEveningTab(container) {
   var entry        = getEntry(currentDate, 'evening') || {};
   var morningEntry = getEntry(currentDate, 'morning') || {};
+  currentTodos = (morningEntry.todos || []).map(function(t) { return Object.assign({}, t); });
   var connectedIds = morningEntry.goalConnections || [];
   var connectedGoals = connectedIds
     .map(function(id) { return goals[id]; })
@@ -1095,6 +1227,11 @@ function renderEveningTab(container) {
       '<p class="section-sub">Look back, celebrate wins, extract lessons.</p></div>' +
     '</div>' +
     '<div class="form-card">' +
+      '<div class="form-group">' +
+        '<label class="form-label">Today\'s Todos</label>' +
+        '<p class="form-hint">Check off what you completed.</p>' +
+        '<div id="evening-todos">' + renderEveningTodosHtml() + '</div>' +
+      '</div>' +
       '<div class="form-group">' +
         '<label class="form-label" for="field-whatHappened">What Happened</label>' +
         '<p class="form-hint">Key events or moments worth noting.</p>' +
