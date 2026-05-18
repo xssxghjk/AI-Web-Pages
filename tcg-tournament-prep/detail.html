@@ -489,6 +489,55 @@
       color: var(--accent);
     }
 
+    /* ── TLDRAW EMBED ── */
+    .tldraw-section {
+      margin-bottom: 0.5rem;
+    }
+    .tldraw-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 2px 2px 0 0;
+    }
+    .tldraw-label {
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-style: italic;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .tldraw-open-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.75rem;
+      font-style: italic;
+      padding: 0.25rem 0.7rem;
+      border-radius: 2px;
+      border: 1px solid var(--border2);
+      color: var(--muted2);
+      background: transparent;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .tldraw-open-link:hover { border-color: var(--muted2); color: var(--text); }
+    .tldraw-iframe {
+      width: 100%;
+      height: 72vh;
+      min-height: 480px;
+      border: 1px solid var(--border);
+      border-radius: 0 0 2px 2px;
+      background: var(--surface);
+      display: block;
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       .prep-title { font-size: 1.4rem; }
@@ -671,6 +720,28 @@
            </div>`
         : '';
 
+      const tldrawHtml = p.tldrawUrl
+        ? `<div class="tldraw-section">
+             <div class="tldraw-header">
+               <span class="tldraw-label">Prep Graph</span>
+               <a class="tldraw-open-link" href="${esc(p.tldrawUrl)}" target="_blank" rel="noopener">
+                 Open in tldraw ↗
+               </a>
+             </div>
+             <iframe
+               class="tldraw-iframe"
+               src="${esc(p.tldrawUrl)}"
+               frameborder="0"
+               allowfullscreen
+               title="Prep graph"
+             ></iframe>
+           </div>`
+        : '';
+
+      const hasFormatContent = p.formats.some(f =>
+        f.summary.length || f.heroReasons.length || f.predictedMeta.length || f.notes.length
+      );
+
       const tabsHtml = p.formats.length > 1
         ? `<div class="format-tabs">
              ${p.formats.map((f, i) =>
@@ -679,11 +750,13 @@
            </div>`
         : '';
 
-      const formatsHtml = p.formats.map((f, i) =>
-        `<div class="format-tab-panel" data-panel="${esc(f.id)}"${i !== 0 ? ' style="display:none"' : ''}>
-           ${renderFormat(f, i)}
-         </div>`
-      ).join('');
+      const formatsHtml = hasFormatContent
+        ? p.formats.map((f, i) =>
+            `<div class="format-tab-panel" data-panel="${esc(f.id)}"${i !== 0 ? ' style="display:none"' : ''}>
+               ${renderFormat(f, i)}
+             </div>`
+          ).join('')
+        : '';
 
       return `
         <header class="page-header">
@@ -699,6 +772,7 @@
         </header>
 
         <main class="main">
+          ${tldrawHtml}
           ${tabsHtml}
           ${formatsHtml}
         </main>`;
