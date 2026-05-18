@@ -17,7 +17,7 @@ test.describe('OMN set stats – mobile overflow', () => {
     await page.route('**flesh-and-blood-cards**card.json', route =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(FIXTURE) })
     );
-    await page.goto('/omn-set-stats/');
+    await page.goto('/tcg-tournament-prep/omn-set-stats.html');
     await expect(page.locator('#stats-content')).toBeVisible({ timeout: 5000 });
   });
 

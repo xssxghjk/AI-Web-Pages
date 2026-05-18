@@ -104,7 +104,7 @@ test('workout tracker page loads', async ({ page }) => {
 });
 
 test('omn set stats page loads', async ({ page }) => {
-  await page.goto('/omn-set-stats/');
+  await page.goto('/tcg-tournament-prep/omn-set-stats.html');
   await expect(page).toHaveTitle(/OMN Set Stats/);
   const sidebarVisible = await page.locator('.sidebar').isVisible();
   const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();

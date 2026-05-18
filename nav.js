@@ -190,7 +190,7 @@
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l1.5 3 3.5.5-2.5 2.5.5 3.5L7 9.5 4 11l.5-3.5L2 5l3.5-.5L7 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>' },
         { key: 'deck-viewer', href: '../fab-deck-viewer/',      text: 'Deck Builder',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
-        { key: 'omn-set-stats', href: '../omn-set-stats/',     text: 'OMN Set Stats',
+        { key: 'omn-set-stats', href: '../tcg-tournament-prep/omn-set-stats.html', text: 'OMN Set Stats',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l1 2.5h2.5l-2 1.5.75 2.5L7 6.5 4.75 8l.75-2.5-2-1.5H6L7 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M2.5 10.5h9M4.5 12.5h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>' },
       ]
     },
@@ -218,11 +218,11 @@
     var p = window.location.pathname;
     if (/\/calendar(\/|$)/.test(p))               return 'calendar';
     if (/\/tcg-tournament-reports(\/|$)/.test(p)) return 'reports';
+    if (/\/tcg-tournament-prep\/omn-set-stats/.test(p)) return 'omn-set-stats';
     if (/\/tcg-tournament-prep(\/|$)/.test(p))    return 'prep';
     if (/\/trips(\/|$)/.test(p))                  return 'trips';
     if (/\/trip(\/|$)/.test(p))                   return 'trips';  // trip detail
     if (/\/fab-deck-viewer(\/|$)/.test(p))        return 'deck-viewer';
-    if (/\/omn-set-stats(\/|$)/.test(p))          return 'omn-set-stats';
     if (/\/fab-card-simulator(\/|$)/.test(p))     return 'card-hand-sim';
     if (/\/marathon-training(\/|$)/.test(p))      return 'marathon';
     if (/\/bouldering-tracker(\/|$)/.test(p))    return 'bouldering';
