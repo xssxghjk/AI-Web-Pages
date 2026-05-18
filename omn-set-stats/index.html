@@ -1023,6 +1023,183 @@
     .sim-color-bar-seg.yellow { background: var(--yellow-c); }
     .sim-color-bar-seg.red    { background: var(--red-c); }
 
+    /* ── Class panel sub-tabs ── */
+    .cls-sub-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border-2);
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .cls-sub-bar::-webkit-scrollbar { display: none; }
+    .cls-sub-btn {
+      padding: 0.55rem 1.2rem;
+      background: none; border: none;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      font-family: 'Cinzel', serif; font-size: 0.6rem;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--muted-2); cursor: pointer; white-space: nowrap;
+      transition: color 0.15s;
+    }
+    .cls-sub-btn:hover { color: var(--text); }
+    .cls-sub-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── Memory game ── */
+    .mem-setup-card {
+      background: var(--surface); border: 1px solid var(--border-2);
+      border-top: 2px solid var(--accent); border-radius: 2px;
+      padding: 1.75rem; max-width: 600px; margin: 1rem auto;
+    }
+    .mem-setup-title {
+      font-family: 'Cinzel', serif; font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase; color: var(--text);
+      margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);
+    }
+    .mem-form-group { margin-bottom: 1.1rem; }
+    .mem-form-label {
+      display: block; font-family: 'Cinzel', serif; font-size: 0.55rem;
+      font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 0.5rem;
+    }
+    .mem-btn-start {
+      width: 100%; padding: 0.75rem 1.25rem; margin-top: 0.75rem;
+      background: var(--accent); color: var(--bg); font-family: 'Cinzel', serif;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+      border: none; border-radius: 2px; cursor: pointer;
+      transition: opacity 0.12s, transform 0.12s;
+    }
+    .mem-btn-start:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+    .mem-btn-start:active:not(:disabled) { transform: translateY(1px); }
+    .mem-btn-start:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .mem-screen { display: none; }
+    .mem-screen.active { display: block; }
+
+    .mem-memorize-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 52vh; cursor: pointer; user-select: none;
+    }
+    .mem-progress {
+      text-align: center; margin-bottom: 1.25rem; font-family: 'Cinzel', serif;
+      font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent);
+    }
+    .mem-card-anim { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .mem-card-img {
+      width: min(240px, 65vw); border-radius: 14px;
+      box-shadow: 0 10px 32px rgba(0,0,0,0.45); display: block;
+    }
+    .mem-card-name {
+      font-family: 'Cinzel', serif; font-size: 0.82rem; font-weight: 700;
+      letter-spacing: 0.05em; color: var(--text); text-align: center;
+    }
+    .mem-hint { margin-top: 1.25rem; font-size: 0.75rem; color: var(--muted-2); text-align: center; }
+
+    .mem-slots-wrap { overflow-x: auto; margin-bottom: 1.5rem; padding-bottom: 0.25rem; }
+    .mem-slots { display: flex; gap: 0.5rem; min-width: max-content; padding: 0.5rem 0.25rem; }
+    .mem-slot {
+      width: 62px; height: 88px; background: var(--surface-2);
+      border: 2px dashed var(--border-2); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; color: var(--muted-2); position: relative; flex-shrink: 0;
+      font-family: 'Cinzel', serif; transition: border-color 0.2s;
+    }
+    .mem-slot.active { border-color: var(--accent); border-style: solid; }
+    .mem-slot img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+    .mem-slot-badge {
+      position: absolute; top: 3px; right: 3px; width: 20px; height: 20px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 900; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .mem-slot-badge.correct  { background: #4ade80; color: #fff; }
+    .mem-slot-badge.incorrect { background: #e05040; color: #fff; }
+
+    .mem-pool-label {
+      font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 0.9rem;
+    }
+    .mem-pool { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; }
+    .mem-pool-card {
+      width: 110px; background: var(--surface-2); border: 1px solid var(--border-2);
+      border-radius: 4px; overflow: hidden; cursor: pointer;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .mem-pool-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .mem-pool-card img { width: 100%; display: block; }
+    .mem-pool-card-name {
+      font-size: 0.6rem; color: var(--muted-2); padding: 0.25rem 0.3rem;
+      text-align: center; line-height: 1.3; font-family: 'Cinzel', serif;
+    }
+
+    .mem-result-wrap { max-width: 640px; margin: 0 auto; padding-top: 0.5rem; }
+    .mem-score-block { text-align: center; margin-bottom: 2rem; }
+    .mem-score-label {
+      font-family: 'Cinzel', serif; font-size: 0.6rem; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem;
+    }
+    .mem-score-value {
+      font-family: 'Cinzel', serif; font-weight: 700;
+      font-size: clamp(2.5rem, 9vw, 4.5rem); letter-spacing: -0.02em; line-height: 1;
+    }
+    .mem-score-num { color: var(--accent); }
+    .mem-score-denom { color: var(--muted-2); font-size: 0.6em; }
+    .mem-result-actions {
+      display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap;
+    }
+    .mem-btn-result {
+      padding: 0.65rem 1.5rem; font-family: 'Cinzel', serif; font-size: 0.62rem;
+      font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+      border-radius: 2px; cursor: pointer; transition: opacity 0.15s, transform 0.15s; border: none;
+    }
+    .mem-btn-result:hover { transform: translateY(-2px); }
+    .mem-btn-result.primary { background: var(--accent); color: var(--bg); }
+    .mem-btn-result.secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border-2); }
+
+    .mem-replay-label {
+      font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--muted-2); margin-bottom: 0.9rem; text-align: center;
+    }
+    .mem-replay-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+    .mem-replay-card {
+      position: relative; width: 80px; border-radius: 10px;
+      overflow: hidden; border: 2px solid var(--border);
+    }
+    .mem-replay-card img { width: 100%; display: block; }
+    .mem-replay-overlay { position: absolute; inset: 0; border-radius: 8px; opacity: 0.2; }
+    .mem-replay-card.correct   .mem-replay-overlay { background: #4ade80; }
+    .mem-replay-card.incorrect .mem-replay-overlay { background: #e05040; }
+    .mem-replay-badge {
+      position: absolute; bottom: 3px; right: 3px; width: 20px; height: 20px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 900; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .mem-replay-card.correct   .mem-replay-badge { background: #4ade80; color: #fff; }
+    .mem-replay-card.incorrect .mem-replay-badge { background: #e05040; color: #fff; }
+    .mem-replay-num {
+      position: absolute; top: 3px; left: 4px; font-family: 'Cinzel', serif; font-size: 0.6rem;
+      color: rgba(255,255,255,0.85); text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+    }
+    .mem-no-image {
+      width: 100%; height: 90px; background: var(--surface-2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; color: var(--muted-2); text-align: center;
+      padding: 0.25rem; line-height: 1.3; font-family: 'Cinzel', serif;
+    }
+
+    @keyframes correctPulse {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.12); }
+      70%  { transform: scale(0.96); }
+      100% { transform: scale(1); }
+    }
+    @keyframes incorrectShake {
+      0%, 100% { transform: translateX(0); }
+      20%  { transform: translateX(-6px); }
+      40%  { transform: translateX(5px); }
+      60%  { transform: translateX(-4px); }
+      80%  { transform: translateX(3px); }
+    }
+
     /* ── Footer ── */
     footer {
       margin-top: 2rem;
@@ -1810,6 +1987,391 @@
       });
     });
 
+    function setupClassPanel(groupKey, classCards, nonClassCards, panelEl, pinnedCards) {
+      panelEl.innerHTML =
+        '<div class="cls-sub-bar">' +
+          '<button class="cls-sub-btn active" data-sub="analysis">Analysis</button>' +
+          '<button class="cls-sub-btn" data-sub="memory">Memory</button>' +
+        '</div>' +
+        '<div id="cls-analysis-' + groupKey + '"></div>' +
+        '<div id="cls-memory-' + groupKey + '" style="display:none"></div>';
+
+      const analysisEl = document.getElementById('cls-analysis-' + groupKey);
+      const memoryEl   = document.getElementById('cls-memory-' + groupKey);
+
+      renderPanel(classCards, analysisEl, pinnedCards);
+      renderSimulator(groupKey, classCards, nonClassCards, analysisEl);
+      renderMemoryGame(groupKey, classCards, nonClassCards, memoryEl);
+
+      panelEl.querySelectorAll('.cls-sub-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          panelEl.querySelectorAll('.cls-sub-btn').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          const sub = btn.dataset.sub;
+          analysisEl.style.display = sub === 'analysis' ? '' : 'none';
+          memoryEl.style.display   = sub === 'memory'   ? '' : 'none';
+        });
+      });
+    }
+
+    function renderMemoryGame(groupKey, classCards, nonClassCards, containerEl) {
+      const mState = {
+        cardCount: 4, sequence: [], pool: [],
+        memorizeIndex: 0, recallIndex: 0,
+        recallAnswers: [], recallLocked: false, screen: 'setup',
+      };
+      const mSp = { pctCommon: 80, pctClass: 60, rawBlue: 35, rawYellow: 15, rawRed: 50 };
+
+      function byRarColor(cards) {
+        const out = { common: { blue: [], yellow: [], red: [], other: [] }, rare: { blue: [], yellow: [], red: [], other: [] } };
+        for (const c of cards) {
+          const rar = c.rarity === 'C' ? 'common' : 'rare';
+          const col = ['blue','yellow','red'].includes(c.color) ? c.color : 'other';
+          out[rar][col].push(c);
+        }
+        return out;
+      }
+      const classByRC    = byRarColor(classCards);
+      const nonclassByRC = byRarColor(nonClassCards);
+
+      function normalizeColors() {
+        const t = mSp.rawBlue + mSp.rawYellow + mSp.rawRed;
+        if (t === 0) return { blue: 33.33, yellow: 33.33, red: 33.34 };
+        return { blue: mSp.rawBlue / t * 100, yellow: mSp.rawYellow / t * 100, red: mSp.rawRed / t * 100 };
+      }
+      function pickRandom(pool) { return pool[Math.floor(Math.random() * pool.length)]; }
+      function drawOneCard() {
+        const isRare  = Math.random() * 100 >= mSp.pctCommon;
+        const isClass = Math.random() * 100 < mSp.pctClass;
+        const ec = normalizeColors();
+        const rv = Math.random() * 100;
+        const color = rv < ec.blue ? 'blue' : rv < ec.blue + ec.yellow ? 'yellow' : 'red';
+        const rar = isRare ? 'rare' : 'common';
+        const src = isClass ? classByRC : nonclassByRC;
+        const exact = src[rar][color];
+        if (exact && exact.length > 0) return pickRandom(exact);
+        const anyInGroup = [...src[rar].blue, ...src[rar].yellow, ...src[rar].red, ...src[rar].other];
+        if (anyInGroup.length > 0) return pickRandom(anyInGroup);
+        const fallback = [
+          ...classByRC.common.blue,    ...classByRC.common.yellow,    ...classByRC.common.red,
+          ...classByRC.rare.blue,      ...classByRC.rare.yellow,      ...classByRC.rare.red,
+          ...nonclassByRC.common.blue, ...nonclassByRC.common.yellow, ...nonclassByRC.common.red,
+          ...nonclassByRC.rare.blue,   ...nonclassByRC.rare.yellow,   ...nonclassByRC.rare.red,
+        ];
+        return fallback.length > 0 ? pickRandom(fallback) : null;
+      }
+      function buildSequence(n) {
+        const seq = [];
+        for (let i = 0; i < n; i++) {
+          const c = drawOneCard();
+          if (c) seq.push({ id: c.name + '|' + (c.color || ''), name: c.name, imgUrl: c.image_url || null, color: c.color || '' });
+        }
+        return seq;
+      }
+      function buildPool() {
+        const allPitch = [...classCards, ...nonClassCards].filter(c => ['blue','yellow','red'].includes(c.color));
+        const seen = new Set(); const pool = [];
+        for (const c of allPitch) {
+          const id = c.name + '|' + (c.color || '');
+          if (seen.has(id)) continue;
+          seen.add(id);
+          pool.push({ id, name: c.name, imgUrl: c.image_url || null, color: c.color || '' });
+        }
+        const pitchRank = col => col === 'blue' ? 0 : col === 'yellow' ? 1 : 2;
+        pool.sort((a, b) => { const d = pitchRank(a.color) - pitchRank(b.color); return d !== 0 ? d : a.name.localeCompare(b.name); });
+        return pool;
+      }
+
+      function sid(name) { return 'omm-' + groupKey + '-' + name; }
+      function showScreen(name) {
+        containerEl.querySelectorAll('.mem-screen').forEach(function (el) { el.classList.remove('active'); });
+        const el = document.getElementById(sid('screen-' + name));
+        if (el) { el.classList.add('active'); mState.screen = name; }
+      }
+
+      const className = groupKey.charAt(0).toUpperCase() + groupKey.slice(1);
+      containerEl.innerHTML =
+        '<div id="' + sid('screen-setup') + '" class="mem-screen active">' +
+          '<div class="mem-setup-card">' +
+            '<div class="mem-setup-title">Memory Game — ' + esc(className) + '</div>' +
+            '<div class="mem-form-group">' +
+              '<label class="mem-form-label" for="' + sid('count') + '">Cards to memorize</label>' +
+              '<input type="number" id="' + sid('count') + '" min="1" max="30" value="4" ' +
+                'style="background:var(--bg);border:1px solid var(--border-2);border-radius:2px;color:var(--text);font-family:\'Cinzel\',serif;font-size:0.82rem;padding:0.55rem 0.85rem;width:100%;outline:none;" />' +
+            '</div>' +
+            '<div class="mem-form-group">' +
+              '<label class="mem-form-label">Hand Probabilities</label>' +
+              '<div class="sim-param-grid" style="margin-bottom:0">' +
+                '<div class="sim-param-group">' +
+                  '<div class="sim-param-title">Rarity Split</div>' +
+                  '<div class="sim-param-row"><span class="sim-param-label">Commons</span>' +
+                    '<input type="range" class="sim-param-slider" id="' + sid('pcom') + '" min="0" max="100" value="80">' +
+                    '<span class="sim-param-val" id="' + sid('pcom-v') + '">80%</span></div>' +
+                  '<div class="sim-param-row"><span class="sim-param-label derived">Rares (derived)</span>' +
+                    '<span class="sim-param-val derived" id="' + sid('prar-v') + '">20%</span></div>' +
+                '</div>' +
+                '<div class="sim-param-group">' +
+                  '<div class="sim-param-title">Class Split</div>' +
+                  '<div class="sim-param-row"><span class="sim-param-label">Class cards</span>' +
+                    '<input type="range" class="sim-param-slider" id="' + sid('pcls') + '" min="0" max="100" value="60">' +
+                    '<span class="sim-param-val" id="' + sid('pcls-v') + '">60%</span></div>' +
+                  '<div class="sim-param-row"><span class="sim-param-label derived">Non-class (derived)</span>' +
+                    '<span class="sim-param-val derived" id="' + sid('pncl-v') + '">40%</span></div>' +
+                '</div>' +
+                '<div class="sim-param-group">' +
+                  '<div class="sim-param-title">Color Distribution</div>' +
+                  '<div class="sim-param-row"><span class="sim-param-label blue">Blue (pitch 3)</span>' +
+                    '<input type="range" class="sim-param-slider blue" id="' + sid('cbl') + '" min="0" max="100" value="35">' +
+                    '<span class="sim-param-val" id="' + sid('cbl-v') + '">35%</span></div>' +
+                  '<div class="sim-param-row"><span class="sim-param-label yellow">Yellow (pitch 2)</span>' +
+                    '<input type="range" class="sim-param-slider yellow" id="' + sid('cye') + '" min="0" max="100" value="15">' +
+                    '<span class="sim-param-val" id="' + sid('cye-v') + '">15%</span></div>' +
+                  '<div class="sim-param-row"><span class="sim-param-label red">Red (pitch 1)</span>' +
+                    '<input type="range" class="sim-param-slider red" id="' + sid('cre') + '" min="0" max="100" value="50">' +
+                    '<span class="sim-param-val" id="' + sid('cre-v') + '">50%</span></div>' +
+                  '<div class="sim-color-bar">' +
+                    '<div class="sim-color-bar-seg blue"   id="' + sid('cb-bl') + '" style="flex:35"></div>' +
+                    '<div class="sim-color-bar-seg yellow" id="' + sid('cb-ye') + '" style="flex:15"></div>' +
+                    '<div class="sim-color-bar-seg red"    id="' + sid('cb-re') + '" style="flex:50"></div>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+            '<button class="mem-btn-start" id="' + sid('start') + '">Start</button>' +
+          '</div>' +
+        '</div>' +
+        '<div id="' + sid('screen-memorize') + '" class="mem-screen"></div>' +
+        '<div id="' + sid('screen-recall')   + '" class="mem-screen"></div>' +
+        '<div id="' + sid('screen-result')   + '" class="mem-screen"></div>';
+
+      function updateColorUI() {
+        const ec = normalizeColors();
+        document.getElementById(sid('cbl-v')).textContent = Math.round(ec.blue)   + '%';
+        document.getElementById(sid('cye-v')).textContent = Math.round(ec.yellow) + '%';
+        document.getElementById(sid('cre-v')).textContent = Math.round(ec.red)    + '%';
+        document.getElementById(sid('cb-bl')).style.flex  = mSp.rawBlue;
+        document.getElementById(sid('cb-ye')).style.flex  = mSp.rawYellow;
+        document.getElementById(sid('cb-re')).style.flex  = mSp.rawRed;
+      }
+      function onColorSlider(key, val) {
+        const others = ['rawBlue','rawYellow','rawRed'].filter(function (k) { return k !== key; });
+        const curSum = mSp[others[0]] + mSp[others[1]];
+        const rem = Math.max(0, 100 - val);
+        mSp[key] = val;
+        if (curSum === 0) { mSp[others[0]] = Math.round(rem / 2); mSp[others[1]] = rem - mSp[others[0]]; }
+        else { mSp[others[0]] = Math.round(mSp[others[0]] / curSum * rem); mSp[others[1]] = rem - mSp[others[0]]; }
+        document.getElementById(sid('cbl')).value = mSp.rawBlue;
+        document.getElementById(sid('cye')).value = mSp.rawYellow;
+        document.getElementById(sid('cre')).value = mSp.rawRed;
+        updateColorUI();
+      }
+      document.getElementById(sid('pcom')).addEventListener('input', function () {
+        mSp.pctCommon = parseInt(this.value);
+        document.getElementById(sid('pcom-v')).textContent = mSp.pctCommon + '%';
+        document.getElementById(sid('prar-v')).textContent = (100 - mSp.pctCommon) + '%';
+      });
+      document.getElementById(sid('pcls')).addEventListener('input', function () {
+        mSp.pctClass = parseInt(this.value);
+        document.getElementById(sid('pcls-v')).textContent = mSp.pctClass + '%';
+        document.getElementById(sid('pncl-v')).textContent = (100 - mSp.pctClass) + '%';
+      });
+      document.getElementById(sid('cbl')).addEventListener('input', function () { onColorSlider('rawBlue',   parseInt(this.value)); });
+      document.getElementById(sid('cye')).addEventListener('input', function () { onColorSlider('rawYellow', parseInt(this.value)); });
+      document.getElementById(sid('cre')).addEventListener('input', function () { onColorSlider('rawRed',    parseInt(this.value)); });
+
+      document.getElementById(sid('start')).addEventListener('click', function () {
+        const n = Math.max(1, parseInt(document.getElementById(sid('count')).value, 10) || 4);
+        mState.cardCount = n;
+        mState.sequence  = buildSequence(n);
+        mState.pool      = buildPool();
+        if (!mState.sequence.length) { alert('No cards available with current settings.'); return; }
+        mState.memorizeIndex = 0;
+        showScreen('memorize');
+        renderMemorize();
+      });
+
+      function renderMemorize() {
+        const el = document.getElementById(sid('screen-memorize'));
+        el.innerHTML =
+          '<div class="mem-progress" id="' + sid('progress') + '"></div>' +
+          '<div class="mem-memorize-wrap" id="' + sid('mem-wrap') + '">' +
+            '<div class="mem-card-anim" id="' + sid('card-anim') + '"></div>' +
+            '<p class="mem-hint">Tap / click to advance</p>' +
+          '</div>';
+        showCard(0);
+        document.getElementById(sid('mem-wrap')).addEventListener('click', function () {
+          const next = mState.memorizeIndex + 1;
+          if (next < mState.sequence.length) { mState.memorizeIndex = next; showCard(next); }
+          else showGetReady();
+        });
+      }
+
+      function showCard(index) {
+        const card  = mState.sequence[index];
+        const total = mState.sequence.length;
+        const prog  = document.getElementById(sid('progress'));
+        if (prog) prog.textContent = 'Card ' + (index + 1) + ' / ' + total;
+        const animEl = document.getElementById(sid('card-anim'));
+        if (!animEl) return;
+        const fresh = animEl.cloneNode(false);
+        if (card.imgUrl) {
+          const img = document.createElement('img');
+          img.className = 'mem-card-img'; img.src = card.imgUrl; img.alt = card.name;
+          fresh.appendChild(img);
+        } else {
+          const noImg = document.createElement('div');
+          noImg.className = 'mem-no-image'; noImg.textContent = card.name;
+          fresh.appendChild(noImg);
+        }
+        const nameEl = document.createElement('div');
+        nameEl.className = 'mem-card-name'; nameEl.textContent = card.name;
+        fresh.appendChild(nameEl);
+        animEl.replaceWith(fresh);
+      }
+
+      function showGetReady() {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(8,12,20,0.96);display:flex;align-items:center;justify-content:center;font-family:\'Cinzel\',serif;font-size:2rem;font-weight:700;letter-spacing:0.12em;color:var(--accent);text-transform:uppercase;';
+        overlay.textContent = 'Get Ready…';
+        document.body.appendChild(overlay);
+        setTimeout(function () {
+          overlay.remove();
+          mState.recallIndex   = 0;
+          mState.recallAnswers = new Array(mState.sequence.length).fill(null);
+          mState.recallLocked  = false;
+          showScreen('recall');
+          renderRecall();
+        }, 1000);
+      }
+
+      function renderRecall() {
+        const n    = mState.sequence.length;
+        const pool = mState.pool;
+        const el   = document.getElementById(sid('screen-recall'));
+        let slotsHtml = '<div class="mem-slots-wrap"><div class="mem-slots" id="' + sid('slots') + '">';
+        for (let i = 0; i < n; i++) {
+          slotsHtml += '<div class="mem-slot' + (i === 0 ? ' active' : '') + '" id="' + sid('slot-' + i) + '">' + (i + 1) + '</div>';
+        }
+        slotsHtml += '</div></div>';
+        let poolHtml = '<div class="mem-pool-label">Pick the cards in order</div><div class="mem-pool" id="' + sid('pool') + '">';
+        for (const card of pool) {
+          const en = esc(card.name);
+          const imgTag = card.imgUrl ? '<img src="' + esc(card.imgUrl) + '" alt="' + en + '" />' : '<div class="mem-no-image">' + en + '</div>';
+          poolHtml += '<div class="mem-pool-card" data-card-id="' + esc(card.id) + '">' + imgTag + '<div class="mem-pool-card-name">' + en + '</div></div>';
+        }
+        poolHtml += '</div>';
+        el.innerHTML = slotsHtml + poolHtml;
+        document.getElementById(sid('pool')).addEventListener('click', function (e) {
+          const cardEl = e.target.closest('.mem-pool-card');
+          if (!cardEl || mState.recallLocked) return;
+          handlePick(cardEl.dataset.cardId, cardEl);
+        });
+      }
+
+      function fillSlot(pos, card, correct) {
+        const slot = document.getElementById(sid('slot-' + pos));
+        if (!slot) return;
+        slot.classList.remove('active');
+        if (card.imgUrl) {
+          const img = document.createElement('img'); img.src = card.imgUrl; img.alt = card.name;
+          slot.innerHTML = ''; slot.appendChild(img);
+        }
+        const badge = document.createElement('div');
+        badge.className = 'mem-slot-badge ' + (correct ? 'correct' : 'incorrect');
+        badge.textContent = correct ? '✓' : '✗';
+        slot.appendChild(badge);
+      }
+
+      function updateActiveSlot() {
+        containerEl.querySelectorAll('.mem-slot').forEach(function (s) { s.classList.remove('active'); });
+        const next = document.getElementById(sid('slot-' + mState.recallIndex));
+        if (next) { next.classList.add('active'); next.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
+      }
+
+      function handlePick(pickedId, pickedEl) {
+        const pos     = mState.recallIndex;
+        const correct = mState.sequence[pos];
+        const isRight = pickedId === correct.id;
+        mState.recallAnswers[pos] = { card: correct, correct: isRight };
+        const poolEl = document.getElementById(sid('pool'));
+        const correctEl = poolEl ? poolEl.querySelector('[data-card-id="' + correct.id.replace(/"/g, '\\"') + '"]') : null;
+        if (isRight) {
+          pickedEl.style.animation = 'correctPulse 0.5s ease both';
+          pickedEl.style.borderColor = '#4ade80';
+          fillSlot(pos, correct, true);
+          setTimeout(function () { pickedEl.style.animation = ''; pickedEl.style.borderColor = ''; }, 500);
+          mState.recallIndex++;
+          if (mState.recallIndex >= mState.sequence.length) { setTimeout(showResult, 600); }
+          else updateActiveSlot();
+        } else {
+          mState.recallLocked = true;
+          pickedEl.style.animation = 'incorrectShake 0.4s ease both';
+          pickedEl.style.borderColor = '#e05040';
+          if (correctEl) { correctEl.style.animation = 'correctPulse 0.55s ease 0.1s both'; correctEl.style.borderColor = '#4ade80'; }
+          fillSlot(pos, correct, false);
+          setTimeout(function () {
+            pickedEl.style.animation = ''; pickedEl.style.borderColor = '';
+            if (correctEl) { correctEl.style.animation = ''; correctEl.style.borderColor = ''; }
+            mState.recallLocked = false;
+            mState.recallIndex++;
+            if (mState.recallIndex >= mState.sequence.length) { setTimeout(showResult, 600); }
+            else updateActiveSlot();
+          }, 900);
+        }
+      }
+
+      function showResult() { showScreen('result'); renderResult(); }
+
+      function renderResult() {
+        const answers    = mState.recallAnswers;
+        const numCorrect = answers.filter(function (a) { return a && a.correct; }).length;
+        const total      = answers.length;
+        let replayHtml = '';
+        for (let i = 0; i < answers.length; i++) {
+          const a = answers[i];
+          if (!a) continue;
+          const cls   = a.correct ? 'correct' : 'incorrect';
+          const badge = a.correct ? '✓' : '✗';
+          const imgTag = a.card.imgUrl
+            ? '<img src="' + esc(a.card.imgUrl) + '" alt="' + esc(a.card.name) + '" />'
+            : '<div class="mem-no-image">' + esc(a.card.name) + '</div>';
+          replayHtml +=
+            '<div class="mem-replay-card ' + cls + '">' +
+              imgTag +
+              '<div class="mem-replay-overlay"></div>' +
+              '<div class="mem-replay-num">' + (i + 1) + '</div>' +
+              '<div class="mem-replay-badge">' + badge + '</div>' +
+            '</div>';
+        }
+        const el = document.getElementById(sid('screen-result'));
+        el.innerHTML =
+          '<div class="mem-result-wrap">' +
+            '<div class="mem-score-block">' +
+              '<div class="mem-score-label">Score</div>' +
+              '<div class="mem-score-value">' +
+                '<span class="mem-score-num">' + numCorrect + '</span>' +
+                '<span class="mem-score-denom"> / ' + total + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="mem-result-actions">' +
+              '<button class="mem-btn-result primary" id="' + sid('btn-replay') + '">Play Again</button>' +
+              '<button class="mem-btn-result secondary" id="' + sid('btn-setup') + '">Change Settings</button>' +
+            '</div>' +
+            '<div class="mem-replay-label">Your sequence</div>' +
+            '<div class="mem-replay-grid">' + replayHtml + '</div>' +
+          '</div>';
+        document.getElementById(sid('btn-replay')).addEventListener('click', function () {
+          mState.sequence = buildSequence(mState.cardCount);
+          mState.memorizeIndex = 0;
+          showScreen('memorize');
+          renderMemorize();
+        });
+        document.getElementById(sid('btn-setup')).addEventListener('click', function () {
+          showScreen('setup');
+        });
+      }
+    }
+
     async function init() {
       try {
         const resp = await fetch(DB_URL);
@@ -1910,13 +2472,15 @@
         document.getElementById('pill-lightning').textContent    = `Lightning: ${groups.lightning.length}`;
         document.getElementById('pill-generic').textContent      = `Generic: ${groups.generic.length}`;
 
-        for (const [key, cards] of Object.entries(groups)) {
-          renderPanel(cards, document.getElementById('panel-' + key), heroWeaponGroups[key] || []);
-        }
+        const nonClassCards = [...(groups.lightning || []), ...(groups.generic || [])];
 
-        for (const key of ['illusionist', 'runeblade', 'wizard']) {
-          const nonClassCards = [...(groups.lightning || []), ...(groups.generic || [])];
-          renderSimulator(key, groups[key] || [], nonClassCards, document.getElementById('panel-' + key));
+        for (const [key, cards] of Object.entries(groups)) {
+          const panelEl = document.getElementById('panel-' + key);
+          if (['illusionist', 'runeblade', 'wizard'].includes(key)) {
+            setupClassPanel(key, cards, nonClassCards, panelEl, heroWeaponGroups[key] || []);
+          } else {
+            renderPanel(cards, panelEl, heroWeaponGroups[key] || []);
+          }
         }
 
         document.getElementById('loading-state').style.display = 'none';
