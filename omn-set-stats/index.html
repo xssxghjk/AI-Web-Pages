@@ -585,6 +585,10 @@
     .card-tile-rarity.rarity-C { color: var(--muted-2); }
     .card-tile-rarity.rarity-P { color: #34d399; }
     .card-tile-rarity.rarity-T { color: var(--muted); }
+    .card-tile.rarity-M { border-top: 2px solid #c084fc; }
+    .card-tile.rarity-L { border-top: 2px solid #fbbf24; }
+    .card-tile-rarity.rarity-M { color: #c084fc; }
+    .card-tile-rarity.rarity-L { color: #fbbf24; }
 
     .card-tile-keywords {
       font-size: 0.55rem;
@@ -1116,9 +1120,15 @@
       'Merchant','Mechanologist','Shapeshifter','Assassin','Bard','Draconic',
     ];
 
-    const RARITY_LABELS = { C:'Common', R:'Rare', S:'Super Rare', T:'Token', P:'Promo' };
-    const RARITY_COLORS = { C:'#9ca3af', R:'#f87171', S:'#fb923c', T:'#6b7280', P:'#34d399' };
+    const RARITY_LABELS = { C:'Common', R:'Rare', S:'Super Rare', T:'Token', P:'Promo', M:'Majestic', L:'Legendary' };
+    const RARITY_COLORS = { C:'#9ca3af', R:'#f87171', S:'#fb923c', T:'#6b7280', P:'#34d399', M:'#c084fc', L:'#fbbf24' };
     const RARITY_ORDER  = ['S','R','P','C','T'];
+
+    const HERO_WEAPON_NAMES = {
+      runeblade:   ['aurora', 'scorpio'],
+      illusionist: ['zyggy', 'aphrodias'],
+      wizard:      ['oscilio', 'volzar'],
+    };
 
     function esc(s) {
       return String(s)
@@ -1454,8 +1464,9 @@
       return `<div class="metric-tile${clickable}><div class="metric-label">${label}</div><div class="metric-val">${val}</div><div class="metric-sub">${sub}</div></div>`;
     }
 
-    function renderPanel(cards, panelEl) {
-      if (cards.length === 0) {
+    function renderPanel(cards, panelEl, pinnedCards) {
+      pinnedCards = pinnedCards || [];
+      if (cards.length === 0 && pinnedCards.length === 0) {
         panelEl.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted-2);font-style:italic;">No cards in this group.</div>';
         return;
       }
@@ -1626,7 +1637,18 @@
         </div>`;
       }).join('');
 
+      const pinnedSorted = pinnedCards.slice().sort((a, b) => {
+        const aHero = a.types.includes('Hero') ? 0 : 1;
+        const bHero = b.types.includes('Hero') ? 0 : 1;
+        return aHero - bHero;
+      });
+      const pinnedTilesHtml = pinnedSorted.map(makePopupCardTile).join('');
+
       html += `<div class="analysis-section" style="margin-top:1rem">
+        ${pinnedSorted.length > 0 ? `
+        <div class="cards-section-head" style="color:var(--accent);border-bottom-color:var(--accent-border)">Hero &amp; Signature Weapon</div>
+        <div class="cards-grid" style="border-bottom:1px solid var(--border)">${pinnedTilesHtml}</div>
+        ` : ''}
         <div class="cards-section-head">Cards (${sortedCards.length})</div>
         <div class="cards-grid">${cardTiles}</div>
       </div>`;
@@ -1843,6 +1865,40 @@
           groups[group].push(processed);
         }
 
+        const heroWeaponGroups = { runeblade: [], illusionist: [], wizard: [] };
+        const seenHeroWeapon = new Set();
+        for (const card of raw) {
+          const omnPrinting = (card.printings || []).find(p => p.set_id === SET_CODE);
+          if (!omnPrinting) continue;
+
+          const lowerName = card.name.toLowerCase();
+          for (const [groupKey, names] of Object.entries(HERO_WEAPON_NAMES)) {
+            if (names.some(n => lowerName.startsWith(n))) {
+              const dedupeKey = groupKey + ':' + card.name;
+              if (seenHeroWeapon.has(dedupeKey)) continue;
+              seenHeroWeapon.add(dedupeKey);
+
+              const types = Array.isArray(card.types) ? card.types : [];
+              const pitchNum = card.pitch   != null && card.pitch   !== '' ? parseInt(card.pitch,   10) : null;
+              const costNum  = card.cost    != null && card.cost    !== '' ? parseInt(card.cost,    10) : null;
+              const powNum   = card.power   != null && card.power   !== '' ? parseInt(card.power,   10) : null;
+              const defNum   = card.defense != null && card.defense !== '' ? parseInt(card.defense, 10) : null;
+              heroWeaponGroups[groupKey].push({
+                name:      card.name,
+                pitch:     isNaN(pitchNum) ? null : pitchNum,
+                cost:      isNaN(costNum)  ? null : costNum,
+                power:     isNaN(powNum)   ? null : powNum,
+                defense:   isNaN(defNum)   ? null : defNum,
+                color:     (card.color || '').toLowerCase(),
+                types,
+                keywords:  Array.isArray(card.card_keywords) ? card.card_keywords.filter(Boolean) : [],
+                rarity:    omnPrinting.rarity,
+                image_url: omnPrinting.image_url || null,
+              });
+            }
+          }
+        }
+
         allGroups = groups;
         currentPanelCards = groups.illusionist;
 
@@ -1855,7 +1911,7 @@
         document.getElementById('pill-generic').textContent      = `Generic: ${groups.generic.length}`;
 
         for (const [key, cards] of Object.entries(groups)) {
-          renderPanel(cards, document.getElementById('panel-' + key));
+          renderPanel(cards, document.getElementById('panel-' + key), heroWeaponGroups[key] || []);
         }
 
         for (const key of ['illusionist', 'runeblade', 'wizard']) {
