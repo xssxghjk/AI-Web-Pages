@@ -1,5 +1,27 @@
 const PREPS = [
   {
+    id: 'prague-calling-2026',
+    event: 'The Calling Prague 2026',
+    eventType: 'Calling',
+    tier: 3,
+    date: '2026-05-22',
+    displayDate: '22–24.05.26',
+    tldrawUrl: 'https://www.tldraw.com/f/1TdXETK9YpCXb0iSLfVU6?d=v-6627.4013.2902.5111.page',
+    formats: [
+      {
+        id: 'sealed',
+        name: 'Sealed Deck',
+        abbr: 'Sealed',
+        hero: 'TBD',
+        summary: [],
+        heroReasons: [],
+        predictedMeta: [],
+        notes: [],
+      },
+    ],
+  },
+
+  {
     id: 'german-nationals-2026',
     event: 'German Nationals 2026',
     eventType: 'Nationals',
