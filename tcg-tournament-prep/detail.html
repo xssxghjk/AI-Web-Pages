@@ -528,13 +528,22 @@
       transition: border-color 0.15s, color 0.15s;
     }
     .tldraw-open-link:hover { border-color: var(--muted2); color: var(--text); }
-    .tldraw-iframe {
-      width: 100%;
+    .tldraw-iframe-wrapper {
+      position: relative;
+      overflow: hidden;
       height: 72vh;
       min-height: 480px;
       border: 1px solid var(--border);
       border-radius: 0 0 2px 2px;
       background: var(--surface);
+    }
+    .tldraw-iframe {
+      position: absolute;
+      top: -52px;
+      left: 0;
+      width: 100%;
+      height: calc(100% + 116px); /* offset top 52px + bottom toolbar 64px */
+      border: none;
       display: block;
     }
 
@@ -728,13 +737,15 @@
                  Open in tldraw ↗
                </a>
              </div>
-             <iframe
-               class="tldraw-iframe"
-               src="${esc(p.tldrawUrl)}"
-               frameborder="0"
-               allowfullscreen
-               title="Prep graph"
-             ></iframe>
+             <div class="tldraw-iframe-wrapper">
+               <iframe
+                 class="tldraw-iframe"
+                 src="${esc(p.tldrawUrl)}"
+                 frameborder="0"
+                 allowfullscreen
+                 title="Prep graph"
+               ></iframe>
+             </div>
            </div>`
         : '';
 
