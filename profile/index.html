@@ -476,6 +476,72 @@
     .day-focus-empty a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(196,134,74,0.3); }
     .day-focus-empty a:hover { border-bottom-color: var(--accent); }
 
+    /* ── DAY TODOS ── */
+    .day-todos-block {
+      margin-top: 0.9rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+    .day-todos-kicker {
+      font-size: 0.52rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      font-style: italic;
+      margin-bottom: 0.55rem;
+    }
+    .day-todos-progress {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.55rem;
+    }
+    .day-todos-bar-wrap {
+      flex: 1;
+      height: 3px;
+      background: var(--border2);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .day-todos-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+    .day-todos-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--accent);
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .day-todo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.28rem;
+    }
+    .day-todo-item {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 0.78rem;
+      color: var(--text2);
+      line-height: 1.4;
+    }
+    .day-todo-item.done { color: var(--muted); }
+    .day-todo-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--border2);
+      margin-top: 1px;
+    }
+    .day-todo-item.done .day-todo-dot { background: var(--accent); }
+    .day-todo-text { flex: 1; }
+    .day-todo-item.done .day-todo-text { text-decoration: line-through; }
+
     /* ── MAIN CONTENT ── */
     .main {
       max-width: 1100px;
@@ -1294,6 +1360,7 @@
       var morning  = dayEntry.morning || {};
       var focus     = morning.focus || '';
       var intention = morning.intention || '';
+      var todos     = Array.isArray(morning.todos) ? morning.todos : [];
 
       if (focus) {
         var html = '<div class="day-focus-block">' +
@@ -1308,6 +1375,24 @@
             '</div>';
         }
         html += '</div>';
+        if (todos.length) {
+          var doneCount = todos.filter(function(t) { return t.done; }).length;
+          var pct = Math.round(doneCount / todos.length * 100);
+          html += '<div class="day-todos-block">' +
+            '<div class="day-todos-kicker">Today\'s Todos</div>' +
+            '<div class="day-todos-progress">' +
+              '<div class="day-todos-bar-wrap"><div class="day-todos-bar-fill" style="width:' + pct + '%"></div></div>' +
+              '<span class="day-todos-count">' + doneCount + '/' + todos.length + '</span>' +
+            '</div>' +
+            '<div class="day-todo-list">' +
+            todos.map(function(t) {
+              return '<div class="day-todo-item' + (t.done ? ' done' : '') + '">' +
+                '<span class="day-todo-dot"></span>' +
+                '<span class="day-todo-text">' + esc(t.text) + '</span>' +
+              '</div>';
+            }).join('') +
+            '</div></div>';
+        }
         el.innerHTML = html;
       } else {
         el.innerHTML = '<div class="day-focus-block">' +
