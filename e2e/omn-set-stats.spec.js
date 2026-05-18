@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 // Minimal fixture exercising every filter branch:
 //   - OMN card detected via set_id (NOT set_printing_unique_id)
-//   - Majestic / Legendary / B (hero) rarities excluded
+//   - Majestic rarity now INCLUDED (Legendary / B / F excluded)
 //   - Weapon / Equipment types excluded
 //   - Classification: Illusionist, Runeblade, Wizard, Lightning, Generic
 const FIXTURE = [
@@ -10,6 +10,8 @@ const FIXTURE = [
   // Illusionist (Lightning+Illusionist → non-lightning class wins)
   { unique_id: 'i1', name: 'Illusionist Card A', color: 'Red',    pitch: '1', cost: '2', power: '3', defense: '2', types: ['Lightning','Illusionist','Action','Attack'], card_keywords: ['Phantasm'], printings: [{ set_id: 'OMN', set_printing_unique_id: 'hash1', id: 'OMN101', rarity: 'C' }] },
   { unique_id: 'i2', name: 'Illusionist Card B', color: 'Blue',   pitch: '3', cost: '0', power: '',  defense: '3', types: ['Lightning','Illusionist','Action'],         card_keywords: [],          printings: [{ set_id: 'OMN', set_printing_unique_id: 'hash2', id: 'OMN102', rarity: 'R' }] },
+  // Illusionist Majestic (now included)
+  { unique_id: 'i3', name: 'Illusionist Majestic', color: 'Red',  pitch: '1', cost: '2', power: '6', defense: '',  types: ['Lightning','Illusionist','Action','Attack'], card_keywords: [], printings: [{ set_id: 'OMN', set_printing_unique_id: 'hashA', id: 'OMN601', rarity: 'M' }] },
   // Runeblade
   { unique_id: 'r1', name: 'Runeblade Card A',   color: 'Red',    pitch: '1', cost: '2', power: '4', defense: '2', types: ['Lightning','Runeblade','Action','Attack'], card_keywords: [],          printings: [{ set_id: 'OMN', set_printing_unique_id: 'hash3', id: 'OMN201', rarity: 'C' }] },
   { unique_id: 'r2', name: 'Runeblade Card B',   color: 'Yellow', pitch: '2', cost: '1', power: '2', defense: '3', types: ['Lightning','Runeblade','Action'],         card_keywords: [],          printings: [{ set_id: 'OMN', set_printing_unique_id: 'hash4', id: 'OMN202', rarity: 'R' }] },
@@ -22,8 +24,6 @@ const FIXTURE = [
   { unique_id: 'g1', name: 'Generic Card',       color: 'Blue',   pitch: '3', cost: '0', power: '',  defense: '3', types: ['Generic','Action'],                       card_keywords: [],          printings: [{ set_id: 'OMN', set_printing_unique_id: 'hash8', id: 'OMN501', rarity: 'C' }] },
 
   // ── Should be EXCLUDED ─────────────────────────────────────────────
-  // Majestic
-  { unique_id: 'x1', name: 'Excluded Majestic',  color: 'Red',    pitch: '1', cost: '2', power: '6', defense: '',  types: ['Lightning','Illusionist','Action','Attack'], card_keywords: [], printings: [{ set_id: 'OMN', set_printing_unique_id: 'hashA', id: 'OMN601', rarity: 'M' }] },
   // Legendary
   { unique_id: 'x2', name: 'Excluded Legendary', color: '',       pitch: '',  cost: '',  power: '',  defense: '',  types: ['Lightning','Runeblade','Weapon','Sword','2H'], card_keywords: [], printings: [{ set_id: 'OMN', set_printing_unique_id: 'hashB', id: 'OMN602', rarity: 'L' }] },
   // Hero (B rarity)
@@ -49,22 +49,14 @@ test('omn set stats filters and classifies cards correctly', async ({ page }) =>
   await expect(page.locator('#loading-state')).not.toBeVisible();
   await expect(page.locator('#error-state')).not.toBeVisible();
 
-  // Total and per-class pill counts
-  await expect(page.locator('#pill-total')).toContainText('8 cards');
-  await expect(page.locator('#pill-illusionist')).toContainText('Illusionist: 2');
-  await expect(page.locator('#pill-runeblade')).toContainText('Runeblade: 2');
-  await expect(page.locator('#pill-wizard')).toContainText('Wizard: 2');
-  await expect(page.locator('#pill-lightning')).toContainText('Lightning: 1');
-  await expect(page.locator('#pill-generic')).toContainText('Generic: 1');
-
-  // Illusionist panel (active by default) shows 2 total cards
-  const illusionistPanel = page.locator('#panel-illusionist');
-  await expect(illusionistPanel.locator('.ov-pill').first().locator('.ov-val')).toHaveText('2');
-
   // Helper: click a tab via JS to avoid mobile-header pointer intercepts
   const clickTab = (tab) => page.evaluate(t =>
     document.querySelector(`.tab-btn[data-tab="${t}"]`).click(), tab
   );
+
+  // Illusionist panel (active by default) shows 3 total cards (2 regular + 1 majestic)
+  const illusionistPanel = page.locator('#panel-illusionist');
+  await expect(illusionistPanel.locator('.ov-pill').first().locator('.ov-val')).toHaveText('3');
 
   // Runeblade tab
   await clickTab('runeblade');
@@ -81,4 +73,8 @@ test('omn set stats filters and classifies cards correctly', async ({ page }) =>
   // Generic tab
   await clickTab('generic');
   await expect(page.locator('#panel-generic').locator('.ov-pill').first().locator('.ov-val')).toHaveText('1');
+
+  // All Cards tab shows all 9 included cards (8 regular + 1 majestic)
+  await clickTab('all');
+  await expect(page.locator('#panel-all').locator('.ov-pill').first().locator('.ov-val')).toHaveText('9');
 });
