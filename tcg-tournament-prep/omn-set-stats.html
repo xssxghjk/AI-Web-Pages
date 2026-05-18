@@ -967,6 +967,33 @@
 
     .sim-param-val.derived { color: var(--muted); font-size: 0.6rem; }
 
+    .sim-param-collapse { margin-bottom: 1.25rem; }
+    .sim-param-collapse > summary {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      cursor: pointer;
+      list-style: none;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted-2);
+      padding: 0.3rem 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.65rem;
+      user-select: none;
+    }
+    .sim-param-collapse > summary::before {
+      content: '▶';
+      font-size: 0.45rem;
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .sim-param-collapse[open] > summary::before { transform: rotate(90deg); }
+    .sim-param-collapse > summary::-webkit-details-marker { display: none; }
+    .sim-param-collapse .sim-param-grid { margin-bottom: 0; }
+
     .sim-color-bar {
       display: flex;
       height: 4px;
@@ -1408,6 +1435,8 @@
             <span class="sim-deck-info">${classCards.length} class · ${nonClassCards.length} non-class</span>
           </div>
 
+          <details class="sim-param-collapse" open>
+            <summary>Parameters</summary>
           <div class="sim-param-grid">
             <div class="sim-param-group">
               <div class="sim-param-title">Rarity Split</div>
@@ -1464,6 +1493,7 @@
               </div>
             </div>
           </div>
+          </details>
 
           <button class="sim-draw-btn" id="sim-draw-${groupKey}" style="margin-bottom:1rem">Draw Hand</button>
           <div class="sim-hand-area" id="sim-hand-${groupKey}">
@@ -2076,7 +2106,8 @@
                 'style="background:var(--bg);border:1px solid var(--border-2);border-radius:2px;color:var(--text);font-family:\'Cormorant Garamond\',Georgia,serif;font-size:0.82rem;padding:0.55rem 0.85rem;width:100%;outline:none;" />' +
             '</div>' +
             '<div class="mem-form-group">' +
-              '<label class="mem-form-label">Hand Probabilities</label>' +
+              '<details class="sim-param-collapse" open>' +
+              '<summary>Hand Probabilities</summary>' +
               '<div class="sim-param-grid" style="margin-bottom:0">' +
                 '<div class="sim-param-group">' +
                   '<div class="sim-param-title">Rarity Split</div>' +
@@ -2115,6 +2146,7 @@
                   '</div>' +
                 '</div>' +
               '</div>' +
+              '</details>' +
             '</div>' +
             '<button class="mem-btn-start" id="' + sid('start') + '">Start</button>' +
           '</div>' +
