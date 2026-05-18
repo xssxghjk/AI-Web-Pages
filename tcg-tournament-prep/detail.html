@@ -491,7 +491,7 @@
 
     /* ── TLDRAW EMBED ── */
     .tldraw-section {
-      margin-bottom: 0.5rem;
+      margin-bottom: 0;
     }
     .tldraw-header {
       display: flex;
@@ -500,9 +500,13 @@
       gap: 0.75rem;
       padding: 0.75rem 1rem;
       background: var(--surface2);
-      border: 1px solid var(--border);
-      border-bottom: none;
-      border-radius: 2px 2px 0 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .tldraw-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
     .tldraw-label {
       font-family: 'DM Serif Text', Georgia, serif;
@@ -512,7 +516,7 @@
       text-transform: uppercase;
       color: var(--accent);
     }
-    .tldraw-open-link {
+    .tldraw-open-link, .tldraw-fs-btn {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
@@ -525,16 +529,16 @@
       color: var(--muted2);
       background: transparent;
       text-decoration: none;
+      cursor: pointer;
       transition: border-color 0.15s, color 0.15s;
     }
-    .tldraw-open-link:hover { border-color: var(--muted2); color: var(--text); }
+    .tldraw-open-link:hover, .tldraw-fs-btn:hover { border-color: var(--muted2); color: var(--text); }
     .tldraw-iframe-wrapper {
       position: relative;
       overflow: hidden;
       height: 72vh;
       min-height: 480px;
-      border: 1px solid var(--border);
-      border-radius: 0 0 2px 2px;
+      border-bottom: 1px solid var(--border);
       background: var(--surface);
     }
     .tldraw-iframe {
@@ -546,6 +550,43 @@
       border: none;
       display: block;
     }
+    /* fullscreen mode */
+    .tldraw-iframe-wrapper.tldraw-fs {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 9999 !important;
+      height: 100dvh !important;
+      min-height: 0 !important;
+      width: 100dvw !important;
+      border: none !important;
+    }
+    .tldraw-iframe-wrapper.tldraw-fs .tldraw-iframe {
+      top: 0 !important;
+      height: 100% !important;
+    }
+    .tldraw-back-btn {
+      display: none;
+      position: absolute;
+      top: 0.75rem;
+      left: 0.75rem;
+      z-index: 10;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.8rem;
+      font-style: italic;
+      padding: 0.35rem 0.9rem;
+      background: rgba(28,24,20,0.88);
+      border: 1px solid var(--border2);
+      border-radius: 2px;
+      color: var(--muted2);
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tldraw-back-btn:hover { color: var(--text); border-color: var(--muted2); }
+    .tldraw-iframe-wrapper.tldraw-fs .tldraw-back-btn { display: flex; }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
@@ -733,11 +774,21 @@
         ? `<div class="tldraw-section">
              <div class="tldraw-header">
                <span class="tldraw-label">Prep Graph</span>
-               <a class="tldraw-open-link" href="${esc(p.tldrawUrl)}" target="_blank" rel="noopener">
-                 Open in tldraw ↗
-               </a>
+               <div class="tldraw-header-actions">
+                 <button class="tldraw-fs-btn" id="tldraw-fs-btn" title="Full screen">
+                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 5V2h3M10 5V2H7M2 7v3h3M10 7v3H7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                   Full screen
+                 </button>
+                 <a class="tldraw-open-link" href="${esc(p.tldrawUrl)}" target="_blank" rel="noopener">
+                   Open in tldraw ↗
+                 </a>
+               </div>
              </div>
-             <div class="tldraw-iframe-wrapper">
+             <div class="tldraw-iframe-wrapper" id="tldraw-wrapper">
+               <button class="tldraw-back-btn" id="tldraw-back-btn">
+                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M7 5H3M3 5L5 3M3 5L5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                 Back
+               </button>
                <iframe
                  class="tldraw-iframe"
                  src="${esc(p.tldrawUrl)}"
@@ -782,11 +833,42 @@
           </div>
         </header>
 
+        ${tldrawHtml}
+
         <main class="main">
-          ${tldrawHtml}
           ${tabsHtml}
           ${formatsHtml}
         </main>`;
+    }
+
+    /* ── TLDRAW FULLSCREEN ── */
+    function initTldrawFullscreen() {
+      const fsBtn = document.getElementById('tldraw-fs-btn');
+      const backBtn = document.getElementById('tldraw-back-btn');
+      const wrapper = document.getElementById('tldraw-wrapper');
+      if (!fsBtn || !wrapper) return;
+
+      function onEsc(e) {
+        if (e.key === 'Escape') exitFs();
+      }
+
+      function enterFs() {
+        wrapper.classList.add('tldraw-fs');
+        history.pushState({ tldrawFs: true }, '');
+        document.addEventListener('keydown', onEsc);
+        try { screen.orientation?.lock('landscape').catch(() => {}); } catch(e) {}
+      }
+
+      function exitFs() {
+        if (!wrapper.classList.contains('tldraw-fs')) return;
+        wrapper.classList.remove('tldraw-fs');
+        document.removeEventListener('keydown', onEsc);
+        try { screen.orientation?.unlock(); } catch(e) {}
+      }
+
+      fsBtn.addEventListener('click', enterFs);
+      if (backBtn) backBtn.addEventListener('click', () => history.back());
+      window.addEventListener('popstate', exitFs);
     }
 
     /* ── COLLAPSIBLES ── */
@@ -834,6 +916,7 @@
       container.innerHTML = renderDetail(prep);
       initCollapsibles();
       initTabs();
+      initTldrawFullscreen();
     }
 
   })();
