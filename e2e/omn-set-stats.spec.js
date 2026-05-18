@@ -42,7 +42,7 @@ test('omn set stats filters and classifies cards correctly', async ({ page }) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(FIXTURE) })
   );
 
-  await page.goto('/omn-set-stats/');
+  await page.goto('/tcg-tournament-prep/omn-set-stats.html');
 
   // Stats panel should appear quickly once the (mocked) fetch resolves
   await expect(page.locator('#stats-content')).toBeVisible({ timeout: 5000 });
