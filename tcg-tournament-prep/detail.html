@@ -516,7 +516,7 @@
       text-transform: uppercase;
       color: var(--accent);
     }
-    .tldraw-open-link, .tldraw-fs-btn {
+    .tldraw-open-link {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
@@ -532,7 +532,7 @@
       cursor: pointer;
       transition: border-color 0.15s, color 0.15s;
     }
-    .tldraw-open-link:hover, .tldraw-fs-btn:hover { border-color: var(--muted2); color: var(--text); }
+    .tldraw-open-link:hover { border-color: var(--muted2); color: var(--text); }
     .tldraw-iframe-wrapper {
       position: relative;
       overflow: hidden;
@@ -550,44 +550,6 @@
       border: none;
       display: block;
     }
-    /* fullscreen mode */
-    .tldraw-iframe-wrapper.tldraw-fs {
-      position: fixed !important;
-      inset: 0 !important;
-      z-index: 9999 !important;
-      height: 100dvh !important;
-      min-height: 0 !important;
-      width: 100dvw !important;
-      border: none !important;
-    }
-    .tldraw-iframe-wrapper.tldraw-fs .tldraw-iframe {
-      top: 0 !important;
-      height: 100% !important;
-    }
-    .tldraw-back-btn {
-      display: none;
-      position: absolute;
-      top: 0.75rem;
-      left: 0.75rem;
-      z-index: 10;
-      align-items: center;
-      gap: 0.4rem;
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.8rem;
-      font-style: italic;
-      padding: 0.35rem 0.9rem;
-      background: rgba(28,24,20,0.88);
-      border: 1px solid var(--border2);
-      border-radius: 2px;
-      color: var(--muted2);
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: color 0.15s, border-color 0.15s;
-    }
-    .tldraw-back-btn:hover { color: var(--text); border-color: var(--muted2); }
-    .tldraw-iframe-wrapper.tldraw-fs .tldraw-back-btn { display: flex; }
-
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       .prep-title { font-size: 1.4rem; }
@@ -761,13 +723,21 @@
         `<span class="format-chip">${esc(f.abbr)} · ${esc(f.hero)}</span>`
       ).join('');
 
-      const reportLinkHtml = p.reportId
-        ? `<div class="header-links">
-             <a class="header-link-btn" href="../tcg-tournament-reports/detail.html?id=${encodeURIComponent(p.reportId)}">
+      const headerLinks = [];
+      if (p.reportId) {
+        headerLinks.push(`<a class="header-link-btn" href="../tcg-tournament-reports/detail.html?id=${encodeURIComponent(p.reportId)}">
                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M4 4h4M4 6.5h4M4 9h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
                Tournament Report
-             </a>
-           </div>`
+             </a>`);
+      }
+      if (p.omnSetStats) {
+        headerLinks.push(`<a class="header-link-btn" href="./omn-set-stats.html">
+               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l1 2.5h2.5l-2 1.5.75 2.5L7 6.5 4.75 8l.75-2.5-2-1.5H6L7 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M2.5 10.5h9M4.5 12.5h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+               OMN Set Stats
+             </a>`);
+      }
+      const reportLinkHtml = headerLinks.length
+        ? `<div class="header-links">${headerLinks.join('')}</div>`
         : '';
 
       const tldrawHtml = p.tldrawUrl
@@ -775,20 +745,12 @@
              <div class="tldraw-header">
                <span class="tldraw-label">Prep Graph</span>
                <div class="tldraw-header-actions">
-                 <button class="tldraw-fs-btn" id="tldraw-fs-btn" title="Full screen">
-                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 5V2h3M10 5V2H7M2 7v3h3M10 7v3H7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                   Full screen
-                 </button>
                  <a class="tldraw-open-link" href="${esc(p.tldrawUrl)}" target="_blank" rel="noopener">
                    Open in tldraw ↗
                  </a>
                </div>
              </div>
              <div class="tldraw-iframe-wrapper" id="tldraw-wrapper">
-               <button class="tldraw-back-btn" id="tldraw-back-btn">
-                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M7 5H3M3 5L5 3M3 5L5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                 Back
-               </button>
                <iframe
                  class="tldraw-iframe"
                  src="${esc(p.tldrawUrl)}"
@@ -841,36 +803,6 @@
         </main>`;
     }
 
-    /* ── TLDRAW FULLSCREEN ── */
-    function initTldrawFullscreen() {
-      const fsBtn = document.getElementById('tldraw-fs-btn');
-      const backBtn = document.getElementById('tldraw-back-btn');
-      const wrapper = document.getElementById('tldraw-wrapper');
-      if (!fsBtn || !wrapper) return;
-
-      function onEsc(e) {
-        if (e.key === 'Escape') exitFs();
-      }
-
-      function enterFs() {
-        wrapper.classList.add('tldraw-fs');
-        history.pushState({ tldrawFs: true }, '');
-        document.addEventListener('keydown', onEsc);
-        try { screen.orientation?.lock('landscape').catch(() => {}); } catch(e) {}
-      }
-
-      function exitFs() {
-        if (!wrapper.classList.contains('tldraw-fs')) return;
-        wrapper.classList.remove('tldraw-fs');
-        document.removeEventListener('keydown', onEsc);
-        try { screen.orientation?.unlock(); } catch(e) {}
-      }
-
-      fsBtn.addEventListener('click', enterFs);
-      if (backBtn) backBtn.addEventListener('click', () => history.back());
-      window.addEventListener('popstate', exitFs);
-    }
-
     /* ── COLLAPSIBLES ── */
     function initCollapsibles() {
       document.querySelectorAll('.date-btn').forEach(btn => {
@@ -916,7 +848,6 @@
       container.innerHTML = renderDetail(prep);
       initCollapsibles();
       initTabs();
-      initTldrawFullscreen();
     }
 
   })();

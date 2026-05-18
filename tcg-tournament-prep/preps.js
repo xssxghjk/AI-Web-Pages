@@ -6,6 +6,7 @@ const PREPS = [
     tier: 3,
     date: '2026-05-22',
     displayDate: '22–24.05.26',
+    omnSetStats: true,
     tldrawUrl: 'https://www.tldraw.com/f/1TdXETK9YpCXb0iSLfVU6?d=v-6627.4013.2902.5111.page',
     formats: [
       {
