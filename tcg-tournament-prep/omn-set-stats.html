@@ -2407,7 +2407,7 @@
           if (nonLightning.includes('Illusionist'))  group = 'illusionist';
           else if (nonLightning.includes('Runeblade')) group = 'runeblade';
           else if (nonLightning.includes('Wizard'))    group = 'wizard';
-          else if (nonLightning.length > 0)            group = 'generic';
+          else if (nonLightning.length > 0)            continue;
           else if (classes.includes('Lightning'))      group = 'lightning';
           else                                         group = 'generic';
 
@@ -2452,13 +2452,13 @@
         allGroups = groups;
         currentPanelCards = groups.illusionist;
 
-        const nonClassCards = [...(groups.lightning || []), ...(groups.generic || [])];
+        const genericCards = groups.generic || [];
 
         for (const [key, cards] of Object.entries(groups)) {
           if (key === 'all') continue;
           const panelEl = document.getElementById('panel-' + key);
           if (['illusionist', 'runeblade', 'wizard'].includes(key)) {
-            setupClassPanel(key, cards, nonClassCards, panelEl, heroWeaponGroups[key] || []);
+            setupClassPanel(key, cards, genericCards, panelEl, heroWeaponGroups[key] || []);
           } else {
             renderPanel(cards, panelEl, heroWeaponGroups[key] || []);
           }
