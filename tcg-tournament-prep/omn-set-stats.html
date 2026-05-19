@@ -1434,7 +1434,7 @@
               <input type="range" class="sim-hs-slider" id="sim-hs-${groupKey}" min="1" max="7" value="4">
               <span class="sim-hs-val" id="sim-hs-val-${groupKey}">4</span>
             </div>
-            <span class="sim-deck-info">${classCards.length} class · ${nonClassCards.length} non-class</span>
+            <span class="sim-deck-info">${classCards.length} class · ${nonClassCards.length} lightning/generic</span>
           </div>
 
           <details class="sim-param-collapse">
@@ -1466,7 +1466,7 @@
                 <span class="sim-param-val" id="sim-pcls-v-${groupKey}">60%</span>
               </div>
               <div class="sim-param-row">
-                <span class="sim-param-label derived">Non-class (derived)</span>
+                <span class="sim-param-label derived">Lightning/Generic (derived)</span>
                 <span class="sim-param-val derived" id="sim-pncl-v-${groupKey}">40%</span>
               </div>
             </div>
@@ -2511,7 +2511,7 @@
         allGroups = groups;
         currentPanelCards = groups.illusionist;
 
-        const genericCards = groups.generic || [];
+        const genericCards = [...(groups.generic || []), ...(groups.lightning || [])];
 
         for (const [key, cards] of Object.entries(groups)) {
           if (key === 'all') continue;
