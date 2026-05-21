@@ -725,23 +725,15 @@
     }
 
     .sim-hand-area {
-      display: flex;
-      gap: 0.65rem;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
       min-height: 340px;
-      align-items: flex-start;
-    }
-
-    @media (max-width: 600px) {
-      .sim-hand-area {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.65rem;
-      }
+      align-items: start;
     }
 
     .sim-empty-state {
-      width: 100%;
+      grid-column: 1 / -1;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -753,13 +745,8 @@
     }
 
     .sim-card-wrap {
-      flex-shrink: 0;
+      min-width: 0;
       animation: simCardIn 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    }
-
-    @media (max-width: 600px) {
-      .sim-card-wrap { flex-shrink: 1; min-width: 0; }
-      .sim-card { width: 100%; }
     }
 
     @keyframes simCardIn {
@@ -769,7 +756,7 @@
     }
 
     .sim-card {
-      width: 175px;
+      width: 100%;
       border-radius: 5px;
       overflow: hidden;
       background: var(--surface-2);
