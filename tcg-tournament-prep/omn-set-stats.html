@@ -732,6 +732,14 @@
       align-items: flex-start;
     }
 
+    @media (max-width: 600px) {
+      .sim-hand-area {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.65rem;
+      }
+    }
+
     .sim-empty-state {
       width: 100%;
       display: flex;
@@ -747,6 +755,11 @@
     .sim-card-wrap {
       flex-shrink: 0;
       animation: simCardIn 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @media (max-width: 600px) {
+      .sim-card-wrap { flex-shrink: 1; }
+      .sim-card { width: 100%; }
     }
 
     @keyframes simCardIn {
