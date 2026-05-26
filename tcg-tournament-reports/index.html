@@ -66,7 +66,6 @@
       background-position: 0 0, 2px 2px;
     }
 
-    /* ── HERO ── */
     .hero {
       padding: 2rem 1.5rem 1.5rem;
       border-bottom: 2px solid var(--text);
@@ -83,33 +82,17 @@
       line-height: 1;
       color: var(--text);
     }
-    .hero p {
-      color: var(--muted);
-      font-size: 0.9rem;
-      font-style: italic;
-    }
-    .hero-stats {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      width: 100%;
-      margin-top: 0.5rem;
-    }
+    .hero p { color: var(--muted); font-size: 0.9rem; font-style: italic; }
+    .hero-stats { display: flex; gap: 0.5rem; flex-wrap: wrap; width: 100%; margin-top: 0.5rem; }
     .stat-pill {
       font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.78rem;
-      font-style: italic;
-      padding: 0.3rem 0.75rem;
-      border-radius: 2px;
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      color: var(--muted2);
+      font-size: 0.78rem; font-style: italic; padding: 0.3rem 0.75rem;
+      border-radius: 2px; background: var(--surface); border: 1px solid var(--border2); color: var(--muted2);
     }
     .stat-pill.win  { color: var(--win);  background: var(--win-bg);  border-color: rgba(122,184,122,0.3); }
     .stat-pill.loss { color: var(--loss); background: var(--loss-bg); border-color: rgba(196,134,74,0.3); }
     .stat-pill.wr   { color: var(--accent); background: var(--accent-dim); border-color: rgba(196,134,74,0.3); }
 
-    /* ── FILTER TOGGLE ── */
     .filter-toggle-bar {
       padding: 0.5rem 1.5rem;
       border-bottom: 1px solid var(--border);
@@ -121,107 +104,55 @@
       z-index: 1;
     }
     .filter-toggle-btn {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.75rem;
-      font-style: italic;
-      padding: 0.25rem 0.65rem;
-      border-radius: 2px;
-      background: transparent;
-      border: 1px solid var(--border2);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.12s;
+      display: flex; align-items: center; gap: 0.4rem;
+      font-family: 'DM Serif Text', Georgia, serif; font-size: 0.75rem; font-style: italic;
+      padding: 0.25rem 0.65rem; border-radius: 2px; background: transparent;
+      border: 1px solid var(--border2); color: var(--muted); cursor: pointer; transition: all 0.12s;
     }
     .filter-toggle-btn:hover { border-color: var(--muted2); color: var(--text); }
-    .filter-toggle-btn.has-filters {
-      background: var(--accent-dim);
-      border-color: rgba(196,134,74,0.4);
-      color: var(--accent);
-    }
+    .filter-toggle-btn.has-filters { background: var(--accent-dim); border-color: rgba(196,134,74,0.4); color: var(--accent); }
     .filter-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 1.1rem;
-      height: 1.1rem;
-      border-radius: 999px;
-      background: var(--accent);
-      color: var(--bg);
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 0 0.25rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 1.1rem; height: 1.1rem; border-radius: 999px;
+      background: var(--accent); color: var(--bg); font-size: 0.65rem; font-weight: 700; padding: 0 0.25rem;
     }
-    .filter-active-tags {
-      display: flex;
-      gap: 0.3rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
+    .filter-active-tags { display: flex; gap: 0.3rem; flex-wrap: wrap; align-items: center; }
     .filter-active-tag {
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.72rem;
-      font-style: italic;
-      padding: 0.15rem 0.5rem;
-      border-radius: 2px;
-      background: var(--accent-dim);
-      border: 1px solid rgba(196,134,74,0.3);
-      color: var(--accent);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
+      font-family: 'DM Serif Text', Georgia, serif; font-size: 0.72rem; font-style: italic;
+      padding: 0.15rem 0.5rem; border-radius: 2px; background: var(--accent-dim);
+      border: 1px solid rgba(196,134,74,0.3); color: var(--accent);
+      cursor: pointer; display: flex; align-items: center; gap: 0.3rem;
     }
     .filter-active-tag:hover { background: rgba(196,134,74,0.16); }
     .filter-active-tag .remove { opacity: 0.7; font-size: 0.9rem; line-height: 1; }
 
-    /* ── FILTER PANEL ── */
+    .export-fab-btn {
+      margin-left: auto;
+      display: flex; align-items: center; gap: 0.4rem;
+      font-family: 'DM Serif Text', Georgia, serif; font-size: 0.75rem; font-style: italic;
+      padding: 0.25rem 0.65rem; border-radius: 2px; background: transparent;
+      border: 1px solid var(--border2); color: var(--muted);
+      cursor: pointer; transition: all 0.12s; white-space: nowrap;
+    }
+    .export-fab-btn:hover { border-color: var(--accent); color: var(--accent); }
+
     .filter-panel {
-      border-bottom: 1px solid var(--border);
-      background: var(--surface2);
-      overflow: hidden;
-      max-height: 0;
-      transition: max-height 0.22s ease, padding 0.22s ease;
-      padding: 0 1.5rem;
-      position: relative;
-      z-index: 1;
+      border-bottom: 1px solid var(--border); background: var(--surface2);
+      overflow: hidden; max-height: 0; transition: max-height 0.22s ease, padding 0.22s ease;
+      padding: 0 1.5rem; position: relative; z-index: 1;
     }
-    .filter-panel.open {
-      max-height: 220px;
-      padding: 0.85rem 1.5rem;
-    }
-    .filter-group {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      margin-bottom: 0.55rem;
-    }
+    .filter-panel.open { max-height: 220px; padding: 0.85rem 1.5rem; }
+    .filter-group { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.55rem; }
     .filter-group:last-child { margin-bottom: 0; }
     .filter-label {
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.65rem;
-      font-style: italic;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      white-space: nowrap;
-      min-width: 2.5rem;
+      font-family: 'DM Serif Text', Georgia, serif; font-size: 0.65rem; font-style: italic;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; min-width: 2.5rem;
     }
     .filter-pills { display: flex; gap: 0.3rem; flex-wrap: wrap; }
     .filter-pill {
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.72rem;
-      font-style: italic;
-      padding: 0.2rem 0.55rem;
-      border-radius: 2px;
-      background: transparent;
-      border: 1px solid var(--border2);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.12s;
+      font-family: 'DM Serif Text', Georgia, serif; font-size: 0.72rem; font-style: italic;
+      padding: 0.2rem 0.55rem; border-radius: 2px; background: transparent;
+      border: 1px solid var(--border2); color: var(--muted); cursor: pointer; transition: all 0.12s;
     }
     .filter-pill:hover { border-color: var(--muted2); color: var(--text); }
     .filter-pill.active { background: var(--accent-dim); border-color: rgba(196,134,74,0.4); color: var(--accent); }
@@ -230,196 +161,41 @@
     .filter-pill.t3.active { background: var(--t3-bg); border-color: var(--t3-border); color: var(--t3); }
     .filter-pill.t4.active { background: var(--t4-bg); border-color: var(--t4-border); color: var(--t4); }
 
-    /* ── MAIN ── */
-    .main {
-      max-width: 1000px;
-      width: 100%;
-      margin: 2rem auto;
-      padding: 0 1.5rem 4rem;
-      position: relative;
-      z-index: 1;
-    }
+    .main { max-width: 1000px; width: 100%; margin: 2rem auto; padding: 0 1.5rem 4rem; position: relative; z-index: 1; }
+    .no-results { text-align: center; padding: 3rem; color: var(--muted); font-size: 0.85rem; font-style: italic; }
+    .tiles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem; }
 
-    .no-results {
-      text-align: center;
-      padding: 3rem;
-      color: var(--muted);
-      font-size: 0.85rem;
-      font-style: italic;
-    }
-
-    /* ── TILES GRID ── */
-    .tiles-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 0.75rem;
-    }
-
-    /* ── REPORT TILE ── */
     .report-tile {
-      display: block;
-      text-decoration: none;
-      color: inherit;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      overflow: hidden;
-      border-top: 2px solid var(--border2);
-      transition: border-color 0.2s, box-shadow 0.2s;
-      position: relative;
+      display: block; text-decoration: none; color: inherit; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 2px; overflow: hidden; border-top: 2px solid var(--border2);
+      transition: border-color 0.2s, box-shadow 0.2s; position: relative;
     }
-    .report-tile:hover {
-      box-shadow: 0 6px 28px rgba(0,0,0,0.45);
-      border-color: var(--border2);
-    }
-    .report-tile.tier-1 { border-top-color: var(--t1); }
-    .report-tile.tier-2 { border-top-color: var(--t2); }
-    .report-tile.tier-3 { border-top-color: var(--t3); }
-    .report-tile.tier-4 { border-top-color: var(--t4); }
-
-    .tile-body {
-      padding: 1.1rem 1.25rem 0.9rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .tile-body::after {
-      content: attr(data-tier-label);
-      position: absolute;
-      bottom: -0.5rem;
-      right: 0.5rem;
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-weight: 900;
-      font-style: italic;
-      font-size: 4rem;
-      line-height: 1;
-      color: rgba(255,255,255,0.025);
-      pointer-events: none;
-      user-select: none;
-    }
-
-    .tile-meta {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-      margin-bottom: 0.6rem;
-    }
-    .tier-badge {
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.65rem;
-      font-style: italic;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 0.12rem 0.5rem;
-      border-radius: 2px;
-      border: 1px solid;
-    }
+    .report-tile:hover { box-shadow: 0 6px 28px rgba(0,0,0,0.45); border-color: var(--border2); }
+    .report-tile.tier-1 { border-top-color: var(--t1); } .report-tile.tier-2 { border-top-color: var(--t2); }
+    .report-tile.tier-3 { border-top-color: var(--t3); } .report-tile.tier-4 { border-top-color: var(--t4); }
+    .tile-body { padding: 1.1rem 1.25rem 0.9rem; position: relative; overflow: hidden; }
+    .tile-body::after { content: attr(data-tier-label); position: absolute; bottom: -0.5rem; right: 0.5rem; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 900; font-style: italic; font-size: 4rem; line-height: 1; color: rgba(255,255,255,0.025); pointer-events: none; user-select: none; }
+    .tile-meta { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+    .tier-badge { font-family: 'DM Serif Text', Georgia, serif; font-size: 0.65rem; font-style: italic; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.12rem 0.5rem; border-radius: 2px; border: 1px solid; }
     .tier-badge.t1 { color: var(--t1); background: var(--t1-bg); border-color: var(--t1-border); }
     .tier-badge.t2 { color: var(--t2); background: var(--t2-bg); border-color: var(--t2-border); }
     .tier-badge.t3 { color: var(--t3); background: var(--t3-bg); border-color: var(--t3-border); }
     .tier-badge.t4 { color: var(--t4); background: var(--t4-bg); border-color: var(--t4-border); }
-    .hero-badge {
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.65rem;
-      font-style: italic;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 0.12rem 0.5rem;
-      border-radius: 2px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      color: var(--muted2);
-    }
-    .format-badge {
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.65rem;
-      font-style: italic;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 0.12rem 0.5rem;
-      border-radius: 2px;
-      background: var(--t3-bg);
-      border: 1px solid var(--t3-border);
-      color: var(--t3);
-    }
-
-    .tile-title {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      font-style: italic;
-      line-height: 1.25;
-      margin-bottom: 0.7rem;
-      color: var(--text);
-    }
-
-    .tile-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.5rem;
-      margin-top: 0.4rem;
-    }
-    .tile-date {
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.72rem;
-      font-style: italic;
-      color: var(--muted);
-    }
-    .tile-record {
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.82rem;
-      font-style: italic;
-    }
-    .rr-win  { color: var(--win); }
-    .rr-loss { color: var(--loss); }
-    .rr-sep  { color: var(--muted); margin: 0 0.15rem; }
-
-    .tile-cta {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.5rem 1.25rem;
-      border-top: 1px solid var(--border);
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.78rem;
-      font-style: italic;
-      color: var(--muted);
-      transition: color 0.15s, background 0.15s;
-    }
-    .report-tile:hover .tile-cta {
-      color: var(--muted2);
-      background: rgba(232,223,208,0.04);
-    }
-    .tile-cta-arrow {
-      margin-left: auto;
-      font-size: 1rem;
-      transition: transform 0.15s;
-    }
+    .hero-badge { font-family: 'DM Serif Text', Georgia, serif; font-size: 0.65rem; font-style: italic; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.12rem 0.5rem; border-radius: 2px; background: var(--surface2); border: 1px solid var(--border2); color: var(--muted2); }
+    .format-badge { font-family: 'DM Serif Text', Georgia, serif; font-size: 0.65rem; font-style: italic; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.12rem 0.5rem; border-radius: 2px; background: var(--t3-bg); border: 1px solid var(--t3-border); color: var(--t3); }
+    .tile-title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.05rem; font-weight: 700; font-style: italic; line-height: 1.25; margin-bottom: 0.7rem; color: var(--text); }
+    .tile-footer { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.4rem; }
+    .tile-date { font-family: 'DM Serif Text', Georgia, serif; font-size: 0.72rem; font-style: italic; color: var(--muted); }
+    .tile-record { font-family: 'DM Serif Text', Georgia, serif; font-size: 0.82rem; font-style: italic; }
+    .rr-win { color: var(--win); } .rr-loss { color: var(--loss); } .rr-sep { color: var(--muted); margin: 0 0.15rem; }
+    .tile-cta { display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 1.25rem; border-top: 1px solid var(--border); font-family: 'DM Serif Text', Georgia, serif; font-size: 0.78rem; font-style: italic; color: var(--muted); transition: color 0.15s, background 0.15s; }
+    .report-tile:hover .tile-cta { color: var(--muted2); background: rgba(232,223,208,0.04); }
+    .tile-cta-arrow { margin-left: auto; font-size: 1rem; transition: transform 0.15s; }
     .report-tile:hover .tile-cta-arrow { transform: translateX(3px); }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 768px) {
-      .tiles-grid { grid-template-columns: 1fr; }
-      .hero { padding: 1.75rem 1.25rem 1.5rem; }
-      .filter-toggle-bar { padding: 0.55rem 1.25rem; }
-    }
+    @media (max-width: 768px) { .tiles-grid { grid-template-columns: 1fr; } .hero { padding: 1.75rem 1.25rem 1.5rem; } .filter-toggle-bar { padding: 0.55rem 1.25rem; } }
 
-    /* ── FOOTER ── */
-    footer {
-      padding: 1.75rem 2rem;
-      font-size: 0.78rem;
-      font-style: italic;
-      color: var(--muted-2);
-      border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-      position: relative;
-      z-index: 1;
-    }
+    footer { padding: 1.75rem 2rem; font-size: 0.78rem; font-style: italic; color: var(--muted-2); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; position: relative; z-index: 1; }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--text); }
   </style>
@@ -443,6 +219,12 @@
       <span class="filter-badge" id="filter-badge" style="display:none"></span>
     </button>
     <div class="filter-active-tags" id="filter-active-tags"></div>
+    <button class="export-fab-btn" id="export-fab-btn" title="Export all FaB localStorage data to JSON">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 1v7M3 5l3 3 3-3M2 9.5h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Export FaB data
+    </button>
   </div>
   <div class="filter-panel" id="filter-panel">
     <div class="filter-group">
@@ -486,21 +268,9 @@
       PT:           { tier: 4, label: 'Tier 4 · Pro Tour' },
     };
 
-    function getTierLabel(eventType) {
-      return (TIER_INFO[eventType] || { label: 'Tier ? · ' + eventType }).label;
-    }
-
-    // Split 'Mario / Briar' → ['mario', 'briar']
-    function getHeroes(r) {
-      return r.hero.split(' / ').map(h => h.trim().toLowerCase());
-    }
-
-    // Split 'CC / Sage' → ['cc', 'sage']
-    function getFormats(r) {
-      return (r.format || '').split(' / ').map(f => f.trim().toLowerCase()).filter(Boolean);
-    }
-
-    // For a multi-hero report, returns the format tag (lowercase) the given hero played, or null
+    function getTierLabel(eventType) { return (TIER_INFO[eventType] || { label: 'Tier ? · ' + eventType }).label; }
+    function getHeroes(r) { return r.hero.split(' / ').map(h => h.trim().toLowerCase()); }
+    function getFormats(r) { return (r.format || '').split(' / ').map(f => f.trim().toLowerCase()).filter(Boolean); }
     function getHeroFormatTag(r, heroLower) {
       const heroes  = r.hero.split(' / ').map(h => h.trim());
       const formats = (r.format || '').split(' / ').map(f => f.trim());
@@ -508,45 +278,26 @@
       if (idx < 0 || heroes.length <= 1) return null;
       return formats[idx] ? formats[idx].toLowerCase() : null;
     }
-
-    // Detects format tag in first note of a round, e.g. '[Sage]' → 'sage'
     function getRoundTag(round) {
       if (!round.notes || !round.notes.length) return null;
       const m = round.notes[0].match(/^\[([^\]]+)\]/);
       return m ? m[1].toLowerCase() : null;
     }
-
-    // Compute W/L record, optionally limited to rounds matching a format tag
     function computeRecord(rounds, formatTag) {
-      const filtered = formatTag != null
-        ? rounds.filter(rnd => getRoundTag(rnd) === formatTag)
-        : rounds;
-      const wins   = filtered.filter(r => r.result === 'win').length;
-      const losses = filtered.filter(r => r.result === 'loss').length;
-      return { wins, losses };
+      const filtered = formatTag != null ? rounds.filter(rnd => getRoundTag(rnd) === formatTag) : rounds;
+      return { wins: filtered.filter(r => r.result === 'win').length, losses: filtered.filter(r => r.result === 'loss').length };
     }
-
-    function esc(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
+    function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
     REPORTS.sort((a, b) => (a.date < b.date ? 1 : -1));
 
-    /* ── RENDER TILE ── */
     function renderTile(r) {
       const heroes  = getHeroes(r);
       const formats = getFormats(r);
       const tierLabel = getTierLabel(r.eventType);
       const tier = getTierForReport(r);
       const tierClass = `t${tier}`;
-
       const recFull = computeRecord(r.rounds);
-
-      // Pre-compute per-hero records for multi-hero events and store as data attrs
       let heroRecAttrs = '';
       if (heroes.length > 1) {
         heroes.forEach(h => {
@@ -555,11 +306,7 @@
           heroRecAttrs += ` data-rec-${h}="${rec.wins}-${rec.losses}"`;
         });
       }
-
-      const formatHtml = r.format
-        ? `<span class="format-badge">${esc(r.format)}</span>`
-        : '';
-
+      const formatHtml = r.format ? `<span class="format-badge">${esc(r.format)}</span>` : '';
       return `
         <a
           class="report-tile tier-${tier}"
@@ -586,17 +333,11 @@
               </span>
             </div>
           </div>
-          <div class="tile-cta">
-            View report
-            <span class="tile-cta-arrow">→</span>
-          </div>
+          <div class="tile-cta">View report<span class="tile-cta-arrow">→</span></div>
         </a>`;
     }
 
-    /* ── FILTER STATE ── */
-    let activeHero   = 'all';
-    let activeTier   = 'all';
-    let activeFormat = 'all';
+    let activeHero = 'all', activeTier = 'all', activeFormat = 'all';
 
     function getTierForReport(r) {
       if (r.tier != null) return r.tier;
@@ -616,7 +357,6 @@
         tile.style.display = show ? '' : 'none';
         if (show) {
           visible++;
-          // For multi-hero tiles, update displayed record to reflect the active hero's rounds only
           const recEl = tile.querySelector('.tile-record');
           if (recEl) {
             let recStr = tile.dataset.recFull;
@@ -626,8 +366,7 @@
             }
             if (recStr) {
               const [w, l] = recStr.split('-');
-              recEl.innerHTML =
-                `<span class="rr-win">${w}W</span><span class="rr-sep">–</span><span class="rr-loss">${l}L</span>`;
+              recEl.innerHTML = `<span class="rr-win">${w}W</span><span class="rr-sep">–</span><span class="rr-loss">${l}L</span>`;
             }
           }
         }
@@ -654,22 +393,16 @@
       const badge = document.getElementById('filter-badge');
       const btn   = document.getElementById('filter-toggle-btn');
       const tags  = document.getElementById('filter-active-tags');
-
       badge.style.display = activeCount > 0 ? '' : 'none';
       badge.textContent = activeCount;
       btn.classList.toggle('has-filters', activeCount > 0);
-
       const parts = [];
       if (activeHero   !== 'all') parts.push({ label: heroLabelMap[activeHero]    || activeHero,   type: 'hero' });
       if (activeTier   !== 'all') parts.push({ label: tierLabels[activeTier]       || 'Tier ' + activeTier, type: 'tier' });
       if (activeFormat !== 'all') parts.push({ label: formatLabelMap[activeFormat] || activeFormat, type: 'format' });
-
       tags.innerHTML = parts.map(p =>
-        `<span class="filter-active-tag" data-clear="${p.type}">
-          ${esc(p.label)}<span class="remove">×</span>
-        </span>`
+        `<span class="filter-active-tag" data-clear="${p.type}">${esc(p.label)}<span class="remove">×</span></span>`
       ).join('');
-
       tags.querySelectorAll('.filter-active-tag').forEach(tag => {
         tag.addEventListener('click', () => {
           if (tag.dataset.clear === 'hero')   setFilter('hero',   'all');
@@ -688,43 +421,31 @@
       applyFilters();
     }
 
-    /* ── BUILD FILTERS ── */
     function buildFilters() {
-      // Unique individual heroes — 'Mario / Briar' contributes 'mario' and 'briar' separately
       const heroSet = new Set();
       REPORTS.forEach(r => getHeroes(r).forEach(h => heroSet.add(h)));
       const heroes = [...heroSet].sort();
-
       const tiers = [...new Set(REPORTS.map(r => getTierForReport(r)))].sort();
-
-      // Unique individual formats — 'CC / Sage' contributes 'cc' and 'sage' separately
       const formatSet = new Set();
       REPORTS.forEach(r => getFormats(r).forEach(f => formatSet.add(f)));
       const formats = [...formatSet].sort();
 
       const heroEl = document.getElementById('hero-filter');
-      heroEl.innerHTML =
-        `<button class="filter-pill active" data-ftype="hero" data-fval="all">All</button>` +
+      heroEl.innerHTML = `<button class="filter-pill active" data-ftype="hero" data-fval="all">All</button>` +
         heroes.map(h => {
-          const displayH = REPORTS.flatMap(r => r.hero.split(' / ').map(s => s.trim()))
-            .find(s => s.toLowerCase() === h) || h;
+          const displayH = REPORTS.flatMap(r => r.hero.split(' / ').map(s => s.trim())).find(s => s.toLowerCase() === h) || h;
           heroLabelMap[h] = displayH;
           return `<button class="filter-pill" data-ftype="hero" data-fval="${esc(h)}">${esc(displayH)}</button>`;
         }).join('');
 
       const tierEl = document.getElementById('tier-filter');
-      tierEl.innerHTML =
-        `<button class="filter-pill active" data-ftype="tier" data-fval="all">All</button>` +
-        tiers.map(t =>
-          `<button class="filter-pill t${t}" data-ftype="tier" data-fval="${t}">${esc(tierLabels[t] || 'Tier ' + t)}</button>`
-        ).join('');
+      tierEl.innerHTML = `<button class="filter-pill active" data-ftype="tier" data-fval="all">All</button>` +
+        tiers.map(t => `<button class="filter-pill t${t}" data-ftype="tier" data-fval="${t}">${esc(tierLabels[t] || 'Tier ' + t)}</button>`).join('');
 
       const formatEl = document.getElementById('format-filter');
-      formatEl.innerHTML =
-        `<button class="filter-pill active" data-ftype="format" data-fval="all">All</button>` +
+      formatEl.innerHTML = `<button class="filter-pill active" data-ftype="format" data-fval="all">All</button>` +
         formats.map(f => {
-          const displayF = REPORTS.flatMap(r => (r.format || '').split(' / ').map(s => s.trim()))
-            .find(s => s.toLowerCase() === f) || f;
+          const displayF = REPORTS.flatMap(r => (r.format || '').split(' / ').map(s => s.trim())).find(s => s.toLowerCase() === f) || f;
           formatLabelMap[f] = displayF;
           return `<button class="filter-pill" data-ftype="format" data-fval="${esc(f)}">${esc(displayF)}</button>`;
         }).join('');
@@ -733,25 +454,18 @@
         btn.addEventListener('click', () => setFilter(btn.dataset.ftype, btn.dataset.fval));
       });
 
-      /* ── FILTER TOGGLE ── */
       const toggleBtn   = document.getElementById('filter-toggle-btn');
       const filterPanel = document.getElementById('filter-panel');
-      toggleBtn.addEventListener('click', () => {
-        filterPanel.classList.toggle('open');
-      });
+      toggleBtn.addEventListener('click', () => { filterPanel.classList.toggle('open'); });
     }
 
-    /* ── BUILD STATS ── */
     function buildStats(reports) {
       reports = reports || REPORTS;
       let wins = 0, losses = 0;
       reports.forEach(r => {
         const heroes = getHeroes(r);
-        // For multi-hero events, count only the rounds belonging to the active hero
         let fmtTag = null;
-        if (activeHero !== 'all' && heroes.length > 1) {
-          fmtTag = getHeroFormatTag(r, activeHero);
-        }
+        if (activeHero !== 'all' && heroes.length > 1) fmtTag = getHeroFormatTag(r, activeHero);
         const rec = computeRecord(r.rounds, fmtTag);
         wins   += rec.wins;
         losses += rec.losses;
@@ -765,10 +479,8 @@
         <span class="stat-pill wr">${wr}% WR</span>`;
     }
 
-    /* ── INIT ── */
     function init() {
-      const container = document.getElementById('reports-container');
-      container.innerHTML = REPORTS.map(renderTile).join('');
+      document.getElementById('reports-container').innerHTML = REPORTS.map(renderTile).join('');
       buildStats();
       buildFilters();
     }
@@ -776,6 +488,31 @@
     init();
 
   })();
+  </script>
+
+  <script>
+  document.getElementById('export-fab-btn').addEventListener('click', function() {
+    var fabData = {};
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && (k.startsWith('fab_') || k.startsWith('fab-'))) {
+        var v = localStorage.getItem(k);
+        try { fabData[k] = JSON.parse(v); } catch(e) { fabData[k] = v; }
+      }
+    }
+    var json = JSON.stringify(fabData, null, 2);
+    var blob = new Blob([json], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    var today = new Date();
+    var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+    a.href = url;
+    a.download = 'fab-data-' + dateStr + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
   </script>
 
 </body>
