@@ -63,3 +63,11 @@ test('workout tracker page loads', async ({ page }) => {
   expect(sidebarVisible || hamburgerVisible).toBe(true);
 });
 
+test('walk tracker page loads', async ({ page }) => {
+  await page.goto('/walk-tracker/');
+  await expect(page).toHaveTitle(/Walk Tracker/);
+  const sidebarVisible = await page.locator('.sidebar').isVisible();
+  const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();
+  expect(sidebarVisible || hamburgerVisible).toBe(true);
+});
+
