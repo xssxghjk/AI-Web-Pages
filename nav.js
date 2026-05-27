@@ -63,6 +63,8 @@
     '.sidebar-link.active{color:var(--nav-accent);background:rgba(196,134,74,0.08);border-left-color:var(--nav-accent)}' +
     '.sidebar-link svg{flex-shrink:0;opacity:0.45;transition:opacity 0.18s}' +
     '.sidebar-link:hover svg,.sidebar-link.active svg{opacity:1}' +
+    '.sidebar-link.external::after{content:"↗";font-size:0.6rem;margin-left:auto;opacity:0.4;flex-shrink:0;transition:opacity 0.18s}' +
+    '.sidebar-link.external:hover::after{opacity:0.8}' +
     '@media(max-width:1024px){.sidebar{display:none}}' +
 
     /* mobile header */
@@ -197,6 +199,15 @@
         { key: 'walk-tracker', href: '../walk-tracker/', text: 'Walk Tracker',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="2.5" r="1.2" stroke="currentColor" stroke-width="1.4"/><path d="M5 5.5c0 0 .5 1.5 2 1.5s2-1.5 2-1.5M4.5 12l1.5-3.5L7 10l1-1.5L9.5 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 8.5l1.5-1M11 8.5L9.5 7.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
       ]
+    },
+    {
+      label: 'Other Sites',
+      links: [
+        { key: 'easy-time-tracker-ext', href: 'https://xssxghjk.github.io/easy-time-tracker/', text: 'Easy Time Tracker', external: true,
+          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M7 4.5v3l1.75 1.75" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+        { key: 'my-fab-journey-ext', href: 'https://xssxghjk.github.io/my-fab-journey/', text: 'My FaB Journey', external: true,
+          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="1.5" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 4.5h4M5 7h3.5M5 9.5h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="10" r="2.5" fill="var(--nav-bg)" stroke="currentColor" stroke-width="1.2"/><path d="M10 8.8v1.2l.8.8" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+      ]
     }
   ];
 
@@ -226,8 +237,9 @@
         (i > 0 ? ' style="margin-top:0.25rem"' : '') + '>' +
         section.label + '</div>';
       section.links.forEach(function (link) {
-        var cls = 'sidebar-link' + (link.key === activePage ? ' active' : '');
-        html += '<a class="' + cls + '" href="' + link.href + '">' +
+        var cls = 'sidebar-link' + (link.key === activePage ? ' active' : '') + (link.external ? ' external' : '');
+        var attrs = link.external ? ' target="_blank" rel="noopener noreferrer"' : '';
+        html += '<a class="' + cls + '" href="' + link.href + '"' + attrs + '>' +
           link.icon + link.text + '</a>';
       });
     });
