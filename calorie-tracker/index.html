@@ -544,24 +544,6 @@ canvas { display: block; width: 100%; }
 }
 .footer-text { font-size: 11px; color: var(--muted2); font-style: italic; }
 
-/* ── WALK TILE ── */
-.walk-tile {
-  display: flex; align-items: center; gap: 12px;
-  background: var(--surf2); border: 1px solid var(--border); border-radius: 3px;
-  padding: 10px 14px; margin-top: 16px;
-  transition: border-color 0.15s;
-}
-.walk-tile-dot { width: 8px; height: 8px; border-radius: 50%; background: #d4924a; flex-shrink: 0; }
-.walk-tile-label { font-size: 13px; color: var(--text); flex: 1; }
-.walk-tile-meta { font-size: 11px; color: var(--muted); margin-left: 6px; }
-.walk-tile-kcal { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; color: var(--accent); white-space: nowrap; }
-.walk-tile-link {
-  font-size: 11px; color: var(--muted); text-decoration: none; white-space: nowrap;
-  border: 1px solid var(--border); border-radius: 2px; padding: 2px 8px;
-  transition: color 0.15s, border-color 0.15s;
-}
-.walk-tile-link:hover { color: var(--accent); border-color: var(--accent); }
-
 /* ── ACTIVITY BURNED ── */
 .activity-section { margin-top: 24px; }
 .activity-list {
@@ -739,14 +721,7 @@ canvas { display: block; width: 100%; }
         <span class="total-num" id="total-count" style="color:var(--muted)">0</span>
       </div>
     </div>
-    <div class="walk-tile" id="walk-tile">
-      <div class="walk-tile-dot"></div>
-      <span class="walk-tile-label">Walks <span class="walk-tile-meta" id="walk-tile-meta"></span></span>
-      <span class="walk-tile-kcal" id="walk-tile-kcal"></span>
-      <a class="walk-tile-link" href="../walk-tracker/">+ Log Walk</a>
-    </div>
-
-    <div class="activity-section" id="activity-section" style="display:none">
+    <div class="activity-section" id="activity-section">
       <div class="section-hdr">
         <span class="section-title">Activity Burned</span>
       </div>
@@ -1219,30 +1194,12 @@ let burnedRange   = 30;
 let pendingCounts = {};
 
 // ── Date navigation ──────────────────────────────────────────────────────────
-function renderWalkTile(date) {
-  const w = getWalkingActivity(date);
-  const meta = document.getElementById('walk-tile-meta');
-  const kcalEl = document.getElementById('walk-tile-kcal');
-  if (w) {
-    const parts = [];
-    if (w.count > 1) parts.push(w.count + ' walks');
-    if (w.km) parts.push(w.km + ' km');
-    if (w.time) parts.push(w.time + ' min');
-    meta.textContent = parts.length ? '— ' + parts.join(' · ') : '';
-    kcalEl.textContent = w.kcal ? '~' + w.kcal.toLocaleString() + ' kcal' : '';
-  } else {
-    meta.textContent = '';
-    kcalEl.textContent = '';
-  }
-}
-
 function setDate(s) {
   currentDate = s;
   document.getElementById('date-display').textContent = formatDate(s);
   document.getElementById('date-picker').value = s;
   renderLog();
   renderActivity(s);
-  renderWalkTile(s);
 }
 
 document.getElementById('prev-day').addEventListener('click', () => {
@@ -2836,25 +2793,26 @@ function renderActivity(date) {
   const totalBar = document.getElementById('activity-total-bar');
   const totalVal = document.getElementById('activity-total-val');
 
-  if (!running && !bouldering && !workout && !walking) {
-    section.style.display = 'none';
-    return;
-  }
   section.style.display = '';
 
   const hasWeight = !!(running?.weight || bouldering?.weight || workout?.weight || walking?.weight);
   const sports = [
     running    && { label: 'Running',    color: '#7ab87a', data: running,    type: 'running'    },
-    walking    && { label: 'Walking',    color: '#d4924a', data: walking,    type: 'walking'    },
+    { label: 'Walking', color: '#d4924a', data: walking, type: 'walking' },
     bouldering && { label: 'Bouldering', color: '#5ab4cc', data: bouldering, type: 'bouldering' },
     workout    && { label: 'Strength',   color: '#e87838', data: workout,    type: 'workout'    },
   ].filter(Boolean);
 
   list.innerHTML = sports.map(s => {
-    const kcalHtml = s.data.kcal != null
-      ? `<span class="activity-kcal-val">~${s.data.kcal.toLocaleString()} kcal</span>
-         <button class="activity-details-btn" onclick="openSportDetails('${s.type}','${date}')">details ↗</button>`
-      : `<span class="activity-no-weight">log weight to estimate</span>`;
+    let kcalHtml;
+    if (!s.data) {
+      kcalHtml = `<a href="../walk-tracker/" class="activity-details-btn" style="text-decoration:none">+ Log Walk</a>`;
+    } else if (s.data.kcal != null) {
+      kcalHtml = `<span class="activity-kcal-val">~${s.data.kcal.toLocaleString()} kcal</span>
+         <button class="activity-details-btn" onclick="openSportDetails('${s.type}','${date}')">details ↗</button>`;
+    } else {
+      kcalHtml = `<span class="activity-no-weight">log weight to estimate</span>`;
+    }
     return `<div class="activity-row">
       <div class="activity-sport">
         <div class="activity-sport-dot" style="background:${s.color}"></div>
@@ -2864,7 +2822,7 @@ function renderActivity(date) {
     </div>`;
   }).join('');
 
-  const total = sports.reduce((n, s) => n + (s.data.kcal || 0), 0);
+  const total = sports.reduce((n, s) => n + ((s.data && s.data.kcal) || 0), 0);
   if (hasWeight && total > 0) {
     totalVal.textContent = '~' + total.toLocaleString() + ' kcal';
     totalBar.style.display = 'flex';
