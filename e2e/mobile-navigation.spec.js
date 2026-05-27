@@ -36,9 +36,6 @@ test.describe('mobile navigation', () => {
     const drawer = page.locator('#mobile-nav-drawer');
     await expect(drawer.getByRole('link', { name: 'Calendar' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Trips' })).toBeVisible();
-    await expect(drawer.getByRole('link', { name: 'Tournament Reports' })).toBeVisible();
-    await expect(drawer.getByRole('link', { name: 'Tournament Prep' })).toBeVisible();
-    await expect(drawer.getByRole('link', { name: 'Deck Builder' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Marathon Training' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Journal' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Site Stats' })).toBeVisible();
@@ -74,27 +71,6 @@ test.describe('mobile navigation', () => {
     await page.locator('#hamburger-btn').click();
     await page.locator('#mobile-nav-drawer').getByRole('link', { name: 'Trips' }).click();
     await expect(page).toHaveURL(/\/trips\//);
-  });
-
-  test('clicking Tournament Reports link navigates to reports page', async ({ page }) => {
-    await page.goto('/calendar/');
-    await page.locator('#hamburger-btn').click();
-    await page.locator('#mobile-nav-drawer').getByRole('link', { name: 'Tournament Reports' }).click();
-    await expect(page).toHaveURL(/\/tcg-tournament-reports\//);
-  });
-
-  test('clicking Tournament Prep link navigates to prep page', async ({ page }) => {
-    await page.goto('/calendar/');
-    await page.locator('#hamburger-btn').click();
-    await page.locator('#mobile-nav-drawer').getByRole('link', { name: 'Tournament Prep' }).click();
-    await expect(page).toHaveURL(/\/tcg-tournament-prep\//);
-  });
-
-  test('clicking Deck Builder link navigates to deck builder page', async ({ page }) => {
-    await page.goto('/calendar/');
-    await page.locator('#hamburger-btn').click();
-    await page.locator('#mobile-nav-drawer').getByRole('link', { name: 'Deck Builder' }).click();
-    await expect(page).toHaveURL(/\/fab-deck-viewer\//);
   });
 
   test('clicking Marathon Training link navigates to marathon training page', async ({ page }) => {

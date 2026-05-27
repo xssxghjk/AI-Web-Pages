@@ -182,17 +182,6 @@
       ]
     },
     {
-      label: 'TCG',
-      links: [
-        { key: 'reports',   href: '../tcg-tournament-reports/', text: 'Tournament Reports',
-          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 2.5h9a1 1 0 011 1v7a1 1 0 01-1 1h-9a1 1 0 01-1-1v-7a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 6h5M4.5 8.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
-        { key: 'prep',      href: '../tcg-tournament-prep/',    text: 'Tournament Prep',
-          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l1.5 3 3.5.5-2.5 2.5.5 3.5L7 9.5 4 11l.5-3.5L2 5l3.5-.5L7 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>' },
-        { key: 'deck-viewer', href: '../fab-deck-viewer/',      text: 'Deck Builder',
-          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
-      ]
-    },
-    {
       label: 'Self Improvement',
       links: [
         { key: 'marathon',   href: '../marathon-training/',  text: 'Marathon Training',
@@ -215,12 +204,8 @@
   function getActivePage() {
     var p = window.location.pathname;
     if (/\/calendar(\/|$)/.test(p))               return 'calendar';
-    if (/\/tcg-tournament-reports(\/|$)/.test(p)) return 'reports';
-    if (/\/tcg-tournament-prep(\/|$)/.test(p))    return 'prep';
     if (/\/trips(\/|$)/.test(p))                  return 'trips';
     if (/\/trip(\/|$)/.test(p))                   return 'trips';  // trip detail
-    if (/\/fab-deck-viewer(\/|$)/.test(p))        return 'deck-viewer';
-    if (/\/fab-card-simulator(\/|$)/.test(p))     return 'card-hand-sim';
     if (/\/marathon-training(\/|$)/.test(p))      return 'marathon';
     if (/\/bouldering-tracker(\/|$)/.test(p))    return 'bouldering';
     if (/\/journal(\/|$)/.test(p))                return 'journal';
@@ -300,9 +285,7 @@
     pageContent.insertBefore(mobileHeader, pageContent.firstChild);
     var disclaimer = document.createElement('div');
     disclaimer.className = 'nav-disclaimer';
-    disclaimer.innerHTML = 'This is an unofficial fan site. Not affiliated with, endorsed by, or sponsored by Legend Story Studios. ' +
-      'Flesh and Blood and all related marks are trademarks of Legend Story Studios. &mdash; ' +
-      '<a href="' + NAV_BASE + 'privacy/">Privacy Policy</a>';
+    disclaimer.innerHTML = '<a href="' + NAV_BASE + 'privacy/">Privacy Policy</a>';
     pageContent.appendChild(disclaimer);
 
     // Storage notice banner (dismissed state persisted in localStorage)
