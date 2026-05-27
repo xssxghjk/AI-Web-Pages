@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Walk Tracker</title>
+<script src="../nav.js"></script>
+<script src="../activity-calc.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #1c1814;
+  --surf:    #252018;
+  --surf2:   #2e2820;
+  --border:  #3a3025;
+  --bord2:   #4a4030;
+  --accent:  #c4864a;
+  --ab:      rgba(196,134,74,0.10);
+  --ab2:     rgba(196,134,74,0.25);
+  --text:    #e8dfd0;
+  --text2:   #9a8a76;
+  --muted:   #5a5040;
+  --green:   #7ab87a;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { overflow-x: hidden; }
+body {
+  font-family: 'DM Serif Text', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle, rgba(232,223,208,0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none; z-index: 0;
+}
+.app-header, .main, .app-footer { position: relative; z-index: 1; }
+
+.app-header {
+  background: var(--surf);
+  border-bottom: 2px solid var(--text);
+  padding: 14px 20px;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-inner {
+  max-width: 720px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.app-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; font-weight: 700;
+}
+.app-title span { color: var(--accent); }
+
+.main { max-width: 720px; margin: 0 auto; padding: 20px; }
+
+/* Stats row */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+@media (max-width: 480px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+.stat-card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 12px;
+  text-align: center;
+}
+.stat-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px; font-weight: 700; color: var(--accent);
+}
+.stat-lbl { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+/* Log form */
+.form-card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 20px;
+}
+.form-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; font-weight: 700;
+  margin-bottom: 14px;
+  color: var(--text);
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+@media (max-width: 480px) { .form-row { grid-template-columns: 1fr 1fr; } }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-input {
+  background: var(--surf2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  width: 100%;
+}
+.form-input:focus { outline: none; border-color: var(--accent); }
+.form-input::placeholder { color: var(--muted); }
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+@media (max-width: 480px) { .form-row-3 { grid-template-columns: 1fr 1fr; } }
+.form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+
+/* Buttons */
+.btn {
+  padding: 7px 14px; border-radius: 6px; border: none; cursor: pointer;
+  font-size: 13px; font-family: 'DM Serif Text', Georgia, serif;
+  font-weight: 600; transition: all 0.15s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.12); }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+
+/* Walk list */
+.list-card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.list-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.walk-entry {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+.walk-entry:last-child { border-bottom: none; }
+.walk-entry:hover { background: rgba(196,134,74,0.04); }
+.walk-date {
+  font-size: 12px; font-weight: 700; color: var(--accent);
+  min-width: 70px; padding-top: 2px; flex-shrink: 0;
+}
+.walk-body { flex: 1; min-width: 0; }
+.walk-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.walk-kcal { font-size: 12px; color: var(--green); margin-top: 2px; }
+.walk-notes { font-size: 12px; color: var(--text2); font-style: italic; margin-top: 2px; }
+.walk-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.btn-icon {
+  background: none; border: none; cursor: pointer;
+  color: var(--text2); font-size: 13px;
+  padding: 3px 6px; border-radius: 4px;
+  transition: color 0.15s, background 0.15s; opacity: 0.5;
+}
+.btn-icon:hover { opacity: 1; color: var(--accent); background: var(--ab); }
+.btn-icon.del:hover { color: #c46a6a; background: rgba(196,106,106,0.12); }
+
+.empty-state {
+  padding: 32px 18px;
+  color: var(--text2);
+  font-size: 13px;
+  text-align: center;
+  font-style: italic;
+}
+
+.app-footer {
+  padding: 1.5rem 2rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  margin-top: 2rem;
+}
+.app-footer a { color: var(--text2); text-decoration: none; }
+.app-footer a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="app-title">Walk <span>Tracker</span></div>
+    <button class="btn btn-primary" onclick="openForm()">+ Log Walk</button>
+  </div>
+</header>
+
+<main class="main">
+
+  <div class="stats-row" id="stats-row"></div>
+
+  <div class="form-card" id="log-form" style="display:none">
+    <div class="form-title" id="form-title">Log a Walk</div>
+    <div class="form-row-3">
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-input" id="f-date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Distance (km)</label>
+        <input type="number" class="form-input" id="f-km" placeholder="e.g. 5.2" min="0" max="200" step="0.1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Duration (min)</label>
+        <input type="number" class="form-input" id="f-time" placeholder="e.g. 60" min="0" max="600">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Notes</label>
+      <input type="text" class="form-input" id="f-notes" placeholder="Optional — where did you walk?">
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="cancelForm()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveWalk()">Save Walk</button>
+    </div>
+  </div>
+
+  <div class="list-card">
+    <div class="list-header">
+      <span>Walk Log</span>
+    </div>
+    <div id="walk-list"></div>
+  </div>
+
+</main>
+
+<footer class="app-footer">
+  <span id="page-version" style="opacity:0.65"></span>
+  <span id="storage-size"></span>
+</footer>
+<script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='v'+v.version}).catch(()=>{});</script>
+
+<script>
+// ── Storage ────────────────────────────────────────────────────────────────
+const LS_KEY = 'walk_tracker_v1';
+
+function loadWalks() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw !== null) return JSON.parse(raw);
+  } catch (e) {}
+  // First load: migrate from marathon tracker if entries exist
+  try {
+    const marathon = JSON.parse(localStorage.getItem('c2hm_v1') || 'null');
+    if (marathon && Array.isArray(marathon.walks) && marathon.walks.length > 0) {
+      const migrated = marathon.walks.map(w => ({
+        id: w.id || Date.now().toString(36) + Math.random().toString(36).slice(2),
+        date: w.date, km: w.km, time: w.time, notes: w.notes
+      }));
+      localStorage.setItem(LS_KEY, JSON.stringify(migrated));
+      return migrated;
+    }
+  } catch (e) {}
+  return [];
+}
+
+function saveWalks(list) {
+  localStorage.setItem(LS_KEY, JSON.stringify(list));
+}
+
+let walks = loadWalks();
+
+// ── Weight helper (reads from calorie tracker for kcal estimates) ──────────
+function getWeight() {
+  try {
+    const wh = JSON.parse(localStorage.getItem('calorie_tracker_v1') || 'null');
+    if (!wh || !wh.weight) return null;
+    const entries = Object.entries(wh.weight).sort((a, b) => b[0].localeCompare(a[0]));
+    return entries.length > 0 ? entries[0][1].kg : null;
+  } catch (e) { return null; }
+}
+
+// ── Date helpers ───────────────────────────────────────────────────────────
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+function fmtDate(str) {
+  const [y, m, d] = str.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[+m - 1] + ' ' + +d;
+}
+
+// ── Form ───────────────────────────────────────────────────────────────────
+let editId = null;
+
+function openForm(id) {
+  editId = id || null;
+  const form = document.getElementById('log-form');
+  document.getElementById('form-title').textContent = id ? 'Edit Walk' : 'Log a Walk';
+  if (id) {
+    const w = walks.find(w => w.id === id);
+    if (!w) return;
+    document.getElementById('f-date').value = w.date;
+    document.getElementById('f-km').value = w.km || '';
+    document.getElementById('f-time').value = w.time || '';
+    document.getElementById('f-notes').value = w.notes || '';
+  } else {
+    document.getElementById('f-date').value = todayStr();
+    document.getElementById('f-km').value = '';
+    document.getElementById('f-time').value = '';
+    document.getElementById('f-notes').value = '';
+  }
+  form.style.display = '';
+  document.getElementById('f-km').focus();
+}
+
+function cancelForm() {
+  document.getElementById('log-form').style.display = 'none';
+  editId = null;
+}
+
+function saveWalk() {
+  const km    = parseFloat(document.getElementById('f-km').value) || null;
+  const time  = parseInt(document.getElementById('f-time').value) || null;
+  const date  = document.getElementById('f-date').value || todayStr();
+  const notes = document.getElementById('f-notes').value.trim() || null;
+
+  if (!km && !time) {
+    document.getElementById('f-km').focus();
+    document.getElementById('f-km').style.borderColor = '#c46a6a';
+    setTimeout(() => { document.getElementById('f-km').style.borderColor = ''; }, 1200);
+    return;
+  }
+
+  if (editId) {
+    const idx = walks.findIndex(w => w.id === editId);
+    if (idx >= 0) walks[idx] = { id: editId, date, km, time, notes };
+  } else {
+    walks.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2), date, km, time, notes });
+  }
+  saveWalks(walks);
+  cancelForm();
+  render();
+}
+
+function deleteWalk(id) {
+  if (!confirm('Delete this walk?')) return;
+  walks = walks.filter(w => w.id !== id);
+  saveWalks(walks);
+  render();
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function render() {
+  renderStats();
+  renderList();
+}
+
+function renderStats() {
+  const weight = getWeight();
+  const totalWalks = walks.length;
+  const totalKm = walks.reduce((s, w) => s + (w.km || 0), 0);
+  const totalTime = walks.reduce((s, w) => s + (w.time || 0), 0);
+  const totalKcal = walks.reduce((s, w) => {
+    const k = ActivityCalc.walkingKcal(weight, w.km, w.time);
+    return s + (k || 0);
+  }, 0);
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-val">${totalWalks}</div>
+      <div class="stat-lbl">Total Walks</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">${Math.round(totalKm * 10) / 10}</div>
+      <div class="stat-lbl">Total KM</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">${Math.round(totalTime / 60 * 10) / 10}h</div>
+      <div class="stat-lbl">Time</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--green)">${totalKcal > 0 ? '~' + totalKcal.toLocaleString() : '—'}</div>
+      <div class="stat-lbl">Est. kcal${!weight ? ' *' : ''}</div>
+    </div>
+  `;
+}
+
+function renderList() {
+  const container = document.getElementById('walk-list');
+  const weight = getWeight();
+  const sorted = walks.slice().sort((a, b) => b.date.localeCompare(a.date));
+
+  if (sorted.length === 0) {
+    container.innerHTML = '<div class="empty-state">No walks logged yet — tap + Log Walk to add one.</div>';
+    return;
+  }
+
+  container.innerHTML = sorted.map(w => {
+    const kcal = ActivityCalc.walkingKcal(weight, w.km, w.time);
+    const meta = [
+      w.km   ? w.km + ' km' : null,
+      w.time ? w.time + ' min' : null,
+    ].filter(Boolean).join(' · ');
+
+    return `<div class="walk-entry">
+      <div class="walk-date">${fmtDate(w.date)}</div>
+      <div class="walk-body">
+        ${meta ? `<div class="walk-meta">${meta}</div>` : ''}
+        ${kcal  ? `<div class="walk-kcal">~${kcal.toLocaleString()} kcal</div>` : ''}
+        ${w.notes ? `<div class="walk-notes">${w.notes}</div>` : ''}
+      </div>
+      <div class="walk-actions">
+        <button class="btn-icon" onclick="openForm('${w.id}')" title="Edit">✎</button>
+        <button class="btn-icon del" onclick="deleteWalk('${w.id}')" title="Delete">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+render();
+</script>
+
+</body>
+</html>
