@@ -847,6 +847,7 @@
         boulder  : get('bouldering_sessions', []),
         calLog   : get('calorie_log', {}),
         calW     : get('calorie_weights', {}),
+        walks    : get('walk_tracker_v1', []),
       };
     }
 
@@ -865,6 +866,7 @@
         activeGoals: 0,
         weightLast: null, weightFirst: null,
         workoutTypes: [],
+        walks: 0, walkKm: 0, walkTime: 0,
       };
 
       Object.values(data.jGoals).forEach(function(g) {
@@ -937,6 +939,13 @@
         stats.weightLast  = data.calW[wDates[wDates.length - 1]];
       }
 
+      (data.walks || []).forEach(function(w) {
+        if (!w || !w.date || w.date < since || w.date > end) return;
+        stats.walks++;
+        stats.walkKm   += (w.km   || 0);
+        stats.walkTime += (w.time || 0);
+      });
+
       return stats;
     }
 
@@ -985,18 +994,27 @@
       var boulderSession = boulderDaySessions[0] || null;
       var boulderCal = ActivityCalc.boulderingKcal(weightKg, boulderDaySessions) || 0;
 
+      // Walking
+      var walkDayEntries = (data.walks || []).filter(function(w) { return w && w.date === iso; });
+      var walkKm   = walkDayEntries.reduce(function(s, w) { return s + (w.km   || 0); }, 0);
+      var walkTime = walkDayEntries.reduce(function(s, w) { return s + (w.time || 0); }, 0);
+      var walkCal  = walkDayEntries.reduce(function(s, w) {
+        return s + (ActivityCalc.walkingKcal(weightKg, w.km, w.time) || 0);
+      }, 0);
+
       // Journal
       var dayEntry  = (data.jEntries || {})[iso] || {};
       var hasMorning = !!(dayEntry && dayEntry.morning);
       var hasEvening = !!(dayEntry && dayEntry.evening);
       var morningFocus = (dayEntry.morning && dayEntry.morning.focus) ? dayEntry.morning.focus.slice(0, 55) : '';
 
-      var totalBurned = runCal + strengthCal + boulderCal;
+      var totalBurned = runCal + strengthCal + boulderCal + walkCal;
 
       return {
         iso, calIn: Math.round(calIn), calProtein: Math.round(calProtein),
         calItemCount: calEntries.length,
         totalBurned, runCal, strengthCal, boulderCal,
+        walkDayEntries, walkKm, walkTime, walkCal,
         netCal: Math.round(calIn - totalBurned),
         runEntry, isStrengthDay, scheduledType, strengthEntry, strengthDone, strengthType,
         boulderSession, hasMorning, hasEvening, morningFocus,
@@ -1032,6 +1050,7 @@
       if (s.runCal > 0) burnParts.push('run ' + s.runCal.toLocaleString());
       if (s.strengthCal > 0) burnParts.push('str ' + s.strengthCal.toLocaleString());
       if (s.boulderCal > 0) burnParts.push('bld ' + s.boulderCal.toLocaleString());
+      if (s.walkCal > 0) burnParts.push('walk ' + s.walkCal.toLocaleString());
       var burnVal = s.totalBurned > 0 ? s.totalBurned.toLocaleString() + ' kcal' : '—';
       var burnSub = burnParts.length ? burnParts.join(' · ') : 'no activity yet';
 
@@ -1094,6 +1113,21 @@
         bldVal = '—'; bldSub = 'no session today'; bldCls = ''; bldBadge = null;
       }
 
+      // Card: Walking
+      var wlkVal, wlkSub, wlkCls, wlkBadge;
+      if (s.walkDayEntries && s.walkDayEntries.length > 0) {
+        var wlkParts = [];
+        if (s.walkKm > 0)   wlkParts.push((Math.round(s.walkKm * 10) / 10) + ' km');
+        if (s.walkTime > 0) wlkParts.push(s.walkTime + ' min');
+        if (s.walkCal > 0)  wlkParts.push('~' + s.walkCal.toLocaleString() + ' kcal');
+        wlkVal   = s.walkDayEntries.length + ' walk' + (s.walkDayEntries.length !== 1 ? 's' : '');
+        wlkSub   = wlkParts.join(' · ') || 'logged today';
+        wlkCls   = 'green';
+        wlkBadge = { type: 'green', text: '✓ Done' };
+      } else {
+        wlkVal = '—'; wlkSub = 'no walks today'; wlkCls = ''; wlkBadge = null;
+      }
+
       // Card: Journal
       var jDone = (s.hasMorning ? 1 : 0) + (s.hasEvening ? 1 : 0);
       var jVal, jSub, jCls, jBadge;
@@ -1118,6 +1152,7 @@
         mkCard('Run',          runVal,  runSub,  runCls,  runBadge),
         mkCard('Strength',     strVal,  strSub,  strCls,  strBadge),
         mkCard('Bouldering',   bldVal,  bldSub,  bldCls,  bldBadge),
+        mkCard('Walking',      wlkVal,  wlkSub,  wlkCls,  wlkBadge),
         mkCard('Journal',      jVal,    jSub,    jCls,    jBadge),
       ].join('');
     }
@@ -1187,14 +1222,23 @@
         : 'no active goals';
       var goalCls = s.activeGoals > 0 ? 'accent' : '';
 
+      // Walking card
+      var wlkWeekVal = s.walks + ' walk' + (s.walks !== 1 ? 's' : '');
+      var wlkWeekParts = [];
+      if (s.walkKm > 0)   wlkWeekParts.push((Math.round(s.walkKm * 10) / 10) + ' km');
+      if (s.walkTime > 0) wlkWeekParts.push(Math.round(s.walkTime / 60 * 10) / 10 + 'h');
+      var wlkWeekSub = wlkWeekParts.length ? wlkWeekParts.join(' · ') : 'no walks this week';
+      var wlkWeekCls = s.walks > 0 ? 'green' : '';
+
       return [
-        mkCard('Running',       runVal,  runSub,  runCls,  null),
-        mkCard('Strength',      strVal,  strSub,  strCls,  null),
-        mkCard('Bouldering',    bldVal,  bldSub,  bldCls,  null),
-        mkCard('Journal',       jVal,    jSub,    jCls,    null),
-        mkCard('Avg Calories',  calVal,  calSub,  '',      null),
-        mkCard('Avg Protein',   protVal, protSub, protCls, null),
-        mkCard('Active Goals',  goalVal, goalSub, goalCls, null),
+        mkCard('Running',       runVal,      runSub,      runCls,     null),
+        mkCard('Strength',      strVal,      strSub,      strCls,     null),
+        mkCard('Bouldering',    bldVal,      bldSub,      bldCls,     null),
+        mkCard('Walking',       wlkWeekVal,  wlkWeekSub,  wlkWeekCls, null),
+        mkCard('Journal',       jVal,        jSub,        jCls,       null),
+        mkCard('Avg Calories',  calVal,      calSub,      '',         null),
+        mkCard('Avg Protein',   protVal,     protSub,     protCls,    null),
+        mkCard('Active Goals',  goalVal,     goalSub,     goalCls,    null),
       ].join('');
     }
 
@@ -1253,6 +1297,13 @@
             ? (s.boulderTotalClimbs > 0 ? s.boulderTotalClimbs + ' climbs · ' : '') + 'max grade ' + s.boulderMaxGrade
             : 'no sessions this month',
           s.boulderSessions > 0 ? 'blue' : '', null),
+
+        mkCard('Walking',
+          s.walks + ' walk' + (s.walks !== 1 ? 's' : ''),
+          s.walkKm > 0
+            ? (Math.round(s.walkKm * 10) / 10) + ' km' + (s.walkTime > 0 ? ' · ' + (Math.round(s.walkTime / 60 * 10) / 10) + 'h' : '')
+            : 'no walks this month',
+          s.walks > 0 ? 'green' : '', null),
 
         mkCard('Journal',
           journalRate + '%',
@@ -1326,6 +1377,13 @@
             ? (s.boulderTotalClimbs > 0 ? s.boulderTotalClimbs + ' climbs · ' : '') + 'max grade ' + s.boulderMaxGrade
             : 'no sessions this year',
           s.boulderSessions > 0 ? 'blue' : '', null),
+
+        mkCard('Walking',
+          s.walks + ' walk' + (s.walks !== 1 ? 's' : ''),
+          s.walkKm > 0
+            ? (Math.round(s.walkKm * 10) / 10) + ' km' + (s.walkTime > 0 ? ' · ' + (Math.round(s.walkTime / 60 * 10) / 10) + 'h' : '')
+            : 'no walks this year',
+          s.walks > 0 ? 'green' : '', null),
 
         mkCard('Journal',
           journalRate + '%',
@@ -1630,6 +1688,12 @@
           var boulderSession = boulderDaySessions2[0] || null;
           var boulderCal = ActivityCalc.boulderingKcal(weightKg, boulderDaySessions2) || 0;
 
+          var walkEntries2 = [];
+          try { walkEntries2 = (JSON.parse(localStorage.getItem('walk_tracker_v1') || '[]') || []).filter(function(w) { return w && w.date === dateStr; }); } catch(e) {}
+          var walkDayCal = walkEntries2.reduce(function(s, w) { return s + (ActivityCalc.walkingKcal(weightKg, w.km, w.time) || 0); }, 0);
+          var walkDayKm   = walkEntries2.reduce(function(s, w) { return s + (w.km   || 0); }, 0);
+          var walkDayTime = walkEntries2.reduce(function(s, w) { return s + (w.time || 0); }, 0);
+
           var dtParts  = dateStr.split('-').map(Number);
           var dt       = new Date(dtParts[0], dtParts[1]-1, dtParts[2]);
           var DOW      = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -1640,7 +1704,7 @@
 
           function paint(ctx) {
             var y = PAD_TOP;
-            var totalBurn = workoutCal + strengthCal + boulderCal;
+            var totalBurn = workoutCal + strengthCal + boulderCal + walkDayCal;
             var net = Math.round(totalCalIn - totalBurn);
 
             function r(color, x, yy, w, h) { if (!ctx) return; ctx.fillStyle = color; ctx.fillRect(x, yy, w, h); }
@@ -1762,6 +1826,28 @@
                 var noteStr  = clampStr('"' + boulderSession.notes + '"', IW - 4, noteFont, '0px');
                 t(noteFont, '#7a6e60', '0px', noteStr, PAD_X, y + 11); y += 19;
               }
+            }
+
+            if (walkEntries2.length > 0) {
+              divider(y); y += 17;
+              sectionLabel('WALKING', y); y += 19;
+              var wlkCountStr = walkEntries2.length + ' walk' + (walkEntries2.length !== 1 ? 's' : '');
+              t('700 14px "DM Serif Text", Georgia, serif', '#7ab87a', '0px', '✓ ' + wlkCountStr, PAD_X, y + 14); y += 20;
+              var wParts = [];
+              if (walkDayKm > 0)   wParts.push((Math.round(walkDayKm * 10) / 10) + ' km');
+              if (walkDayTime > 0) wParts.push(walkDayTime + ' min');
+              if (walkDayCal > 0)  wParts.push('∼' + walkDayCal.toLocaleString() + ' kcal burned');
+              if (wParts.length > 0) { t('12px "DM Serif Text", Georgia, serif', '#9a8a76', '0px', wParts.join('  \xb7  '), PAD_X, y + 12); y += 22; }
+              walkEntries2.forEach(function(w) {
+                var wEntParts = [];
+                if (w.km)   wEntParts.push(w.km + ' km');
+                if (w.time) wEntParts.push(w.time + ' min');
+                if (w.notes) wEntParts.push(w.notes);
+                if (wEntParts.length > 0 && walkEntries2.length > 1) {
+                  var wEntStr = clampStr(wEntParts.join(' · '), IW - 14, '11px "DM Serif Text", Georgia, serif', '0px');
+                  t('11px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', wEntStr, PAD_X + 14, y + 11); y += 18;
+                }
+              });
             }
 
             return y + PAD_BOT;
@@ -1887,6 +1973,21 @@
               'Evening: ' + s.journalEvening + ' / ' + periodDayCount + ' days', PAD_X, y + 14); y += 26;
 
             divider(y); y += 19;
+
+            // ── Walking ───────────────────────────────────────────────────────
+            if (s.walks > 0) {
+              sectionLabel('WALKING', y); y += 19;
+              t('italic 700 19px "Cormorant Garamond", Georgia, serif', '#7ab87a', '-0.19px',
+                s.walks + ' walk' + (s.walks !== 1 ? 's' : ''), PAD_X, y + 19); y += 28;
+              var wPeriodParts = [];
+              if (s.walkKm > 0)   wPeriodParts.push((Math.round(s.walkKm * 10) / 10) + ' km total');
+              if (s.walkTime > 0) wPeriodParts.push((Math.round(s.walkTime / 60 * 10) / 10) + 'h');
+              if (wPeriodParts.length > 0) {
+                t('14px "DM Serif Text", Georgia, serif', '#7a6e60', '0px', wPeriodParts.join('  \xb7  '), PAD_X, y + 14); y += 22;
+              }
+              y += 6;
+              divider(y); y += 19;
+            }
 
             // ── Nutrition ─────────────────────────────────────────────────────
             sectionLabel('NUTRITION', y); y += 19;
