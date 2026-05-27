@@ -52,6 +52,15 @@ var ActivityCalc = (function() {
     return Math.round(STRENGTH_MET * weightKg * ((duration || 60) / 60));
   }
 
+  // Walking: ~0.5 kcal / kg / km (distance-based) or MET 3.5 (time-based).
+  var WALKING_MET = 3.5;
+  function walkingKcal(weightKg, km, timeMin) {
+    if (!weightKg) return null;
+    if (km)      return Math.round(0.5 * weightKg * km);
+    if (timeMin) return Math.round(WALKING_MET * weightKg * timeMin / 60);
+    return null;
+  }
+
   return {
     runningKcal:           runningKcal,
     boulderingMet:         boulderingMet,
@@ -59,5 +68,7 @@ var ActivityCalc = (function() {
     boulderingKcal:        boulderingKcal,
     strengthKcal:          strengthKcal,
     STRENGTH_MET:          STRENGTH_MET,
+    walkingKcal:           walkingKcal,
+    WALKING_MET:           WALKING_MET,
   };
 })();
