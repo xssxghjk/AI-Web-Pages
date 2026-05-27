@@ -1693,10 +1693,13 @@ function addToLog(entry) {
 }
 
 // ── Presets rendering ────────────────────────────────────────────────────────
+// Cached outside renderPresets so grid.innerHTML='' doesn't lose the reference
+const presetsEmptyEl = document.getElementById('presets-empty');
+
 function renderPresets() {
   const presets = getPresets();
   const grid    = document.getElementById('preset-grid');
-  const empty   = document.getElementById('presets-empty');
+  const empty   = presetsEmptyEl;
   grid.innerHTML = '';
 
   if (presets.length === 0) {
