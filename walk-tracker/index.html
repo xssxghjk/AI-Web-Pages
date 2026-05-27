@@ -288,10 +288,10 @@ let walks = loadWalks();
 // ── Weight helper (reads from calorie tracker for kcal estimates) ──────────
 function getWeight() {
   try {
-    const wh = JSON.parse(localStorage.getItem('calorie_tracker_v1') || 'null');
-    if (!wh || !wh.weight) return null;
-    const entries = Object.entries(wh.weight).sort((a, b) => b[0].localeCompare(a[0]));
-    return entries.length > 0 ? entries[0][1].kg : null;
+    const weights = JSON.parse(localStorage.getItem('calorie_weights') || 'null');
+    if (!weights) return null;
+    const dates = Object.keys(weights).filter(d => weights[d] > 0).sort();
+    return dates.length > 0 ? weights[dates[dates.length - 1]] : null;
   } catch (e) { return null; }
 }
 
