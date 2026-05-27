@@ -2063,12 +2063,14 @@ function getDailyBurned(days) {
     const run  = getRunningActivity(key);
     const boul = getBoulderingActivity(key);
     const work = getWorkoutActivity(key);
+    const walk = getWalkingActivity(key);
     result.push({
       date: key,
       running:    run?.kcal  || 0,
       bouldering: boul?.kcal || 0,
       workout:    work?.kcal || 0,
-      hasData: !!(run || boul || work),
+      walking:    walk?.kcal || 0,
+      hasData: !!(run || boul || work || walk),
     });
   }
   return result;
@@ -2087,16 +2089,18 @@ function drawBurnedCaloriesChart() {
 
   const SPORTS = [
     { key: 'running',    label: 'Running',    color: '#7ab87a' },
+    { key: 'walking',    label: 'Walking',    color: '#d4924a' },
     { key: 'bouldering', label: 'Bouldering', color: '#5ab4cc' },
     { key: 'workout',    label: 'Strength',   color: '#e87838' },
   ];
 
   // Aggregate totals per sport
-  const totals = { running: 0, bouldering: 0, workout: 0 };
+  const totals = { running: 0, walking: 0, bouldering: 0, workout: 0 };
   let daysWithActivity = 0;
   data.forEach(d => {
     if (d.hasData) daysWithActivity++;
     totals.running    += d.running    || 0;
+    totals.walking    += d.walking    || 0;
     totals.bouldering += d.bouldering || 0;
     totals.workout    += d.workout    || 0;
   });
@@ -2757,25 +2761,41 @@ function getWorkoutActivity(dateStr) {
   } catch { return null; }
 }
 
+function getWalkingActivity(dateStr) {
+  try {
+    const data = JSON.parse(localStorage.getItem('c2hm_v1') || 'null');
+    if (!data || !data.walks) return null;
+    const dayWalks = data.walks.filter(w => w.date === dateStr);
+    if (dayWalks.length === 0) return null;
+    const totalKm   = dayWalks.reduce((s, w) => s + (w.km || 0), 0) || null;
+    const totalTime = dayWalks.reduce((s, w) => s + (w.time || 0), 0) || null;
+    const weight = getClosestWeightForDate(dateStr);
+    const kcal = ActivityCalc.walkingKcal(weight?.kg, totalKm, totalTime);
+    return { hasData: true, weight, km: totalKm, time: totalTime, count: dayWalks.length, kcal };
+  } catch { return null; }
+}
+
 function renderActivity(date) {
   const running   = getRunningActivity(date);
   const bouldering = getBoulderingActivity(date);
   const workout   = getWorkoutActivity(date);
+  const walking   = getWalkingActivity(date);
 
   const section = document.getElementById('activity-section');
   const list    = document.getElementById('activity-list');
   const totalBar = document.getElementById('activity-total-bar');
   const totalVal = document.getElementById('activity-total-val');
 
-  if (!running && !bouldering && !workout) {
+  if (!running && !bouldering && !workout && !walking) {
     section.style.display = 'none';
     return;
   }
   section.style.display = '';
 
-  const hasWeight = !!(running?.weight || bouldering?.weight || workout?.weight);
+  const hasWeight = !!(running?.weight || bouldering?.weight || workout?.weight || walking?.weight);
   const sports = [
     running    && { label: 'Running',    color: '#7ab87a', data: running,    type: 'running'    },
+    walking    && { label: 'Walking',    color: '#d4924a', data: walking,    type: 'walking'    },
     bouldering && { label: 'Bouldering', color: '#5ab4cc', data: bouldering, type: 'bouldering' },
     workout    && { label: 'Strength',   color: '#e87838', data: workout,    type: 'workout'    },
   ].filter(Boolean);
@@ -2854,6 +2874,35 @@ function openSportDetails(type, date) {
       </table>
       ${hasDurationEst ? '<div style="font-size:10px;color:var(--muted2);margin-top:6px">* estimated — log session duration in the Bouldering Tracker for more accuracy.</div>' : ''}` : '<div style="color:var(--muted2);font-size:12px;font-style:italic">No weight logged — add a body weight entry to enable estimates.</div>'}
       <div style="font-size:11px;color:var(--muted2);margin-top:12px;font-style:italic">Rough estimate only. Actual burn varies with rest time, intensity, and technique.</div>`;
+
+  } else if (type === 'walking') {
+    const d = getWalkingActivity(date);
+    title.textContent = 'Walking — Calorie Estimate';
+    const w = d.weight;
+    const distStr = d.km ? d.km.toFixed(1) + ' km' : '—';
+    const timeStr = d.time ? d.time + ' min' : '—';
+    const formula = d.km
+      ? 'kcal = 0.5 × weight (kg) × distance (km)'
+      : 'kcal = MET × weight (kg) × duration (h)';
+    const formulaNote = d.km
+      ? '~0.5 kcal per kg per km. Standard rule-of-thumb for moderate walking.'
+      : 'MET = 3.5 (moderate walking). Distance-based formula is preferred when km are logged.';
+    body.innerHTML = `
+      <div class="sport-detail-formula">
+        <div class="sport-detail-formula-lbl">Formula</div>
+        <div class="sport-detail-formula-expr">${formula}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5">${formulaNote}</div>
+      </div>
+      ${w ? `<table class="sport-detail-table">
+        <thead><tr><th>Distance</th><th>Duration</th><th>Weight</th><th>Est. kcal</th></tr></thead>
+        <tbody><tr>
+          <td style="font-family:'Space Mono',monospace">${distStr}</td>
+          <td style="font-family:'Space Mono',monospace">${timeStr}</td>
+          <td style="font-family:'Space Mono',monospace">${w.kg} kg</td>
+          <td style="font-family:'Space Mono',monospace;color:var(--accent);font-weight:700">~${d.kcal}</td>
+        </tr></tbody>
+      </table>` : '<div style="color:var(--muted2);font-size:12px;font-style:italic">No weight logged — add a body weight entry to enable estimates.</div>'}
+      <div style="font-size:11px;color:var(--muted2);margin-top:12px;font-style:italic">Rough estimate. Log walks in the Marathon Training page via the "Log Walk" button.</div>`;
 
   } else if (type === 'workout') {
     const d = getWorkoutActivity(date);

@@ -748,6 +748,32 @@
   /* Charts */
   .chart-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .chart-wrap svg { min-width: 300px; }
+
+  /* Walk Log */
+  --walk: #d4924a;
+  .walk-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .walk-entry:last-child { border-bottom: none; }
+  .walk-entry-icon { font-size: 18px; flex-shrink: 0; padding-top: 1px; }
+  .walk-entry-info { flex: 1; min-width: 0; }
+  .walk-entry-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .walk-delete-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 14px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    opacity: 0.5;
+    transition: opacity 0.15s, color 0.15s;
+  }
+  .walk-delete-btn:hover { opacity: 1; color: var(--danger); }
 </style>
 </head>
 <body>
@@ -757,6 +783,7 @@
     <div class="app-title">Couch to <span>Half Marathon</span></div>
     <div id="countdownBadge" class="countdown-badge">Loading...</div>
     <div class="header-actions" id="headerActions">
+      <button class="btn btn-ghost btn-sm" onclick="openWalkModal()" style="border-color:rgba(212,146,74,0.5);color:var(--warning);">&#9654; Log Walk</button>
       <button class="btn btn-ghost btn-sm" onclick="exportData()">Export</button>
       <button class="btn btn-ghost btn-sm" onclick="togglePause()">Pause</button>
       <button class="btn btn-danger btn-sm" onclick="confirmReset()">Reset</button>
@@ -956,6 +983,36 @@
     <div class="modal-footer" style="margin-top:12px;">
       <button class="btn btn-ghost" onclick="document.getElementById('exportModal').classList.add('hidden')">Close</button>
       <button class="btn btn-primary" onclick="copyExport()">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- Walk Log Modal -->
+<div id="walkModal" class="modal-overlay hidden" onclick="closeWalkOutside(event)">
+  <div class="modal">
+    <div class="modal-title">Log a Walk</div>
+    <div class="modal-subtitle">Track walks separately from your run workouts</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-group">
+        <label class="form-label">Distance (km)</label>
+        <input type="number" class="form-input" id="walkKm" placeholder="e.g. 4.5" min="0" max="200" step="0.1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Duration (min)</label>
+        <input type="number" class="form-input" id="walkTime" placeholder="e.g. 60" min="0" max="600">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Date</label>
+      <input type="date" class="form-input" id="walkDate">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="walkNotes" rows="2" placeholder="Where did you walk? How did it feel?"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeWalkModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveWalk()">Save Walk</button>
     </div>
   </div>
 </div>
@@ -1308,9 +1365,13 @@ function migrateLegacyData(data) {
 function loadData() {
   try {
     const raw = localStorage.getItem(LS_KEY);
-    if (raw) return migrateLegacyData(JSON.parse(raw));
+    if (raw) {
+      const d = migrateLegacyData(JSON.parse(raw));
+      if (!d.walks) d.walks = [];
+      return d;
+    }
   } catch(e) {}
-  return { days: {}, pause: null, pauseHistory: [], planStart: null, version: 1 };
+  return { days: {}, walks: [], pause: null, pauseHistory: [], planStart: null, version: 1 };
 }
 
 // Returns the Sunday of the week containing the plan start date, or null if not started
@@ -1507,7 +1568,8 @@ function calcStats() {
   const wd = getWeekDayForDate(t);
   const currentWeek = wd ? wd.weekNum : 20;
 
-  return { totalCompleted, totalSkipped, totalModified, totalTime, totalKm, streak, weeksCompleted, currentWeek };
+  const ws = calcWalkStats();
+  return { totalCompleted, totalSkipped, totalModified, totalTime, totalKm, streak, weeksCompleted, currentWeek, ...ws };
 }
 
 function getWeekCompletion(weekNum) {
@@ -1558,7 +1620,7 @@ function renderStats() {
     </div>
     <div class="stat-card">
       <div class="stat-value">${Math.round(s.totalKm * 10) / 10}</div>
-      <div class="stat-label">Total KM</div>
+      <div class="stat-label">Run KM</div>
     </div>
     <div class="stat-card">
       <div class="stat-value">${Math.round(s.totalTime / 60 * 10) / 10}h</div>
@@ -1567,6 +1629,14 @@ function renderStats() {
     <div class="stat-card">
       <div class="stat-value">${s.streak}</div>
       <div class="stat-label">Workout Streak</div>
+    </div>
+    <div class="stat-card stat-card-interactive" onclick="switchTab('progress');setTimeout(()=>{document.getElementById('walksSection').scrollIntoView({behavior:'smooth'})},100)" title="View walk log">
+      <div class="stat-value" style="color:var(--warning)">${s.totalWalks}</div>
+      <div class="stat-label">Walks Logged</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:var(--warning)">${Math.round(s.totalWalkKm * 10) / 10}</div>
+      <div class="stat-label">Walk KM</div>
     </div>
   `;
 
@@ -1872,6 +1942,33 @@ function renderHeatmap() {
   }
   grid.innerHTML = html;
 
+  // Walks overlay on heatmap: mark dates with walks
+  const walksByDate = {};
+  for (const w of (appData.walks || [])) {
+    if (!walksByDate[w.date]) walksByDate[w.date] = [];
+    walksByDate[w.date].push(w);
+  }
+  // Append walk dots below the heatmap as a separate row
+  if (Object.keys(walksByDate).length > 0) {
+    let walkRowHtml = '<div style="margin-top:12px;"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--warning);margin-bottom:6px;">&#9654; Walks</div><div style="display:flex;gap:3px;flex-wrap:wrap;">';
+    for (let w = 1; w <= 20; w++) {
+      walkRowHtml += '<div style="display:flex;flex-direction:column;gap:3px;">';
+      for (let d = 0; d < 7; d++) {
+        const date = getDateForWeekDay(w, d);
+        if (!date) { walkRowHtml += '<div style="width:14px;height:14px;"></div>'; continue; }
+        const dStr = dateKey(date);
+        const hasWalk = !!walksByDate[dStr];
+        const wList = walksByDate[dStr] || [];
+        const kmSum = wList.reduce((s, x) => s + (x.km || 0), 0);
+        const title = hasWalk ? `Walk: ${kmSum ? kmSum.toFixed(1) + ' km' : wList.length + ' walk(s)'}` : '';
+        walkRowHtml += `<div style="width:14px;height:14px;border-radius:2px;background:${hasWalk ? 'var(--warning)' : 'transparent'};border:1px solid ${hasWalk ? 'var(--warning)' : 'transparent'};cursor:${hasWalk ? 'pointer' : 'default'};" title="${title}" ${hasWalk ? 'onclick="switchTab(\'progress\')"' : ''}></div>`;
+      }
+      walkRowHtml += '</div>';
+    }
+    walkRowHtml += '</div><div style="font-size:11px;color:var(--text2);margin-top:6px;">Click a walk square to view walk log in Progress tab</div></div>';
+    grid.insertAdjacentHTML('afterend', walkRowHtml);
+  }
+
   // Weekly summary
   const list = document.getElementById('weeklySummaryList');
   let listHtml = '';
@@ -1957,6 +2054,30 @@ function renderProgress() {
   }
   html += '</div>';
 
+  // Walk stats in progress
+  const ws = calcWalkStats();
+  html += `<div class="card" id="walksSection">
+    <div class="card-title" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <span><span class="icon">&#9654;</span> Walk Log</span>
+      <button class="btn btn-ghost btn-sm" onclick="openWalkModal()" style="border-color:rgba(212,146,74,0.5);color:var(--warning);">+ Log Walk</button>
+    </div>
+    <div class="stats-grid" style="margin-bottom:16px;">
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--warning)">${ws.totalWalks}</div>
+        <div class="stat-label">Total Walks</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--warning)">${Math.round(ws.totalWalkKm * 10) / 10}</div>
+        <div class="stat-label">Total KM</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--warning)">${Math.round(ws.totalWalkTime / 60 * 10) / 10}h</div>
+        <div class="stat-label">Time</div>
+      </div>
+    </div>
+    <div id="walksListProgress"></div>
+  </div>`;
+
   // Recent activity
   html += '<div class="card"><div class="card-title">Recent Logged Days</div>';
   const entries = Object.entries(appData.days)
@@ -1993,6 +2114,7 @@ function renderProgress() {
   html += '</div>';
 
   document.getElementById('progressContent').innerHTML = html;
+  renderWalksSection(document.getElementById('walksListProgress'));
 }
 
 // ============================================================
@@ -2132,7 +2254,7 @@ function closeExportOutside(e) {
 function confirmReset() {
   if (confirm('Reset ALL training data? This cannot be undone.')) {
     if (confirm('Are you sure? All progress and the start date will be cleared.')) {
-      appData = { days: {}, pause: null, pauseHistory: [], planStart: null, version: 1 };
+      appData = { days: {}, walks: [], pause: null, pauseHistory: [], planStart: null, version: 1 };
       saveData(appData);
       updatePauseBanner();
       render();
@@ -2598,6 +2720,98 @@ function buildProgressCharts() {
       ${speedChart}
     </div>
   `;
+}
+
+// ============================================================
+// WALK LOG
+// ============================================================
+function openWalkModal(editId) {
+  const modal = document.getElementById('walkModal');
+  if (editId) {
+    const w = (appData.walks || []).find(w => w.id === editId);
+    if (!w) return;
+    document.getElementById('walkDate').value = w.date;
+    document.getElementById('walkKm').value = w.km || '';
+    document.getElementById('walkTime').value = w.time || '';
+    document.getElementById('walkNotes').value = w.notes || '';
+    modal.dataset.editId = editId;
+  } else {
+    document.getElementById('walkDate').value = dateKey(today());
+    document.getElementById('walkKm').value = '';
+    document.getElementById('walkTime').value = '';
+    document.getElementById('walkNotes').value = '';
+    delete modal.dataset.editId;
+  }
+  modal.classList.remove('hidden');
+}
+
+function closeWalkModal() {
+  document.getElementById('walkModal').classList.add('hidden');
+}
+
+function closeWalkOutside(e) {
+  if (e.target.id === 'walkModal') closeWalkModal();
+}
+
+function saveWalk() {
+  const km    = parseFloat(document.getElementById('walkKm').value) || null;
+  const time  = parseInt(document.getElementById('walkTime').value) || null;
+  const date  = document.getElementById('walkDate').value || dateKey(today());
+  const notes = document.getElementById('walkNotes').value.trim() || null;
+
+  if (!km && !time) { alert('Please enter at least a distance or duration.'); return; }
+
+  if (!appData.walks) appData.walks = [];
+  const modal = document.getElementById('walkModal');
+  const editId = modal.dataset.editId;
+
+  if (editId) {
+    const idx = appData.walks.findIndex(w => w.id === editId);
+    if (idx >= 0) appData.walks[idx] = { id: editId, date, km, time, notes };
+  } else {
+    appData.walks.push({ id: Date.now().toString(36), date, km, time, notes });
+  }
+  saveData(appData);
+  closeWalkModal();
+  render();
+}
+
+function deleteWalk(id) {
+  if (!confirm('Delete this walk?')) return;
+  appData.walks = (appData.walks || []).filter(w => w.id !== id);
+  saveData(appData);
+  render();
+}
+
+function calcWalkStats() {
+  const walks = appData.walks || [];
+  const totalWalks = walks.length;
+  const totalWalkKm = walks.reduce((s, w) => s + (w.km || 0), 0);
+  const totalWalkTime = walks.reduce((s, w) => s + (w.time || 0), 0);
+  return { totalWalks, totalWalkKm, totalWalkTime };
+}
+
+function renderWalksSection(container) {
+  const walks = (appData.walks || []).slice().sort((a, b) => b.date.localeCompare(a.date));
+  if (walks.length === 0) {
+    container.innerHTML = '<div style="color:var(--text2);font-size:13px;">No walks logged yet. Use the Log Walk button to add one.</div>';
+    return;
+  }
+  container.innerHTML = walks.map(w => {
+    const meta = [
+      w.km   ? w.km + ' km' : null,
+      w.time ? w.time + ' min' : null,
+      w.notes ? '"' + w.notes + '"' : null,
+    ].filter(Boolean).join(' · ');
+    return `<div class="walk-entry">
+      <div class="walk-entry-icon">&#9654;</div>
+      <div class="walk-entry-info">
+        <div style="font-size:13px;font-weight:600;">${w.date}</div>
+        ${meta ? `<div class="walk-entry-meta">${meta}</div>` : ''}
+      </div>
+      <button class="walk-delete-btn" onclick="deleteWalk('${w.id}')" title="Delete">✕</button>
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
