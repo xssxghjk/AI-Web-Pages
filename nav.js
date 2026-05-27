@@ -203,9 +203,9 @@
     {
       label: 'Other Sites',
       links: [
-        { key: 'easy-time-tracker-ext', href: 'https://xssxghjk.github.io/easy-time-tracker/', text: 'Easy Time Tracker', external: true,
+        { key: 'easy-time-tracker-ext', href: 'https://xssxghjk.github.io/Easy-Time-Tracker/', text: 'Easy Time Tracker', external: true,
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M7 4.5v3l1.75 1.75" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
-        { key: 'my-fab-journey-ext', href: 'https://xssxghjk.github.io/my-fab-journey/', text: 'My FaB Journey', external: true,
+        { key: 'my-fab-journey-ext', href: 'https://xssxghjk.github.io/My-FaB-Journey/', text: 'My FaB Journey', external: true,
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="1.5" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 4.5h4M5 7h3.5M5 9.5h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="10" r="2.5" fill="var(--nav-bg)" stroke="currentColor" stroke-width="1.2"/><path d="M10 8.8v1.2l.8.8" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
       ]
     }
