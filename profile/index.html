@@ -541,6 +541,14 @@
     .day-todo-item.done .day-todo-dot { background: var(--accent); }
     .day-todo-text { flex: 1; }
     .day-todo-item.done .day-todo-text { text-decoration: line-through; }
+    .day-todo-cb {
+      width: 13px;
+      height: 13px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+      cursor: pointer;
+      margin-top: 1px;
+    }
 
     /* ── MAIN CONTENT ── */
     .main {
@@ -1439,13 +1447,14 @@
           html += '<div class="day-todos-block">' +
             '<div class="day-todos-kicker">Today\'s Todos</div>' +
             '<div class="day-todos-progress">' +
-              '<div class="day-todos-bar-wrap"><div class="day-todos-bar-fill" style="width:' + pct + '%"></div></div>' +
-              '<span class="day-todos-count">' + doneCount + '/' + todos.length + '</span>' +
+              '<div class="day-todos-bar-wrap"><div class="day-todos-bar-fill" id="profile-todos-bar-fill" style="width:' + pct + '%"></div></div>' +
+              '<span class="day-todos-count" id="profile-todos-count">' + doneCount + '/' + todos.length + '</span>' +
             '</div>' +
             '<div class="day-todo-list">' +
             todos.map(function(t) {
-              return '<div class="day-todo-item' + (t.done ? ' done' : '') + '">' +
-                '<span class="day-todo-dot"></span>' +
+              return '<div class="day-todo-item' + (t.done ? ' done' : '') + '" id="profile-todo-' + t.id + '">' +
+                '<input type="checkbox" class="day-todo-cb"' + (t.done ? ' checked' : '') +
+                  ' onchange="profileToggleTodo(\'' + t.id + '\',this.checked)">' +
                 '<span class="day-todo-text">' + esc(t.text) + '</span>' +
               '</div>';
             }).join('') +
@@ -2131,6 +2140,42 @@
     var appData = loadAll();
     switchTab('day');
     updateNav();
+
+    // ── Journal todo toggle (called from inline onchange) ────────────────────
+    window.profileToggleTodo = function(id, checked) {
+      var entries;
+      try { entries = JSON.parse(localStorage.getItem('journal_entries') || '{}'); } catch(e) { entries = {}; }
+      var d = new Date();
+      function lpad(n) { return n < 10 ? '0' + n : '' + n; }
+      var iso = d.getFullYear() + '-' + lpad(d.getMonth() + 1) + '-' + lpad(d.getDate());
+
+      var dayEntry = entries[iso] || {};
+      var morning = dayEntry.morning || {};
+      var todos = Array.isArray(morning.todos) ? morning.todos : [];
+
+      for (var i = 0; i < todos.length; i++) {
+        if (todos[i].id === id) { todos[i].done = checked; break; }
+      }
+
+      morning.todos = todos;
+      dayEntry.morning = morning;
+      entries[iso] = dayEntry;
+
+      try { localStorage.setItem('journal_entries', JSON.stringify(entries)); } catch(e) {}
+      appData.jEntries = entries;
+
+      var item = document.getElementById('profile-todo-' + id);
+      if (item) {
+        if (checked) item.classList.add('done'); else item.classList.remove('done');
+      }
+
+      var doneCount = todos.filter(function(t) { return t.done; }).length;
+      var pct = todos.length > 0 ? Math.round(doneCount / todos.length * 100) : 0;
+      var barFill = document.getElementById('profile-todos-bar-fill');
+      var countEl = document.getElementById('profile-todos-count');
+      if (barFill) barFill.style.width = pct + '%';
+      if (countEl) countEl.textContent = doneCount + '/' + todos.length;
+    };
 
     // ── Version ──────────────────────────────────────────────────────────────
     fetch('../version.json').then(function(r) { return r.json(); }).then(function(v) {
