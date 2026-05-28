@@ -66,11 +66,12 @@ body::before {
 /* Stats row */
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 10px;
   margin-bottom: 20px;
 }
-@media (max-width: 480px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .stats-row { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 400px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
 .stat-card {
   background: var(--surf);
   border: 1px solid var(--border);
@@ -453,7 +454,9 @@ function renderStats() {
   const runs  = activities.filter(a => a.type === 'run');
   const walks = activities.filter(a => a.type === 'walk');
   const totalKm = activities.reduce((s, a) => s + (a.km || 0), 0);
-  const totalKcal = activities.reduce((s, a) => s + (kcalForActivity(a, weight) || 0), 0);
+  const runKcal  = runs.reduce((s, a)  => s + (kcalForActivity(a, weight)  || 0), 0);
+  const walkKcal = walks.reduce((s, a) => s + (kcalForActivity(a, weight) || 0), 0);
+  const noWeight = !weight;
 
   document.getElementById('stats-row').innerHTML = `
     <div class="stat-card">
@@ -469,8 +472,12 @@ function renderStats() {
       <div class="stat-lbl">Total KM</div>
     </div>
     <div class="stat-card">
-      <div class="stat-val" style="color:var(--green)">${totalKcal > 0 ? '~' + totalKcal.toLocaleString() : '—'}</div>
-      <div class="stat-lbl">Est. kcal${!weight ? ' *' : ''}</div>
+      <div class="stat-val" style="color:var(--green)">${runKcal > 0 ? '~' + runKcal.toLocaleString() : '—'}</div>
+      <div class="stat-lbl">Run kcal${noWeight ? ' *' : ''}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--accent)">${walkKcal > 0 ? '~' + walkKcal.toLocaleString() : '—'}</div>
+      <div class="stat-lbl">Walk kcal${noWeight ? ' *' : ''}</div>
     </div>
   `;
 }

@@ -853,9 +853,10 @@
         marathon : get('c2hm_v1', {}),
         workout  : get('workout_plan_v3', {}),
         boulder  : get('bouldering_sessions', []),
-        calLog   : get('calorie_log', {}),
-        calW     : get('calorie_weights', {}),
-        walks    : get('walk_tracker_v1', []),
+        calLog            : get('calorie_log', {}),
+        calW              : get('calorie_weights', {}),
+        walks             : get('walk_tracker_v1', []),
+        unifiedActivities : get('activity_tracker_v1', []),
       };
     }
 
@@ -900,6 +901,10 @@
           stats.runs++;
           stats.runKm += parseFloat(d.km || 0);
         }
+      });
+      (data.unifiedActivities || []).forEach(function(a) {
+        if (!a || !a.date || a.date < since || a.date > end) return;
+        if (a.type === 'run') { stats.runs++; stats.runKm += parseFloat(a.km || 0); }
       });
 
       var ST_NAMES = ['Push', 'Pull', 'Legs'];
@@ -953,6 +958,10 @@
         stats.walkKm   += (w.km   || 0);
         stats.walkTime += (w.time || 0);
       });
+      (data.unifiedActivities || []).forEach(function(a) {
+        if (!a || !a.date || a.date < since || a.date > end) return;
+        if (a.type === 'walk') { stats.walks++; stats.walkKm += (a.km || 0); stats.walkTime += (a.time || 0); }
+      });
 
       return stats;
     }
@@ -981,6 +990,13 @@
       }
       var runCal = 0;
       if (runEntry) runCal = ActivityCalc.runningKcal(weightKg, runEntry.km ? parseFloat(runEntry.km) : null, runEntry.time ? parseFloat(runEntry.time) : null) || 0;
+      var unifiedRuns = (data.unifiedActivities || []).filter(function(a) { return a && a.date === iso && a.type === 'run'; });
+      if (unifiedRuns.length > 0) {
+        var uRunKm   = unifiedRuns.reduce(function(s, a) { return s + parseFloat(a.km   || 0); }, 0) || null;
+        var uRunTime = unifiedRuns.reduce(function(s, a) { return s + parseFloat(a.time || 0); }, 0) || null;
+        runCal += ActivityCalc.runningKcal(weightKg, uRunKm, uRunTime) || 0;
+        if (!runEntry) runEntry = { km: uRunKm, time: uRunTime, status: 'completed' };
+      }
 
       // Strength
       var sched = (data.workout && Array.isArray(data.workout.schedule) && data.workout.schedule.length === 3)
@@ -1004,6 +1020,8 @@
 
       // Walking
       var walkDayEntries = (data.walks || []).filter(function(w) { return w && w.date === iso; });
+      var unifiedWalks = (data.unifiedActivities || []).filter(function(a) { return a && a.date === iso && a.type === 'walk'; });
+      walkDayEntries = walkDayEntries.concat(unifiedWalks);
       var walkKm   = walkDayEntries.reduce(function(s, w) { return s + (w.km   || 0); }, 0);
       var walkTime = walkDayEntries.reduce(function(s, w) { return s + (w.time || 0); }, 0);
       var walkCal  = walkDayEntries.reduce(function(s, w) {
@@ -1674,6 +1692,16 @@
 
           var workoutCal = 0;
           if (dayWorkout) workoutCal = ActivityCalc.runningKcal(weightKg, dayWorkout.km || null, dayWorkout.time || null) || 0;
+          try {
+            var _unifiedActs = JSON.parse(localStorage.getItem('activity_tracker_v1') || '[]') || [];
+            var _dayRuns = _unifiedActs.filter(function(a) { return a && a.date === dateStr && a.type === 'run'; });
+            if (_dayRuns.length > 0) {
+              var _runKm   = _dayRuns.reduce(function(s, a) { return s + parseFloat(a.km   || 0); }, 0) || null;
+              var _runTime = _dayRuns.reduce(function(s, a) { return s + parseFloat(a.time || 0); }, 0) || null;
+              workoutCal += ActivityCalc.runningKcal(weightKg, _runKm, _runTime) || 0;
+              if (!dayWorkout) dayWorkout = { km: _runKm, time: _runTime, status: 'completed' };
+            }
+          } catch(e) {}
 
           var strengthEntryMap = strengthData.entries || {};
           var strengthEntry    = strengthEntryMap[dateStr] || null;
@@ -1699,6 +1727,10 @@
 
           var walkEntries2 = [];
           try { walkEntries2 = (JSON.parse(localStorage.getItem('walk_tracker_v1') || '[]') || []).filter(function(w) { return w && w.date === dateStr; }); } catch(e) {}
+          try {
+            var _unifiedActs2 = JSON.parse(localStorage.getItem('activity_tracker_v1') || '[]') || [];
+            walkEntries2 = walkEntries2.concat(_unifiedActs2.filter(function(a) { return a && a.date === dateStr && a.type === 'walk'; }));
+          } catch(e) {}
           var walkDayCal = walkEntries2.reduce(function(s, w) { return s + (ActivityCalc.walkingKcal(weightKg, w.km, w.time) || 0); }, 0);
           var walkDayKm   = walkEntries2.reduce(function(s, w) { return s + (w.km   || 0); }, 0);
           var walkDayTime = walkEntries2.reduce(function(s, w) { return s + (w.time || 0); }, 0);
