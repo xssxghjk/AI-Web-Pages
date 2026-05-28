@@ -198,6 +198,13 @@
       background: var(--ongoing);
       margin: 2px auto 0;
     }
+    .cal-todo-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 1px;
+      background: var(--accent);
+      margin: 2px auto 0;
+    }
 
     .cal-trip-bar {
       position: absolute;
@@ -263,6 +270,7 @@
     .cal-legend-dot.s-planning  { background: var(--planning); }
     .cal-legend-dot.s-fab-event { background: var(--fab-event); }
     .cal-legend-dot.s-local-event { background: var(--local-event); }
+    .cal-legend-dot.s-todo { background: var(--accent); border-radius: 1px; }
 
     /* ── SWIPE VIEWPORT ── */
     .cal-viewport {
@@ -719,6 +727,13 @@
       });
     } catch(e) {}
 
+    // Build set of deadline dates from incomplete todos
+    const todoDueDates = new Set();
+    try {
+      const _todos = JSON.parse(localStorage.getItem('todos_v1') || '[]');
+      _todos.forEach(t => { if (!t.completed && t.deadline) todoDueDates.add(t.deadline); });
+    } catch(e) {}
+
     function buildGridHTML(year, month) {
       const firstDay = new Date(year, month, 1);
       const lastDay  = new Date(year, month + 1, 0);
@@ -800,9 +815,11 @@
             String(date.getMonth() + 1).padStart(2, '0') + '-' +
             String(date.getDate()).padStart(2, '0');
           const hasRun = marathonRunDates.has(isoKey);
+          const hasTodo = todoDueDates.has(isoKey);
           return `<div class="cal-day${isToday ? ' today' : ''}${hasTrip ? ' has-trip' : ''}" data-iso="${isoKey}" style="height:${cellH}px">` +
             `<div class="cal-day-num">${date.getDate()}</div>` +
             (hasRun ? '<div class="cal-run-dot"></div>' : '') +
+            (hasTodo ? '<div class="cal-todo-dot" title="To-do deadline"></div>' : '') +
             `</div>`;
         }).join('');
 
@@ -841,6 +858,7 @@
       if (tripStatus) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-${esc(tripStatus)}"></div><span>Trips</span></div>`);
       if (hasFabEvent) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-fab-event"></div><span>FaB Events</span></div>`);
       if (localEvents.length > 0) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-local-event"></div><span>My Events</span></div>`);
+      if (todoDueDates.size > 0) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-todo"></div><span>To-Do Deadlines</span></div>`);
       legend.innerHTML = items.join('');
     }
 

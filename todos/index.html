@@ -2,10 +2,616 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=../profile/" />
-  <title>Redirecting…</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>To-Do List</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&display=swap">
+  <script src="../nav.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #1c1814;
+      --surface:   #252018;
+      --surface2:  #2e271d;
+      --border:    #3a3025;
+      --border2:   #4a3e2e;
+      --accent:    #c4864a;
+      --accent-dim: rgba(196,134,74,0.10);
+      --accent-bdr: rgba(196,134,74,0.30);
+      --text:      #e8dfd0;
+      --muted:     #9a8a76;
+      --muted2:    #b5a48e;
+      --muted3:    #5a4e40;
+      --due-soon:  #d4924a;
+      --overdue:   #c86060;
+      --overdue-dim: rgba(200,96,96,0.10);
+      --overdue-bdr: rgba(200,96,96,0.30);
+      --done-text: #5a5040;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.022) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.012) 1px, transparent 1px);
+      background-size: 4px 4px, 6px 6px;
+      background-position: 0 0, 2px 2px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 2rem 1.5rem 1.5rem;
+      border-bottom: 2px solid var(--text);
+      position: relative;
+      z-index: 1;
+    }
+    .hero-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      align-items: baseline;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--text);
+    }
+    .hero-meta {
+      font-size: 0.82rem;
+      font-style: italic;
+      color: var(--muted);
+      padding-bottom: 0.1rem;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      max-width: 720px;
+      margin: 1.75rem auto;
+      padding: 0 1.25rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── ADD FORM ── */
+    .add-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      align-items: stretch;
+    }
+    .add-inputs {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      min-width: 0;
+    }
+    .add-text {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.9rem;
+      padding: 0.6rem 0.85rem;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    .add-text::placeholder { color: var(--muted3); font-style: italic; }
+    .add-text:focus { border-color: var(--accent); }
+    .add-text.error { border-color: var(--overdue); }
+
+    .add-deadline-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .add-deadline-label {
+      font-size: 0.72rem;
+      font-style: italic;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .add-deadline {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.82rem;
+      padding: 0.38rem 0.6rem;
+      outline: none;
+      color-scheme: dark;
+      transition: border-color 0.15s;
+    }
+    .add-deadline:focus { border-color: var(--accent); }
+
+    .add-btn {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-bdr);
+      color: var(--accent);
+      border-radius: 2px;
+      padding: 0.6rem 1rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      align-self: flex-start;
+    }
+    .add-btn:hover { background: rgba(196,134,74,0.18); border-color: var(--accent); }
+
+    /* ── SECTIONS ── */
+    .section-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted3);
+      font-family: 'DM Serif Text', Georgia, serif;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+    }
+
+    /* ── TODO LIST ── */
+    .todo-list {
+      list-style: none;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      transition: opacity 0.2s;
+    }
+    .todo-item:last-child { border-bottom: none; }
+
+    /* Custom checkbox */
+    .todo-check {
+      flex-shrink: 0;
+      width: 17px;
+      height: 17px;
+      border: 1.5px solid var(--border2);
+      border-radius: 2px;
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.18s, background 0.18s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .todo-check:hover { border-color: var(--accent); }
+    .todo-check:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .todo-check:checked::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 1px;
+      width: 8px;
+      height: 5px;
+      border-left: 1.8px solid var(--bg);
+      border-bottom: 1.8px solid var(--bg);
+      transform: rotate(-45deg);
+    }
+
+    .todo-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .todo-text {
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.4;
+      transition: color 0.2s;
+      word-break: break-word;
+    }
+    .todo-item.done .todo-text {
+      text-decoration: line-through;
+      color: var(--done-text);
+    }
+
+    .todo-deadline-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-style: italic;
+      padding: 0.1rem 0.45rem;
+      border-radius: 2px;
+      margin-top: 0.2rem;
+      letter-spacing: 0.01em;
+    }
+    .todo-deadline-badge.future {
+      color: var(--muted);
+      background: transparent;
+    }
+    .todo-deadline-badge.due-soon {
+      color: var(--due-soon);
+      background: rgba(212,146,74,0.08);
+      border: 1px solid rgba(212,146,74,0.20);
+    }
+    .todo-deadline-badge.overdue {
+      color: var(--overdue);
+      background: var(--overdue-dim);
+      border: 1px solid var(--overdue-bdr);
+    }
+    .todo-deadline-badge.done {
+      color: var(--muted3);
+      background: transparent;
+    }
+
+    .todo-delete {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: var(--muted3);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 2px;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+      line-height: 1;
+      font-size: 1rem;
+    }
+    .todo-item:hover .todo-delete { opacity: 1; }
+    .todo-delete:hover { color: var(--overdue); }
+
+    /* ── EMPTY STATES ── */
+    .empty-hint {
+      font-size: 0.82rem;
+      font-style: italic;
+      color: var(--muted3);
+      padding: 1.25rem 0 0.5rem;
+      text-align: center;
+    }
+
+    /* ── COMPLETED SECTION TOGGLE ── */
+    .completed-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      user-select: none;
+      margin-top: 2rem;
+      margin-bottom: 0;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .completed-toggle-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted3);
+      font-family: 'DM Serif Text', Georgia, serif;
+      flex: 1;
+    }
+    .completed-toggle-count {
+      font-size: 0.62rem;
+      color: var(--muted3);
+      font-family: 'DM Serif Text', Georgia, serif;
+    }
+    .completed-toggle-chevron {
+      color: var(--muted3);
+      transition: transform 0.2s;
+    }
+    .completed-toggle.open .completed-toggle-chevron {
+      transform: rotate(180deg);
+    }
+    .completed-section { display: none; }
+    .completed-section.open { display: block; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 1.75rem 2rem;
+      font-size: 0.78rem;
+      font-style: italic;
+      color: var(--muted3);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: auto;
+      position: relative;
+      z-index: 1;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 600px) {
+      .main { padding: 0 0.85rem 3rem; }
+      .hero { padding: 1.25rem 0.85rem 1rem; }
+      .hero h1 { font-size: 2rem; }
+      .add-form { flex-direction: column; }
+      .add-btn { align-self: stretch; justify-content: center; }
+    }
+  </style>
 </head>
 <body>
-  <script>window.location.replace('../profile/');</script>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <h1>To-Do List</h1>
+      <span class="hero-meta" id="hero-meta"></span>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <form class="add-form" id="add-form" autocomplete="off">
+      <div class="add-inputs">
+        <input
+          type="text"
+          class="add-text"
+          id="add-text"
+          placeholder="New task…"
+          maxlength="200"
+        />
+        <div class="add-deadline-row">
+          <span class="add-deadline-label">Deadline (optional):</span>
+          <input type="date" class="add-deadline" id="add-deadline" />
+        </div>
+      </div>
+      <button type="submit" class="add-btn">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+          <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+        Add
+      </button>
+    </form>
+
+    <p class="section-label">Pending</p>
+    <ul class="todo-list" id="pending-list"></ul>
+    <p class="empty-hint" id="pending-empty" style="display:none">All done — nothing pending.</p>
+
+    <div class="completed-toggle" id="completed-toggle">
+      <span class="completed-toggle-label">Completed</span>
+      <span class="completed-toggle-count" id="completed-count"></span>
+      <svg class="completed-toggle-chevron" width="11" height="11" viewBox="0 0 12 12" fill="none">
+        <path d="M2 4.5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="completed-section" id="completed-section">
+      <ul class="todo-list" id="completed-list"></ul>
+      <p class="empty-hint" id="completed-empty" style="display:none">Nothing completed yet.</p>
+    </div>
+
+  </main>
+
+  <footer>
+    <span id="page-version" style="opacity:0.65"></span>
+    <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
+    <span id="storage-size"></span>
+  </footer>
+  <script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='v'+v.version}).catch(()=>{});</script>
+
+  <script>
+  (function () {
+    const STORAGE_KEY = 'todos_v1';
+
+    function load() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (e) { return []; }
+    }
+    function save(todos) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+    }
+    function generateId() {
+      return Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
+    }
+
+    function todayIso() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function daysDiff(isoA, isoB) {
+      const [ay, am, ad] = isoA.split('-').map(Number);
+      const [by, bm, bd] = isoB.split('-').map(Number);
+      const a = new Date(ay, am - 1, ad);
+      const b = new Date(by, bm - 1, bd);
+      return Math.round((b - a) / 86400000);
+    }
+
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatDeadline(iso) {
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const [y, m, d] = iso.split('-').map(Number);
+      const today = new Date();
+      const thisYear = today.getFullYear();
+      return months[m - 1] + ' ' + d + (y !== thisYear ? ' ' + y : '');
+    }
+
+    function deadlineClass(iso, done) {
+      if (done) return 'done';
+      const today = todayIso();
+      const diff = daysDiff(today, iso);
+      if (diff < 0) return 'overdue';
+      if (diff <= 2) return 'due-soon';
+      return 'future';
+    }
+
+    function deadlineLabel(iso, done) {
+      if (done) return formatDeadline(iso);
+      const today = todayIso();
+      const diff = daysDiff(today, iso);
+      if (diff < 0) return formatDeadline(iso) + ' — overdue';
+      if (diff === 0) return 'Due today';
+      if (diff === 1) return 'Due tomorrow';
+      if (diff <= 2) return formatDeadline(iso);
+      return formatDeadline(iso);
+    }
+
+    function buildItem(todo) {
+      const li = document.createElement('li');
+      li.className = 'todo-item' + (todo.completed ? ' done' : '');
+      li.dataset.id = todo.id;
+
+      const check = document.createElement('input');
+      check.type = 'checkbox';
+      check.className = 'todo-check';
+      check.checked = todo.completed;
+      check.setAttribute('aria-label', 'Mark complete');
+
+      const body = document.createElement('div');
+      body.className = 'todo-body';
+
+      const textEl = document.createElement('div');
+      textEl.className = 'todo-text';
+      textEl.textContent = todo.text;
+
+      body.appendChild(textEl);
+
+      if (todo.deadline) {
+        const badge = document.createElement('div');
+        badge.className = 'todo-deadline-badge ' + deadlineClass(todo.deadline, todo.completed);
+        badge.textContent = deadlineLabel(todo.deadline, todo.completed);
+        body.appendChild(badge);
+      }
+
+      const del = document.createElement('button');
+      del.className = 'todo-delete';
+      del.setAttribute('aria-label', 'Delete task');
+      del.innerHTML = '&times;';
+      del.type = 'button';
+
+      li.appendChild(check);
+      li.appendChild(body);
+      li.appendChild(del);
+
+      check.addEventListener('change', () => toggle(todo.id, check.checked));
+      del.addEventListener('click', () => remove(todo.id));
+
+      return li;
+    }
+
+    function render() {
+      const todos = load();
+      const today = todayIso();
+
+      const pending   = todos.filter(t => !t.completed);
+      const completed = todos.filter(t =>  t.completed);
+
+      const pendingList   = document.getElementById('pending-list');
+      const completedList = document.getElementById('completed-list');
+      pendingList.innerHTML   = '';
+      completedList.innerHTML = '';
+
+      pending.forEach(t => pendingList.appendChild(buildItem(t)));
+      completed.forEach(t => completedList.appendChild(buildItem(t)));
+
+      document.getElementById('pending-empty').style.display   = pending.length   === 0 ? '' : 'none';
+      document.getElementById('completed-empty').style.display = completed.length === 0 ? '' : 'none';
+
+      const countEl = document.getElementById('completed-count');
+      countEl.textContent = completed.length > 0 ? '(' + completed.length + ')' : '';
+
+      // Hero meta
+      const overdue = pending.filter(t => t.deadline && daysDiff(today, t.deadline) < 0).length;
+      const dueSoon = pending.filter(t => t.deadline && daysDiff(today, t.deadline) >= 0 && daysDiff(today, t.deadline) <= 2).length;
+      let meta = pending.length === 0 ? 'all clear' : pending.length + ' pending';
+      if (overdue > 0) meta += ' · ' + overdue + ' overdue';
+      else if (dueSoon > 0) meta += ' · ' + dueSoon + ' due soon';
+      document.getElementById('hero-meta').textContent = meta;
+    }
+
+    function toggle(id, completed) {
+      const todos = load();
+      const idx = todos.findIndex(t => t.id === id);
+      if (idx === -1) return;
+      todos[idx].completed = completed;
+      save(todos);
+      render();
+    }
+
+    function remove(id) {
+      save(load().filter(t => t.id !== id));
+      render();
+    }
+
+    // Add form
+    const addForm    = document.getElementById('add-form');
+    const addText    = document.getElementById('add-text');
+    const addDeadline = document.getElementById('add-deadline');
+
+    addForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const text = addText.value.trim();
+      if (!text) {
+        addText.classList.add('error');
+        addText.focus();
+        return;
+      }
+      addText.classList.remove('error');
+      const todos = load();
+      todos.unshift({
+        id: generateId(),
+        text,
+        deadline: addDeadline.value || null,
+        completed: false,
+        createdAt: todayIso(),
+      });
+      save(todos);
+      addText.value = '';
+      addDeadline.value = '';
+      render();
+    });
+    addText.addEventListener('input', () => addText.classList.remove('error'));
+
+    // Completed toggle
+    const toggle_ = document.getElementById('completed-toggle');
+    const completedSection = document.getElementById('completed-section');
+    toggle_.addEventListener('click', () => {
+      const open = completedSection.classList.toggle('open');
+      toggle_.classList.toggle('open', open);
+    });
+
+    render();
+  })();
+  </script>
+
 </body>
 </html>

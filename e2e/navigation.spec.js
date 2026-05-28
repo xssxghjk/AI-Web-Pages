@@ -71,3 +71,12 @@ test('walk tracker page loads', async ({ page }) => {
   expect(sidebarVisible || hamburgerVisible).toBe(true);
 });
 
+test('todos page loads', async ({ page }) => {
+  await page.goto('/todos/');
+  await expect(page).toHaveTitle(/To-Do List/);
+  await expect(page.locator('h1')).toContainText('To-Do List');
+  const sidebarVisible = await page.locator('.sidebar').isVisible();
+  const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();
+  expect(sidebarVisible || hamburgerVisible).toBe(true);
+});
+
