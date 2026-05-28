@@ -151,7 +151,40 @@
     '.nav-backup-reminder-btn{background:none;border:none;padding:0;cursor:pointer;' +
       'color:#86ae64;font-family:"DM Serif Text",Georgia,serif;font-size:0.72rem;' +
       'border-bottom:1px solid rgba(134,174,100,0.4);transition:color 0.15s,border-color 0.15s}' +
-    '.nav-backup-reminder-btn:hover{color:#a0c87e;border-bottom-color:rgba(134,174,100,0.7)}';
+    '.nav-backup-reminder-btn:hover{color:#a0c87e;border-bottom-color:rgba(134,174,100,0.7)}' +
+
+    /* event reminder popup */
+    '.nav-event-reminder-overlay{position:fixed;inset:0;z-index:9100;background:rgba(0,0,0,0.75);' +
+      'display:flex;align-items:center;justify-content:center;' +
+      'opacity:0;visibility:hidden;transition:opacity 0.2s ease,visibility 0s linear 0.2s}' +
+    '.nav-event-reminder-overlay.open{opacity:1;visibility:visible;' +
+      'transition:opacity 0.2s ease,visibility 0s linear 0s}' +
+    '.nav-er-modal{background:#252018;border:1px solid #4a3e2e;border-radius:3px;' +
+      'padding:1.3rem 1.45rem 1.1rem;width:min(340px,calc(100vw - 2rem));' +
+      'box-shadow:0 16px 48px rgba(0,0,0,0.6);' +
+      'transform:scale(0.9) translateY(-10px);' +
+      'transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1)}' +
+    '.nav-event-reminder-overlay.open .nav-er-modal{transform:scale(1) translateY(0)}' +
+    '.nav-er-header{display:flex;align-items:center;gap:0.5rem;' +
+      'font-family:"Playfair Display",Georgia,serif;font-size:0.9rem;font-weight:700;font-style:italic;' +
+      'color:#c4864a;margin-bottom:0.85rem;padding-bottom:0.6rem;border-bottom:1px solid #3a3025}' +
+    '.nav-er-event{padding:0.55rem 0;border-bottom:1px solid #2e271d}' +
+    '.nav-er-event:last-of-type{border-bottom:none}' +
+    '.nav-er-event-name{font-family:"DM Serif Text",Georgia,serif;font-size:0.9rem;color:#e8dfd0;margin-bottom:0.15rem}' +
+    '.nav-er-event-date{font-family:"DM Serif Text",Georgia,serif;font-size:0.7rem;font-style:italic;color:#9a8a76}' +
+    '.nav-er-actions{display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.85rem;' +
+      'padding-top:0.6rem;border-top:1px solid #3a3025}' +
+    '.nav-er-btn-calendar{display:inline-flex;align-items:center;padding:0.38rem 0.8rem;' +
+      'background:rgba(196,134,74,0.1);border:1px solid rgba(196,134,74,0.4);' +
+      'color:#c4864a;border-radius:2px;text-decoration:none;' +
+      'font-family:"DM Serif Text",Georgia,serif;font-size:0.77rem;' +
+      'transition:background 0.15s,border-color 0.15s}' +
+    '.nav-er-btn-calendar:hover{background:rgba(196,134,74,0.2);border-color:#c4864a}' +
+    '.nav-er-btn-dismiss{background:transparent;border:1px solid #3a3025;color:#9a8a76;' +
+      'border-radius:2px;padding:0.38rem 0.75rem;' +
+      'font-family:"DM Serif Text",Georgia,serif;font-size:0.77rem;cursor:pointer;' +
+      'transition:border-color 0.15s,color 0.15s}' +
+    '.nav-er-btn-dismiss:hover{border-color:#5a5040;color:#e8dfd0}';
   document.head.appendChild(style);
 
   // ── Inject favicon ───────────────────────────────────────────────────────
@@ -358,6 +391,9 @@
     // Weekly backup reminder
     checkBackupReminder(pageContent);
 
+    // Calendar event reminders
+    checkEventReminders();
+
     // Mobile nav overlay (backdrop)
     var overlay = document.createElement('div');
     overlay.className = 'mobile-nav-overlay';
@@ -533,6 +569,96 @@
     banner.querySelector('.nav-morning-reminder-dismiss').addEventListener('click', function () {
       localStorage.setItem(storageKey, 'dismissed');
       banner.remove();
+    });
+  }
+
+  // ── Calendar Event Reminders ─────────────────────────────────────────────
+  function checkEventReminders() {
+    var d = new Date();
+    function p2(n) { return n < 10 ? '0' + n : '' + n; }
+    var today = d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+
+    var events = [];
+    try { events = JSON.parse(localStorage.getItem('cal_local_events') || '[]'); } catch(e) { return; }
+    if (!events.length) return;
+
+    var dueEvents = events.filter(function(ev) {
+      if (!ev.reminderDays || !ev.startDate) return false;
+      if (ev.startDate <= today) return false;
+      if (localStorage.getItem('cal_reminder_dismissed_' + ev.id + '_' + today)) return false;
+      var parts = ev.startDate.split('-');
+      var evStart = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      var remDate = new Date(evStart.getTime());
+      remDate.setDate(remDate.getDate() - ev.reminderDays);
+      var remIso = remDate.getFullYear() + '-' + p2(remDate.getMonth() + 1) + '-' + p2(remDate.getDate());
+      return remIso === today;
+    });
+
+    if (!dueEvents.length) return;
+
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    function fmtDate(iso) {
+      var pts = iso.split('-');
+      return months[parseInt(pts[1], 10) - 1] + ' ' + parseInt(pts[2], 10) + ', ' + pts[0];
+    }
+    function navEsc(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    var eventRows = dueEvents.map(function(ev) {
+      var days = ev.reminderDays;
+      var daysLabel = days === 1 ? 'Tomorrow' : 'In ' + days + ' days';
+      return '<div class="nav-er-event">' +
+        '<div class="nav-er-event-name">' + navEsc(ev.name) + '</div>' +
+        '<div class="nav-er-event-date">' + fmtDate(ev.startDate) + ' — ' + daysLabel + '</div>' +
+        '</div>';
+    }).join('');
+
+    var overlay = document.createElement('div');
+    overlay.className = 'nav-event-reminder-overlay';
+    var plural = dueEvents.length > 1 ? 's' : '';
+    overlay.innerHTML =
+      '<div class="nav-er-modal">' +
+        '<div class="nav-er-header">' +
+          '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M8 2a4.5 4.5 0 0 1 4.5 4.5c0 2.25.45 3.5 1.5 4.5h-12c1.05-1 1.5-2.25 1.5-4.5A4.5 4.5 0 0 1 8 2z"/>' +
+            '<path d="M6.5 13a1.5 1.5 0 0 0 3 0"/>' +
+          '</svg>' +
+          'Event Reminder' + plural +
+        '</div>' +
+        eventRows +
+        '<div class="nav-er-actions">' +
+          '<a class="nav-er-btn-calendar" href="' + NAV_BASE + 'calendar/">Open Calendar</a>' +
+          '<button class="nav-er-btn-dismiss">Dismiss</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { overlay.classList.add('open'); });
+    });
+
+    function dismissOverlay() {
+      dueEvents.forEach(function(ev) {
+        localStorage.setItem('cal_reminder_dismissed_' + ev.id + '_' + today, '1');
+      });
+      overlay.classList.remove('open');
+      setTimeout(function() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 250);
+    }
+
+    overlay.querySelector('.nav-er-btn-dismiss').addEventListener('click', dismissOverlay);
+    overlay.querySelector('.nav-er-btn-calendar').addEventListener('click', function() {
+      dueEvents.forEach(function(ev) {
+        localStorage.setItem('cal_reminder_dismissed_' + ev.id + '_' + today, '1');
+      });
+    });
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) dismissOverlay(); });
+    document.addEventListener('keydown', function onEscReminder(e) {
+      if (e.key === 'Escape' && overlay.parentNode) {
+        dismissOverlay();
+        document.removeEventListener('keydown', onEscReminder);
+      }
     });
   }
 

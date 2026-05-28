@@ -623,6 +623,14 @@
         <input type="date" class="dreport-date" id="lev-start" style="flex:1;margin-bottom:0">
         <input type="date" class="dreport-date" id="lev-end" style="flex:1;margin-bottom:0">
       </div>
+      <select class="dreport-date" id="lev-reminder">
+        <option value="">No reminder</option>
+        <option value="1">Remind me 1 day before</option>
+        <option value="3">Remind me 3 days before</option>
+        <option value="7">Remind me 7 days before</option>
+        <option value="14">Remind me 14 days before</option>
+        <option value="30">Remind me 30 days before</option>
+      </select>
       <div class="dreport-actions">
         <button class="dreport-cancel" id="lev-delete" style="color:var(--local-event);border-color:var(--local-event-border);display:none">Delete</button>
         <button class="dreport-cancel" id="lev-cancel">Cancel</button>
@@ -1184,6 +1192,7 @@
     const levName       = document.getElementById('lev-name');
     const levStart      = document.getElementById('lev-start');
     const levEnd        = document.getElementById('lev-end');
+    const levReminder   = document.getElementById('lev-reminder');
     const levDelete     = document.getElementById('lev-delete');
     const levCancel     = document.getElementById('lev-cancel');
     const levSave       = document.getElementById('lev-save');
@@ -1192,9 +1201,10 @@
     function openCreateEventModal(isoDate) {
       editingEventId = null;
       levModalTitle.textContent = 'New Event';
-      levName.value  = '';
-      levStart.value = isoDate;
-      levEnd.value   = isoDate;
+      levName.value     = '';
+      levStart.value    = isoDate;
+      levEnd.value      = isoDate;
+      levReminder.value = '';
       levDelete.style.display = 'none';
       levOverlay.classList.add('open');
       requestAnimationFrame(() => levName.focus());
@@ -1205,9 +1215,10 @@
       if (!ev) return;
       editingEventId = evId;
       levModalTitle.textContent = 'Edit Event';
-      levName.value  = ev.name;
-      levStart.value = ev.startDate;
-      levEnd.value   = ev.endDate;
+      levName.value     = ev.name;
+      levStart.value    = ev.startDate;
+      levEnd.value      = ev.endDate;
+      levReminder.value = ev.reminderDays ? String(ev.reminderDays) : '';
       levDelete.style.display = '';
       levOverlay.classList.add('open');
       requestAnimationFrame(() => levName.focus());
@@ -1235,12 +1246,13 @@
       const name = levName.value.trim();
       if (!name) { levName.focus(); levName.style.borderColor = 'var(--local-event)'; return; }
       levName.style.borderColor = '';
-      const start = levStart.value;
-      const end   = levEnd.value >= start ? levEnd.value : start;
+      const start       = levStart.value;
+      const end         = levEnd.value >= start ? levEnd.value : start;
+      const reminderDays = parseInt(levReminder.value) || null;
       if (editingEventId) {
-        saveLocalEventsAndRefresh(localEvents.map(e => e.id === editingEventId ? { ...e, name, startDate: start, endDate: end } : e));
+        saveLocalEventsAndRefresh(localEvents.map(e => e.id === editingEventId ? { ...e, name, startDate: start, endDate: end, reminderDays } : e));
       } else {
-        saveLocalEventsAndRefresh([...localEvents, { id: generateId(), name, startDate: start, endDate: end }]);
+        saveLocalEventsAndRefresh([...localEvents, { id: generateId(), name, startDate: start, endDate: end, reminderDays }]);
       }
       closeLevModal();
     });
