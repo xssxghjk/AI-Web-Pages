@@ -20,9 +20,9 @@ test('trips page loads', async ({ page }) => {
   await expect(page).toHaveTitle(/Trips/);
 });
 
-test('marathon training page loads', async ({ page }) => {
+test('run walk tracker page loads', async ({ page }) => {
   await page.goto('/marathon-training/');
-  await expect(page).toHaveTitle(/Marathon/);
+  await expect(page).toHaveTitle(/Run.*Walk Tracker|Walk.*Run Tracker/);
 });
 
 test('project stats page loads', async ({ page }) => {

@@ -2724,6 +2724,18 @@ function getClosestWeightForDate(dateStr) {
 
 function getRunningActivity(dateStr) {
   try {
+    // Primary: activity_tracker_v1 (unified run/walk tracker)
+    const unified = JSON.parse(localStorage.getItem('activity_tracker_v1') || 'null');
+    if (unified) {
+      const dayRuns = unified.filter(a => a.date === dateStr && a.type === 'run');
+      if (dayRuns.length > 0) {
+        const totalKm   = dayRuns.reduce((s, a) => s + (a.km   || 0), 0) || null;
+        const totalTime = dayRuns.reduce((s, a) => s + (a.time || 0), 0) || null;
+        const w = getClosestWeightForDate(dateStr);
+        return { hasData: true, weight: w, km: totalKm, kcal: ActivityCalc.runningKcal(w?.kg, totalKm, totalTime) };
+      }
+    }
+    // Fallback: c2hm_v1 (old marathon tracker storage)
     const data = JSON.parse(localStorage.getItem('c2hm_v1') || 'null');
     if (!data || !data.days) return null;
     const day = data.days[dateStr];
@@ -2766,18 +2778,29 @@ function getWorkoutActivity(dateStr) {
 
 function getWalkingActivity(dateStr) {
   try {
-    // Primary: walk_tracker_v1 (standalone walk tracker)
+    // walk_tracker_v1 (standalone walk tracker)
     let raw = localStorage.getItem('walk_tracker_v1');
-    let allWalks = raw !== null ? JSON.parse(raw) : null;
-    // Fallback: c2hm_v1 (old marathon tracker storage) if walk tracker not yet initialized
-    if (!allWalks) {
+    let allWalks = raw !== null ? JSON.parse(raw) : [];
+
+    // Also include walks logged in activity_tracker_v1 (unified tracker)
+    try {
+      const unified = JSON.parse(localStorage.getItem('activity_tracker_v1') || 'null');
+      if (unified) {
+        const unifiedWalks = unified.filter(a => a.type === 'walk');
+        allWalks = allWalks.concat(unifiedWalks);
+      }
+    } catch (e) {}
+
+    // Fallback: c2hm_v1 if no walks found yet
+    if (allWalks.length === 0) {
       const marathon = JSON.parse(localStorage.getItem('c2hm_v1') || 'null');
-      allWalks = (marathon && marathon.walks) ? marathon.walks : null;
+      allWalks = (marathon && marathon.walks) ? marathon.walks : [];
     }
-    if (!allWalks) return null;
+
+    if (!allWalks.length) return null;
     const dayWalks = allWalks.filter(w => w.date === dateStr);
     if (dayWalks.length === 0) return null;
-    const totalKm   = dayWalks.reduce((s, w) => s + (w.km || 0), 0) || null;
+    const totalKm   = dayWalks.reduce((s, w) => s + (w.km   || 0), 0) || null;
     const totalTime = dayWalks.reduce((s, w) => s + (w.time || 0), 0) || null;
     const weight = getClosestWeightForDate(dateStr);
     const kcal = ActivityCalc.walkingKcal(weight?.kg, totalKm, totalTime);
@@ -2800,8 +2823,8 @@ function renderActivity(date) {
 
   const hasWeight = !!(running?.weight || bouldering?.weight || workout?.weight || walking?.weight);
   const sports = [
-    running    && { label: 'Running',    color: '#7ab87a', data: running,    type: 'running'    },
-    { label: 'Walking', color: '#d4924a', data: walking, type: 'walking' },
+    { label: 'Running',    color: '#7ab87a', data: running,    type: 'running'    },
+    { label: 'Walking',    color: '#d4924a', data: walking,    type: 'walking'    },
     bouldering && { label: 'Bouldering', color: '#5ab4cc', data: bouldering, type: 'bouldering' },
     workout    && { label: 'Strength',   color: '#e87838', data: workout,    type: 'workout'    },
   ].filter(Boolean);
@@ -2810,6 +2833,7 @@ function renderActivity(date) {
     let kcalHtml;
     if (!s.data) {
       kcalHtml = `<a href="../walk-tracker/" class="activity-details-btn" style="text-decoration:none">+ Log Walk</a>`;
+      if (s.type === 'running') kcalHtml = `<a href="../marathon-training/" class="activity-details-btn" style="text-decoration:none">+ Log Run</a>`;
     } else if (s.data.kcal != null) {
       kcalHtml = `<span class="activity-kcal-val">~${s.data.kcal.toLocaleString()} kcal</span>
          <button class="activity-details-btn" onclick="openSportDetails('${s.type}','${date}')">details ↗</button>`;
