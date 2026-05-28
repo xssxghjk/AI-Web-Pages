@@ -36,7 +36,7 @@ test.describe('mobile navigation', () => {
     const drawer = page.locator('#mobile-nav-drawer');
     await expect(drawer.getByRole('link', { name: 'Calendar' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Trips' })).toBeVisible();
-    await expect(drawer.getByRole('link', { name: 'Marathon Training' })).toBeVisible();
+    await expect(drawer.getByRole('link', { name: 'Run & Walk' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Journal' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Walk Tracker' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Site Stats' })).toBeVisible();
@@ -74,10 +74,10 @@ test.describe('mobile navigation', () => {
     await expect(page).toHaveURL(/\/trips\//);
   });
 
-  test('clicking Marathon Training link navigates to marathon training page', async ({ page }) => {
+  test('clicking Run & Walk link navigates to run walk tracker page', async ({ page }) => {
     await page.goto('/calendar/');
     await page.locator('#hamburger-btn').click();
-    await page.locator('#mobile-nav-drawer').getByRole('link', { name: 'Marathon Training' }).click();
+    await page.locator('#mobile-nav-drawer').getByRole('link', { name: 'Run & Walk' }).click();
     await expect(page).toHaveURL(/\/marathon-training\//);
   });
 
