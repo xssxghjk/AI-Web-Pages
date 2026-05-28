@@ -585,13 +585,13 @@
     var dueEvents = events.filter(function(ev) {
       if (!ev.reminderDays || !ev.startDate) return false;
       if (ev.startDate <= today) return false;
-      if (localStorage.getItem('cal_reminder_dismissed_' + ev.id + '_' + today)) return false;
+      if (localStorage.getItem('cal_reminder_dismissed_' + ev.id)) return false;
       var parts = ev.startDate.split('-');
       var evStart = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
       var remDate = new Date(evStart.getTime());
       remDate.setDate(remDate.getDate() - ev.reminderDays);
       var remIso = remDate.getFullYear() + '-' + p2(remDate.getMonth() + 1) + '-' + p2(remDate.getDate());
-      return remIso === today;
+      return remIso <= today;
     });
 
     if (!dueEvents.length) return;
@@ -641,7 +641,7 @@
 
     function dismissOverlay() {
       dueEvents.forEach(function(ev) {
-        localStorage.setItem('cal_reminder_dismissed_' + ev.id + '_' + today, '1');
+        localStorage.setItem('cal_reminder_dismissed_' + ev.id, '1');
       });
       overlay.classList.remove('open');
       setTimeout(function() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 250);
@@ -650,7 +650,7 @@
     overlay.querySelector('.nav-er-btn-dismiss').addEventListener('click', dismissOverlay);
     overlay.querySelector('.nav-er-btn-calendar').addEventListener('click', function() {
       dueEvents.forEach(function(ev) {
-        localStorage.setItem('cal_reminder_dismissed_' + ev.id + '_' + today, '1');
+        localStorage.setItem('cal_reminder_dismissed_' + ev.id, '1');
       });
     });
     overlay.addEventListener('click', function(e) { if (e.target === overlay) dismissOverlay(); });
