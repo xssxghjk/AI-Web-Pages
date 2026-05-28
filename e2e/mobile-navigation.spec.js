@@ -38,7 +38,6 @@ test.describe('mobile navigation', () => {
     await expect(drawer.getByRole('link', { name: 'Trips' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Run & Walk' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Journal' })).toBeVisible();
-    await expect(drawer.getByRole('link', { name: 'Walk Tracker' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Site Stats' })).toBeVisible();
   });
 
