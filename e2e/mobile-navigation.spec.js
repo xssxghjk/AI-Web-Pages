@@ -58,6 +58,31 @@ test.describe('mobile navigation', () => {
     await expect(page.locator('#mobile-nav-drawer')).not.toHaveClass(/open/);
   });
 
+  test('page is not scrollable when nav drawer is open', async ({ page }) => {
+    await page.goto('/calendar/');
+    await page.locator('#hamburger-btn').click();
+    await expect(page.locator('#mobile-nav-drawer')).toHaveClass(/open/);
+    const overflow = await page.evaluate(() => ({
+      html: document.documentElement.style.overflow,
+      body: document.body.style.overflow,
+    }));
+    expect(overflow.html).toBe('hidden');
+    expect(overflow.body).toBe('hidden');
+  });
+
+  test('page is scrollable again after nav drawer is closed', async ({ page }) => {
+    await page.goto('/calendar/');
+    await page.locator('#hamburger-btn').click();
+    await page.locator('#mobile-nav-close').click();
+    await expect(page.locator('#mobile-nav-drawer')).not.toHaveClass(/open/);
+    const overflow = await page.evaluate(() => ({
+      html: document.documentElement.style.overflow,
+      body: document.body.style.overflow,
+    }));
+    expect(overflow.html).toBe('');
+    expect(overflow.body).toBe('');
+  });
+
   test('Escape key closes the nav drawer', async ({ page }) => {
     await page.goto('/calendar/');
     await page.locator('#hamburger-btn').click();
