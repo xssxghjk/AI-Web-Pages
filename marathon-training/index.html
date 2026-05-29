@@ -349,6 +349,50 @@ body::before {
 }
 .app-footer a { color: var(--text2); text-decoration: none; }
 .app-footer a:hover { color: var(--accent); }
+
+/* ── Heatmap ── */
+.hm-card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+}
+.hm-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px;
+  margin-bottom: 12px;
+}
+.hm-card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px; font-weight: 700; color: var(--text);
+}
+.hm-range-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px; overflow: hidden;
+}
+.hm-range-btn {
+  padding: 3px 10px;
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Serif Text', Georgia, serif;
+  font-size: 11px; color: var(--text2);
+  border-right: 1px solid var(--border);
+  transition: all 0.15s; line-height: 1.6;
+}
+.hm-range-btn:last-child { border-right: none; }
+.hm-range-btn.active { background: var(--ab); color: var(--accent); font-weight: 700; }
+.hm-range-btn:hover:not(.active) { color: var(--text); background: rgba(232,223,208,0.04); }
+#activity-heatmap { overflow-x: auto; padding-bottom: 4px; }
+.hm-cell { transition: opacity 0.1s; }
+.hm-cell:hover { opacity: 0.65; cursor: default; }
+#hm-tooltip {
+  position: fixed; pointer-events: none; z-index: 9999; display: none;
+  background: var(--surf2); border: 1px solid var(--bord2);
+  color: var(--text); font-family: 'DM Serif Text', Georgia, serif;
+  font-size: 11px; padding: 4px 9px; border-radius: 4px;
+  white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
 </style>
 </head>
 <body>
@@ -374,6 +418,18 @@ body::before {
   <!-- ── Overview ─────────────────────────────────────────────────────────── -->
   <div class="tab-panel active" id="tab-overview">
     <div class="stats-row" id="stats-row"></div>
+
+    <div class="hm-card">
+      <div class="hm-card-header">
+        <div class="hm-card-title">Activity Heatmap</div>
+        <div class="hm-range-toggle">
+          <button class="hm-range-btn active" data-weeks="13" onclick="setHmRange(13)">3M</button>
+          <button class="hm-range-btn"        data-weeks="26" onclick="setHmRange(26)">6M</button>
+          <button class="hm-range-btn"        data-weeks="53" onclick="setHmRange(53)">1Y</button>
+        </div>
+      </div>
+      <div id="activity-heatmap"></div>
+    </div>
 
     <div class="form-card" id="log-form" style="display:none">
       <div class="form-title" id="form-title">Log an Activity</div>
@@ -782,6 +838,7 @@ function render() {
   renderStats();
   if (currentTab === 'statistics') renderStatistics();
   if (currentTab === 'history')    renderList();
+  if (typeof renderHeatmap === 'function') renderHeatmap();
 }
 
 function renderStats() {
@@ -886,6 +943,154 @@ function dismissMigration() { document.getElementById('migrate-banner').style.di
 
 render();
 checkMigrationAvailable();
+</script>
+
+<div id="hm-tooltip"></div>
+
+<script>
+// ── Activity Heatmap ────────────────────────────────────────────────────────
+let hmWeeks = 13;
+
+function setHmRange(weeks) {
+  hmWeeks = weeks;
+  document.querySelectorAll('.hm-range-btn').forEach(b => b.classList.toggle('active', +b.dataset.weeks === weeks));
+  renderHeatmap();
+}
+
+function renderHeatmap() {
+  const el = document.getElementById('activity-heatmap');
+  if (!el) return;
+
+  const CELL = 11, GAP = 2, DAY_LBL_W = 24, MONTH_H = 16;
+  const MON_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DOW_LABELS = ['Mon','','Wed','','Fri','','Sun'];
+  const WEEKS = hmWeeks;
+
+  // Build day map from activities
+  const dayMap = {};
+  activities.forEach(a => {
+    if (!a || !a.date) return;
+    if (!dayMap[a.date]) dayMap[a.date] = { runKm: 0, walkKm: 0 };
+    if (a.type === 'run')  dayMap[a.date].runKm  += parseFloat(a.km || 0);
+    if (a.type === 'walk') dayMap[a.date].walkKm += parseFloat(a.km || 0);
+  });
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayDow = (today.getDay() + 6) % 7; // Mon=0
+  const thisMonday = new Date(today); thisMonday.setDate(today.getDate() - todayDow);
+  const startDate = new Date(thisMonday); startDate.setDate(thisMonday.getDate() - (WEEKS - 1) * 7);
+  const todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+
+  const weeks = [];
+  const cur = new Date(startDate);
+  for (let wi = 0; wi < WEEKS; wi++) {
+    const week = [];
+    for (let di = 0; di < 7; di++) {
+      const iso = cur.getFullYear() + '-' + String(cur.getMonth()+1).padStart(2,'0') + '-' + String(cur.getDate()).padStart(2,'0');
+      week.push({ iso, future: cur > today, today: iso === todayStr, data: dayMap[iso] || null });
+      cur.setDate(cur.getDate() + 1);
+    }
+    weeks.push(week);
+  }
+
+  // Month labels
+  let lastMon = -1;
+  const monthPos = [];
+  weeks.forEach((wk, col) => {
+    const m = parseInt(wk[0].iso.substring(5, 7), 10);
+    if (m !== lastMon && !wk[0].future) { monthPos.push({ col, m: m - 1 }); lastMon = m; }
+  });
+
+  function cellBg(d) {
+    if (!d) return '';
+    const rKm = d.runKm || 0, wKm = d.walkKm || 0, total = rKm + wKm;
+    if (total === 0) return '';
+    const a = total < 2 ? 0.28 : total < 5 ? 0.55 : total < 10 ? 0.8 : 1.0;
+    return rKm >= wKm ? `rgba(196,134,74,${a})` : `rgba(122,184,122,${a})`;
+  }
+
+  const cols = WEEKS * (CELL + GAP) - GAP;
+  let html = '<div style="display:inline-flex;flex-direction:column;gap:0;">';
+
+  // Month row
+  html += `<div style="display:flex;margin-left:${DAY_LBL_W + GAP}px;height:${MONTH_H}px;position:relative;width:${cols}px;">`;
+  monthPos.forEach(mp => {
+    html += `<span style="position:absolute;left:${mp.col * (CELL + GAP)}px;top:3px;font-family:'DM Serif Text',Georgia,serif;font-size:9px;color:var(--text2);white-space:nowrap;">${MON_LABELS[mp.m]}</span>`;
+  });
+  html += '</div>';
+
+  // Rows
+  html += `<div style="display:flex;gap:${GAP}px;">`;
+  html += `<div style="display:flex;flex-direction:column;gap:${GAP}px;width:${DAY_LBL_W}px;flex-shrink:0;">`;
+  DOW_LABELS.forEach(lbl => {
+    html += `<div style="height:${CELL}px;font-family:'DM Serif Text',Georgia,serif;font-size:9px;color:var(--text2);display:flex;align-items:center;line-height:1;">${lbl}</div>`;
+  });
+  html += '</div>';
+
+  html += `<div style="display:flex;gap:${GAP}px;">`;
+  weeks.forEach(wk => {
+    html += `<div style="display:flex;flex-direction:column;gap:${GAP}px;">`;
+    wk.forEach(day => {
+      const bg = day.future ? 'transparent' : (cellBg(day.data) || 'var(--surf2)');
+      const shadow = day.today ? ';box-shadow:0 0 0 1px var(--accent)' : '';
+      let tip = '';
+      if (!day.future) {
+        const rKm = day.data ? Math.round((day.data.runKm || 0) * 10) / 10 : 0;
+        const wKm = day.data ? Math.round((day.data.walkKm || 0) * 10) / 10 : 0;
+        const parts = [];
+        if (rKm > 0) parts.push(rKm + 'km run');
+        if (wKm > 0) parts.push(wKm + 'km walk');
+        tip = ` data-tip="${day.iso}${parts.length ? ': ' + parts.join(', ') : ''}"`;
+      }
+      html += `<div class="hm-cell" style="width:${CELL}px;height:${CELL}px;border-radius:2px;background:${bg}${shadow};flex-shrink:0;"${tip}></div>`;
+    });
+    html += '</div>';
+  });
+  html += '</div></div></div>';
+
+  // Legend
+  html += '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;">';
+  html += '<span style="font-size:10px;color:var(--text2);">Less</span>';
+  [['run','196,134,74'],['walk','122,184,122']].forEach(([label, rgb]) => {
+    html += '<div style="display:flex;gap:2px;align-items:center;">';
+    html += `<span style="font-size:10px;color:var(--text2);margin-right:2px;">${label}</span>`;
+    [0.28, 0.55, 0.8, 1.0].forEach(a => {
+      html += `<div style="width:10px;height:10px;border-radius:1px;background:rgba(${rgb},${a});"></div>`;
+    });
+    html += '</div>';
+  });
+  html += '<span style="font-size:10px;color:var(--text2);">More</span>';
+  html += '</div>';
+
+  el.innerHTML = html;
+
+  // Tooltip
+  const tooltip = document.getElementById('hm-tooltip');
+  if (!tooltip) return;
+  el.addEventListener('mouseover', e => {
+    let t = e.target;
+    while (t && t !== el) {
+      if (t.dataset && t.dataset.tip) {
+        tooltip.textContent = t.dataset.tip;
+        tooltip.style.display = 'block';
+        tooltip.style.left = (e.clientX + 14) + 'px';
+        tooltip.style.top  = (e.clientY - 34) + 'px';
+        return;
+      }
+      t = t.parentElement;
+    }
+    tooltip.style.display = 'none';
+  });
+  el.addEventListener('mousemove', e => {
+    if (tooltip.style.display !== 'none') {
+      tooltip.style.left = (e.clientX + 14) + 'px';
+      tooltip.style.top  = (e.clientY - 34) + 'px';
+    }
+  });
+  el.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+}
+
+renderHeatmap();
 </script>
 
 </body>
