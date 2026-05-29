@@ -560,11 +560,26 @@ function collectOldEntries() {
       }
     }
   } catch (e) {}
-  // Even older marathon tracker: c2hm_v1 — { walks: [...], runs: [...] }
+  // Even older marathon tracker: c2hm_v1 — { days: {date: {status,km,time}}, walks: [...] }
   try {
     const raw = localStorage.getItem('c2hm_v1');
     if (raw) {
       const data = JSON.parse(raw);
+      // Primary training sessions stored in data.days (date-keyed object)
+      if (data && data.days && typeof data.days === 'object') {
+        Object.entries(data.days).forEach(([date, session]) => {
+          if (session.status === 'completed') {
+            out.push({
+              id: `c2hm_${date}`,
+              date,
+              type: 'run',
+              km: session.km || null,
+              time: session.time || null,
+              notes: session.notes || null
+            });
+          }
+        });
+      }
       if (data && Array.isArray(data.walks)) {
         data.walks.forEach(w => {
           if (w.date) out.push({
