@@ -43,13 +43,16 @@ body::before {
   background-size: 24px 24px;
   pointer-events: none; z-index: 0;
 }
-.app-header, .main, .app-footer { position: relative; z-index: 1; }
+.sticky-top, .main, .app-footer { position: relative; z-index: 1; }
+
+.sticky-top {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--surf);
+}
 
 .app-header {
-  background: var(--surf);
   border-bottom: 2px solid var(--text);
   padding: 14px 20px;
-  position: sticky; top: 0; z-index: 100;
 }
 .header-inner {
   max-width: 720px; margin: 0 auto;
@@ -61,7 +64,35 @@ body::before {
 }
 .app-title span { color: var(--accent); }
 
+/* Tab bar */
+.tab-bar {
+  border-bottom: 1px solid var(--border);
+}
+.tab-bar-inner {
+  max-width: 720px; margin: 0 auto;
+  display: flex;
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px 12px;
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Serif Text', Georgia, serif;
+  font-size: 12px; font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.6px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.18s;
+  position: relative; bottom: -1px;
+}
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-btn:hover:not(.active) { color: var(--text); }
+
 .main { max-width: 720px; margin: 0 auto; padding: 20px; }
+
+/* Tab panels */
+.tab-panel { display: none; animation: fadeIn 0.18s ease; }
+.tab-panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Stats row */
 .stats-row {
@@ -122,10 +153,9 @@ body::before {
 .form-input::placeholder { color: var(--muted); }
 .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
 
-/* Type toggle */
+/* Type toggle (form) */
 .type-toggle {
-  display: flex;
-  gap: 0;
+  display: flex; gap: 0;
   border: 1px solid var(--border);
   border-radius: 6px;
   overflow: hidden;
@@ -134,19 +164,16 @@ body::before {
 .type-btn {
   flex: 1;
   padding: 8px 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
+  background: none; border: none; cursor: pointer;
   font-family: 'DM Serif Text', Georgia, serif;
-  font-size: 13px;
-  color: var(--text2);
+  font-size: 13px; color: var(--text2);
   border-right: 1px solid var(--border);
   transition: all 0.15s;
   display: flex; align-items: center; justify-content: center; gap: 6px;
 }
 .type-btn:last-child { border-right: none; }
-.type-btn.active[data-type="run"] { background: rgba(122,184,122,0.12); color: var(--green); }
-.type-btn.active[data-type="walk"] { background: rgba(196,134,74,0.12); color: var(--accent); }
+.type-btn.active[data-type="run"]  { background: rgba(122,184,122,0.12); color: var(--green); }
+.type-btn.active[data-type="walk"] { background: rgba(196,134,74,0.12);  color: var(--accent); }
 .type-btn:hover:not(.active) { color: var(--text); background: rgba(232,223,208,0.04); }
 
 /* Buttons */
@@ -163,7 +190,77 @@ body::before {
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 .btn-sm { padding: 4px 10px; font-size: 12px; }
 
-/* Activity list */
+/* Statistics tab ─────────────────────────────────────────────────────────── */
+.stat-type-toggle {
+  display: flex; gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden;
+  margin-bottom: 20px;
+  max-width: 220px;
+}
+.stat-type-btn {
+  flex: 1; padding: 9px 16px;
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Serif Text', Georgia, serif;
+  font-size: 13px; color: var(--text2);
+  border-right: 1px solid var(--border);
+  transition: all 0.15s;
+}
+.stat-type-btn:last-child { border-right: none; }
+.stat-type-btn.active[data-type="run"]  { background: rgba(122,184,122,0.15); color: var(--green);  font-weight: 700; }
+.stat-type-btn.active[data-type="walk"] { background: rgba(196,134,74,0.15);  color: var(--accent); font-weight: 700; }
+.stat-type-btn:hover:not(.active) { color: var(--text); background: rgba(232,223,208,0.04); }
+
+/* Summary stat grid */
+.stats-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+@media (max-width: 480px) { .stats-summary { grid-template-columns: repeat(2, 1fr); } }
+.summary-card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.summary-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 700;
+}
+.summary-val.run  { color: var(--green); }
+.summary-val.walk { color: var(--accent); }
+.summary-lbl { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+
+/* Chart cards */
+.chart-card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+.chart-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+}
+.chart-sub {
+  font-size: 10px; color: var(--text2);
+  font-style: italic; font-weight: 400;
+  font-family: 'DM Serif Text', Georgia, serif;
+}
+.chart-wrap { width: 100%; overflow: hidden; }
+.chart-empty {
+  padding: 24px;
+  text-align: center; color: var(--text2);
+  font-size: 12px; font-style: italic;
+}
+
+/* Activity list (History tab) */
 .list-card {
   background: var(--surf);
   border: 1px solid var(--border);
@@ -177,19 +274,12 @@ body::before {
   font-size: 16px; font-weight: 700;
   display: flex; align-items: center; justify-content: space-between;
 }
-.filter-tabs {
-  display: flex; gap: 6px;
-}
+.filter-tabs { display: flex; gap: 6px; }
 .filter-tab {
-  padding: 3px 10px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-family: 'DM Serif Text', Georgia, serif;
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text2);
-  cursor: pointer;
-  transition: all 0.15s;
+  padding: 3px 10px; border-radius: 4px;
+  font-size: 11px; font-family: 'DM Serif Text', Georgia, serif;
+  background: none; border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer; transition: all 0.15s;
 }
 .filter-tab.active { background: var(--ab); border-color: var(--accent); color: var(--accent); }
 .filter-tab:hover:not(.active) { color: var(--text); }
@@ -202,22 +292,18 @@ body::before {
 }
 .activity-entry:last-child { border-bottom: none; }
 .activity-entry:hover { background: rgba(196,134,74,0.04); }
-.entry-date {
-  font-size: 12px; font-weight: 700; color: var(--accent);
-  min-width: 70px; padding-top: 2px; flex-shrink: 0;
-}
+.entry-date { font-size: 12px; font-weight: 700; color: var(--accent); min-width: 70px; padding-top: 2px; flex-shrink: 0; }
 .entry-body { flex: 1; min-width: 0; }
 .entry-type {
   display: inline-block;
   font-size: 10px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.5px;
-  padding: 1px 7px; border-radius: 3px;
-  margin-bottom: 3px;
+  padding: 1px 7px; border-radius: 3px; margin-bottom: 3px;
 }
-.entry-type.run { background: rgba(122,184,122,0.15); color: var(--green); }
-.entry-type.walk { background: rgba(196,134,74,0.15); color: var(--accent); }
-.entry-meta { font-size: 12px; color: var(--text2); margin-top: 1px; }
-.entry-kcal { font-size: 12px; color: var(--green); margin-top: 2px; }
+.entry-type.run  { background: rgba(122,184,122,0.15); color: var(--green); }
+.entry-type.walk { background: rgba(196,134,74,0.15);  color: var(--accent); }
+.entry-meta  { font-size: 12px; color: var(--text2); margin-top: 1px; }
+.entry-kcal  { font-size: 12px; color: var(--green); margin-top: 2px; }
 .entry-notes { font-size: 12px; color: var(--text2); font-style: italic; margin-top: 2px; }
 .entry-actions { display: flex; gap: 4px; flex-shrink: 0; }
 .btn-icon {
@@ -230,17 +316,13 @@ body::before {
 .btn-icon.del:hover { color: #c46a6a; background: rgba(196,106,106,0.12); }
 
 .empty-state {
-  padding: 32px 18px;
-  color: var(--text2);
-  font-size: 13px;
-  text-align: center;
-  font-style: italic;
+  padding: 32px 18px; color: var(--text2);
+  font-size: 13px; text-align: center; font-style: italic;
 }
 
 .app-footer {
   padding: 1.5rem 2rem;
-  font-size: 0.78rem;
-  color: var(--muted);
+  font-size: 0.78rem; color: var(--muted);
   border-top: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
   margin-top: 2rem;
@@ -251,66 +333,113 @@ body::before {
 </head>
 <body>
 
-<header class="app-header">
-  <div class="header-inner">
-    <div class="app-title">Run &amp; Walk <span>Tracker</span></div>
-    <button class="btn btn-primary" onclick="openForm()">+ Log Activity</button>
-  </div>
-</header>
+<div class="sticky-top">
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="app-title">Run &amp; Walk <span>Tracker</span></div>
+      <button class="btn btn-primary" onclick="openForm()">+ Log Activity</button>
+    </div>
+  </header>
+  <nav class="tab-bar">
+    <div class="tab-bar-inner">
+      <button class="tab-btn active" data-tab="overview"   onclick="switchTab('overview')">Overview</button>
+      <button class="tab-btn"        data-tab="statistics" onclick="switchTab('statistics')">Statistics</button>
+      <button class="tab-btn"        data-tab="history"    onclick="switchTab('history')">History</button>
+    </div>
+  </nav>
+</div>
 
 <main class="main">
 
-  <div class="stats-row" id="stats-row"></div>
+  <!-- ── Overview ─────────────────────────────────────────────────────────── -->
+  <div class="tab-panel active" id="tab-overview">
+    <div class="stats-row" id="stats-row"></div>
 
-  <div class="form-card" id="log-form" style="display:none">
-    <div class="form-title" id="form-title">Log an Activity</div>
-
-    <div class="type-toggle" id="type-toggle">
-      <button class="type-btn active" data-type="run" onclick="setType('run')">&#127939; Run</button>
-      <button class="type-btn" data-type="walk" onclick="setType('walk')">&#128694; Walk</button>
-    </div>
-
-    <div class="form-row-3">
-      <div class="form-group">
-        <label class="form-label">Date</label>
-        <input type="date" class="form-input" id="f-date">
+    <div class="form-card" id="log-form" style="display:none">
+      <div class="form-title" id="form-title">Log an Activity</div>
+      <div class="type-toggle" id="type-toggle">
+        <button class="type-btn active" data-type="run"  onclick="setType('run')">&#127939; Run</button>
+        <button class="type-btn"        data-type="walk" onclick="setType('walk')">&#128694; Walk</button>
       </div>
-      <div class="form-group">
-        <label class="form-label">Distance (km)</label>
-        <input type="number" class="form-input" id="f-km" placeholder="e.g. 5.2" min="0" max="200" step="0.1">
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-input" id="f-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Distance (km)</label>
+          <input type="number" class="form-input" id="f-km" placeholder="e.g. 5.2" min="0" max="200" step="0.1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Duration (min)</label>
+          <input type="number" class="form-input" id="f-time" placeholder="e.g. 30" min="0" max="600">
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Duration (min)</label>
-        <input type="number" class="form-input" id="f-time" placeholder="e.g. 30" min="0" max="600">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Notes</label>
+        <input type="text" class="form-input" id="f-notes" placeholder="Optional — route, pace, how it felt…">
       </div>
-    </div>
-    <div class="form-group" style="margin-bottom:0">
-      <label class="form-label">Notes</label>
-      <input type="text" class="form-input" id="f-notes" placeholder="Optional — route, pace, how it felt…">
-    </div>
-    <div class="form-actions">
-      <button class="btn btn-ghost" onclick="cancelForm()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveActivity()">Save</button>
+      <div class="form-actions">
+        <button class="btn btn-ghost"   onclick="cancelForm()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveActivity()">Save</button>
+      </div>
     </div>
   </div>
 
-  <div class="list-card">
-    <div class="list-header">
-      <span>Activity Log</span>
-      <div class="filter-tabs">
-        <button class="filter-tab active" data-filter="all" onclick="setFilter('all')">All</button>
-        <button class="filter-tab" data-filter="run" onclick="setFilter('run')">Runs</button>
-        <button class="filter-tab" data-filter="walk" onclick="setFilter('walk')">Walks</button>
-      </div>
+  <!-- ── Statistics ───────────────────────────────────────────────────────── -->
+  <div class="tab-panel" id="tab-statistics">
+    <div class="stat-type-toggle">
+      <button class="stat-type-btn active" data-type="run"  onclick="setStatType('run')">&#127939; Runs</button>
+      <button class="stat-type-btn"        data-type="walk" onclick="setStatType('walk')">&#128694; Walks</button>
     </div>
-    <div id="activity-list"></div>
+
+    <div class="stats-summary" id="stat-summary"></div>
+
+    <div class="chart-card">
+      <div class="chart-title">
+        <span id="chart1-label">Pace Over Time</span>
+        <span class="chart-sub" id="chart1-sub">min/km · lower is faster</span>
+      </div>
+      <div class="chart-wrap" id="chart-pace"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">
+        Distance Per Session
+        <span class="chart-sub">km · last 20 sessions</span>
+      </div>
+      <div class="chart-wrap" id="chart-distance"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">
+        Monthly Distance
+        <span class="chart-sub">km · last 6 months</span>
+      </div>
+      <div class="chart-wrap" id="chart-monthly"></div>
+    </div>
   </div>
 
-  <div id="migrate-banner" style="display:none; margin-top:14px; background:var(--surf); border:1px solid var(--bord2); border-radius:10px; padding:14px 18px; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-    <span style="font-size:12px; color:var(--text2);">Old activity data found in browser storage.</span>
-    <div style="display:flex; gap:8px;">
-      <button class="btn btn-primary btn-sm" onclick="runMigration()">Import old data</button>
-      <button class="btn btn-ghost btn-sm" onclick="dismissMigration()">Dismiss</button>
+  <!-- ── History ───────────────────────────────────────────────────────────── -->
+  <div class="tab-panel" id="tab-history">
+    <div class="list-card">
+      <div class="list-header">
+        <span>Activity Log</span>
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all"  onclick="setFilter('all')">All</button>
+          <button class="filter-tab"        data-filter="run"  onclick="setFilter('run')">Runs</button>
+          <button class="filter-tab"        data-filter="walk" onclick="setFilter('walk')">Walks</button>
+        </div>
+      </div>
+      <div id="activity-list"></div>
+    </div>
+
+    <div id="migrate-banner" style="display:none; margin-top:14px; background:var(--surf); border:1px solid var(--bord2); border-radius:10px; padding:14px 18px; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+      <span style="font-size:12px; color:var(--text2);">Old activity data found in browser storage.</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-primary btn-sm" onclick="runMigration()">Import old data</button>
+        <button class="btn btn-ghost   btn-sm" onclick="dismissMigration()">Dismiss</button>
+      </div>
     </div>
   </div>
 
@@ -333,107 +462,115 @@ function loadActivities() {
   } catch (e) {}
   return [];
 }
-
-function saveActivities(list) {
-  localStorage.setItem(LS_KEY, JSON.stringify(list));
-}
+function saveActivities(list) { localStorage.setItem(LS_KEY, JSON.stringify(list)); }
 
 let activities = loadActivities();
 
-// ── Weight helper ──────────────────────────────────────────────────────────
+// ── Weight ─────────────────────────────────────────────────────────────────
 function getWeight() {
   try {
-    const weights = JSON.parse(localStorage.getItem('calorie_weights') || 'null');
-    if (!weights) return null;
-    const dates = Object.keys(weights).filter(d => weights[d] > 0).sort();
-    return dates.length > 0 ? weights[dates[dates.length - 1]] : null;
+    const w = JSON.parse(localStorage.getItem('calorie_weights') || 'null');
+    if (!w) return null;
+    const dates = Object.keys(w).filter(d => w[d] > 0).sort();
+    return dates.length > 0 ? w[dates[dates.length - 1]] : null;
   } catch (e) { return null; }
 }
 
 // ── Date helpers ───────────────────────────────────────────────────────────
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
 function todayStr() {
   const d = new Date();
-  return d.getFullYear() + '-' +
-    String(d.getMonth() + 1).padStart(2, '0') + '-' +
-    String(d.getDate()).padStart(2, '0');
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function fmtDate(s) {
+  const [, m, d] = s.split('-');
+  return MONTHS[+m-1] + ' ' + +d;
+}
+function fmtMonthKey(s) {
+  const [y, m] = s.split('-');
+  return MONTHS[+m-1] + " '" + y.slice(2);
+}
+function kcalFor(a, weight) {
+  return a.type === 'run'
+    ? ActivityCalc.runningKcal(weight, a.km, a.time)
+    : ActivityCalc.walkingKcal(weight, a.km, a.time);
+}
+function formatPace(minPerKm) {
+  const m = Math.floor(minPerKm);
+  return m + ':' + String(Math.round((minPerKm - m) * 60)).padStart(2, '0');
 }
 
-function fmtDate(str) {
-  const [y, m, d] = str.split('-');
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return months[+m - 1] + ' ' + +d;
+// ── Tab navigation ─────────────────────────────────────────────────────────
+let currentTab = 'overview';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+  if (tab === 'statistics') renderStatistics();
+  if (tab === 'history')    renderList();
 }
 
-function kcalForActivity(a, weight) {
-  if (a.type === 'run') return ActivityCalc.runningKcal(weight, a.km, a.time);
-  return ActivityCalc.walkingKcal(weight, a.km, a.time);
-}
-
-// ── Form state ─────────────────────────────────────────────────────────────
+// ── Form ───────────────────────────────────────────────────────────────────
 let editId = null;
 let currentType = 'run';
 let currentFilter = 'all';
+let currentStatType = 'run';
 
 function setType(t) {
   currentType = t;
-  document.querySelectorAll('.type-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.type === t);
-  });
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === t));
 }
-
 function setFilter(f) {
   currentFilter = f;
-  document.querySelectorAll('.filter-tab').forEach(tab => {
-    tab.classList.toggle('active', tab.dataset.filter === f);
-  });
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
   renderList();
+}
+function setStatType(t) {
+  currentStatType = t;
+  document.querySelectorAll('.stat-type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === t));
+  renderStatistics();
 }
 
 function openForm(id) {
+  if (currentTab !== 'overview') switchTab('overview');
   editId = id || null;
-  const form = document.getElementById('log-form');
   document.getElementById('form-title').textContent = id ? 'Edit Activity' : 'Log an Activity';
   if (id) {
     const a = activities.find(a => a.id === id);
     if (!a) return;
     setType(a.type || 'run');
     document.getElementById('f-date').value  = a.date;
-    document.getElementById('f-km').value   = a.km   || '';
-    document.getElementById('f-time').value = a.time || '';
+    document.getElementById('f-km').value    = a.km   || '';
+    document.getElementById('f-time').value  = a.time || '';
     document.getElementById('f-notes').value = a.notes || '';
   } else {
     setType('run');
     document.getElementById('f-date').value  = todayStr();
-    document.getElementById('f-km').value   = '';
-    document.getElementById('f-time').value = '';
+    document.getElementById('f-km').value    = '';
+    document.getElementById('f-time').value  = '';
     document.getElementById('f-notes').value = '';
   }
-  form.style.display = '';
+  document.getElementById('log-form').style.display = '';
   document.getElementById('f-km').focus();
 }
-
 function cancelForm() {
   document.getElementById('log-form').style.display = 'none';
   editId = null;
 }
-
 function saveActivity() {
-  const km    = parseFloat(document.getElementById('f-km').value) || null;
-  const time  = parseInt(document.getElementById('f-time').value)  || null;
-  const date  = document.getElementById('f-date').value || todayStr();
-  const notes = document.getElementById('f-notes').value.trim() || null;
-
+  const km    = parseFloat(document.getElementById('f-km').value)   || null;
+  const time  = parseInt(document.getElementById('f-time').value)   || null;
+  const date  = document.getElementById('f-date').value             || todayStr();
+  const notes = document.getElementById('f-notes').value.trim()     || null;
   if (!km && !time) {
     const inp = document.getElementById('f-km');
-    inp.focus();
-    inp.style.borderColor = '#c46a6a';
+    inp.focus(); inp.style.borderColor = '#c46a6a';
     setTimeout(() => { inp.style.borderColor = ''; }, 1200);
     return;
   }
-
-  const entry = { id: editId || (Date.now().toString(36) + Math.random().toString(36).slice(2)),
-    date, type: currentType, km, time, notes };
-
+  const entry = { id: editId || (Date.now().toString(36) + Math.random().toString(36).slice(2)), date, type: currentType, km, time, notes };
   if (editId) {
     const idx = activities.findIndex(a => a.id === editId);
     if (idx >= 0) activities[idx] = entry;
@@ -444,7 +581,6 @@ function saveActivity() {
   cancelForm();
   render();
 }
-
 function deleteActivity(id) {
   if (!confirm('Delete this activity?')) return;
   activities = activities.filter(a => a.id !== id);
@@ -452,21 +588,176 @@ function deleteActivity(id) {
   render();
 }
 
-// ── Render ─────────────────────────────────────────────────────────────────
+// ── Chart primitives ───────────────────────────────────────────────────────
+function lineChart(points, color) {
+  if (points.length < 2) return '<div class="chart-empty">Not enough data — need at least 2 sessions with both distance and duration.</div>';
+  const W=560, H=158, PL=46, PR=16, PT=12, PB=32;
+  const pw=W-PL-PR, ph=H-PT-PB;
+  const ys = points.map(p=>p.y);
+  const lo = Math.min(...ys), hi = Math.max(...ys);
+  const pad = (hi-lo)*0.12 || 0.5;
+  const ylo=lo-pad, yhi=hi+pad, yr=yhi-ylo;
+  const mx = i => PL + i/(points.length-1)*pw;
+  const my = y => PT + (1-(y-ylo)/yr)*ph;
+  const gid = 'g'+Math.random().toString(36).slice(2,8);
+
+  const ticks = [0,.33,.67,1].map(t=>{
+    const vy=yhi-t*yr, sy=PT+t*ph;
+    const lbl = points[0].isSpeed ? vy.toFixed(1) : formatPace(vy);
+    return `<line x1="${PL}" y1="${sy}" x2="${PL+pw}" y2="${sy}" stroke="rgba(232,223,208,.07)" stroke-width="1"/>
+<text x="${PL-5}" y="${sy+3.5}" text-anchor="end" font-size="9" fill="rgba(154,138,118,.9)" font-family="DM Serif Text,Georgia,serif">${lbl}</text>`;
+  });
+
+  const n=points.length, step=Math.max(1,Math.ceil(n/7));
+  const xlbls = points.reduce((a,p,i)=>{
+    if(i%step===0||i===n-1) a.push(`<text x="${mx(i)}" y="${PT+ph+20}" text-anchor="middle" font-size="9" fill="rgba(154,138,118,.9)" font-family="DM Serif Text,Georgia,serif">${p.label}</text>`);
+    return a;
+  },[]);
+
+  const lpts = points.map((p,i)=>`${mx(i)},${my(p.y)}`).join(' ');
+  const apts = `${mx(0)},${PT+ph} ${lpts} ${mx(n-1)},${PT+ph}`;
+
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;min-height:110px">
+<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%" stop-color="${color}" stop-opacity=".25"/>
+  <stop offset="100%" stop-color="${color}" stop-opacity=".02"/>
+</linearGradient></defs>
+${ticks.join('')}
+<polygon points="${apts}" fill="url(#${gid})"/>
+<polyline points="${lpts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+${points.map((p,i)=>`<circle cx="${mx(i)}" cy="${my(p.y)}" r="2.8" fill="${color}" opacity=".9"><title>${p.tip}</title></circle>`).join('')}
+${xlbls.join('')}
+<line x1="${PL}" y1="${PT}" x2="${PL}" y2="${PT+ph}" stroke="rgba(232,223,208,.1)" stroke-width="1"/>
+<line x1="${PL}" y1="${PT+ph}" x2="${PL+pw}" y2="${PT+ph}" stroke="rgba(232,223,208,.1)" stroke-width="1"/>
+</svg>`;
+}
+
+function barChart(bars, color) {
+  if (bars.length === 0) return '<div class="chart-empty">No data yet.</div>';
+  const W=560, H=138, PL=36, PR=16, PT=12, PB=28;
+  const pw=W-PL-PR, ph=H-PT-PB;
+  const maxY = Math.max(...bars.map(b=>b.y), 0.1);
+  const n=bars.length, bw=pw/n, gap=Math.min(3,bw*.15), rw=bw-gap*2;
+  const ticks=[0,.5,1].map(t=>{
+    const vy=t*maxY, sy=PT+(1-t)*ph;
+    return `<line x1="${PL}" y1="${sy}" x2="${PL+pw}" y2="${sy}" stroke="rgba(232,223,208,.07)" stroke-width="1"/>
+<text x="${PL-4}" y="${sy+3.5}" text-anchor="end" font-size="9" fill="rgba(154,138,118,.9)" font-family="DM Serif Text,Georgia,serif">${vy.toFixed(1)}</text>`;
+  });
+  const step=Math.max(1,Math.ceil(n/7));
+  const xlbls=bars.reduce((a,b,i)=>{
+    if(i%step===0||i===n-1) a.push(`<text x="${PL+i*bw+bw/2}" y="${PT+ph+17}" text-anchor="middle" font-size="9" fill="rgba(154,138,118,.9)" font-family="DM Serif Text,Georgia,serif">${b.label}</text>`);
+    return a;
+  },[]);
+  const rects=bars.map((b,i)=>{
+    const bh=Math.max(1,b.y/maxY*ph), by=PT+ph-bh;
+    return `<rect x="${PL+i*bw+gap}" y="${by}" width="${rw}" height="${bh}" fill="${color}" opacity=".72" rx="2"><title>${b.tip}</title></rect>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;min-height:95px">
+${ticks.join('')}${rects.join('')}${xlbls.join('')}
+<line x1="${PL}" y1="${PT}" x2="${PL}" y2="${PT+ph}" stroke="rgba(232,223,208,.1)" stroke-width="1"/>
+<line x1="${PL}" y1="${PT+ph}" x2="${PL+pw}" y2="${PT+ph}" stroke="rgba(232,223,208,.1)" stroke-width="1"/>
+</svg>`;
+}
+
+// ── Statistics render ──────────────────────────────────────────────────────
+function renderStatistics() {
+  const weight  = getWeight();
+  const type    = currentStatType;
+  const color   = type === 'run' ? '#7ab87a' : '#c4864a';
+  const isRun   = type === 'run';
+  const subset  = activities.filter(a => a.type === type);
+  const sorted  = subset.slice().sort((a,b) => a.date.localeCompare(b.date));
+
+  const totalKm   = subset.reduce((s,a) => s+(a.km||0), 0);
+  const totalMin  = subset.reduce((s,a) => s+(a.time||0), 0);
+  const totalKcal = subset.reduce((s,a) => s+(kcalFor(a,weight)||0), 0);
+  const avgKm     = subset.length ? totalKm/subset.length : 0;
+
+  const paceData  = sorted.filter(a => a.km>0 && a.time>0);
+  const paces     = paceData.map(a => a.time/a.km);
+  const bestPace  = paces.length ? (isRun ? Math.min(...paces) : Math.max(...paces)) : null;
+  const avgPace   = paces.length ? paces.reduce((s,p)=>s+p,0)/paces.length : null;
+
+  const fmt1 = v => isRun ? formatPace(v)+'/km' : (60/v).toFixed(1)+' km/h';
+
+  document.getElementById('stat-summary').innerHTML = `
+    <div class="summary-card">
+      <div class="summary-val ${type}">${subset.length}</div>
+      <div class="summary-lbl">${isRun ? 'Runs' : 'Walks'}</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-val ${type}">${(Math.round(totalKm*10)/10) || '—'}</div>
+      <div class="summary-lbl">Total KM</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-val ${type}">${avgKm>0 ? Math.round(avgKm*10)/10 : '—'}</div>
+      <div class="summary-lbl">Avg KM</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-val ${type}">${totalMin>=60 ? Math.round(totalMin/60*10)/10+'h' : (totalMin||'—')+(totalMin?'m':'')}</div>
+      <div class="summary-lbl">Total Time</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-val ${type}">${bestPace ? fmt1(bestPace) : '—'}</div>
+      <div class="summary-lbl">${isRun ? 'Best Pace' : 'Best Speed'}</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-val ${type}">${totalKcal>0 ? '~'+totalKcal.toLocaleString() : '—'}</div>
+      <div class="summary-lbl">Total kcal</div>
+    </div>`;
+
+  // Chart 1: Pace / Speed over time
+  document.getElementById('chart1-label').textContent = isRun ? 'Pace Over Time' : 'Speed Over Time';
+  document.getElementById('chart1-sub').textContent   = isRun ? 'min/km · lower is faster' : 'km/h · higher is faster';
+  const pacePoints = paceData.map(a => {
+    const pace  = a.time/a.km;
+    const speed = a.km/a.time*60;
+    const val   = isRun ? pace : speed;
+    return {
+      y: val, isSpeed: !isRun,
+      label: fmtDate(a.date),
+      tip: fmtDate(a.date) + ': ' + (isRun ? formatPace(pace)+'/km' : speed.toFixed(2)+' km/h') + (a.km ? ' · '+a.km+'km' : '')
+    };
+  });
+  document.getElementById('chart-pace').innerHTML = lineChart(pacePoints, color);
+
+  // Chart 2: Distance per session (last 20 with distance)
+  const distData = sorted.filter(a => a.km>0).slice(-20);
+  document.getElementById('chart-distance').innerHTML = distData.length
+    ? barChart(distData.map(a=>({ y:a.km, label:fmtDate(a.date), tip:fmtDate(a.date)+': '+a.km+' km' })), color)
+    : '<div class="chart-empty">No distance data yet.</div>';
+
+  // Chart 3: Monthly distance (last 6 months)
+  const monthMap = {};
+  sorted.filter(a=>a.km>0).forEach(a => {
+    const k = a.date.slice(0,7);
+    monthMap[k] = (monthMap[k]||0) + a.km;
+  });
+  const now = new Date();
+  const monthBars = Array.from({length:6},(_,i)=>{
+    const d = new Date(now.getFullYear(), now.getMonth()-5+i, 1);
+    const k = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    const v = Math.round((monthMap[k]||0)*10)/10;
+    return { y:v, label:fmtMonthKey(k), tip:fmtMonthKey(k)+': '+v+' km' };
+  });
+  document.getElementById('chart-monthly').innerHTML = barChart(monthBars, color);
+}
+
+// ── Main render ────────────────────────────────────────────────────────────
 function render() {
   renderStats();
-  renderList();
+  if (currentTab === 'statistics') renderStatistics();
+  if (currentTab === 'history')    renderList();
 }
 
 function renderStats() {
-  const weight = getWeight();
-  const runs  = activities.filter(a => a.type === 'run');
-  const walks = activities.filter(a => a.type === 'walk');
-  const totalKm = activities.reduce((s, a) => s + (a.km || 0), 0);
-  const runKcal  = runs.reduce((s, a)  => s + (kcalForActivity(a, weight)  || 0), 0);
-  const walkKcal = walks.reduce((s, a) => s + (kcalForActivity(a, weight) || 0), 0);
-  const noWeight = !weight;
-
+  const weight  = getWeight();
+  const runs    = activities.filter(a => a.type === 'run');
+  const walks   = activities.filter(a => a.type === 'walk');
+  const totalKm = activities.reduce((s,a) => s+(a.km||0), 0);
+  const runKcal = runs.reduce((s,a)  => s+(kcalFor(a,weight)||0), 0);
+  const wlkKcal = walks.reduce((s,a) => s+(kcalFor(a,weight)||0), 0);
+  const nw = !weight;
   document.getElementById('stats-row').innerHTML = `
     <div class="stat-card">
       <div class="stat-val">${runs.length}</div>
@@ -477,53 +768,45 @@ function renderStats() {
       <div class="stat-lbl">Walks</div>
     </div>
     <div class="stat-card">
-      <div class="stat-val">${Math.round(totalKm * 10) / 10}</div>
+      <div class="stat-val">${Math.round(totalKm*10)/10}</div>
       <div class="stat-lbl">Total KM</div>
     </div>
     <div class="stat-card">
-      <div class="stat-val" style="color:var(--green)">${runKcal > 0 ? '~' + runKcal.toLocaleString() : '—'}</div>
-      <div class="stat-lbl">Run kcal${noWeight ? ' *' : ''}</div>
+      <div class="stat-val" style="color:var(--green)">${runKcal>0?'~'+runKcal.toLocaleString():'—'}</div>
+      <div class="stat-lbl">Run kcal${nw?' *':''}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-val" style="color:var(--accent)">${walkKcal > 0 ? '~' + walkKcal.toLocaleString() : '—'}</div>
-      <div class="stat-lbl">Walk kcal${noWeight ? ' *' : ''}</div>
-    </div>
-  `;
+      <div class="stat-val" style="color:var(--accent)">${wlkKcal>0?'~'+wlkKcal.toLocaleString():'—'}</div>
+      <div class="stat-lbl">Walk kcal${nw?' *':''}</div>
+    </div>`;
 }
 
 function renderList() {
-  const container = document.getElementById('activity-list');
   const weight = getWeight();
-  let filtered = activities.slice();
-  if (currentFilter !== 'all') filtered = filtered.filter(a => a.type === currentFilter);
-  const sorted = filtered.sort((a, b) => b.date.localeCompare(a.date));
-
-  if (sorted.length === 0) {
-    const msg = currentFilter === 'run' ? 'No runs logged yet.'
-      : currentFilter === 'walk' ? 'No walks logged yet.'
+  let list = activities.slice();
+  if (currentFilter !== 'all') list = list.filter(a => a.type === currentFilter);
+  list.sort((a,b) => b.date.localeCompare(a.date));
+  const el = document.getElementById('activity-list');
+  if (list.length === 0) {
+    const msg = currentFilter==='run'?'No runs logged yet.'
+      : currentFilter==='walk'?'No walks logged yet.'
       : 'No activities logged yet — tap + Log Activity to add one.';
-    container.innerHTML = `<div class="empty-state">${msg}</div>`;
+    el.innerHTML = `<div class="empty-state">${msg}</div>`;
     return;
   }
-
-  container.innerHTML = sorted.map(a => {
-    const kcal = kcalForActivity(a, weight);
-    const meta = [
-      a.km   ? a.km + ' km' : null,
-      a.time ? a.time + ' min' : null,
-    ].filter(Boolean).join(' · ');
-    const typeLabel = a.type === 'run' ? 'Run' : 'Walk';
-
+  el.innerHTML = list.map(a => {
+    const kcal = kcalFor(a, weight);
+    const meta = [a.km?a.km+' km':null, a.time?a.time+' min':null].filter(Boolean).join(' · ');
     return `<div class="activity-entry">
       <div class="entry-date">${fmtDate(a.date)}</div>
       <div class="entry-body">
-        <span class="entry-type ${a.type}">${typeLabel}</span>
-        ${meta  ? `<div class="entry-meta">${meta}</div>` : ''}
-        ${kcal  ? `<div class="entry-kcal">~${kcal.toLocaleString()} kcal</div>` : ''}
-        ${a.notes ? `<div class="entry-notes">${a.notes}</div>` : ''}
+        <span class="entry-type ${a.type}">${a.type==='run'?'Run':'Walk'}</span>
+        ${meta  ?`<div class="entry-meta">${meta}</div>`:''}
+        ${kcal  ?`<div class="entry-kcal">~${kcal.toLocaleString()} kcal</div>`:''}
+        ${a.notes?`<div class="entry-notes">${a.notes}</div>`:''}
       </div>
       <div class="entry-actions">
-        <button class="btn-icon" onclick="openForm('${a.id}')" title="Edit">✎</button>
+        <button class="btn-icon"     onclick="openForm('${a.id}')" title="Edit">✎</button>
         <button class="btn-icon del" onclick="deleteActivity('${a.id}')" title="Delete">✕</button>
       </div>
     </div>`;
@@ -532,98 +815,40 @@ function renderList() {
 
 // ── Migration ──────────────────────────────────────────────────────────────
 function checkMigrationAvailable() {
-  const existingIds = new Set(activities.map(a => a.id));
-  const candidates = collectOldEntries();
-  const novel = candidates.filter(e => !existingIds.has(e.id));
-  if (novel.length > 0) {
+  const ids = new Set(activities.map(a=>a.id));
+  if (collectOldEntries().some(e=>!ids.has(e.id))) {
     const banner = document.getElementById('migrate-banner');
     banner.style.display = 'flex';
-    banner.querySelector('span').textContent =
-      `${novel.length} old activit${novel.length === 1 ? 'y' : 'ies'} found in browser storage.`;
   }
 }
-
 function collectOldEntries() {
-  const out = [];
-  // Old walk tracker: walk_tracker_v1 — array of { id, date, km, time, notes }
+  const out=[];
   try {
-    const raw = localStorage.getItem('walk_tracker_v1');
-    if (raw) {
-      const walks = JSON.parse(raw);
-      if (Array.isArray(walks)) {
-        walks.forEach(w => {
-          if (w.date) out.push({
-            id: w.id || (Date.now().toString(36) + Math.random().toString(36).slice(2)),
-            date: w.date, type: 'walk', km: w.km || null, time: w.time || null, notes: w.notes || null
-          });
-        });
-      }
-    }
-  } catch (e) {}
-  // Even older marathon tracker: c2hm_v1 — { days: {date: {status,km,time}}, walks: [...] }
+    const ws=JSON.parse(localStorage.getItem('walk_tracker_v1'));
+    if(Array.isArray(ws)) ws.forEach(w=>{if(w.date)out.push({id:w.id||(Date.now().toString(36)+Math.random().toString(36).slice(2)),date:w.date,type:'walk',km:w.km||null,time:w.time||null,notes:w.notes||null});});
+  } catch(e){}
   try {
-    const raw = localStorage.getItem('c2hm_v1');
-    if (raw) {
-      const data = JSON.parse(raw);
-      // Primary training sessions stored in data.days (date-keyed object)
-      if (data && data.days && typeof data.days === 'object') {
-        Object.entries(data.days).forEach(([date, session]) => {
-          if (session.status === 'completed') {
-            out.push({
-              id: `c2hm_${date}`,
-              date,
-              type: 'run',
-              km: session.km || null,
-              time: session.time || null,
-              notes: session.notes || null
-            });
-          }
-        });
-      }
-      if (data && Array.isArray(data.walks)) {
-        data.walks.forEach(w => {
-          if (w.date) out.push({
-            id: w.id || (Date.now().toString(36) + Math.random().toString(36).slice(2)),
-            date: w.date, type: 'walk', km: w.km || null, time: w.time || null, notes: w.notes || null
-          });
-        });
-      }
-      if (data && Array.isArray(data.runs)) {
-        data.runs.forEach(r => {
-          if (r.date) out.push({
-            id: r.id || (Date.now().toString(36) + Math.random().toString(36).slice(2)),
-            date: r.date, type: 'run', km: r.km || null, time: r.time || null, notes: r.notes || null
-          });
-        });
-      }
-    }
-  } catch (e) {}
+    const data=JSON.parse(localStorage.getItem('c2hm_v1'));
+    if(data?.days) Object.entries(data.days).forEach(([date,s])=>{if(s.status==='completed')out.push({id:'c2hm_'+date,date,type:'run',km:s.km||null,time:s.time||null,notes:s.notes||null});});
+    if(Array.isArray(data?.walks)) data.walks.forEach(w=>{if(w.date)out.push({id:w.id||(Date.now().toString(36)+Math.random().toString(36).slice(2)),date:w.date,type:'walk',km:w.km||null,time:w.time||null,notes:w.notes||null});});
+    if(Array.isArray(data?.runs))  data.runs.forEach(r=>{if(r.date)out.push({id:r.id||(Date.now().toString(36)+Math.random().toString(36).slice(2)),date:r.date,type:'run',km:r.km||null,time:r.time||null,notes:r.notes||null});});
+  } catch(e){}
   return out;
 }
-
 function runMigration() {
-  const existingIds = new Set(activities.map(a => a.id));
-  const candidates = collectOldEntries();
-  const novel = candidates.filter(e => !existingIds.has(e.id));
-  if (novel.length === 0) {
-    dismissMigration();
-    return;
-  }
-  activities = activities.concat(novel);
+  const ids=new Set(activities.map(a=>a.id));
+  const novel=collectOldEntries().filter(e=>!ids.has(e.id));
+  if(!novel.length){dismissMigration();return;}
+  activities=activities.concat(novel);
   saveActivities(activities);
-  dismissMigration();
-  render();
-  const banner = document.getElementById('migrate-banner');
-  banner.style.display = 'flex';
-  banner.querySelector('span').textContent =
-    `Imported ${novel.length} activit${novel.length === 1 ? 'y' : 'ies'} successfully.`;
-  banner.querySelector('.btn-primary').style.display = 'none';
-  setTimeout(dismissMigration, 3000);
+  dismissMigration(); render();
+  const b=document.getElementById('migrate-banner');
+  b.style.display='flex';
+  b.querySelector('span').textContent=`Imported ${novel.length} activit${novel.length===1?'y':'ies'} successfully.`;
+  b.querySelector('.btn-primary').style.display='none';
+  setTimeout(dismissMigration,3000);
 }
-
-function dismissMigration() {
-  document.getElementById('migrate-banner').style.display = 'none';
-}
+function dismissMigration() { document.getElementById('migrate-banner').style.display='none'; }
 
 render();
 checkMigrationAvailable();
