@@ -383,7 +383,7 @@ body::before {
 .hm-range-btn:last-child { border-right: none; }
 .hm-range-btn.active { background: var(--ab); color: var(--accent); font-weight: 700; }
 .hm-range-btn:hover:not(.active) { color: var(--text); background: rgba(232,223,208,0.04); }
-#activity-heatmap { overflow-x: auto; padding-bottom: 4px; }
+#activity-heatmap { }
 .hm-cell { transition: opacity 0.1s; }
 .hm-cell:hover { opacity: 0.65; cursor: default; }
 #hm-tooltip {
@@ -1010,7 +1010,7 @@ function renderHeatmap() {
   }
 
   const cols = WEEKS * (CELL + GAP) - GAP;
-  let html = '<div style="display:inline-flex;flex-direction:column;gap:0;">';
+  let html = '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;padding-bottom:4px;"><div style="display:inline-flex;flex-direction:column;gap:0;">';
 
   // Month row
   html += `<div style="display:flex;margin-left:${DAY_LBL_W + GAP}px;height:${MONTH_H}px;position:relative;width:${cols}px;">`;
@@ -1046,7 +1046,7 @@ function renderHeatmap() {
     });
     html += '</div>';
   });
-  html += '</div></div></div>';
+  html += '</div></div></div></div>';
 
   // Legend
   html += '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;">';

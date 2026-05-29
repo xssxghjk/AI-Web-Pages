@@ -510,43 +510,43 @@ body::before {
 .hm-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: 16px 18px;
   margin-bottom: 20px;
 }
 .hm-card-header {
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .hm-card-title {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 13px; font-weight: 700; font-style: italic; color: var(--text);
+  font-size: 14px; font-weight: 700; color: var(--text);
 }
 .hm-range-toggle {
   display: flex;
-  border: 1px solid var(--bord2);
-  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 6px; overflow: hidden;
 }
 .hm-range-btn {
-  padding: 2px 9px;
+  padding: 3px 10px;
   background: none; border: none; cursor: pointer;
   font-family: 'DM Serif Text', Georgia, serif;
   font-size: 11px; color: var(--text2);
-  border-right: 1px solid var(--bord2);
+  border-right: 1px solid var(--border);
   transition: all 0.15s; line-height: 1.6;
 }
 .hm-range-btn:last-child { border-right: none; }
-.hm-range-btn.active { background: rgba(196,134,74,0.12); color: var(--accent); font-weight: 700; }
+.hm-range-btn.active { background: rgba(196,134,74,0.10); color: var(--accent); font-weight: 700; }
 .hm-range-btn:hover:not(.active) { color: var(--text); background: rgba(232,223,208,0.04); }
-#workout-heatmap { overflow-x: auto; padding-bottom: 4px; }
+#workout-heatmap { }
 .hm-cell { transition: opacity 0.1s; }
 .hm-cell:hover { opacity: 0.65; cursor: default; }
 #hm-tooltip {
   position: fixed; pointer-events: none; z-index: 9999; display: none;
   background: var(--surf2); border: 1px solid var(--bord2);
   color: var(--text); font-family: 'DM Serif Text', Georgia, serif;
-  font-size: 11px; padding: 4px 9px;
+  font-size: 11px; padding: 4px 9px; border-radius: 4px;
   white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
 
@@ -1221,7 +1221,7 @@ function renderHeatmap() {
   }
 
   const cols = WEEKS * (CELL + GAP) - GAP;
-  let html = '<div style="display:inline-flex;flex-direction:column;gap:0;">';
+  let html = '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;padding-bottom:4px;"><div style="display:inline-flex;flex-direction:column;gap:0;">';
 
   html += `<div style="display:flex;margin-left:${DAY_LBL_W + GAP}px;height:${MONTH_H}px;position:relative;width:${cols}px;">`;
   monthPos.forEach(mp => {
@@ -1260,7 +1260,7 @@ function renderHeatmap() {
     });
     html += '</div>';
   });
-  html += '</div></div></div>';
+  html += '</div></div></div></div>';
 
   html += '<div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">';
   html += '<span style="font-size:10px;color:var(--text2);">Done</span>';
