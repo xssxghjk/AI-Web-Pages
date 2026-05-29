@@ -677,6 +677,36 @@
     }
     .pending-todos-link:hover { color: var(--text2); border-bottom-color: var(--text2); }
 
+    /* ── HEATMAP ── */
+    .heatmap-section {
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+    }
+    .heatmap-inner { max-width: 1100px; margin: 0 auto; }
+    #activity-heatmap { overflow-x: auto; padding-bottom: 0.5rem; }
+    .hm-cell { transition: opacity 0.1s; }
+    .hm-cell:hover { opacity: 0.65; }
+    #hm-tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      display: none;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.57rem;
+      padding: 0.28rem 0.55rem;
+      border-radius: 2px;
+      white-space: nowrap;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+      letter-spacing: 0.02em;
+    }
+
+    @media (max-width: 640px) {
+      .heatmap-section { padding: 1.1rem 1rem; }
+    }
+
     /* ── FOOTER ── */
     footer {
       max-width: 1100px;
@@ -757,6 +787,13 @@
     </div>
   </section>
 
+  <section class="heatmap-section">
+    <div class="heatmap-inner">
+      <div class="section-head">Activity — Past Year</div>
+      <div id="activity-heatmap"></div>
+    </div>
+  </section>
+
   <main class="main">
     <div class="content-grid">
       <div class="section-head">Data</div>
@@ -779,6 +816,8 @@
     <span id="page-version"></span>
     <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">GitHub</a>
   </footer>
+
+  <div id="hm-tooltip"></div>
 
   <script src="../trips/trips.js"></script>
   <script>
@@ -1495,6 +1534,164 @@
         mkCard('Weight',
           weightStr, weightSub, weightCls, null),
       ].join('');
+    }
+
+    // ── Activity heatmap ─────────────────────────────────────────────────────
+    function renderActivityHeatmap(data) {
+      var el = document.getElementById('activity-heatmap');
+      if (!el) return;
+
+      // Build day map: iso → { runKm, walkKm }
+      var dayMap = {};
+      function ensureDay(iso) { if (!dayMap[iso]) dayMap[iso] = { runKm: 0, walkKm: 0 }; }
+
+      var mDays = (data.marathon && data.marathon.days) || {};
+      Object.keys(mDays).forEach(function(iso) {
+        var d = mDays[iso]; if (!d) return;
+        var eff = d.completedDate || iso;
+        if (d.status === 'completed' || d.status === 'modified') {
+          ensureDay(eff);
+          dayMap[eff].runKm += parseFloat(d.km || 0);
+        }
+      });
+      (data.unifiedActivities || []).forEach(function(a) {
+        if (!a || !a.date) return;
+        ensureDay(a.date);
+        if (a.type === 'run')  dayMap[a.date].runKm  += parseFloat(a.km || 0);
+        if (a.type === 'walk') dayMap[a.date].walkKm += parseFloat(a.km || 0);
+      });
+      (data.walks || []).forEach(function(w) {
+        if (!w || !w.date) return;
+        ensureDay(w.date);
+        dayMap[w.date].walkKm += parseFloat(w.km || 0);
+      });
+
+      // Grid: 53 weeks, Mon–Sun rows, ending Sunday of current week
+      var today = new Date(); today.setHours(0,0,0,0);
+      var todayDow = (today.getDay() + 6) % 7; // Mon=0, Sun=6
+      var thisMonday = new Date(today); thisMonday.setDate(today.getDate() - todayDow);
+      var startDate = new Date(thisMonday); startDate.setDate(thisMonday.getDate() - 52 * 7);
+      var todayIso = isoDate(today);
+
+      var WEEKS = 53, CELL = 11, GAP = 2, DAY_LBL_W = 24, MONTH_H = 16;
+      var MON_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var DOW_LABELS = ['Mon','','Wed','','Fri','','Sun'];
+
+      var weeks = [];
+      var cur = new Date(startDate);
+      for (var wi = 0; wi < WEEKS; wi++) {
+        var week = [];
+        for (var di = 0; di < 7; di++) {
+          var iso = isoDate(cur);
+          week.push({ iso: iso, future: cur > today, today: iso === todayIso, data: dayMap[iso] || null });
+          cur.setDate(cur.getDate() + 1);
+        }
+        weeks.push(week);
+      }
+
+      // Month labels
+      var lastMon = -1, monthPos = [];
+      weeks.forEach(function(wk, col) {
+        var m = parseInt(wk[0].iso.substring(5, 7), 10);
+        if (m !== lastMon && !wk[0].future) { monthPos.push({ col: col, m: m - 1 }); lastMon = m; }
+      });
+
+      function cellBg(d, isToday) {
+        if (!d) return isToday ? '' : '';
+        var rKm = d.runKm || 0, wKm = d.walkKm || 0, total = rKm + wKm;
+        if (total === 0) return '';
+        var a = total < 2 ? 0.28 : total < 5 ? 0.55 : total < 10 ? 0.8 : 1.0;
+        return rKm >= wKm
+          ? 'rgba(196,134,74,' + a + ')'
+          : 'rgba(106,154,106,' + a + ')';
+      }
+
+      var cols = WEEKS * (CELL + GAP) - GAP;
+      var html = '<div style="display:inline-flex;flex-direction:column;gap:0;">';
+
+      // Month row
+      html += '<div style="display:flex;margin-left:' + (DAY_LBL_W + GAP) + 'px;height:' + MONTH_H + 'px;position:relative;width:' + cols + 'px;">';
+      monthPos.forEach(function(mp) {
+        html += '<span style="position:absolute;left:' + (mp.col * (CELL + GAP)) + 'px;top:3px;' +
+          'font-family:\'Space Mono\',monospace;font-size:0.5rem;color:var(--muted2);' +
+          'letter-spacing:0.04em;white-space:nowrap;">' + MON_LABELS[mp.m] + '</span>';
+      });
+      html += '</div>';
+
+      // Rows: day labels + cell grid
+      html += '<div style="display:flex;gap:' + GAP + 'px;">';
+
+      // Day-of-week labels
+      html += '<div style="display:flex;flex-direction:column;gap:' + GAP + 'px;width:' + DAY_LBL_W + 'px;flex-shrink:0;">';
+      DOW_LABELS.forEach(function(lbl) {
+        html += '<div style="height:' + CELL + 'px;font-family:\'Space Mono\',monospace;font-size:0.44rem;' +
+          'color:var(--muted2);display:flex;align-items:center;line-height:1;letter-spacing:0.02em;">' + esc(lbl) + '</div>';
+      });
+      html += '</div>';
+
+      // Week columns
+      html += '<div style="display:flex;gap:' + GAP + 'px;">';
+      weeks.forEach(function(wk) {
+        html += '<div style="display:flex;flex-direction:column;gap:' + GAP + 'px;">';
+        wk.forEach(function(day) {
+          var bg = day.future ? 'transparent' : (cellBg(day.data, day.today) || '#26211a');
+          var boxShadow = day.today ? ';box-shadow:0 0 0 1px var(--accent)' : '';
+          var tip = '';
+          if (!day.future) {
+            var rKm = day.data ? Math.round((day.data.runKm || 0) * 10) / 10 : 0;
+            var wKm = day.data ? Math.round((day.data.walkKm || 0) * 10) / 10 : 0;
+            var parts = [];
+            if (rKm > 0) parts.push(rKm + 'km run');
+            if (wKm > 0) parts.push(wKm + 'km walk');
+            tip = ' data-tip="' + day.iso + (parts.length ? ': ' + parts.join(', ') : '') + '"';
+          }
+          html += '<div class="hm-cell" style="width:' + CELL + 'px;height:' + CELL + 'px;' +
+            'border-radius:2px;background:' + bg + boxShadow + ';flex-shrink:0;"' + tip + '></div>';
+        });
+        html += '</div>';
+      });
+      html += '</div></div></div>';
+
+      // Legend
+      html += '<div style="display:flex;align-items:center;gap:0.55rem;margin-top:0.65rem;flex-wrap:wrap;">';
+      html += '<span style="font-family:\'Space Mono\',monospace;font-size:0.47rem;color:var(--muted2);letter-spacing:0.06em;">Less</span>';
+      [['run','196,134,74'],['walk','106,154,106']].forEach(function(pair) {
+        html += '<div style="display:flex;gap:2px;align-items:center;">';
+        html += '<span style="font-family:\'Space Mono\',monospace;font-size:0.44rem;color:var(--muted2);margin-right:2px;">' + pair[0] + '</span>';
+        [0.28,0.55,0.8,1.0].forEach(function(a) {
+          html += '<div style="width:10px;height:10px;border-radius:1px;background:rgba(' + pair[1] + ',' + a + ');"></div>';
+        });
+        html += '</div>';
+      });
+      html += '<span style="font-family:\'Space Mono\',monospace;font-size:0.47rem;color:var(--muted2);letter-spacing:0.06em;">More</span>';
+      html += '</div>';
+
+      el.innerHTML = html;
+
+      // Custom tooltip
+      var tooltip = document.getElementById('hm-tooltip');
+      if (!tooltip) return;
+      el.addEventListener('mouseover', function(e) {
+        var t = e.target;
+        while (t && t !== el) {
+          if (t.dataset && t.dataset.tip) {
+            tooltip.textContent = t.dataset.tip;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (e.clientX + 14) + 'px';
+            tooltip.style.top  = (e.clientY - 34) + 'px';
+            return;
+          }
+          t = t.parentElement;
+        }
+        tooltip.style.display = 'none';
+      });
+      el.addEventListener('mousemove', function(e) {
+        if (tooltip.style.display !== 'none') {
+          tooltip.style.left = (e.clientX + 14) + 'px';
+          tooltip.style.top  = (e.clientY - 34) + 'px';
+        }
+      });
+      el.addEventListener('mouseleave', function() { tooltip.style.display = 'none'; });
     }
 
     // ── Day focus & intention ────────────────────────────────────────────────
@@ -2294,6 +2491,7 @@
     var appData = loadAll();
     switchTab('day');
     updateNav();
+    renderActivityHeatmap(appData);
 
     // ── Journal todo toggle (called from inline onchange) ────────────────────
     window.profileToggleTodo = function(id, checked) {
@@ -2400,6 +2598,7 @@
           setStatus('Imported ' + count + ' key' + (count !== 1 ? 's' : '') + '. Refreshing…', 'ok');
           appData = loadAll();
           renderCurrentStats();
+          renderActivityHeatmap(appData);
         };
         reader.readAsText(file);
       });
