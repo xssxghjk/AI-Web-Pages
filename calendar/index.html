@@ -240,6 +240,7 @@
     .cal-trip-bar.s-planning  { background: var(--planning-bg);  color: var(--planning);  border: 1px solid var(--planning-border); }
     .cal-trip-bar.s-fab-event { background: var(--fab-event-bg); color: var(--fab-event); border: 1px solid var(--fab-event-border); }
     .cal-trip-bar.s-local-event { background: var(--local-event-bg); color: var(--local-event); border: 1px solid var(--local-event-border); }
+    .cal-trip-bar.s-todo { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(196,134,74,0.35); }
 
     /* ── LEGEND ── */
     .cal-legend {
@@ -727,12 +728,13 @@
       });
     } catch(e) {}
 
-    // Build set of deadline dates from incomplete todos
-    const todoDueDates = new Set();
+    // Build pending todos with deadlines for calendar display
+    let pendingTodos = [];
     try {
       const _todos = JSON.parse(localStorage.getItem('todos_v1') || '[]');
-      _todos.forEach(t => { if (!t.completed && t.deadline) todoDueDates.add(t.deadline); });
+      pendingTodos = _todos.filter(t => !t.completed && t.deadline);
     } catch(e) {}
+    const todoDueDates = new Set(pendingTodos.map(t => t.deadline));
 
     function buildGridHTML(year, month) {
       const firstDay = new Date(year, month, 1);
@@ -762,7 +764,19 @@
         displayDates: ev.startDate,
       }));
 
-      const allBarsThisMonth = [...tripsThisMonth, ...localEventsThisMonth];
+      const todosThisMonth = pendingTodos.filter(t => {
+        const d = localDate(t.deadline);
+        return d >= firstDay && d <= lastDay;
+      }).map(t => ({
+        id: t.id,
+        title: t.text,
+        startDate: t.deadline,
+        endDate: t.deadline,
+        status: 'todo',
+        displayDates: t.deadline,
+        isTodo: true,
+      }));
+      const allBarsThisMonth = [...tripsThisMonth, ...localEventsThisMonth, ...todosThisMonth];
 
       const totalWeeks = Math.ceil((startOffset + lastDay.getDate()) / 7);
       let html = `<div class="cal-dow-row">${DOW.map(d => `<div class="cal-dow">${d}</div>`).join('')}</div>`;
@@ -815,11 +829,9 @@
             String(date.getMonth() + 1).padStart(2, '0') + '-' +
             String(date.getDate()).padStart(2, '0');
           const hasRun = marathonRunDates.has(isoKey);
-          const hasTodo = todoDueDates.has(isoKey);
           return `<div class="cal-day${isToday ? ' today' : ''}${hasTrip ? ' has-trip' : ''}" data-iso="${isoKey}" style="height:${cellH}px">` +
             `<div class="cal-day-num">${date.getDate()}</div>` +
             (hasRun ? '<div class="cal-run-dot"></div>' : '') +
-            (hasTodo ? '<div class="cal-todo-dot" title="To-do deadline"></div>' : '') +
             `</div>`;
         }).join('');
 
@@ -832,6 +844,10 @@
           const titleAttr = `${esc(trip.title)} · ${esc(trip.displayDates)}`;
           if (trip.isLocal) {
             return `<button class="${classes}" data-local-event-id="${esc(trip.id)}" title="${esc(trip.title)}"` +
+              ` style="${styleAttr}"><span class="bar-label">${esc(trip.title)}</span></button>`;
+          }
+          if (trip.isTodo) {
+            return `<button class="${classes}" data-todo-id="${esc(trip.id)}" title="${esc(trip.title)}"` +
               ` style="${styleAttr}"><span class="bar-label">${esc(trip.title)}</span></button>`;
           }
           if (trip.status === 'fab-event') {
@@ -858,7 +874,7 @@
       if (tripStatus) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-${esc(tripStatus)}"></div><span>Trips</span></div>`);
       if (hasFabEvent) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-fab-event"></div><span>FaB Events</span></div>`);
       if (localEvents.length > 0) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-local-event"></div><span>My Events</span></div>`);
-      if (todoDueDates.size > 0) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-todo"></div><span>To-Do Deadlines</span></div>`);
+      if (todoDueDates.size > 0) items.push(`<div class="cal-legend-item"><div class="cal-legend-dot s-todo"></div><span>To-Dos</span></div>`);
       legend.innerHTML = items.join('');
     }
 
@@ -1057,6 +1073,41 @@
 
     function closeFabPopup() { popup.classList.remove('open'); }
 
+    function openTodoPopup(btn) {
+      const todo = pendingTodos.find(t => t.id === btn.dataset.todoId);
+      if (!todo) return;
+      const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const [dy, dm, dd] = todo.deadline.split('-').map(Number);
+      const deadlineDate = new Date(dy, dm - 1, dd);
+      const diffDays = Math.round((deadlineDate - today) / 86400000);
+      let dateInfo;
+      if (diffDays < 0)       dateInfo = MONTHS[dm-1] + ' ' + dd + (dy !== today.getFullYear() ? ' ' + dy : '') + ' — overdue';
+      else if (diffDays === 0) dateInfo = 'Due today';
+      else if (diffDays === 1) dateInfo = 'Due tomorrow';
+      else                     dateInfo = 'Due ' + MONTHS[dm-1] + ' ' + dd + (dy !== today.getFullYear() ? ' ' + dy : '');
+      popupTitle.textContent = todo.text;
+      popupDates.textContent = dateInfo;
+      popupActions.innerHTML = '';
+      const link = document.createElement('a');
+      link.className = 'fab-popup-btn';
+      link.href = '../todos/';
+      link.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M4 4h4M4 6.5h4M4 9h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> View To-Dos';
+      popupActions.appendChild(link);
+      const rect = btn.getBoundingClientRect();
+      const pw = popup.offsetWidth || 240;
+      const ph = popup.offsetHeight || 100;
+      const margin = 6;
+      let left = rect.left;
+      let top  = rect.bottom + margin;
+      if (left + pw > window.innerWidth - margin) left = window.innerWidth - pw - margin;
+      if (left < margin) left = margin;
+      if (top + ph > window.innerHeight - margin) top = rect.top - ph - margin;
+      popup.style.left = left + 'px';
+      popup.style.top  = top  + 'px';
+      popup.style.transformOrigin = (top > rect.bottom) ? 'top left' : 'bottom left';
+      popup.classList.add('open');
+    }
+
     // Event delegation: clicks on any calendar bar (FAB events and regular trips)
     document.addEventListener('click', e => {
       const trigger = e.target.closest('[data-event-id].cal-trip-bar');
@@ -1071,6 +1122,16 @@
       }
       // Click outside popup closes it
       if (popup.classList.contains('open') && !popup.contains(e.target)) { closeFabPopup(); popup._activeBtn = null; }
+
+      // Todo bar click → show todo details popup
+      const todoTrigger = e.target.closest('[data-todo-id]');
+      if (todoTrigger) {
+        e.stopPropagation();
+        if (popup.classList.contains('open') && popup._activeBtn === todoTrigger) { closeFabPopup(); popup._activeBtn = null; return; }
+        popup._activeBtn = todoTrigger;
+        openTodoPopup(todoTrigger);
+        return;
+      }
 
       // Local event bar click → open edit modal
       const localTrigger = e.target.closest('[data-local-event-id]');

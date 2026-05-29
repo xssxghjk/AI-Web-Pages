@@ -616,6 +616,67 @@
     .storage-status.ok  { color: var(--green); }
     .storage-status.err { color: #c46a6a; }
 
+    /* ── PENDING TODOS ── */
+    .pending-todos-section {
+      margin-top: 1.4rem;
+      max-width: 720px;
+    }
+    .pending-todos-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-top: 0.85rem;
+      margin-bottom: 0.75rem;
+    }
+    .pending-todo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      transition: border-color 0.15s;
+    }
+    .pending-todo-item:hover { border-color: var(--border2); }
+    .pending-todo-item--overdue { border-left: 2px solid #c86060; }
+    .pending-todo-item--due-soon { border-left: 2px solid var(--accent); }
+    .pending-todo-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 1px;
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+    .pending-todo-dot--future  { background: var(--muted2); }
+    .pending-todo-dot--due-soon { background: var(--accent); }
+    .pending-todo-dot--overdue  { background: #c86060; }
+    .pending-todo-body { flex: 1; min-width: 0; }
+    .pending-todo-text {
+      font-size: 0.82rem;
+      color: var(--text);
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .pending-todo-deadline {
+      font-size: 0.64rem;
+      font-style: italic;
+      margin-top: 0.1rem;
+    }
+    .pending-todo-deadline--future   { color: var(--muted2); }
+    .pending-todo-deadline--due-soon { color: var(--accent); }
+    .pending-todo-deadline--overdue  { color: #c86060; }
+    .pending-todos-link {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-style: italic;
+      color: var(--muted);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(122,110,96,0.3);
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .pending-todos-link:hover { color: var(--text2); border-bottom-color: var(--text2); }
+
     /* ── FOOTER ── */
     footer {
       max-width: 1100px;
@@ -692,6 +753,7 @@
       <div class="stats-grid" id="stats-grid">
         <div class="stat-card"><div class="stat-label">Loading…</div><div class="stat-value">—</div></div>
       </div>
+      <div id="pending-todos-section" style="display:none"></div>
     </div>
   </section>
 
@@ -2114,6 +2176,65 @@
       document.getElementById('export-label').textContent = TAB_LABELS[tab] || 'Export';
     }
 
+    function renderPendingTodos() {
+      var el = document.getElementById('pending-todos-section');
+      if (!el) return;
+      if (currentTab !== 'day') { el.style.display = 'none'; return; }
+
+      var todos;
+      try { todos = JSON.parse(localStorage.getItem('todos_v1') || '[]'); } catch(e) { todos = []; }
+      var pending = todos.filter(function(t) { return !t.completed && t.deadline; });
+      if (!pending.length) { el.style.display = 'none'; return; }
+
+      var todayStr = todayIso();
+      pending.sort(function(a, b) {
+        var aOver = a.deadline < todayStr ? 0 : 1;
+        var bOver = b.deadline < todayStr ? 0 : 1;
+        if (aOver !== bOver) return aOver - bOver;
+        return a.deadline.localeCompare(b.deadline);
+      });
+
+      var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var thisYear = new Date().getFullYear();
+
+      function fmtDeadline(iso) {
+        var p = iso.split('-').map(Number);
+        return MONTHS[p[1]-1] + ' ' + p[2] + (p[0] !== thisYear ? ' ' + p[0] : '');
+      }
+
+      function dlCls(iso) {
+        var diff = Math.round((new Date(iso + 'T00:00:00') - new Date(todayStr + 'T00:00:00')) / 86400000);
+        if (diff < 0) return 'overdue';
+        if (diff <= 2) return 'due-soon';
+        return 'future';
+      }
+
+      function dlLabel(iso) {
+        var diff = Math.round((new Date(iso + 'T00:00:00') - new Date(todayStr + 'T00:00:00')) / 86400000);
+        if (diff < 0) return fmtDeadline(iso) + ' — overdue';
+        if (diff === 0) return 'Due today';
+        if (diff === 1) return 'Due tomorrow';
+        return 'Due ' + fmtDeadline(iso);
+      }
+
+      var html = '<div class="section-head">Pending To-Dos</div>' +
+        '<div class="pending-todos-list">';
+      pending.forEach(function(t) {
+        var cls = dlCls(t.deadline);
+        html += '<div class="pending-todo-item pending-todo-item--' + cls + '">' +
+          '<div class="pending-todo-dot pending-todo-dot--' + cls + '"></div>' +
+          '<div class="pending-todo-body">' +
+            '<div class="pending-todo-text">' + esc(t.text) + '</div>' +
+            '<div class="pending-todo-deadline pending-todo-deadline--' + cls + '">' + esc(dlLabel(t.deadline)) + '</div>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div><a href="../todos/" class="pending-todos-link">View all to-dos →</a>';
+
+      el.innerHTML = html;
+      el.style.display = '';
+    }
+
     function renderCurrentStats() {
       var grid = document.getElementById('stats-grid');
       if      (currentTab === 'day')   grid.innerHTML = renderStatsDay(appData, currentOffset);
@@ -2122,6 +2243,7 @@
       else if (currentTab === 'year')  grid.innerHTML = renderStatsYear(appData, currentOffset);
       renderDayFocus();
       renderTodayView();
+      renderPendingTodos();
     }
 
     // ── Export handler ───────────────────────────────────────────────────────
