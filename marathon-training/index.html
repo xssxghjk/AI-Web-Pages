@@ -1006,7 +1006,7 @@ function renderHeatmap() {
     const rKm = d.runKm || 0, wKm = d.walkKm || 0, total = rKm + wKm;
     if (total === 0) return '';
     const a = total < 2 ? 0.28 : total < 5 ? 0.55 : total < 10 ? 0.8 : 1.0;
-    return rKm >= wKm ? `rgba(196,134,74,${a})` : `rgba(122,184,122,${a})`;
+    return rKm >= wKm ? `rgba(122,184,122,${a})` : `rgba(196,134,74,${a})`;
   }
 
   const cols = WEEKS * (CELL + GAP) - GAP;
@@ -1051,7 +1051,7 @@ function renderHeatmap() {
   // Legend
   html += '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;">';
   html += '<span style="font-size:10px;color:var(--text2);">Less</span>';
-  [['run','196,134,74'],['walk','122,184,122']].forEach(([label, rgb]) => {
+  [['run','122,184,122'],['walk','196,134,74']].forEach(([label, rgb]) => {
     html += '<div style="display:flex;gap:2px;align-items:center;">';
     html += `<span style="font-size:10px;color:var(--text2);margin-right:2px;">${label}</span>`;
     [0.28, 0.55, 0.8, 1.0].forEach(a => {
