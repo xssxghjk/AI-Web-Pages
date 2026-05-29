@@ -431,6 +431,7 @@
       drawer.classList.add('open');
       overlay.classList.add('open');
       hamburgerBtn.setAttribute('aria-expanded', 'true');
+      document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
     }
 
@@ -438,6 +439,7 @@
       drawer.classList.remove('open');
       overlay.classList.remove('open');
       hamburgerBtn.setAttribute('aria-expanded', 'false');
+      document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
     }
 
