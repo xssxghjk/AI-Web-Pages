@@ -211,6 +211,26 @@ body::before {
 .stat-type-btn.active[data-type="walk"] { background: rgba(196,134,74,0.15);  color: var(--accent); font-weight: 700; }
 .stat-type-btn:hover:not(.active) { color: var(--text); background: rgba(232,223,208,0.04); }
 
+/* Pace unit switcher */
+.pace-unit-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px; overflow: hidden;
+  align-self: center;
+  margin-left: auto;
+}
+.pace-unit-btn {
+  padding: 3px 9px;
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Serif Text', Georgia, serif;
+  font-size: 10px; color: var(--text2);
+  border-right: 1px solid var(--border);
+  transition: all 0.15s; line-height: 1.5;
+}
+.pace-unit-btn:last-child { border-right: none; }
+.pace-unit-btn.active { background: rgba(122,184,122,0.15); color: var(--green); font-weight: 700; }
+.pace-unit-btn:hover:not(.active) { color: var(--text); background: rgba(232,223,208,0.04); }
+
 /* Summary stat grid */
 .stats-summary {
   display: grid;
@@ -399,6 +419,10 @@ body::before {
       <div class="chart-title">
         <span id="chart1-label">Pace Over Time</span>
         <span class="chart-sub" id="chart1-sub">min/km · lower is faster</span>
+        <div class="pace-unit-toggle" id="pace-unit-toggle">
+          <button class="pace-unit-btn active" data-unit="pace"  onclick="setPaceUnit('pace')">min/km</button>
+          <button class="pace-unit-btn"        data-unit="speed" onclick="setPaceUnit('speed')">km/h</button>
+        </div>
       </div>
       <div class="chart-wrap" id="chart-pace"></div>
     </div>
@@ -517,6 +541,7 @@ let editId = null;
 let currentType = 'run';
 let currentFilter = 'all';
 let currentStatType = 'run';
+let currentPaceUnit = 'pace';
 
 function setType(t) {
   currentType = t;
@@ -530,6 +555,11 @@ function setFilter(f) {
 function setStatType(t) {
   currentStatType = t;
   document.querySelectorAll('.stat-type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === t));
+  renderStatistics();
+}
+function setPaceUnit(u) {
+  currentPaceUnit = u;
+  document.querySelectorAll('.pace-unit-btn').forEach(b => b.classList.toggle('active', b.dataset.unit === u));
   renderStatistics();
 }
 
@@ -707,16 +737,20 @@ function renderStatistics() {
     </div>`;
 
   // Chart 1: Pace / Speed over time
-  document.getElementById('chart1-label').textContent = isRun ? 'Pace Over Time' : 'Speed Over Time';
-  document.getElementById('chart1-sub').textContent   = isRun ? 'min/km · lower is faster' : 'km/h · higher is faster';
+  const paceToggle = document.getElementById('pace-unit-toggle');
+  paceToggle.style.display = isRun ? 'flex' : 'none';
+  document.querySelectorAll('.pace-unit-btn').forEach(b => b.classList.toggle('active', b.dataset.unit === currentPaceUnit));
+  const showSpeed = !isRun || currentPaceUnit === 'speed';
+  document.getElementById('chart1-label').textContent = showSpeed ? 'Speed Over Time' : 'Pace Over Time';
+  document.getElementById('chart1-sub').textContent   = showSpeed ? 'km/h · higher is faster' : 'min/km · lower is faster';
   const pacePoints = paceData.map(a => {
     const pace  = a.time/a.km;
     const speed = a.km/a.time*60;
-    const val   = isRun ? pace : speed;
+    const val   = showSpeed ? speed : pace;
     return {
-      y: val, isSpeed: !isRun,
+      y: val, isSpeed: showSpeed,
       label: fmtDate(a.date),
-      tip: fmtDate(a.date) + ': ' + (isRun ? formatPace(pace)+'/km' : speed.toFixed(2)+' km/h') + (a.km ? ' · '+a.km+'km' : '')
+      tip: fmtDate(a.date) + ': ' + (showSpeed ? speed.toFixed(2)+' km/h' : formatPace(pace)+'/km') + (a.km ? ' · '+a.km+'km' : '')
     };
   });
   document.getElementById('chart-pace').innerHTML = lineChart(pacePoints, color);
