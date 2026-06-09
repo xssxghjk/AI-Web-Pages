@@ -325,6 +325,15 @@
       letter-spacing: -0.01em;
     }
     a.today-event-card .today-event-card-title { color: var(--accent); }
+    .today-event-card-time {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text2);
+      font-style: normal;
+      margin-top: 0.18rem;
+      letter-spacing: 0.02em;
+    }
     .today-event-card-arrow {
       font-size: 0.75rem;
       color: var(--accent);
@@ -1615,23 +1624,31 @@
       try { calLocalEvs = JSON.parse(localStorage.getItem('cal_local_events') || '[]'); } catch(e) {}
       calLocalEvs.forEach(function(ev) {
         if (ev.startDate <= iso && ev.endDate >= iso)
-          todayEvents.push({ title: ev.name, link: null });
+          todayEvents.push({ title: ev.name, link: null, timeFrom: ev.timeFrom || null, timeTo: ev.timeTo || null });
       });
 
       // Render events block
       var eventsEl = document.getElementById('today-events');
       if (eventsEl) {
         if (todayEvents.length) {
+          function fmtEventTime(ev) {
+            if (!ev.timeFrom && !ev.timeTo) return '';
+            if (ev.timeFrom && ev.timeTo) return ev.timeFrom + ' – ' + ev.timeTo;
+            if (ev.timeFrom) return ev.timeFrom;
+            return 'until ' + ev.timeTo;
+          }
           var evHtml = '<div class="today-events-block"><div class="today-events-kicker">Today\'s Events</div>';
           todayEvents.forEach(function(ev) {
+            var timeStr = fmtEventTime(ev);
+            var timeHtml = timeStr ? '<span class="today-event-card-time">' + esc(timeStr) + '</span>' : '';
             if (ev.link) {
               evHtml += '<a class="today-event-card" href="' + esc(ev.link) + '" target="_blank" rel="noopener">' +
-                '<span class="today-event-card-body"><span class="today-event-card-title">' + esc(ev.title) + '</span></span>' +
+                '<span class="today-event-card-body"><span class="today-event-card-title">' + esc(ev.title) + '</span>' + timeHtml + '</span>' +
                 '<span class="today-event-card-arrow">→</span>' +
                 '</a>';
             } else {
               evHtml += '<div class="today-event-card">' +
-                '<span class="today-event-card-body"><span class="today-event-card-title">' + esc(ev.title) + '</span></span>' +
+                '<span class="today-event-card-body"><span class="today-event-card-title">' + esc(ev.title) + '</span>' + timeHtml + '</span>' +
                 '</div>';
             }
           });
