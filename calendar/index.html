@@ -628,9 +628,14 @@
       <div class="dreport-title" id="lev-modal-title">New Event</div>
       <div class="dreport-sub">Name the event and set its date range.</div>
       <input type="text" class="dreport-date" id="lev-name" placeholder="Event name…" maxlength="60" style="margin-bottom:0.5rem;font-style:normal">
-      <div style="display:flex;gap:0.5rem;margin-bottom:0.9rem">
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem">
         <input type="date" class="dreport-date" id="lev-start" style="flex:1;margin-bottom:0">
         <input type="date" class="dreport-date" id="lev-end" style="flex:1;margin-bottom:0">
+      </div>
+      <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.9rem">
+        <input type="time" class="dreport-date" id="lev-time-from" style="flex:1;margin-bottom:0" placeholder="From (optional)">
+        <span style="color:var(--muted);font-size:0.75rem;flex-shrink:0;font-style:italic">to</span>
+        <input type="time" class="dreport-date" id="lev-time-to" style="flex:1;margin-bottom:0" placeholder="To (optional)">
       </div>
       <select class="dreport-date" id="lev-reminder">
         <option value="">No reminder</option>
@@ -1271,6 +1276,8 @@
     const levName       = document.getElementById('lev-name');
     const levStart      = document.getElementById('lev-start');
     const levEnd        = document.getElementById('lev-end');
+    const levTimeFrom   = document.getElementById('lev-time-from');
+    const levTimeTo     = document.getElementById('lev-time-to');
     const levReminder   = document.getElementById('lev-reminder');
     const levDelete     = document.getElementById('lev-delete');
     const levCancel     = document.getElementById('lev-cancel');
@@ -1280,10 +1287,12 @@
     function openCreateEventModal(isoDate) {
       editingEventId = null;
       levModalTitle.textContent = 'New Event';
-      levName.value     = '';
-      levStart.value    = isoDate;
-      levEnd.value      = isoDate;
-      levReminder.value = '';
+      levName.value      = '';
+      levStart.value     = isoDate;
+      levEnd.value       = isoDate;
+      levTimeFrom.value  = '';
+      levTimeTo.value    = '';
+      levReminder.value  = '';
       levDelete.style.display = 'none';
       levOverlay.classList.add('open');
       requestAnimationFrame(() => levName.focus());
@@ -1294,10 +1303,12 @@
       if (!ev) return;
       editingEventId = evId;
       levModalTitle.textContent = 'Edit Event';
-      levName.value     = ev.name;
-      levStart.value    = ev.startDate;
-      levEnd.value      = ev.endDate;
-      levReminder.value = ev.reminderDays ? String(ev.reminderDays) : '';
+      levName.value      = ev.name;
+      levStart.value     = ev.startDate;
+      levEnd.value       = ev.endDate;
+      levTimeFrom.value  = ev.timeFrom || '';
+      levTimeTo.value    = ev.timeTo || '';
+      levReminder.value  = ev.reminderDays ? String(ev.reminderDays) : '';
       levDelete.style.display = '';
       levOverlay.classList.add('open');
       requestAnimationFrame(() => levName.focus());
@@ -1317,7 +1328,7 @@
     levStart.addEventListener('change', () => { if (levEnd.value < levStart.value) levEnd.value = levStart.value; });
     levEnd.addEventListener('change',   () => { if (levEnd.value < levStart.value) levStart.value = levEnd.value; });
 
-    [levName, levStart, levEnd].forEach(el => {
+    [levName, levStart, levEnd, levTimeFrom, levTimeTo].forEach(el => {
       el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); levSave.click(); } });
     });
 
@@ -1325,13 +1336,15 @@
       const name = levName.value.trim();
       if (!name) { levName.focus(); levName.style.borderColor = 'var(--local-event)'; return; }
       levName.style.borderColor = '';
-      const start       = levStart.value;
-      const end         = levEnd.value >= start ? levEnd.value : start;
+      const start        = levStart.value;
+      const end          = levEnd.value >= start ? levEnd.value : start;
+      const timeFrom     = levTimeFrom.value || null;
+      const timeTo       = levTimeTo.value || null;
       const reminderDays = parseInt(levReminder.value) || null;
       if (editingEventId) {
-        saveLocalEventsAndRefresh(localEvents.map(e => e.id === editingEventId ? { ...e, name, startDate: start, endDate: end, reminderDays } : e));
+        saveLocalEventsAndRefresh(localEvents.map(e => e.id === editingEventId ? { ...e, name, startDate: start, endDate: end, timeFrom, timeTo, reminderDays } : e));
       } else {
-        saveLocalEventsAndRefresh([...localEvents, { id: generateId(), name, startDate: start, endDate: end, reminderDays }]);
+        saveLocalEventsAndRefresh([...localEvents, { id: generateId(), name, startDate: start, endDate: end, timeFrom, timeTo, reminderDays }]);
       }
       closeLevModal();
     });
