@@ -761,7 +761,15 @@ canvas { display: block; width: 100%; }
           </div>
         </div>
         <div class="wh-stats-grid" id="wh-stats-grid"></div>
-        <canvas id="chart-weight" height="160" style="margin-top:12px"></canvas>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+          <span style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted)">Goal</span>
+          <input type="number" id="wh-goal-input" min="20" max="400" step="0.1" placeholder="—"
+            style="width:80px;padding:4px 8px;background:var(--surf3);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:'DM Serif Text',serif;font-size:13px;-webkit-appearance:none;transition:border-color 0.15s">
+          <span style="font-size:11px;color:var(--muted)">kg</span>
+          <button id="wh-goal-clear" title="Clear goal"
+            style="display:none;padding:1px 7px;background:none;border:1px solid var(--border);border-radius:2px;color:var(--muted);cursor:pointer;font-size:12px;line-height:20px">×</button>
+        </div>
+        <canvas id="chart-weight" height="160" style="margin-top:10px"></canvas>
       </div>
 
       <!-- Calories burned section -->
@@ -1119,9 +1127,10 @@ const LS = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 };
 
-const PRESETS_KEY = 'calorie_presets';
-const LOG_KEY     = 'calorie_log';
-const WEIGHTS_KEY = 'calorie_weights';
+const PRESETS_KEY     = 'calorie_presets';
+const LOG_KEY         = 'calorie_log';
+const WEIGHTS_KEY     = 'calorie_weights';
+const GOAL_WEIGHT_KEY = 'calorie_goal_weight';
 
 function getPresets()       { return LS.get(PRESETS_KEY, []); }
 function savePresets(arr)   { LS.set(PRESETS_KEY, arr); }
@@ -1129,6 +1138,14 @@ function getLog()           { return LS.get(LOG_KEY, {}); }
 function saveLog(obj)       { LS.set(LOG_KEY, obj); }
 function getWeights()       { return LS.get(WEIGHTS_KEY, {}); }
 function saveWeights(obj)   { LS.set(WEIGHTS_KEY, obj); }
+function getGoalWeight()    { return LS.get(GOAL_WEIGHT_KEY, null); }
+function setGoalWeight(kg)  {
+  if (kg === null || kg === undefined) {
+    try { localStorage.removeItem(GOAL_WEIGHT_KEY); } catch {}
+  } else {
+    LS.set(GOAL_WEIGHT_KEY, kg);
+  }
+}
 function getWeightForDate(dateStr) { return getWeights()[dateStr] || null; }
 function setWeightForDate(dateStr, kg) {
   const w = getWeights();
@@ -1456,6 +1473,22 @@ function renderWeightStats(all) {
   const deltaClass = delta === null ? 'neutral' : delta < 0 ? 'down' : delta > 0 ? 'up' : 'neutral';
   const deltaStr  = delta === null ? '—' : (delta > 0 ? '+' : '') + delta.toFixed(1) + ' kg';
 
+  const goal = getGoalWeight();
+  const goalStatHtml = goal !== null ? (() => {
+    const rem = latest - goal;
+    const remClass = rem > 0.05 ? 'up' : rem < -0.05 ? 'down' : 'neutral';
+    const remStr = rem === 0 ? '—' : (rem > 0 ? '+' : '') + rem.toFixed(1) + ' kg';
+    return `
+    <div class="wh-stat">
+      <div class="wh-stat-lbl">Goal</div>
+      <div class="wh-stat-val">${goal.toFixed(1)} <span style="font-size:12px;color:var(--muted);font-family:'DM Serif Text',serif">kg</span></div>
+    </div>
+    <div class="wh-stat">
+      <div class="wh-stat-lbl">To Goal</div>
+      <div class="wh-stat-val ${remClass}">${remStr}</div>
+    </div>`;
+  })() : '';
+
   grid.innerHTML = `
     <div class="wh-stat">
       <div class="wh-stat-lbl">Current</div>
@@ -1472,7 +1505,7 @@ function renderWeightStats(all) {
     <div class="wh-stat">
       <div class="wh-stat-lbl">Average</div>
       <div class="wh-stat-val">${avg.toFixed(1)} <span style="font-size:12px;color:var(--muted);font-family:'DM Serif Text',serif">kg</span></div>
-    </div>`;
+    </div>${goalStatHtml}`;
 }
 
 function drawWeightTrendChart(allEntries) {
@@ -1515,10 +1548,12 @@ function drawWeightTrendChart(allEntries) {
   const cH = H - pad.top  - pad.bottom;
   const n  = data.length;
 
-  const kgs   = data.map(d => d.kg);
-  const minKg = Math.min(...kgs);
-  const maxKg = Math.max(...kgs);
-  const spread = maxKg - minKg || 1;
+  const kgs    = data.map(d => d.kg);
+  const goal   = getGoalWeight();
+  const rangeKgs = goal !== null ? [...kgs, goal] : [...kgs];
+  const minKg  = Math.min(...rangeKgs);
+  const maxKg  = Math.max(...rangeKgs);
+  const spread  = maxKg - minKg || 1;
   const yMin = minKg - spread * 0.15;
   const yMax = maxKg + spread * 0.15;
 
@@ -1600,6 +1635,25 @@ function drawWeightTrendChart(allEntries) {
       ctx.fillText(label, x, H - pad.bottom + 12);
     }
   });
+
+  // Goal weight line
+  if (goal !== null) {
+    const gy = yPos(goal);
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(pad.left, gy);
+    ctx.lineTo(pad.left + cW, gy);
+    ctx.strokeStyle = 'rgba(90,200,195,0.85)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(90,200,195,0.85)';
+    ctx.font = 'bold 9px DM Serif Text, Georgia, serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Goal ' + goal.toFixed(1) + ' kg', pad.left + 4, gy - 3);
+    ctx.restore();
+  }
 }
 
 function renderWeightList(all) {
@@ -1670,6 +1724,41 @@ document.getElementById('wh-range-tabs').addEventListener('click', e => {
   weightRange = parseInt(btn.dataset.wrange);
   drawWeightTrendChart(getWeightHistory());
 });
+
+// Goal weight input
+(function() {
+  const input    = document.getElementById('wh-goal-input');
+  const clearBtn = document.getElementById('wh-goal-clear');
+  const stored   = getGoalWeight();
+  if (stored !== null) {
+    input.value            = stored;
+    clearBtn.style.display = '';
+  }
+  input.addEventListener('focus', () => { input.style.borderColor = 'var(--accent)'; });
+  input.addEventListener('blur',  () => { input.style.borderColor = ''; });
+  input.addEventListener('change', () => {
+    const val = parseFloat(input.value);
+    if (!isNaN(val) && val >= 20 && val <= 400) {
+      setGoalWeight(val);
+      clearBtn.style.display = '';
+    } else {
+      setGoalWeight(null);
+      clearBtn.style.display = 'none';
+      input.value = '';
+    }
+    const all = getWeightHistory();
+    renderWeightStats(all);
+    drawWeightTrendChart(all);
+  });
+  clearBtn.addEventListener('click', () => {
+    input.value            = '';
+    clearBtn.style.display = 'none';
+    setGoalWeight(null);
+    const all = getWeightHistory();
+    renderWeightStats(all);
+    drawWeightTrendChart(all);
+  });
+})();
 
 // Open weight modal targeting a specific date (history edit or today)
 function openWeightModalForDate(targetDate) {
@@ -2506,12 +2595,14 @@ function drawWeightSparkline(canvasId, days) {
   const cH  = H - pad.top  - pad.bottom;
   const n   = data.length;
 
-  const kgs    = data.map(d => d.kg);
-  const minKg  = Math.min(...kgs);
-  const maxKg  = Math.max(...kgs);
-  const spread = maxKg - minKg || 0.5;
-  const yMin   = minKg - spread * 0.2;
-  const yMax   = maxKg + spread * 0.2;
+  const kgs      = data.map(d => d.kg);
+  const goalSp   = getGoalWeight();
+  const rangeKgsSp = goalSp !== null ? [...kgs, goalSp] : [...kgs];
+  const minKg    = Math.min(...rangeKgsSp);
+  const maxKg    = Math.max(...rangeKgsSp);
+  const spread   = maxKg - minKg || 0.5;
+  const yMin     = minKg - spread * 0.2;
+  const yMax     = maxKg + spread * 0.2;
 
   function xPos(i) { return pad.left + (n === 1 ? cW / 2 : i / (n - 1) * cW); }
   function yPos(kg) { return pad.top + cH - ((kg - yMin) / (yMax - yMin)) * cH; }
@@ -2591,6 +2682,25 @@ function drawWeightSparkline(canvasId, days) {
       ctx.fillText(label, xPos(i), H - pad.bottom + 11);
     }
   });
+
+  // Goal weight line
+  if (goalSp !== null) {
+    const gy = yPos(goalSp);
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(pad.left, gy);
+    ctx.lineTo(pad.left + cW, gy);
+    ctx.strokeStyle = 'rgba(90,200,195,0.85)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(90,200,195,0.85)';
+    ctx.font = '8px DM Serif Text, Georgia, serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Goal', pad.left + 2, gy - 2);
+    ctx.restore();
+  }
 }
 
 function renderStats() {
