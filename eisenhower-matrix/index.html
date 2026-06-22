@@ -22,23 +22,13 @@
       --muted2:   #7a6e60;
       --muted3:   #5a4e40;
 
-      /* quadrant accent colours */
-      --q1:       #c47070;
-      --q1-dim:   rgba(196,112,112,0.08);
-      --q1-bdr:   rgba(196,112,112,0.22);
-      --q2:       #6aaa80;
-      --q2-dim:   rgba(106,170,128,0.08);
-      --q2-bdr:   rgba(106,170,128,0.22);
-      --q3:       #6a9abb;
-      --q3-dim:   rgba(106,154,187,0.08);
-      --q3-bdr:   rgba(106,154,187,0.22);
-      --q4:       #8a7a5a;
-      --q4-dim:   rgba(138,122,90,0.08);
-      --q4-bdr:   rgba(138,122,90,0.20);
+      --q1:      #c47070;  --q1-dim: rgba(196,112,112,0.08);  --q1-bdr: rgba(196,112,112,0.22);
+      --q2:      #6aaa80;  --q2-dim: rgba(106,170,128,0.08);  --q2-bdr: rgba(106,170,128,0.22);
+      --q3:      #6a9abb;  --q3-dim: rgba(106,154,187,0.08);  --q3-bdr: rgba(106,154,187,0.22);
+      --q4:      #8a7a5a;  --q4-dim: rgba(138,122,90,0.08);   --q4-bdr: rgba(138,122,90,0.20);
     }
 
     html { scroll-behavior: smooth; }
-
     body {
       background: var(--bg);
       color: var(--text);
@@ -47,13 +37,10 @@
       line-height: 1.55;
       min-height: 100vh;
     }
-
     body::before {
       content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0;
       background-image:
         radial-gradient(circle, rgba(255,255,255,0.018) 1px, transparent 1px),
         radial-gradient(circle, rgba(255,255,255,0.010) 1px, transparent 1px);
@@ -63,89 +50,106 @@
 
     /* ── HERO ── */
     .hero {
-      padding: 1.5rem 1.75rem 1.25rem;
+      padding: 1.25rem 1.5rem 0.9rem;
       border-bottom: 2px solid var(--text);
-      position: relative;
-      z-index: 1;
+      position: relative; z-index: 1;
       flex-shrink: 0;
     }
-    .hero-inner {
-      display: flex;
-      align-items: baseline;
-      gap: 1.25rem;
-      flex-wrap: wrap;
+    .hero-row {
+      display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+      margin-bottom: 0.75rem;
     }
-    .hero h1 {
+    .hero-left { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 0.9rem; }
+    h1 {
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: clamp(1.6rem, 4vw, 2.4rem);
-      font-weight: 900;
-      font-style: italic;
-      letter-spacing: -0.02em;
-      line-height: 1;
-      color: var(--text);
+      font-size: clamp(1.55rem, 4vw, 2.2rem);
+      font-weight: 900; font-style: italic;
+      letter-spacing: -0.02em; line-height: 1;
     }
-    .hero-meta {
-      font-size: 0.8rem;
-      font-style: italic;
-      color: var(--muted);
+    .hero-sub { font-size: 0.75rem; font-style: italic; color: var(--muted3); }
+
+    /* Period toggle */
+    .period-toggle {
+      display: flex; gap: 2px;
+      background: var(--surface2); border: 1px solid var(--border2); border-radius: 2px;
+      padding: 2px; flex-shrink: 0;
     }
+    .period-btn {
+      background: transparent; border: none; cursor: pointer;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.72rem; font-style: italic;
+      color: var(--muted); padding: 0.25rem 0.65rem; border-radius: 1px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .period-btn.active { background: rgba(196,134,74,0.12); color: var(--text); }
+    .period-btn:hover:not(.active) { color: var(--muted2); }
+
+    /* Distribution bar */
+    .dist-wrap { display: none; }
+    .dist-wrap.visible { display: block; }
+    .dist-bar {
+      height: 6px; border-radius: 3px; overflow: hidden;
+      display: flex; background: var(--surface2); margin-bottom: 0.55rem;
+    }
+    .dist-seg { height: 100%; transition: width 0.35s ease; min-width: 2px; }
+    .dist-seg.q1 { background: var(--q1); }
+    .dist-seg.q2 { background: var(--q2); }
+    .dist-seg.q3 { background: var(--q3); }
+    .dist-seg.q4 { background: var(--q4); }
+    .dist-legend {
+      display: flex; gap: 1.25rem; flex-wrap: wrap;
+    }
+    .dist-item {
+      display: flex; align-items: center; gap: 0.35rem;
+      font-size: 0.68rem; font-style: italic;
+    }
+    .dist-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    }
+    .dist-dot.q1 { background: var(--q1); }
+    .dist-dot.q2 { background: var(--q2); }
+    .dist-dot.q3 { background: var(--q3); }
+    .dist-dot.q4 { background: var(--q4); }
+    .dist-label { color: var(--muted); }
+    .dist-hours { color: var(--text); }
+    .dist-no-data {
+      font-size: 0.72rem; font-style: italic; color: var(--muted3);
+    }
+    .dist-no-data a { color: var(--muted); }
 
     /* ── MATRIX OUTER ── */
     .matrix-outer {
-      position: relative;
-      z-index: 1;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 1rem 1.25rem 0.75rem;
+      position: relative; z-index: 1;
+      flex: 1; display: flex; flex-direction: column;
+      padding: 0.85rem 1.1rem 0.6rem;
       min-height: 0;
     }
 
     /* ── AXIS GRID ── */
     .matrix-grid {
       display: grid;
-      grid-template-columns: 26px 1fr 1fr;
-      grid-template-rows: 26px 1fr 1fr;
+      grid-template-columns: 22px 1fr 1fr;
+      grid-template-rows: 22px 1fr 1fr;
       grid-template-areas:
-        "corner  col1   col2"
-        "row1    q1     q2"
-        "row2    q3     q4";
+        "corner  col1  col2"
+        "row1    q1    q2"
+        "row2    q3    q4";
       gap: 3px;
-      flex: 1;
-      min-height: 480px;
+      flex: 1; min-height: 460px;
     }
-
-    /* Axis labels */
     .ax-corner { grid-area: corner; }
-
     .ax-col {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.58rem;
-      font-weight: 400;
-      font-style: italic;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; font-style: italic; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted3);
     }
     .ax-col1 { grid-area: col1; }
     .ax-col2 { grid-area: col2; }
-
     .ax-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      writing-mode: vertical-rl;
-      transform: rotate(180deg);
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.58rem;
-      font-weight: 400;
-      font-style: italic;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted3);
+      display: flex; align-items: center; justify-content: center;
+      writing-mode: vertical-rl; transform: rotate(180deg);
+      font-size: 0.55rem; font-style: italic; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted3);
     }
     .ax-row1 { grid-area: row1; }
     .ax-row2 { grid-area: row2; }
@@ -154,305 +158,258 @@
     .quadrant {
       border: 1px solid var(--border2);
       border-radius: 2px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      transition: border-color 0.18s;
-      min-height: 0;
+      display: flex; flex-direction: column;
+      overflow: hidden; min-height: 0;
+      transition: border-color 0.15s;
     }
-    .quadrant.drag-over {
-      border-color: var(--q-accent, var(--border2));
-      box-shadow: inset 0 0 0 1px var(--q-accent, var(--border2));
-    }
+    .q1 { grid-area: q1; background: var(--q1-dim); --qa: var(--q1); --qb: var(--q1-bdr); }
+    .q2 { grid-area: q2; background: var(--q2-dim); --qa: var(--q2); --qb: var(--q2-bdr); }
+    .q3 { grid-area: q3; background: var(--q3-dim); --qa: var(--q3); --qb: var(--q3-bdr); }
+    .q4 { grid-area: q4; background: var(--q4-dim); --qa: var(--q4); --qb: var(--q4-bdr); }
 
-    .q1 { grid-area: q1; background: var(--q1-dim);  --q-accent: var(--q1);  --q-bdr: var(--q1-bdr); }
-    .q2 { grid-area: q2; background: var(--q2-dim);  --q-accent: var(--q2);  --q-bdr: var(--q2-bdr); }
-    .q3 { grid-area: q3; background: var(--q3-dim);  --q-accent: var(--q3);  --q-bdr: var(--q3-bdr); }
-    .q4 { grid-area: q4; background: var(--q4-dim);  --q-accent: var(--q4);  --q-bdr: var(--q4-bdr); }
-
-    /* Quadrant header */
     .q-header {
-      flex-shrink: 0;
-      padding: 0.6rem 0.85rem 0.45rem;
-      border-bottom: 1px solid var(--q-bdr, var(--border));
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
+      flex-shrink: 0; padding: 0.55rem 0.8rem 0.4rem;
+      border-bottom: 1px solid var(--qb, var(--border));
+      display: flex; align-items: center; gap: 0.5rem;
     }
     .q-label-group { flex: 1; min-width: 0; }
     .q-action {
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 0.88rem;
-      font-weight: 700;
-      font-style: italic;
-      letter-spacing: 0.02em;
-      color: var(--q-accent);
-      line-height: 1.1;
+      font-size: 0.85rem; font-weight: 700; font-style: italic;
+      color: var(--qa); line-height: 1.1;
     }
     .q-desc {
-      font-size: 0.6rem;
-      font-style: italic;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted3);
-      margin-top: 0.1rem;
+      font-size: 0.56rem; font-style: italic; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted3); margin-top: 0.08rem;
     }
-    .q-count {
-      font-size: 0.65rem;
-      font-style: italic;
-      color: var(--muted3);
-      flex-shrink: 0;
+    .q-total {
+      font-size: 0.68rem; font-style: italic; color: var(--muted3); flex-shrink: 0;
     }
+    .q-total.has-time { color: var(--qa); }
     .q-add-btn {
-      flex-shrink: 0;
-      width: 22px;
-      height: 22px;
-      border-radius: 2px;
-      border: 1px solid var(--q-bdr, var(--border));
-      background: transparent;
-      color: var(--q-accent);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s, border-color 0.15s;
-      padding: 0;
+      flex-shrink: 0; width: 20px; height: 20px;
+      border-radius: 2px; border: 1px solid var(--qb, var(--border));
+      background: transparent; color: var(--qa);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s; padding: 0;
     }
-    .q-add-btn:hover {
-      background: rgba(255,255,255,0.05);
-      border-color: var(--q-accent);
-    }
+    .q-add-btn:hover { background: rgba(255,255,255,0.06); }
 
-    /* Task list scroll area */
     .q-body {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 0.25rem 0;
+      flex: 1; overflow-y: auto; overflow-x: hidden;
       min-height: 0;
-      scrollbar-width: thin;
-      scrollbar-color: var(--border2) transparent;
+      scrollbar-width: thin; scrollbar-color: var(--border2) transparent;
     }
-    .q-body::-webkit-scrollbar { width: 4px; }
+    .q-body::-webkit-scrollbar { width: 3px; }
     .q-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-    .q-body::-webkit-scrollbar-track { background: transparent; }
 
-    /* Empty hint */
+    /* Activity rows */
+    .act-row {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      border-bottom: 1px solid rgba(58,48,37,0.4);
+      transition: background 0.12s;
+    }
+    .act-row:last-child { border-bottom: none; }
+    .act-row:hover { background: rgba(255,255,255,0.025); }
+
+    .act-name {
+      flex: 1; min-width: 0;
+      font-size: 0.8rem; color: var(--text);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .act-goal-chip {
+      font-size: 0.58rem; font-style: italic; letter-spacing: 0.04em;
+      color: var(--muted3); border: 1px solid var(--border); border-radius: 2px;
+      padding: 0.1rem 0.35rem; white-space: nowrap; flex-shrink: 0;
+      max-width: 90px; overflow: hidden; text-overflow: ellipsis;
+    }
+    .act-time {
+      font-size: 0.7rem; font-style: italic; color: var(--muted3);
+      flex-shrink: 0; min-width: 28px; text-align: right;
+    }
+    .act-time.has-time { color: var(--qa); }
+    .act-edit-btn, .act-del-btn {
+      flex-shrink: 0; background: none; border: none; cursor: pointer;
+      color: var(--muted3); padding: 0.15rem; border-radius: 1px;
+      opacity: 0; transition: opacity 0.12s, color 0.12s; line-height: 1;
+    }
+    .act-row:hover .act-edit-btn,
+    .act-row:hover .act-del-btn { opacity: 1; }
+    .act-edit-btn:hover { color: var(--muted); }
+    .act-del-btn:hover  { color: var(--q1); }
+
+    /* Empty state */
     .q-empty {
-      padding: 1rem 0.85rem;
-      font-size: 0.72rem;
-      font-style: italic;
-      color: var(--muted3);
-      text-align: center;
-      display: none;
+      padding: 1.1rem 0.8rem;
+      font-size: 0.7rem; font-style: italic; color: var(--muted3);
+      text-align: center; display: none;
     }
     .q-empty.visible { display: block; }
 
-    /* Inline add form */
-    .q-add-form {
-      display: none;
-      padding: 0.45rem 0.85rem;
-      border-bottom: 1px solid var(--border);
-      gap: 0.4rem;
-      align-items: center;
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.72);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
     }
-    .q-add-form.open { display: flex; }
-    .q-add-input {
-      flex: 1;
-      min-width: 0;
+    .modal-overlay.hidden { display: none; }
+    .modal {
       background: var(--surface);
-      border: 1px solid var(--q-bdr, var(--border2));
-      border-radius: 2px;
-      color: var(--text);
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.8rem;
-      padding: 0.38rem 0.6rem;
-      outline: none;
-      transition: border-color 0.15s;
+      border: 1px solid var(--border2); border-radius: 3px;
+      width: 100%; max-width: 400px;
+      display: flex; flex-direction: column;
     }
-    .q-add-input::placeholder { color: var(--muted3); font-style: italic; }
-    .q-add-input:focus { border-color: var(--q-accent); }
-    .q-add-submit {
-      flex-shrink: 0;
-      background: transparent;
-      border: 1px solid var(--q-bdr, var(--border2));
-      color: var(--q-accent);
-      border-radius: 2px;
-      padding: 0.32rem 0.6rem;
-      font-family: 'DM Serif Text', Georgia, serif;
-      font-size: 0.72rem;
-      cursor: pointer;
-      transition: background 0.15s;
-      white-space: nowrap;
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.25rem 0.75rem;
+      border-bottom: 1px solid var(--border);
     }
-    .q-add-submit:hover { background: rgba(255,255,255,0.05); }
-    .q-add-cancel {
-      flex-shrink: 0;
-      background: none;
-      border: none;
-      color: var(--muted3);
-      cursor: pointer;
-      font-size: 1rem;
-      line-height: 1;
-      padding: 0.2rem;
-      transition: color 0.15s;
+    .modal-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem; font-weight: 700; font-style: italic;
     }
-    .q-add-cancel:hover { color: var(--muted); }
-
-    /* Task items */
-    .task-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.55rem;
-      padding: 0.45rem 0.85rem;
-      border-bottom: 1px solid rgba(58,48,37,0.5);
-      cursor: grab;
-      transition: background 0.15s;
-      position: relative;
+    .modal-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 1.3rem; line-height: 1;
+      padding: 0.2rem; border-radius: 2px;
+      transition: color 0.12s; display: flex; align-items: center;
     }
-    .task-item:last-child { border-bottom: none; }
-    .task-item:hover { background: rgba(255,255,255,0.025); }
-    .task-item.dragging { opacity: 0.35; cursor: grabbing; }
-    .task-item.drag-placeholder {
-      border: 1px dashed var(--q-accent, var(--border2));
-      background: rgba(255,255,255,0.02);
-      border-radius: 2px;
-      margin: 2px 0.85rem;
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 1rem 1.25rem; }
+    .modal-footer {
+      padding: 0.75rem 1.25rem; border-top: 1px solid var(--border);
+      display: flex; gap: 0.5rem; justify-content: flex-end;
     }
 
-    /* Custom checkbox */
-    .task-check {
-      flex-shrink: 0;
-      width: 14px;
-      height: 14px;
-      border: 1.5px solid var(--border2);
-      border-radius: 2px;
-      background: transparent;
-      cursor: pointer;
-      position: relative;
+    /* Form elements inside modal */
+    .form-group { margin-bottom: 0.9rem; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-label {
+      display: block; font-size: 0.72rem; color: var(--muted);
+      font-style: italic; letter-spacing: 0.04em; margin-bottom: 0.35rem;
+    }
+    .form-input {
+      width: 100%;
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 2px; color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.85rem; padding: 0.5rem 0.75rem;
+      outline: none; transition: border-color 0.15s;
+    }
+    .form-input:focus { border-color: rgba(196,134,74,0.5); }
+    .form-input::placeholder { color: var(--muted3); font-style: italic; }
+    .form-select {
+      width: 100%;
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 2px; color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.82rem; padding: 0.5rem 0.75rem;
+      outline: none; cursor: pointer;
       appearance: none;
-      -webkit-appearance: none;
-      transition: border-color 0.15s, background 0.15s;
-      margin-top: 2px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a6e60' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+      padding-right: 28px;
+      transition: border-color 0.15s; color-scheme: dark;
     }
-    .task-check:hover { border-color: var(--q-accent, var(--border2)); }
-    .task-check:checked {
-      background: var(--q-accent, var(--border2));
-      border-color: var(--q-accent, var(--border2));
-    }
-    .task-check:checked::after {
-      content: '';
-      position: absolute;
-      left: 2px;
-      top: 0px;
-      width: 7px;
-      height: 4px;
-      border-left: 1.5px solid var(--bg);
-      border-bottom: 1.5px solid var(--bg);
-      transform: rotate(-45deg);
-    }
+    .form-select:focus { outline: none; border-color: rgba(196,134,74,0.5); }
+    .form-select option { background: var(--surface2); }
 
-    .task-body { flex: 1; min-width: 0; }
-    .task-text {
-      font-size: 0.82rem;
-      color: var(--text);
-      line-height: 1.4;
-      word-break: break-word;
-      transition: color 0.18s;
+    /* Quadrant picker in modal */
+    .quad-picker {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
     }
-    .task-item.done .task-text {
-      text-decoration: line-through;
-      color: var(--muted3);
+    .quad-pick-btn {
+      background: transparent; border: 1px solid var(--border2);
+      border-radius: 2px; cursor: pointer;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.72rem; color: var(--muted);
+      padding: 0.45rem 0.5rem; text-align: left;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      display: flex; flex-direction: column; gap: 1px;
     }
+    .quad-pick-btn .qpb-action { font-size: 0.8rem; }
+    .quad-pick-btn .qpb-desc { font-size: 0.6rem; font-style: italic; opacity: 0.7; }
+    .quad-pick-btn:hover { color: var(--text); border-color: var(--border2); background: rgba(255,255,255,0.03); }
+    .quad-pick-btn.selected-q1 { border-color: var(--q1); color: var(--q1); background: var(--q1-dim); }
+    .quad-pick-btn.selected-q2 { border-color: var(--q2); color: var(--q2); background: var(--q2-dim); }
+    .quad-pick-btn.selected-q3 { border-color: var(--q3); color: var(--q3); background: var(--q3-dim); }
+    .quad-pick-btn.selected-q4 { border-color: var(--q4); color: var(--q4); background: var(--q4-dim); }
 
-    .task-delete {
-      flex-shrink: 0;
-      background: none;
-      border: none;
-      color: var(--muted3);
-      cursor: pointer;
-      padding: 0 0.15rem;
-      border-radius: 2px;
-      opacity: 0;
-      transition: opacity 0.15s, color 0.15s;
-      line-height: 1;
-      font-size: 1rem;
-      margin-top: 1px;
+    /* Buttons */
+    .btn {
+      background: transparent; border: 1px solid var(--border2);
+      border-radius: 2px; cursor: pointer;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.78rem; color: var(--muted);
+      padding: 0.42rem 0.9rem;
+      transition: border-color 0.15s, color 0.15s;
     }
-    .task-item:hover .task-delete { opacity: 1; }
-    .task-delete:hover { color: var(--q1); }
-
-    /* Drag ghost indicator line */
-    .drop-indicator {
-      height: 2px;
-      background: var(--q-accent, var(--border2));
-      border-radius: 1px;
-      margin: 0 0.85rem;
-      display: none;
+    .btn:hover { border-color: var(--muted); color: var(--text); }
+    .btn-primary {
+      background: rgba(196,134,74,0.12);
+      border-color: rgba(196,134,74,0.35);
+      color: rgba(196,134,74,0.9);
     }
-    .drop-indicator.visible { display: block; }
+    .btn-primary:hover { background: rgba(196,134,74,0.2); border-color: rgba(196,134,74,0.6); color: #c4864a; }
+    .btn-danger:hover { border-color: var(--q1); color: var(--q1); }
 
     /* ── FOOTER ── */
     footer {
-      padding: 1rem 1.75rem;
-      font-size: 0.75rem;
-      font-style: italic;
-      color: var(--muted3);
+      padding: 0.85rem 1.5rem;
+      font-size: 0.72rem; font-style: italic; color: var(--muted3);
       border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-      position: relative;
-      z-index: 1;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap;
+      position: relative; z-index: 1; flex-shrink: 0;
     }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--text); }
 
     /* ── MOBILE ── */
-    @media (max-width: 800px) {
-      .matrix-outer { padding: 0.75rem 0.75rem 0.5rem; }
-
+    @media (max-width: 700px) {
+      .matrix-outer { padding: 0.6rem 0.65rem 0.4rem; }
       .matrix-grid {
-        grid-template-columns: 20px 1fr 1fr;
-        grid-template-rows: 20px 1fr 1fr;
-        min-height: 0;
-        gap: 2px;
+        grid-template-columns: 16px 1fr 1fr;
+        grid-template-rows: 16px 1fr 1fr;
+        min-height: 0; gap: 2px;
       }
-      .ax-col { font-size: 0.52rem; }
-      .ax-row { font-size: 0.52rem; }
-
-      .q-action { font-size: 0.78rem; }
       .q-desc { display: none; }
-      .task-text { font-size: 0.78rem; }
-      .q-add-input { font-size: 0.76rem; }
     }
-
-    @media (max-width: 540px) {
+    @media (max-width: 480px) {
       .matrix-grid {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
-        grid-template-areas:
-          "q1" "q2" "q3" "q4";
-        gap: 6px;
-        min-height: 0;
+        grid-template-areas: "q1" "q2" "q3" "q4";
+        min-height: 0; gap: 6px;
       }
       .ax-corner, .ax-col1, .ax-col2, .ax-row1, .ax-row2 { display: none; }
-      .quadrant { min-height: 180px; }
-      .hero { padding: 1.1rem 1rem 0.9rem; }
-      .matrix-outer { padding: 0.6rem 0.75rem 0.5rem; }
+      .quadrant { min-height: 160px; }
     }
   </style>
 </head>
 <body>
 
   <header class="hero">
-    <div class="hero-inner">
-      <h1>Eisenhower Matrix</h1>
-      <span class="hero-meta" id="hero-meta"></span>
+    <div class="hero-row">
+      <div class="hero-left">
+        <h1>Eisenhower Matrix</h1>
+        <span class="hero-sub">activity landscape</span>
+      </div>
+      <div class="period-toggle" id="period-toggle">
+        <button class="period-btn" data-days="7">7 days</button>
+        <button class="period-btn active" data-days="30">30 days</button>
+      </div>
     </div>
+    <div class="dist-wrap" id="dist-wrap">
+      <div class="dist-bar" id="dist-bar"></div>
+      <div class="dist-legend" id="dist-legend"></div>
+    </div>
+    <p class="dist-no-data hidden" id="dist-no-data">
+      No time logged yet — track activities in the
+      <a href="../journal/">evening journal</a>.
+    </p>
   </header>
 
   <div class="matrix-outer">
@@ -461,107 +418,130 @@
       <div class="ax-corner"></div>
       <div class="ax-col ax-col1">Urgent</div>
       <div class="ax-col ax-col2">Not Urgent</div>
-
       <div class="ax-row ax-row1">Important</div>
 
-      <!-- Q1: Urgent + Important -->
-      <div class="quadrant q1" data-q="q1" id="quad-q1">
+      <div class="quadrant q1" id="quad-q1">
         <div class="q-header">
           <div class="q-label-group">
             <div class="q-action">Do</div>
             <div class="q-desc">Urgent &amp; Important</div>
           </div>
-          <span class="q-count" id="count-q1"></span>
-          <button class="q-add-btn" data-q="q1" aria-label="Add task to Do">
+          <span class="q-total" id="total-q1"></span>
+          <button class="q-add-btn" data-q="q1" aria-label="Add activity">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
           </button>
         </div>
-        <div class="q-add-form" id="form-q1">
-          <input type="text" class="q-add-input" placeholder="New task…" maxlength="200" />
-          <button type="button" class="q-add-submit">Add</button>
-          <button type="button" class="q-add-cancel">&times;</button>
-        </div>
-        <div class="q-body" id="body-q1">
-          <p class="q-empty" id="empty-q1">No tasks here.</p>
+        <div class="q-body">
+          <p class="q-empty" id="empty-q1">No activities here.</p>
         </div>
       </div>
 
-      <!-- Q2: Not Urgent + Important -->
-      <div class="quadrant q2" data-q="q2" id="quad-q2">
+      <div class="quadrant q2" id="quad-q2">
         <div class="q-header">
           <div class="q-label-group">
             <div class="q-action">Schedule</div>
             <div class="q-desc">Not Urgent &amp; Important</div>
           </div>
-          <span class="q-count" id="count-q2"></span>
-          <button class="q-add-btn" data-q="q2" aria-label="Add task to Schedule">
+          <span class="q-total" id="total-q2"></span>
+          <button class="q-add-btn" data-q="q2" aria-label="Add activity">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
           </button>
         </div>
-        <div class="q-add-form" id="form-q2">
-          <input type="text" class="q-add-input" placeholder="New task…" maxlength="200" />
-          <button type="button" class="q-add-submit">Add</button>
-          <button type="button" class="q-add-cancel">&times;</button>
-        </div>
-        <div class="q-body" id="body-q2">
-          <p class="q-empty" id="empty-q2">No tasks here.</p>
+        <div class="q-body">
+          <p class="q-empty" id="empty-q2">No activities here.</p>
         </div>
       </div>
 
       <div class="ax-row ax-row2">Not Important</div>
 
-      <!-- Q3: Urgent + Not Important -->
-      <div class="quadrant q3" data-q="q3" id="quad-q3">
+      <div class="quadrant q3" id="quad-q3">
         <div class="q-header">
           <div class="q-label-group">
             <div class="q-action">Delegate</div>
             <div class="q-desc">Urgent &amp; Not Important</div>
           </div>
-          <span class="q-count" id="count-q3"></span>
-          <button class="q-add-btn" data-q="q3" aria-label="Add task to Delegate">
+          <span class="q-total" id="total-q3"></span>
+          <button class="q-add-btn" data-q="q3" aria-label="Add activity">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
           </button>
         </div>
-        <div class="q-add-form" id="form-q3">
-          <input type="text" class="q-add-input" placeholder="New task…" maxlength="200" />
-          <button type="button" class="q-add-submit">Add</button>
-          <button type="button" class="q-add-cancel">&times;</button>
-        </div>
-        <div class="q-body" id="body-q3">
-          <p class="q-empty" id="empty-q3">No tasks here.</p>
+        <div class="q-body">
+          <p class="q-empty" id="empty-q3">No activities here.</p>
         </div>
       </div>
 
-      <!-- Q4: Not Urgent + Not Important -->
-      <div class="quadrant q4" data-q="q4" id="quad-q4">
+      <div class="quadrant q4" id="quad-q4">
         <div class="q-header">
           <div class="q-label-group">
             <div class="q-action">Eliminate</div>
             <div class="q-desc">Not Urgent &amp; Not Important</div>
           </div>
-          <span class="q-count" id="count-q4"></span>
-          <button class="q-add-btn" data-q="q4" aria-label="Add task to Eliminate">
+          <span class="q-total" id="total-q4"></span>
+          <button class="q-add-btn" data-q="q4" aria-label="Add activity">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
           </button>
         </div>
-        <div class="q-add-form" id="form-q4">
-          <input type="text" class="q-add-input" placeholder="New task…" maxlength="200" />
-          <button type="button" class="q-add-submit">Add</button>
-          <button type="button" class="q-add-cancel">&times;</button>
-        </div>
-        <div class="q-body" id="body-q4">
-          <p class="q-empty" id="empty-q4">No tasks here.</p>
+        <div class="q-body">
+          <p class="q-empty" id="empty-q4">No activities here.</p>
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Add / Edit modal -->
+  <div class="modal-overlay hidden" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-title">Add Activity</span>
+        <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="modal-name">Activity name</label>
+          <input type="text" class="form-input" id="modal-name" maxlength="80" placeholder="e.g. Deep work, Team meetings…" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quadrant</label>
+          <div class="quad-picker" id="quad-picker">
+            <button type="button" class="quad-pick-btn" data-q="q1">
+              <span class="qpb-action">Do</span>
+              <span class="qpb-desc">Urgent · Important</span>
+            </button>
+            <button type="button" class="quad-pick-btn" data-q="q2">
+              <span class="qpb-action">Schedule</span>
+              <span class="qpb-desc">Not Urgent · Important</span>
+            </button>
+            <button type="button" class="quad-pick-btn" data-q="q3">
+              <span class="qpb-action">Delegate</span>
+              <span class="qpb-desc">Urgent · Not Important</span>
+            </button>
+            <button type="button" class="quad-pick-btn" data-q="q4">
+              <span class="qpb-action">Eliminate</span>
+              <span class="qpb-desc">Not Urgent · Not Important</span>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="modal-goal">Link to goal (optional)</label>
+          <select class="form-select" id="modal-goal">
+            <option value="">— No goal —</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger hidden" id="modal-delete">Delete</button>
+        <button class="btn" id="modal-cancel">Cancel</button>
+        <button class="btn btn-primary" id="modal-save">Save</button>
+      </div>
     </div>
   </div>
 
@@ -574,223 +554,312 @@
 
   <script>
   (function () {
-    var STORAGE_KEY = 'eisenhower_v1';
-    var QUADS = ['q1', 'q2', 'q3', 'q4'];
+    var ACT_KEY  = 'eisenhower_v2';
+    var ENT_KEY  = 'journal_entries';
+    var GOAL_KEY = 'journal_goals';
+    var QUADS    = ['q1','q2','q3','q4'];
+    var QLABEL   = { q1:'Do', q2:'Schedule', q3:'Delegate', q4:'Eliminate' };
+    var QDESC    = {
+      q1:'Urgent · Important', q2:'Not Urgent · Important',
+      q3:'Urgent · Not Important', q4:'Not Urgent · Not Important'
+    };
 
-    var dragState = null; /* { fromQ, taskId } */
+    var activePeriod = 30;
+    var modalQ       = 'q1';
+    var editingId    = null;
 
-    /* ── Storage ── */
-    function load() {
-      try {
-        var d = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    /* ── Storage helpers ── */
+    function loadActs() {
+      try { var d = JSON.parse(localStorage.getItem(ACT_KEY)||'null');
         if (d && typeof d === 'object') return d;
-      } catch (e) {}
-      return { q1: [], q2: [], q3: [], q4: [] };
+      } catch(e) {}
+      return { q1:[], q2:[], q3:[], q4:[] };
     }
-    function save(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    function saveActs(d) { localStorage.setItem(ACT_KEY, JSON.stringify(d)); }
+    function loadGoals() {
+      try { return JSON.parse(localStorage.getItem(GOAL_KEY)||'{}'); } catch(e) { return {}; }
     }
-    function genId() {
-      return Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
+    function loadEntries() {
+      try { return JSON.parse(localStorage.getItem(ENT_KEY)||'{}'); } catch(e) { return {}; }
+    }
+    function genId() { return Math.random().toString(36).slice(2,9)+Date.now().toString(36); }
+
+    /* ── Stats ── */
+    function computeStats(days) {
+      var entries = loadEntries();
+      var cutoff  = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+      var cutStr  = cutoff.getFullYear()+'-'+pad(cutoff.getMonth()+1)+'-'+pad(cutoff.getDate());
+      var stats   = {};
+      Object.keys(entries).forEach(function(date) {
+        if (date < cutStr) return;
+        var log = (entries[date].evening || {}).activityLog || [];
+        log.forEach(function(item) {
+          stats[item.activityId] = (stats[item.activityId] || 0) + (item.hours || 0);
+        });
+      });
+      return stats;
+    }
+
+    function pad(n) { return n < 10 ? '0'+n : ''+n; }
+
+    function fmtHours(h) {
+      if (!h) return '—';
+      return h % 1 === 0 ? h+'h' : h.toFixed(1)+'h';
     }
 
     /* ── Render ── */
     function render() {
-      var data = load();
-      var totalPending = 0;
-      var totalDone = 0;
+      var data  = loadActs();
+      var goals = loadGoals();
+      var stats = computeStats(activePeriod);
 
-      QUADS.forEach(function (q) {
-        var tasks = data[q] || [];
-        var body = document.getElementById('body-' + q);
-        var emptyEl = document.getElementById('empty-' + q);
-        var countEl = document.getElementById('count-' + q);
+      renderDistBar(data, stats);
 
-        /* remove existing task nodes */
-        body.querySelectorAll('.task-item').forEach(function (el) { el.remove(); });
+      QUADS.forEach(function(q) {
+        renderQuad(q, data[q] || [], goals, stats);
+      });
+    }
 
-        var pending = tasks.filter(function (t) { return !t.done; });
-        var done    = tasks.filter(function (t) {  return t.done; });
-        totalPending += pending.length;
-        totalDone += done.length;
+    function renderDistBar(data, stats) {
+      var totals = {}, grand = 0;
+      QUADS.forEach(function(q) {
+        var t = (data[q]||[]).reduce(function(s,a){ return s+(stats[a.id]||0); }, 0);
+        totals[q] = t; grand += t;
+      });
 
-        if (tasks.length === 0) {
-          emptyEl.classList.add('visible');
-        } else {
-          emptyEl.classList.remove('visible');
+      var wrap     = document.getElementById('dist-wrap');
+      var bar      = document.getElementById('dist-bar');
+      var legend   = document.getElementById('dist-legend');
+      var noData   = document.getElementById('dist-no-data');
+      var hasActs  = QUADS.some(function(q){ return (data[q]||[]).length>0; });
+
+      if (!hasActs) { wrap.classList.remove('visible'); noData.classList.add('hidden'); return; }
+      noData.classList.remove('hidden');
+
+      if (grand === 0) {
+        wrap.classList.remove('visible');
+        return;
+      }
+      noData.classList.add('hidden');
+      wrap.classList.add('visible');
+
+      bar.innerHTML = QUADS.map(function(q) {
+        var pct = (totals[q]/grand*100).toFixed(1);
+        return '<div class="dist-seg '+q+'" style="width:'+pct+'%"' +
+          ' title="'+QLABEL[q]+': '+fmtHours(totals[q])+'"></div>';
+      }).join('');
+
+      legend.innerHTML = QUADS.map(function(q) {
+        return '<div class="dist-item">' +
+          '<span class="dist-dot '+q+'"></span>' +
+          '<span class="dist-label">'+QLABEL[q]+'</span>' +
+          '<span class="dist-hours">'+fmtHours(totals[q])+'</span>' +
+        '</div>';
+      }).join('');
+    }
+
+    function renderQuad(q, activities, goals, stats) {
+      var quad    = document.getElementById('quad-'+q);
+      var body    = quad.querySelector('.q-body');
+      var emptyEl = document.getElementById('empty-'+q);
+      var totalEl = document.getElementById('total-'+q);
+
+      /* remove existing rows */
+      body.querySelectorAll('.act-row').forEach(function(el){ el.remove(); });
+
+      if (activities.length === 0) {
+        emptyEl.classList.add('visible');
+      } else {
+        emptyEl.classList.remove('visible');
+      }
+
+      var qTotal = activities.reduce(function(s,a){ return s+(stats[a.id]||0); }, 0);
+      if (qTotal > 0) {
+        totalEl.textContent = fmtHours(qTotal);
+        totalEl.classList.add('has-time');
+      } else {
+        totalEl.textContent = '';
+        totalEl.classList.remove('has-time');
+      }
+
+      activities.forEach(function(act) {
+        var row    = document.createElement('div');
+        row.className = 'act-row';
+
+        var name   = document.createElement('span');
+        name.className = 'act-name';
+        name.textContent = act.name;
+        row.appendChild(name);
+
+        if (act.goalId && goals[act.goalId]) {
+          var chip = document.createElement('span');
+          chip.className = 'act-goal-chip';
+          chip.textContent = goals[act.goalId].text;
+          chip.title = goals[act.goalId].text;
+          row.appendChild(chip);
         }
 
-        countEl.textContent = tasks.length > 0 ? '(' + tasks.length + ')' : '';
+        var timeEl = document.createElement('span');
+        timeEl.className = 'act-time';
+        var h = stats[act.id] || 0;
+        timeEl.textContent = fmtHours(h);
+        if (h > 0) timeEl.classList.add('has-time');
+        row.appendChild(timeEl);
 
-        /* render pending first, then done */
-        pending.concat(done).forEach(function (task) {
-          var el = buildTask(task, q);
-          body.insertBefore(el, emptyEl);
-        });
+        var editBtn = document.createElement('button');
+        editBtn.className = 'act-edit-btn';
+        editBtn.title = 'Edit';
+        editBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5v-2l7-7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
+        editBtn.addEventListener('click', function(e){ e.stopPropagation(); openModal(q, act.id); });
+        row.appendChild(editBtn);
+
+        var delBtn = document.createElement('button');
+        delBtn.className = 'act-del-btn';
+        delBtn.title = 'Delete';
+        delBtn.innerHTML = '&times;';
+        delBtn.addEventListener('click', function(e){ e.stopPropagation(); deleteActivity(q, act.id); });
+        row.appendChild(delBtn);
+
+        body.insertBefore(row, emptyEl);
       });
+    }
 
-      /* hero meta */
-      var heroMeta = document.getElementById('hero-meta');
-      if (totalPending === 0 && totalDone === 0) {
-        heroMeta.textContent = 'empty';
-      } else if (totalPending === 0) {
-        heroMeta.textContent = 'all done';
+    function deleteActivity(q, id) {
+      var data = loadActs();
+      data[q] = (data[q]||[]).filter(function(a){ return a.id !== id; });
+      saveActs(data);
+      render();
+    }
+
+    /* ── Modal ── */
+    function openModal(defaultQ, actId) {
+      editingId = actId || null;
+      var data  = loadActs();
+      var goals = loadGoals();
+      var act   = null;
+
+      if (actId) {
+        QUADS.forEach(function(q) {
+          var found = (data[q]||[]).find(function(a){ return a.id===actId; });
+          if (found) { act = found; modalQ = q; }
+        });
       } else {
-        heroMeta.textContent = totalPending + ' pending' + (totalDone > 0 ? ' · ' + totalDone + ' done' : '');
+        modalQ = defaultQ;
       }
+
+      document.getElementById('modal-title').textContent = actId ? 'Edit Activity' : 'Add Activity';
+      document.getElementById('modal-name').value = act ? act.name : '';
+      document.getElementById('modal-delete').classList.toggle('hidden', !actId);
+
+      /* quadrant picker */
+      document.querySelectorAll('.quad-pick-btn').forEach(function(btn) {
+        btn.className = 'quad-pick-btn';
+        if (btn.dataset.q === modalQ) btn.classList.add('selected-'+modalQ);
+      });
+
+      /* goal selector */
+      var sel = document.getElementById('modal-goal');
+      var activeGoals = Object.values(goals).filter(function(g){ return g.status === 'active'; });
+      sel.innerHTML = '<option value="">— No goal —</option>' +
+        activeGoals.map(function(g){
+          var selected = act && act.goalId === g.id ? ' selected' : '';
+          return '<option value="'+g.id+'"'+selected+'>'+escHtml(g.text)+'</option>';
+        }).join('');
+
+      document.getElementById('modal-overlay').classList.remove('hidden');
+      setTimeout(function(){ document.getElementById('modal-name').focus(); }, 50);
     }
 
-    function buildTask(task, q) {
-      var li = document.createElement('div');
-      li.className = 'task-item' + (task.done ? ' done' : '');
-      li.dataset.id = task.id;
-      li.dataset.q = q;
-      li.draggable = true;
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.add('hidden');
+      editingId = null;
+    }
 
-      var check = document.createElement('input');
-      check.type = 'checkbox';
-      check.className = 'task-check';
-      check.checked = task.done;
-      check.setAttribute('aria-label', 'Mark complete');
+    function saveModal() {
+      var name = document.getElementById('modal-name').value.trim();
+      if (!name) { document.getElementById('modal-name').focus(); return; }
+      var goalId = document.getElementById('modal-goal').value || null;
+      var data   = loadActs();
 
-      var body = document.createElement('div');
-      body.className = 'task-body';
-      var textEl = document.createElement('div');
-      textEl.className = 'task-text';
-      textEl.textContent = task.text;
-      body.appendChild(textEl);
-
-      var del = document.createElement('button');
-      del.className = 'task-delete';
-      del.type = 'button';
-      del.setAttribute('aria-label', 'Delete task');
-      del.innerHTML = '&times;';
-
-      li.appendChild(check);
-      li.appendChild(body);
-      li.appendChild(del);
-
-      check.addEventListener('change', function () {
-        toggleTask(q, task.id, check.checked);
-      });
-      del.addEventListener('click', function (e) {
-        e.stopPropagation();
-        deleteTask(q, task.id);
-      });
-
-      /* drag */
-      li.addEventListener('dragstart', function (e) {
-        dragState = { fromQ: q, taskId: task.id };
-        li.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-      });
-      li.addEventListener('dragend', function () {
-        li.classList.remove('dragging');
-        dragState = null;
-        document.querySelectorAll('.quadrant').forEach(function (qEl) {
-          qEl.classList.remove('drag-over');
+      if (editingId) {
+        /* find and update (possibly moving quadrant) */
+        var found = false;
+        QUADS.forEach(function(q) {
+          var idx = (data[q]||[]).findIndex(function(a){ return a.id===editingId; });
+          if (idx !== -1) {
+            var act = data[q].splice(idx, 1)[0];
+            act.name   = name;
+            act.goalId = goalId;
+            if (!data[modalQ]) data[modalQ] = [];
+            data[modalQ].push(act);
+            found = true;
+          }
         });
+        if (!found) { closeModal(); return; }
+      } else {
+        if (!data[modalQ]) data[modalQ] = [];
+        data[modalQ].push({ id: genId(), name: name, goalId: goalId });
+      }
+
+      saveActs(data);
+      closeModal();
+      render();
+    }
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;');
+    }
+
+    /* ── Wiring ── */
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    document.getElementById('modal-overlay').addEventListener('click', function(e){
+      if (e.target === this) closeModal();
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') closeModal();
+    });
+
+    document.getElementById('modal-save').addEventListener('click', saveModal);
+    document.getElementById('modal-name').addEventListener('keydown', function(e){
+      if (e.key === 'Enter') { e.preventDefault(); saveModal(); }
+    });
+
+    document.getElementById('modal-delete').addEventListener('click', function() {
+      if (!editingId) return;
+      var data = loadActs();
+      QUADS.forEach(function(q) {
+        data[q] = (data[q]||[]).filter(function(a){ return a.id!==editingId; });
       });
-
-      return li;
-    }
-
-    function toggleTask(q, id, done) {
-      var data = load();
-      var arr = data[q] || [];
-      var idx = arr.findIndex(function (t) { return t.id === id; });
-      if (idx === -1) return;
-      arr[idx].done = done;
-      save(data);
+      saveActs(data);
+      closeModal();
       render();
-    }
+    });
 
-    function deleteTask(q, id) {
-      var data = load();
-      data[q] = (data[q] || []).filter(function (t) { return t.id !== id; });
-      save(data);
-      render();
-    }
-
-    function addTask(q, text) {
-      if (!text.trim()) return;
-      var data = load();
-      if (!data[q]) data[q] = [];
-      data[q].unshift({ id: genId(), text: text.trim(), done: false, createdAt: new Date().toISOString() });
-      save(data);
-      render();
-    }
-
-    function moveTask(fromQ, toQ, taskId) {
-      if (fromQ === toQ) return;
-      var data = load();
-      var fromArr = data[fromQ] || [];
-      var idx = fromArr.findIndex(function (t) { return t.id === taskId; });
-      if (idx === -1) return;
-      var task = fromArr.splice(idx, 1)[0];
-      if (!data[toQ]) data[toQ] = [];
-      data[toQ].unshift(task);
-      save(data);
-      render();
-    }
-
-    /* ── Add forms ── */
-    QUADS.forEach(function (q) {
-      var addBtn  = document.querySelector('.q-add-btn[data-q="' + q + '"]');
-      var form    = document.getElementById('form-' + q);
-      var input   = form.querySelector('.q-add-input');
-      var submit  = form.querySelector('.q-add-submit');
-      var cancel  = form.querySelector('.q-add-cancel');
-
-      function openForm() {
-        form.classList.add('open');
-        input.focus();
-      }
-      function closeForm() {
-        form.classList.remove('open');
-        input.value = '';
-      }
-      function submitForm() {
-        var text = input.value.trim();
-        if (!text) { input.focus(); return; }
-        addTask(q, text);
-        input.value = '';
-        input.focus();
-      }
-
-      addBtn.addEventListener('click', openForm);
-      cancel.addEventListener('click', closeForm);
-      submit.addEventListener('click', submitForm);
-      input.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') { e.preventDefault(); submitForm(); }
-        if (e.key === 'Escape') { e.preventDefault(); closeForm(); }
+    document.querySelectorAll('.quad-pick-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        modalQ = btn.dataset.q;
+        document.querySelectorAll('.quad-pick-btn').forEach(function(b) {
+          b.className = 'quad-pick-btn';
+        });
+        btn.classList.add('selected-'+modalQ);
       });
     });
 
-    /* ── Drag & Drop ── */
-    QUADS.forEach(function (q) {
-      var qEl = document.getElementById('quad-' + q);
+    document.querySelectorAll('.q-add-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() { openModal(btn.dataset.q, null); });
+    });
 
-      qEl.addEventListener('dragover', function (e) {
-        if (!dragState) return;
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        qEl.classList.add('drag-over');
-      });
-
-      qEl.addEventListener('dragleave', function (e) {
-        if (!qEl.contains(e.relatedTarget)) {
-          qEl.classList.remove('drag-over');
-        }
-      });
-
-      qEl.addEventListener('drop', function (e) {
-        e.preventDefault();
-        qEl.classList.remove('drag-over');
-        if (!dragState) return;
-        moveTask(dragState.fromQ, q, dragState.taskId);
-        dragState = null;
-      });
+    document.getElementById('period-toggle').addEventListener('click', function(e) {
+      var btn = e.target.closest('.period-btn');
+      if (!btn) return;
+      activePeriod = parseInt(btn.dataset.days, 10);
+      document.querySelectorAll('.period-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      render();
     });
 
     render();
