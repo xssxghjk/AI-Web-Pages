@@ -686,6 +686,32 @@
 
   .hidden { display: none !important; }
 
+  /* ── ACTIVITY LOG ── */
+  .act-log-empty { font-size: 12px; color: var(--muted2); font-style: italic; }
+  .act-log-empty a { color: var(--text2); }
+  .act-log-group { margin-bottom: 14px; }
+  .act-log-group:last-child { margin-bottom: 0; }
+  .act-log-group-label {
+    font-size: 10px; font-style: italic; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted2); margin-bottom: 6px;
+    padding-bottom: 4px; border-bottom: 1px solid var(--border);
+  }
+  .act-log-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 5px 0;
+  }
+  .act-log-name { flex: 1; min-width: 0; font-size: 13px; color: var(--text); }
+  .act-log-goal { font-size: 11px; font-style: italic; color: var(--muted2); }
+  .act-log-input-wrap { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .act-log-input {
+    width: 52px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 2px; color: var(--text); text-align: center;
+    font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 700;
+    padding: 3px 6px; transition: border-color 0.15s;
+  }
+  .act-log-input:focus { outline: none; border-color: var(--accent); }
+  .act-log-unit { font-size: 11px; font-style: italic; color: var(--muted2); }
+
   /* ── TODOS ── */
   .todo-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px; }
   .todo-item {
@@ -1230,6 +1256,63 @@ function saveTodosImmediate() {
   setTimeout(function() { showSaveStatus('idle'); }, 2000);
 }
 
+// ── Activity Log helpers ──────────────────────────────────────────────────────
+function loadEisenhowerActs() {
+  try { var d = JSON.parse(localStorage.getItem('eisenhower_v2')||'null');
+    if (d && typeof d === 'object') return d;
+  } catch(e) {}
+  return null;
+}
+
+function renderActivityLogHtml(entry) {
+  var acts = loadEisenhowerActs();
+  var existingLog = {};
+  (entry.activityLog || []).forEach(function(item) {
+    existingLog[item.activityId] = item.hours;
+  });
+
+  var allActs = acts ? [].concat(
+    (acts.q1||[]).map(function(a){ return Object.assign({},a,{q:'q1'}); }),
+    (acts.q2||[]).map(function(a){ return Object.assign({},a,{q:'q2'}); }),
+    (acts.q3||[]).map(function(a){ return Object.assign({},a,{q:'q3'}); }),
+    (acts.q4||[]).map(function(a){ return Object.assign({},a,{q:'q4'}); })
+  ) : [];
+
+  if (!allActs.length) {
+    return '<p class="act-log-empty">No activities set up yet — ' +
+      '<a href="../eisenhower-matrix/">define them in the Eisenhower Matrix</a>.</p>';
+  }
+
+  var QLABEL = { q1:'Do — Urgent &amp; Important', q2:'Schedule — Not Urgent &amp; Important',
+                 q3:'Delegate — Urgent &amp; Not Important', q4:'Eliminate — Not Urgent &amp; Not Important' };
+  var grouped = { q1:[], q2:[], q3:[], q4:[] };
+  allActs.forEach(function(a) { grouped[a.q].push(a); });
+
+  var html = '';
+  ['q1','q2','q3','q4'].forEach(function(q) {
+    if (!grouped[q].length) return;
+    html += '<div class="act-log-group">';
+    html += '<div class="act-log-group-label">'+QLABEL[q]+'</div>';
+    grouped[q].forEach(function(act) {
+      var val = existingLog[act.id] || '';
+      var goalText = act.goalId && goals[act.goalId] ? ' — '+escHtml(goals[act.goalId].text) : '';
+      html += '<div class="act-log-row">' +
+        '<span class="act-log-name">'+escHtml(act.name)+'</span>' +
+        (goalText ? '<span class="act-log-goal">'+goalText+'</span>' : '') +
+        '<div class="act-log-input-wrap">' +
+          '<input type="number" class="act-log-input" id="act-'+act.id+'"' +
+            ' data-activity-id="'+act.id+'" min="0" max="24" step="0.5"' +
+            ' value="'+(val||'')+'" placeholder="0"' +
+            ' oninput="scheduleEveningSave()" />' +
+          '<span class="act-log-unit">h</span>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
 // ── Evening Tab ───────────────────────────────────────────────────────────────
 function renderEveningTab(container) {
   var entry        = getEntry(currentDate, 'evening') || {};
@@ -1295,6 +1378,11 @@ function renderEveningTab(container) {
       '<div class="form-group">' +
         '<label class="form-label">Progress on Goals</label>' +
         goalProgressHtml +
+      '</div>' +
+      '<div class="form-group" id="activity-log-section">' +
+        '<label class="form-label">Activity Time Log</label>' +
+        '<p class="form-hint">Roughly how many hours did you spend on each activity today?</p>' +
+        renderActivityLogHtml(entry) +
       '</div>' +
       '<div class="form-group">' +
         '<label class="form-label">Mood &amp; Energy</label>' +
@@ -1438,6 +1526,12 @@ function saveEvening() {
     return { goalId: id, progressAtSave: goals[id] ? goals[id].progress : 0 };
   });
 
+  var activityLog = [];
+  document.querySelectorAll('#activity-log-section .act-log-input').forEach(function(input) {
+    var hours = parseFloat(input.value) || 0;
+    if (hours > 0) activityLog.push({ activityId: input.dataset.activityId, hours: hours });
+  });
+
   setEntry(currentDate, 'evening', {
     whatHappened: whatEl.value,
     mood:         selectedMood,
@@ -1445,7 +1539,8 @@ function saveEvening() {
     win:          winEl    ? winEl.value    : '',
     learning:     learnEl  ? learnEl.value  : '',
     kaizen:       kaizenEl ? kaizenEl.value : '',
-    goalProgress: goalProgress
+    goalProgress: goalProgress,
+    activityLog:  activityLog
   });
   showSaveStatus('saved');
   setTimeout(function() { showSaveStatus('idle'); }, 2000);
