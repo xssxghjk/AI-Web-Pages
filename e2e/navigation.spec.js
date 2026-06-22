@@ -80,3 +80,12 @@ test('todos page loads', async ({ page }) => {
   expect(sidebarVisible || hamburgerVisible).toBe(true);
 });
 
+test('eisenhower matrix page loads', async ({ page }) => {
+  await page.goto('/eisenhower-matrix/');
+  await expect(page).toHaveTitle(/Eisenhower Matrix/);
+  await expect(page.locator('h1')).toContainText('Eisenhower Matrix');
+  const sidebarVisible = await page.locator('.sidebar').isVisible();
+  const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();
+  expect(sidebarVisible || hamburgerVisible).toBe(true);
+});
+

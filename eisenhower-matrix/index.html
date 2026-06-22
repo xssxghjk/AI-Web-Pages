@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eisenhower Matrix</title>
+  <script src="../nav.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #1c1814;
+      --surface:  #252018;
+      --surface2: #2e271d;
+      --border:   #3a3025;
+      --border2:  #4a3e2e;
+      --text:     #e8dfd0;
+      --muted:    #9a8a76;
+      --muted2:   #7a6e60;
+      --muted3:   #5a4e40;
+
+      /* quadrant accent colours */
+      --q1:       #c47070;
+      --q1-dim:   rgba(196,112,112,0.08);
+      --q1-bdr:   rgba(196,112,112,0.22);
+      --q2:       #6aaa80;
+      --q2-dim:   rgba(106,170,128,0.08);
+      --q2-bdr:   rgba(106,170,128,0.22);
+      --q3:       #6a9abb;
+      --q3-dim:   rgba(106,154,187,0.08);
+      --q3-bdr:   rgba(106,154,187,0.22);
+      --q4:       #8a7a5a;
+      --q4-dim:   rgba(138,122,90,0.08);
+      --q4-bdr:   rgba(138,122,90,0.20);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.018) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.010) 1px, transparent 1px);
+      background-size: 4px 4px, 6px 6px;
+      background-position: 0 0, 2px 2px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 1.5rem 1.75rem 1.25rem;
+      border-bottom: 2px solid var(--text);
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+    .hero-inner {
+      display: flex;
+      align-items: baseline;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--text);
+    }
+    .hero-meta {
+      font-size: 0.8rem;
+      font-style: italic;
+      color: var(--muted);
+    }
+
+    /* ── MATRIX OUTER ── */
+    .matrix-outer {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem 1.25rem 0.75rem;
+      min-height: 0;
+    }
+
+    /* ── AXIS GRID ── */
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: 26px 1fr 1fr;
+      grid-template-rows: 26px 1fr 1fr;
+      grid-template-areas:
+        "corner  col1   col2"
+        "row1    q1     q2"
+        "row2    q3     q4";
+      gap: 3px;
+      flex: 1;
+      min-height: 480px;
+    }
+
+    /* Axis labels */
+    .ax-corner { grid-area: corner; }
+
+    .ax-col {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.58rem;
+      font-weight: 400;
+      font-style: italic;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted3);
+    }
+    .ax-col1 { grid-area: col1; }
+    .ax-col2 { grid-area: col2; }
+
+    .ax-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.58rem;
+      font-weight: 400;
+      font-style: italic;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted3);
+    }
+    .ax-row1 { grid-area: row1; }
+    .ax-row2 { grid-area: row2; }
+
+    /* ── QUADRANTS ── */
+    .quadrant {
+      border: 1px solid var(--border2);
+      border-radius: 2px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: border-color 0.18s;
+      min-height: 0;
+    }
+    .quadrant.drag-over {
+      border-color: var(--q-accent, var(--border2));
+      box-shadow: inset 0 0 0 1px var(--q-accent, var(--border2));
+    }
+
+    .q1 { grid-area: q1; background: var(--q1-dim);  --q-accent: var(--q1);  --q-bdr: var(--q1-bdr); }
+    .q2 { grid-area: q2; background: var(--q2-dim);  --q-accent: var(--q2);  --q-bdr: var(--q2-bdr); }
+    .q3 { grid-area: q3; background: var(--q3-dim);  --q-accent: var(--q3);  --q-bdr: var(--q3-bdr); }
+    .q4 { grid-area: q4; background: var(--q4-dim);  --q-accent: var(--q4);  --q-bdr: var(--q4-bdr); }
+
+    /* Quadrant header */
+    .q-header {
+      flex-shrink: 0;
+      padding: 0.6rem 0.85rem 0.45rem;
+      border-bottom: 1px solid var(--q-bdr, var(--border));
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .q-label-group { flex: 1; min-width: 0; }
+    .q-action {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      font-style: italic;
+      letter-spacing: 0.02em;
+      color: var(--q-accent);
+      line-height: 1.1;
+    }
+    .q-desc {
+      font-size: 0.6rem;
+      font-style: italic;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted3);
+      margin-top: 0.1rem;
+    }
+    .q-count {
+      font-size: 0.65rem;
+      font-style: italic;
+      color: var(--muted3);
+      flex-shrink: 0;
+    }
+    .q-add-btn {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 2px;
+      border: 1px solid var(--q-bdr, var(--border));
+      background: transparent;
+      color: var(--q-accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+      padding: 0;
+    }
+    .q-add-btn:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: var(--q-accent);
+    }
+
+    /* Task list scroll area */
+    .q-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 0.25rem 0;
+      min-height: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border2) transparent;
+    }
+    .q-body::-webkit-scrollbar { width: 4px; }
+    .q-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+    .q-body::-webkit-scrollbar-track { background: transparent; }
+
+    /* Empty hint */
+    .q-empty {
+      padding: 1rem 0.85rem;
+      font-size: 0.72rem;
+      font-style: italic;
+      color: var(--muted3);
+      text-align: center;
+      display: none;
+    }
+    .q-empty.visible { display: block; }
+
+    /* Inline add form */
+    .q-add-form {
+      display: none;
+      padding: 0.45rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+      gap: 0.4rem;
+      align-items: center;
+    }
+    .q-add-form.open { display: flex; }
+    .q-add-input {
+      flex: 1;
+      min-width: 0;
+      background: var(--surface);
+      border: 1px solid var(--q-bdr, var(--border2));
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.8rem;
+      padding: 0.38rem 0.6rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .q-add-input::placeholder { color: var(--muted3); font-style: italic; }
+    .q-add-input:focus { border-color: var(--q-accent); }
+    .q-add-submit {
+      flex-shrink: 0;
+      background: transparent;
+      border: 1px solid var(--q-bdr, var(--border2));
+      color: var(--q-accent);
+      border-radius: 2px;
+      padding: 0.32rem 0.6rem;
+      font-family: 'DM Serif Text', Georgia, serif;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .q-add-submit:hover { background: rgba(255,255,255,0.05); }
+    .q-add-cancel {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: var(--muted3);
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0.2rem;
+      transition: color 0.15s;
+    }
+    .q-add-cancel:hover { color: var(--muted); }
+
+    /* Task items */
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
+      padding: 0.45rem 0.85rem;
+      border-bottom: 1px solid rgba(58,48,37,0.5);
+      cursor: grab;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .task-item:last-child { border-bottom: none; }
+    .task-item:hover { background: rgba(255,255,255,0.025); }
+    .task-item.dragging { opacity: 0.35; cursor: grabbing; }
+    .task-item.drag-placeholder {
+      border: 1px dashed var(--q-accent, var(--border2));
+      background: rgba(255,255,255,0.02);
+      border-radius: 2px;
+      margin: 2px 0.85rem;
+    }
+
+    /* Custom checkbox */
+    .task-check {
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid var(--border2);
+      border-radius: 2px;
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.15s, background 0.15s;
+      margin-top: 2px;
+    }
+    .task-check:hover { border-color: var(--q-accent, var(--border2)); }
+    .task-check:checked {
+      background: var(--q-accent, var(--border2));
+      border-color: var(--q-accent, var(--border2));
+    }
+    .task-check:checked::after {
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: 0px;
+      width: 7px;
+      height: 4px;
+      border-left: 1.5px solid var(--bg);
+      border-bottom: 1.5px solid var(--bg);
+      transform: rotate(-45deg);
+    }
+
+    .task-body { flex: 1; min-width: 0; }
+    .task-text {
+      font-size: 0.82rem;
+      color: var(--text);
+      line-height: 1.4;
+      word-break: break-word;
+      transition: color 0.18s;
+    }
+    .task-item.done .task-text {
+      text-decoration: line-through;
+      color: var(--muted3);
+    }
+
+    .task-delete {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: var(--muted3);
+      cursor: pointer;
+      padding: 0 0.15rem;
+      border-radius: 2px;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+      line-height: 1;
+      font-size: 1rem;
+      margin-top: 1px;
+    }
+    .task-item:hover .task-delete { opacity: 1; }
+    .task-delete:hover { color: var(--q1); }
+
+    /* Drag ghost indicator line */
+    .drop-indicator {
+      height: 2px;
+      background: var(--q-accent, var(--border2));
+      border-radius: 1px;
+      margin: 0 0.85rem;
+      display: none;
+    }
+    .drop-indicator.visible { display: block; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 1rem 1.75rem;
+      font-size: 0.75rem;
+      font-style: italic;
+      color: var(--muted3);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 800px) {
+      .matrix-outer { padding: 0.75rem 0.75rem 0.5rem; }
+
+      .matrix-grid {
+        grid-template-columns: 20px 1fr 1fr;
+        grid-template-rows: 20px 1fr 1fr;
+        min-height: 0;
+        gap: 2px;
+      }
+      .ax-col { font-size: 0.52rem; }
+      .ax-row { font-size: 0.52rem; }
+
+      .q-action { font-size: 0.78rem; }
+      .q-desc { display: none; }
+      .task-text { font-size: 0.78rem; }
+      .q-add-input { font-size: 0.76rem; }
+    }
+
+    @media (max-width: 540px) {
+      .matrix-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        grid-template-areas:
+          "q1" "q2" "q3" "q4";
+        gap: 6px;
+        min-height: 0;
+      }
+      .ax-corner, .ax-col1, .ax-col2, .ax-row1, .ax-row2 { display: none; }
+      .quadrant { min-height: 180px; }
+      .hero { padding: 1.1rem 1rem 0.9rem; }
+      .matrix-outer { padding: 0.6rem 0.75rem 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <h1>Eisenhower Matrix</h1>
+      <span class="hero-meta" id="hero-meta"></span>
+    </div>
+  </header>
+
+  <div class="matrix-outer">
+    <div class="matrix-grid" id="matrix-grid">
+
+      <div class="ax-corner"></div>
+      <div class="ax-col ax-col1">Urgent</div>
+      <div class="ax-col ax-col2">Not Urgent</div>
+
+      <div class="ax-row ax-row1">Important</div>
+
+      <!-- Q1: Urgent + Important -->
+      <div class="quadrant q1" data-q="q1" id="quad-q1">
+        <div class="q-header">
+          <div class="q-label-group">
+            <div class="q-action">Do</div>
+            <div class="q-desc">Urgent &amp; Important</div>
+          </div>
+          <span class="q-count" id="count-q1"></span>
+          <button class="q-add-btn" data-q="q1" aria-label="Add task to Do">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="q-add-form" id="form-q1">
+          <input type="text" class="q-add-input" placeholder="New task…" maxlength="200" />
+          <button type="button" class="q-add-submit">Add</button>
+          <button type="button" class="q-add-cancel">&times;</button>
+        </div>
+        <div class="q-body" id="body-q1">
+          <p class="q-empty" id="empty-q1">No tasks here.</p>
+        </div>
+      </div>
+
+      <!-- Q2: Not Urgent + Important -->
+      <div class="quadrant q2" data-q="q2" id="quad-q2">
+        <div class="q-header">
+          <div class="q-label-group">
+            <div class="q-action">Schedule</div>
+            <div class="q-desc">Not Urgent &amp; Important</div>
+          </div>
+          <span class="q-count" id="count-q2"></span>
+          <button class="q-add-btn" data-q="q2" aria-label="Add task to Schedule">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="q-add-form" id="form-q2">
+          <input type="text" class="q-add-input" placeholder="New task…" maxlength="200" />
+          <button type="button" class="q-add-submit">Add</button>
+          <button type="button" class="q-add-cancel">&times;</button>
+        </div>
+        <div class="q-body" id="body-q2">
+          <p class="q-empty" id="empty-q2">No tasks here.</p>
+        </div>
+      </div>
+
+      <div class="ax-row ax-row2">Not Important</div>
+
+      <!-- Q3: Urgent + Not Important -->
+      <div class="quadrant q3" data-q="q3" id="quad-q3">
+        <div class="q-header">
+          <div class="q-label-group">
+            <div class="q-action">Delegate</div>
+            <div class="q-desc">Urgent &amp; Not Important</div>
+          </div>
+          <span class="q-count" id="count-q3"></span>
+          <button class="q-add-btn" data-q="q3" aria-label="Add task to Delegate">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="q-add-form" id="form-q3">
+          <input type="text" class="q-add-input" placeholder="New task…" maxlength="200" />
+          <button type="button" class="q-add-submit">Add</button>
+          <button type="button" class="q-add-cancel">&times;</button>
+        </div>
+        <div class="q-body" id="body-q3">
+          <p class="q-empty" id="empty-q3">No tasks here.</p>
+        </div>
+      </div>
+
+      <!-- Q4: Not Urgent + Not Important -->
+      <div class="quadrant q4" data-q="q4" id="quad-q4">
+        <div class="q-header">
+          <div class="q-label-group">
+            <div class="q-action">Eliminate</div>
+            <div class="q-desc">Not Urgent &amp; Not Important</div>
+          </div>
+          <span class="q-count" id="count-q4"></span>
+          <button class="q-add-btn" data-q="q4" aria-label="Add task to Eliminate">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="q-add-form" id="form-q4">
+          <input type="text" class="q-add-input" placeholder="New task…" maxlength="200" />
+          <button type="button" class="q-add-submit">Add</button>
+          <button type="button" class="q-add-cancel">&times;</button>
+        </div>
+        <div class="q-body" id="body-q4">
+          <p class="q-empty" id="empty-q4">No tasks here.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <span id="page-version" style="opacity:0.65"></span>
+    <a href="https://github.com/xssxghjk/AI-Web-Pages" target="_blank" rel="noopener">View on GitHub</a>
+    <span id="storage-size"></span>
+  </footer>
+  <script>fetch('../version.json').then(r=>r.json()).then(v=>{var e=document.getElementById('page-version');if(e)e.textContent='v'+v.version}).catch(()=>{});</script>
+
+  <script>
+  (function () {
+    var STORAGE_KEY = 'eisenhower_v1';
+    var QUADS = ['q1', 'q2', 'q3', 'q4'];
+
+    var dragState = null; /* { fromQ, taskId } */
+
+    /* ── Storage ── */
+    function load() {
+      try {
+        var d = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+        if (d && typeof d === 'object') return d;
+      } catch (e) {}
+      return { q1: [], q2: [], q3: [], q4: [] };
+    }
+    function save(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+    function genId() {
+      return Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
+    }
+
+    /* ── Render ── */
+    function render() {
+      var data = load();
+      var totalPending = 0;
+      var totalDone = 0;
+
+      QUADS.forEach(function (q) {
+        var tasks = data[q] || [];
+        var body = document.getElementById('body-' + q);
+        var emptyEl = document.getElementById('empty-' + q);
+        var countEl = document.getElementById('count-' + q);
+
+        /* remove existing task nodes */
+        body.querySelectorAll('.task-item').forEach(function (el) { el.remove(); });
+
+        var pending = tasks.filter(function (t) { return !t.done; });
+        var done    = tasks.filter(function (t) {  return t.done; });
+        totalPending += pending.length;
+        totalDone += done.length;
+
+        if (tasks.length === 0) {
+          emptyEl.classList.add('visible');
+        } else {
+          emptyEl.classList.remove('visible');
+        }
+
+        countEl.textContent = tasks.length > 0 ? '(' + tasks.length + ')' : '';
+
+        /* render pending first, then done */
+        pending.concat(done).forEach(function (task) {
+          var el = buildTask(task, q);
+          body.insertBefore(el, emptyEl);
+        });
+      });
+
+      /* hero meta */
+      var heroMeta = document.getElementById('hero-meta');
+      if (totalPending === 0 && totalDone === 0) {
+        heroMeta.textContent = 'empty';
+      } else if (totalPending === 0) {
+        heroMeta.textContent = 'all done';
+      } else {
+        heroMeta.textContent = totalPending + ' pending' + (totalDone > 0 ? ' · ' + totalDone + ' done' : '');
+      }
+    }
+
+    function buildTask(task, q) {
+      var li = document.createElement('div');
+      li.className = 'task-item' + (task.done ? ' done' : '');
+      li.dataset.id = task.id;
+      li.dataset.q = q;
+      li.draggable = true;
+
+      var check = document.createElement('input');
+      check.type = 'checkbox';
+      check.className = 'task-check';
+      check.checked = task.done;
+      check.setAttribute('aria-label', 'Mark complete');
+
+      var body = document.createElement('div');
+      body.className = 'task-body';
+      var textEl = document.createElement('div');
+      textEl.className = 'task-text';
+      textEl.textContent = task.text;
+      body.appendChild(textEl);
+
+      var del = document.createElement('button');
+      del.className = 'task-delete';
+      del.type = 'button';
+      del.setAttribute('aria-label', 'Delete task');
+      del.innerHTML = '&times;';
+
+      li.appendChild(check);
+      li.appendChild(body);
+      li.appendChild(del);
+
+      check.addEventListener('change', function () {
+        toggleTask(q, task.id, check.checked);
+      });
+      del.addEventListener('click', function (e) {
+        e.stopPropagation();
+        deleteTask(q, task.id);
+      });
+
+      /* drag */
+      li.addEventListener('dragstart', function (e) {
+        dragState = { fromQ: q, taskId: task.id };
+        li.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      li.addEventListener('dragend', function () {
+        li.classList.remove('dragging');
+        dragState = null;
+        document.querySelectorAll('.quadrant').forEach(function (qEl) {
+          qEl.classList.remove('drag-over');
+        });
+      });
+
+      return li;
+    }
+
+    function toggleTask(q, id, done) {
+      var data = load();
+      var arr = data[q] || [];
+      var idx = arr.findIndex(function (t) { return t.id === id; });
+      if (idx === -1) return;
+      arr[idx].done = done;
+      save(data);
+      render();
+    }
+
+    function deleteTask(q, id) {
+      var data = load();
+      data[q] = (data[q] || []).filter(function (t) { return t.id !== id; });
+      save(data);
+      render();
+    }
+
+    function addTask(q, text) {
+      if (!text.trim()) return;
+      var data = load();
+      if (!data[q]) data[q] = [];
+      data[q].unshift({ id: genId(), text: text.trim(), done: false, createdAt: new Date().toISOString() });
+      save(data);
+      render();
+    }
+
+    function moveTask(fromQ, toQ, taskId) {
+      if (fromQ === toQ) return;
+      var data = load();
+      var fromArr = data[fromQ] || [];
+      var idx = fromArr.findIndex(function (t) { return t.id === taskId; });
+      if (idx === -1) return;
+      var task = fromArr.splice(idx, 1)[0];
+      if (!data[toQ]) data[toQ] = [];
+      data[toQ].unshift(task);
+      save(data);
+      render();
+    }
+
+    /* ── Add forms ── */
+    QUADS.forEach(function (q) {
+      var addBtn  = document.querySelector('.q-add-btn[data-q="' + q + '"]');
+      var form    = document.getElementById('form-' + q);
+      var input   = form.querySelector('.q-add-input');
+      var submit  = form.querySelector('.q-add-submit');
+      var cancel  = form.querySelector('.q-add-cancel');
+
+      function openForm() {
+        form.classList.add('open');
+        input.focus();
+      }
+      function closeForm() {
+        form.classList.remove('open');
+        input.value = '';
+      }
+      function submitForm() {
+        var text = input.value.trim();
+        if (!text) { input.focus(); return; }
+        addTask(q, text);
+        input.value = '';
+        input.focus();
+      }
+
+      addBtn.addEventListener('click', openForm);
+      cancel.addEventListener('click', closeForm);
+      submit.addEventListener('click', submitForm);
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); submitForm(); }
+        if (e.key === 'Escape') { e.preventDefault(); closeForm(); }
+      });
+    });
+
+    /* ── Drag & Drop ── */
+    QUADS.forEach(function (q) {
+      var qEl = document.getElementById('quad-' + q);
+
+      qEl.addEventListener('dragover', function (e) {
+        if (!dragState) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        qEl.classList.add('drag-over');
+      });
+
+      qEl.addEventListener('dragleave', function (e) {
+        if (!qEl.contains(e.relatedTarget)) {
+          qEl.classList.remove('drag-over');
+        }
+      });
+
+      qEl.addEventListener('drop', function (e) {
+        e.preventDefault();
+        qEl.classList.remove('drag-over');
+        if (!dragState) return;
+        moveTask(dragState.fromQ, q, dragState.taskId);
+        dragState = null;
+      });
+    });
+
+    render();
+  })();
+  </script>
+
+</body>
+</html>
