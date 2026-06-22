@@ -542,6 +542,28 @@
     color: var(--accent) !important;
   }
 
+  /* ── WEEKLY DUE BANNER ── */
+  .weekly-due-banner {
+    background: rgba(196,134,74,0.08);
+    border: 1px solid rgba(196,134,74,0.3);
+    border-radius: 2px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--accent);
+    font-style: italic;
+    margin-bottom: 16px;
+  }
+  .weekly-tab-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-left: 5px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+
   /* ── MODAL ── */
   .modal-overlay {
     position: fixed; inset: 0; z-index: 500;
@@ -749,6 +771,7 @@
 <nav class="nav-tabs" id="nav-tabs">
   <div class="nav-tab active" data-tab="morning" onclick="switchTab('morning')">Morning</div>
   <div class="nav-tab" data-tab="evening" onclick="switchTab('evening')">Evening</div>
+  <div class="nav-tab" data-tab="weekly" id="weekly-tab" onclick="switchTab('weekly')">Weekly</div>
   <div class="nav-tab" data-tab="goals" onclick="switchTab('goals')">Goals</div>
   <div class="nav-tab" data-tab="history" onclick="switchTab('history')">History</div>
 </nav>
@@ -863,6 +886,7 @@ var LS_ENTRIES     = 'journal_entries';
 var LS_GOALS       = 'journal_goals';
 var LS_REVIEWS     = 'journal_quarterly_reviews';
 var LS_LAST_REVIEW = 'journal_last_quarterly_review';
+var LS_WEEKLY      = 'journal_weekly_reviews';
 
 var CATEGORY_COLORS = {
   Career: '#5ab4cc', Health: '#7ab87a', Learning: '#d4924a',
@@ -877,9 +901,11 @@ var activeTab    = 'morning';
 var goals        = {};
 var entries      = {};
 var reviews      = [];
+var weeklyReviews = {};
 var lastReviewDate = null;
 var morningTimer = null;
 var eveningTimer = null;
+var weeklyTimer  = null;
 var editingGoalId = null;
 var selectedMood  = null;
 var historyYear   = new Date().getFullYear();
@@ -890,6 +916,7 @@ var currentTodos  = [];
 document.addEventListener('DOMContentLoaded', function() {
   loadData();
   updateDateDisplay();
+  updateWeeklyTabLabel();
   switchTab('morning');
   fetch('../version.json').then(function(r){ return r.json(); }).then(function(v){
     var el = document.getElementById('page-version');
@@ -899,10 +926,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 function loadData() {
-  try { entries = JSON.parse(localStorage.getItem(LS_ENTRIES) || '{}'); } catch(e) { entries = {}; }
-  try { goals   = JSON.parse(localStorage.getItem(LS_GOALS)   || '{}'); } catch(e) { goals = {}; }
-  try { reviews = JSON.parse(localStorage.getItem(LS_REVIEWS) || '[]'); } catch(e) { reviews = []; }
+  try { entries       = JSON.parse(localStorage.getItem(LS_ENTRIES)  || '{}'); } catch(e) { entries = {}; }
+  try { goals         = JSON.parse(localStorage.getItem(LS_GOALS)    || '{}'); } catch(e) { goals = {}; }
+  try { reviews       = JSON.parse(localStorage.getItem(LS_REVIEWS)  || '[]'); } catch(e) { reviews = []; }
+  try { weeklyReviews = JSON.parse(localStorage.getItem(LS_WEEKLY)   || '{}'); } catch(e) { weeklyReviews = {}; }
   lastReviewDate = localStorage.getItem(LS_LAST_REVIEW) || null;
+}
+
+function saveWeeklyReviews() {
+  try { localStorage.setItem(LS_WEEKLY, JSON.stringify(weeklyReviews)); }
+  catch(e) { showToast('Storage full — could not save weekly review', 'error'); }
 }
 
 function saveGoals() {
@@ -964,6 +997,7 @@ function goToToday() { setDate(todayStr()); }
 function setDate(d) {
   if (activeTab === 'morning' && morningTimer) { clearTimeout(morningTimer); morningTimer = null; saveMorning(); }
   if (activeTab === 'evening' && eveningTimer) { clearTimeout(eveningTimer); eveningTimer = null; saveEvening(); }
+  if (activeTab === 'weekly'  && weeklyTimer)  { clearTimeout(weeklyTimer);  weeklyTimer  = null; saveWeekly();  }
   currentDate = d;
   updateDateDisplay();
   switchTab(activeTab);
@@ -991,6 +1025,31 @@ function onDatePickerChange() {
   if (val && val <= todayStr()) setDate(val);
 }
 
+function isSunday(dateStr) {
+  var parts = dateStr.split('-').map(Number);
+  return new Date(parts[0], parts[1] - 1, parts[2]).getDay() === 0;
+}
+
+function getWeekKey(dateStr) {
+  var parts = dateStr.split('-').map(Number);
+  var d = new Date(parts[0], parts[1] - 1, parts[2]);
+  var dow = (d.getDay() + 6) % 7;
+  var monday = new Date(parts[0], parts[1] - 1, parts[2] - dow);
+  return monday.getFullYear() + '-' + padZ(monday.getMonth() + 1) + '-' + padZ(monday.getDate());
+}
+
+function updateWeeklyTabLabel() {
+  var tab = document.getElementById('weekly-tab');
+  if (!tab) return;
+  var existing = tab.querySelector('.weekly-tab-dot');
+  if (existing) existing.parentNode.removeChild(existing);
+  if (isSunday(todayStr())) {
+    var dot = document.createElement('span');
+    dot.className = 'weekly-tab-dot';
+    tab.appendChild(dot);
+  }
+}
+
 // ── Tabs ─────────────────────────────────────────────────────────────────────
 function switchTab(tab) {
   if (activeTab === 'morning' && tab !== 'morning' && morningTimer) {
@@ -999,14 +1058,18 @@ function switchTab(tab) {
   if (activeTab === 'evening' && tab !== 'evening' && eveningTimer) {
     clearTimeout(eveningTimer); eveningTimer = null; saveEvening();
   }
+  if (activeTab === 'weekly' && tab !== 'weekly' && weeklyTimer) {
+    clearTimeout(weeklyTimer); weeklyTimer = null; saveWeekly();
+  }
   activeTab = tab;
   document.querySelectorAll('.nav-tab').forEach(function(t) {
     t.classList.toggle('active', t.dataset.tab === tab);
   });
   var main = document.getElementById('main');
   if (!main) return;
-  if (tab === 'morning')  renderMorningTab(main);
+  if (tab === 'morning')       renderMorningTab(main);
   else if (tab === 'evening')  renderEveningTab(main);
+  else if (tab === 'weekly')   renderWeeklyTab(main);
   else if (tab === 'goals')    renderGoalsTab(main);
   else if (tab === 'history')  renderHistoryTab(main);
 }
@@ -1049,16 +1112,6 @@ function renderMorningTab(container) {
         '<p class="form-hint">Which long-term goals does today connect to?</p>' +
         renderGoalConnections(activeGoals, entry.goalConnections || []) +
       '</div>' +
-      '<div class="form-group">' +
-        '<label class="form-label" for="field-intention">Daily Intention</label>' +
-        '<p class="form-hint">How do you want to feel or show up today?</p>' +
-        '<p class="form-help-text">e.g., "I want to be focused and kind today"</p>' +
-        '<textarea class="form-textarea" id="field-intention" rows="2" maxlength="200"' +
-          ' placeholder="I want to be..."' +
-          ' oninput="updateCharCount(\'intention\',200);scheduleMorningSave()">' +
-          escHtml(entry.intention || '') + '</textarea>' +
-        '<div class="char-count"><span id="count-intention">' + (entry.intention || '').length + '</span>/200</div>' +
-      '</div>' +
     '</div>' +
     (entry.savedAt ? '<p class="last-saved">Last saved ' + fmtTime(entry.savedAt) + '</p>' : '') +
     '</div>';
@@ -1089,14 +1142,12 @@ function saveMorning() {
   morningTimer = null;
   var focusEl = document.getElementById('field-focus');
   if (!focusEl) return;
-  var intentionEl = document.getElementById('field-intention');
   var goalConnections = Array.prototype.slice.call(
     document.getElementById('main').querySelectorAll('.goal-checkbox:checked')
   ).map(function(cb) { return cb.value; });
 
   setEntry(currentDate, 'morning', {
     focus: focusEl.value,
-    intention: intentionEl ? intentionEl.value : '',
     goalConnections: goalConnections,
     todos: currentTodos
   });
@@ -1274,6 +1325,15 @@ function renderEveningTab(container) {
           escHtml(entry.learning || '') + '</textarea>' +
         '<div class="char-count"><span id="count-learning">' + (entry.learning || '').length + '</span>/300</div>' +
       '</div>' +
+      '<div class="form-group">' +
+        '<label class="form-label" for="field-kaizen">Daily Kaizen</label>' +
+        '<p class="form-hint">One small thing you can do better tomorrow.</p>' +
+        '<textarea class="form-textarea" id="field-kaizen" rows="2" maxlength="300"' +
+          ' placeholder="e.g., \'Start earlier, fewer context switches\'"' +
+          ' oninput="updateCharCount(\'kaizen\',300);scheduleEveningSave()">' +
+          escHtml(entry.kaizen || '') + '</textarea>' +
+        '<div class="char-count"><span id="count-kaizen">' + (entry.kaizen || '').length + '</span>/300</div>' +
+      '</div>' +
     '</div>' +
     (entry.savedAt ? '<p class="last-saved">Last saved ' + fmtTime(entry.savedAt) + '</p>' : '') +
     '</div>';
@@ -1370,6 +1430,7 @@ function saveEvening() {
   var moodNoteEl = document.getElementById('field-moodNote');
   var winEl      = document.getElementById('field-win');
   var learnEl    = document.getElementById('field-learning');
+  var kaizenEl   = document.getElementById('field-kaizen');
 
   var morningEntry    = getEntry(currentDate, 'morning') || {};
   var connectedIds    = morningEntry.goalConnections || [];
@@ -1381,8 +1442,9 @@ function saveEvening() {
     whatHappened: whatEl.value,
     mood:         selectedMood,
     moodNote:     moodNoteEl ? moodNoteEl.value : '',
-    win:          winEl   ? winEl.value   : '',
-    learning:     learnEl ? learnEl.value : '',
+    win:          winEl    ? winEl.value    : '',
+    learning:     learnEl  ? learnEl.value  : '',
+    kaizen:       kaizenEl ? kaizenEl.value : '',
     goalProgress: goalProgress
   });
   showSaveStatus('saved');
@@ -1696,6 +1758,95 @@ function nextHistoryMonth() {
   if (historyMonth === 11) { historyYear++; historyMonth = 0; }
   else historyMonth++;
   switchTab('history');
+}
+
+// ── Weekly Tab ────────────────────────────────────────────────────────────────
+function renderWeeklyTab(container) {
+  var weekKey  = getWeekKey(currentDate);
+  var review   = weeklyReviews[weekKey] || {};
+  var isSun    = isSunday(currentDate);
+  var weekEnd  = shiftDate(weekKey, 6);
+  var weekLabel = formatDateShort(weekKey) + ' – ' + formatDateShort(weekEnd);
+
+  var bannerHtml = isSun
+    ? '<div class="weekly-due-banner">Sunday — a good moment to reflect on the week before it closes.</div>'
+    : '';
+
+  container.innerHTML =
+    '<div class="tab-content">' +
+    '<div class="section-header">' +
+      '<div><h2 class="section-title">Weekly Retrospective</h2>' +
+      '<p class="section-sub">' + weekLabel + '</p></div>' +
+    '</div>' +
+    bannerHtml +
+    '<div class="form-card">' +
+      '<div class="form-group">' +
+        '<label class="form-label" for="field-w-highlights">Highlights <span class="required-mark">*</span></label>' +
+        '<p class="form-hint">What went well this week?</p>' +
+        '<textarea class="form-textarea" id="field-w-highlights" rows="4" maxlength="600"' +
+          ' placeholder="Wins, good moments, things you\'re proud of..."' +
+          ' oninput="scheduleWeeklySave()">' +
+          escHtml(review.highlights || '') + '</textarea>' +
+      '</div>' +
+      '<div class="form-group">' +
+        '<label class="form-label" for="field-w-challenges">Challenges</label>' +
+        '<p class="form-hint">What was difficult or didn\'t go as planned?</p>' +
+        '<textarea class="form-textarea" id="field-w-challenges" rows="3" maxlength="600"' +
+          ' placeholder="Obstacles, setbacks, friction points..."' +
+          ' oninput="scheduleWeeklySave()">' +
+          escHtml(review.challenges || '') + '</textarea>' +
+      '</div>' +
+      '<div class="form-group">' +
+        '<label class="form-label" for="field-w-learning">Weekly Learning</label>' +
+        '<p class="form-hint">Key insight or lesson from this week.</p>' +
+        '<textarea class="form-textarea" id="field-w-learning" rows="3" maxlength="400"' +
+          ' placeholder="What did you learn about yourself, your work, or your approach?"' +
+          ' oninput="scheduleWeeklySave()">' +
+          escHtml(review.learning || '') + '</textarea>' +
+      '</div>' +
+      '<div class="form-group">' +
+        '<label class="form-label" for="field-w-kaizen">Kaizen for Next Week</label>' +
+        '<p class="form-hint">One small improvement to carry into next week.</p>' +
+        '<textarea class="form-textarea" id="field-w-kaizen" rows="2" maxlength="300"' +
+          ' placeholder="One habit, system, or behaviour to do 1% better..."' +
+          ' oninput="scheduleWeeklySave()">' +
+          escHtml(review.kaizen || '') + '</textarea>' +
+      '</div>' +
+      '<div class="form-group">' +
+        '<label class="form-label" for="field-w-focus">Focus for Next Week</label>' +
+        '<p class="form-hint">What matters most in the coming week?</p>' +
+        '<textarea class="form-textarea" id="field-w-focus" rows="2" maxlength="300"' +
+          ' placeholder="The most important thing to accomplish..."' +
+          ' oninput="scheduleWeeklySave()">' +
+          escHtml(review.focus || '') + '</textarea>' +
+      '</div>' +
+    '</div>' +
+    (review.savedAt ? '<p class="last-saved">Last saved ' + fmtTime(review.savedAt) + '</p>' : '') +
+    '</div>';
+}
+
+function scheduleWeeklySave() {
+  clearTimeout(weeklyTimer);
+  showSaveStatus('saving');
+  weeklyTimer = setTimeout(saveWeekly, 800);
+}
+
+function saveWeekly() {
+  weeklyTimer = null;
+  var highlightsEl  = document.getElementById('field-w-highlights');
+  if (!highlightsEl) return;
+  var weekKey = getWeekKey(currentDate);
+  weeklyReviews[weekKey] = {
+    highlights: highlightsEl.value,
+    challenges: (document.getElementById('field-w-challenges') || { value: '' }).value,
+    learning:   (document.getElementById('field-w-learning')   || { value: '' }).value,
+    kaizen:     (document.getElementById('field-w-kaizen')     || { value: '' }).value,
+    focus:      (document.getElementById('field-w-focus')      || { value: '' }).value,
+    savedAt: new Date().toISOString()
+  };
+  saveWeeklyReviews();
+  showSaveStatus('saved');
+  setTimeout(function() { showSaveStatus('idle'); }, 2000);
 }
 
 // ── Quarterly Review ──────────────────────────────────────────────────────────
