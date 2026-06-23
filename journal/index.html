@@ -1258,38 +1258,44 @@ function saveTodosImmediate() {
 
 // ── Activity Log helpers ──────────────────────────────────────────────────────
 function loadEisenhowerActs() {
-  try { var d = JSON.parse(localStorage.getItem('eisenhower_v2')||'null');
+  try { var d = JSON.parse(localStorage.getItem('eisenhower_v3')||'null');
     if (d && typeof d === 'object') return d;
   } catch(e) {}
   return null;
 }
 
-function renderActivityLogHtml(entry) {
+function renderActivityLogHtml(entry, saveCallback) {
+  saveCallback = saveCallback || 'scheduleEveningSave()';
   var acts = loadEisenhowerActs();
   var existingLog = {};
   (entry.activityLog || []).forEach(function(item) {
     existingLog[item.activityId] = item.hours;
   });
 
+  var BUCKETS = ['goals','chores','recreational','waste'];
   var allActs = acts ? [].concat(
-    (acts.q1||[]).map(function(a){ return Object.assign({},a,{q:'q1'}); }),
-    (acts.q2||[]).map(function(a){ return Object.assign({},a,{q:'q2'}); }),
-    (acts.q3||[]).map(function(a){ return Object.assign({},a,{q:'q3'}); }),
-    (acts.q4||[]).map(function(a){ return Object.assign({},a,{q:'q4'}); })
+    (acts.goals||[]).map(function(a){ return Object.assign({},a,{q:'goals'}); }),
+    (acts.chores||[]).map(function(a){ return Object.assign({},a,{q:'chores'}); }),
+    (acts.recreational||[]).map(function(a){ return Object.assign({},a,{q:'recreational'}); }),
+    (acts.waste||[]).map(function(a){ return Object.assign({},a,{q:'waste'}); })
   ) : [];
 
   if (!allActs.length) {
     return '<p class="act-log-empty">No activities set up yet — ' +
-      '<a href="../eisenhower-matrix/">define them in the Eisenhower Matrix</a>.</p>';
+      '<a href="../eisenhower-matrix/">define them in Activity Buckets</a>.</p>';
   }
 
-  var QLABEL = { q1:'Do — Urgent &amp; Important', q2:'Schedule — Not Urgent &amp; Important',
-                 q3:'Delegate — Urgent &amp; Not Important', q4:'Eliminate — Not Urgent &amp; Not Important' };
-  var grouped = { q1:[], q2:[], q3:[], q4:[] };
+  var QLABEL = {
+    goals:        'Goals',
+    chores:       'Chores',
+    recreational: 'Recreational',
+    waste:        'Waste of Time'
+  };
+  var grouped = { goals:[], chores:[], recreational:[], waste:[] };
   allActs.forEach(function(a) { grouped[a.q].push(a); });
 
   var html = '';
-  ['q1','q2','q3','q4'].forEach(function(q) {
+  BUCKETS.forEach(function(q) {
     if (!grouped[q].length) return;
     html += '<div class="act-log-group">';
     html += '<div class="act-log-group-label">'+QLABEL[q]+'</div>';
@@ -1301,9 +1307,9 @@ function renderActivityLogHtml(entry) {
         (goalText ? '<span class="act-log-goal">'+goalText+'</span>' : '') +
         '<div class="act-log-input-wrap">' +
           '<input type="number" class="act-log-input" id="act-'+act.id+'"' +
-            ' data-activity-id="'+act.id+'" min="0" max="24" step="0.5"' +
+            ' data-activity-id="'+act.id+'" min="0" max="168" step="0.5"' +
             ' value="'+(val||'')+'" placeholder="0"' +
-            ' oninput="scheduleEveningSave()" />' +
+            ' oninput="'+saveCallback+'" />' +
           '<span class="act-log-unit">h</span>' +
         '</div>' +
       '</div>';
@@ -1915,6 +1921,11 @@ function renderWeeklyTab(container) {
           ' oninput="scheduleWeeklySave()">' +
           escHtml(review.focus || '') + '</textarea>' +
       '</div>' +
+      '<div class="form-group" id="weekly-activity-log-section">' +
+        '<label class="form-label">Activity Time This Week</label>' +
+        '<p class="form-hint">How many hours did you spend on each activity this week?</p>' +
+        renderActivityLogHtml(review, 'scheduleWeeklySave()') +
+      '</div>' +
     '</div>' +
     (review.savedAt ? '<p class="last-saved">Last saved ' + fmtTime(review.savedAt) + '</p>' : '') +
     '</div>';
@@ -1931,12 +1942,20 @@ function saveWeekly() {
   var highlightsEl  = document.getElementById('field-w-highlights');
   if (!highlightsEl) return;
   var weekKey = getWeekKey(currentDate);
+
+  var activityLog = [];
+  document.querySelectorAll('#weekly-activity-log-section .act-log-input').forEach(function(input) {
+    var hours = parseFloat(input.value) || 0;
+    if (hours > 0) activityLog.push({ activityId: input.dataset.activityId, hours: hours });
+  });
+
   weeklyReviews[weekKey] = {
-    highlights: highlightsEl.value,
-    challenges: (document.getElementById('field-w-challenges') || { value: '' }).value,
-    learning:   (document.getElementById('field-w-learning')   || { value: '' }).value,
-    kaizen:     (document.getElementById('field-w-kaizen')     || { value: '' }).value,
-    focus:      (document.getElementById('field-w-focus')      || { value: '' }).value,
+    highlights:  highlightsEl.value,
+    challenges:  (document.getElementById('field-w-challenges') || { value: '' }).value,
+    learning:    (document.getElementById('field-w-learning')   || { value: '' }).value,
+    kaizen:      (document.getElementById('field-w-kaizen')     || { value: '' }).value,
+    focus:       (document.getElementById('field-w-focus')      || { value: '' }).value,
+    activityLog: activityLog,
     savedAt: new Date().toISOString()
   };
   saveWeeklyReviews();
