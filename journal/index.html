@@ -797,6 +797,7 @@
 <nav class="nav-tabs" id="nav-tabs">
   <div class="nav-tab active" data-tab="morning" onclick="switchTab('morning')">Morning</div>
   <div class="nav-tab" data-tab="evening" onclick="switchTab('evening')">Evening</div>
+  <div class="nav-tab" data-tab="activities" onclick="switchTab('activities')">Activities</div>
   <div class="nav-tab" data-tab="weekly" id="weekly-tab" onclick="switchTab('weekly')">Weekly</div>
   <div class="nav-tab" data-tab="goals" onclick="switchTab('goals')">Goals</div>
   <div class="nav-tab" data-tab="history" onclick="switchTab('history')">History</div>
@@ -929,9 +930,10 @@ var entries      = {};
 var reviews      = [];
 var weeklyReviews = {};
 var lastReviewDate = null;
-var morningTimer = null;
-var eveningTimer = null;
-var weeklyTimer  = null;
+var morningTimer     = null;
+var eveningTimer     = null;
+var weeklyTimer      = null;
+var activitiesTimer  = null;
 var editingGoalId = null;
 var selectedMood  = null;
 var historyYear   = new Date().getFullYear();
@@ -1021,9 +1023,10 @@ function nextDay() {
 function goToToday() { setDate(todayStr()); }
 
 function setDate(d) {
-  if (activeTab === 'morning' && morningTimer) { clearTimeout(morningTimer); morningTimer = null; saveMorning(); }
-  if (activeTab === 'evening' && eveningTimer) { clearTimeout(eveningTimer); eveningTimer = null; saveEvening(); }
-  if (activeTab === 'weekly'  && weeklyTimer)  { clearTimeout(weeklyTimer);  weeklyTimer  = null; saveWeekly();  }
+  if (activeTab === 'morning'    && morningTimer)    { clearTimeout(morningTimer);    morningTimer    = null; saveMorning();    }
+  if (activeTab === 'evening'    && eveningTimer)    { clearTimeout(eveningTimer);    eveningTimer    = null; saveEvening();    }
+  if (activeTab === 'activities' && activitiesTimer) { clearTimeout(activitiesTimer); activitiesTimer = null; saveActivities(); }
+  if (activeTab === 'weekly'     && weeklyTimer)     { clearTimeout(weeklyTimer);     weeklyTimer     = null; saveWeekly();     }
   currentDate = d;
   updateDateDisplay();
   switchTab(activeTab);
@@ -1078,26 +1081,22 @@ function updateWeeklyTabLabel() {
 
 // ── Tabs ─────────────────────────────────────────────────────────────────────
 function switchTab(tab) {
-  if (activeTab === 'morning' && tab !== 'morning' && morningTimer) {
-    clearTimeout(morningTimer); morningTimer = null; saveMorning();
-  }
-  if (activeTab === 'evening' && tab !== 'evening' && eveningTimer) {
-    clearTimeout(eveningTimer); eveningTimer = null; saveEvening();
-  }
-  if (activeTab === 'weekly' && tab !== 'weekly' && weeklyTimer) {
-    clearTimeout(weeklyTimer); weeklyTimer = null; saveWeekly();
-  }
+  if (activeTab === 'morning'    && tab !== 'morning'    && morningTimer)    { clearTimeout(morningTimer);    morningTimer    = null; saveMorning();    }
+  if (activeTab === 'evening'    && tab !== 'evening'    && eveningTimer)    { clearTimeout(eveningTimer);    eveningTimer    = null; saveEvening();    }
+  if (activeTab === 'activities' && tab !== 'activities' && activitiesTimer) { clearTimeout(activitiesTimer); activitiesTimer = null; saveActivities(); }
+  if (activeTab === 'weekly'     && tab !== 'weekly'     && weeklyTimer)     { clearTimeout(weeklyTimer);     weeklyTimer     = null; saveWeekly();     }
   activeTab = tab;
   document.querySelectorAll('.nav-tab').forEach(function(t) {
     t.classList.toggle('active', t.dataset.tab === tab);
   });
   var main = document.getElementById('main');
   if (!main) return;
-  if (tab === 'morning')       renderMorningTab(main);
-  else if (tab === 'evening')  renderEveningTab(main);
-  else if (tab === 'weekly')   renderWeeklyTab(main);
-  else if (tab === 'goals')    renderGoalsTab(main);
-  else if (tab === 'history')  renderHistoryTab(main);
+  if (tab === 'morning')         renderMorningTab(main);
+  else if (tab === 'evening')    renderEveningTab(main);
+  else if (tab === 'activities') renderActivitiesTab(main);
+  else if (tab === 'weekly')     renderWeeklyTab(main);
+  else if (tab === 'goals')      renderGoalsTab(main);
+  else if (tab === 'history')    renderHistoryTab(main);
 }
 
 // ── Morning Tab ───────────────────────────────────────────────────────────────
@@ -1264,8 +1263,9 @@ function loadEisenhowerActs() {
   return null;
 }
 
-function renderActivityLogHtml(entry, saveCallback) {
-  saveCallback = saveCallback || 'scheduleEveningSave()';
+function renderActivityLogHtml(entry, saveCallback, idPrefix) {
+  saveCallback = saveCallback || 'scheduleActivitiesSave()';
+  idPrefix = idPrefix || 'act-';
   var acts = loadEisenhowerActs();
   var existingLog = {};
   (entry.activityLog || []).forEach(function(item) {
@@ -1301,12 +1301,10 @@ function renderActivityLogHtml(entry, saveCallback) {
     html += '<div class="act-log-group-label">'+QLABEL[q]+'</div>';
     grouped[q].forEach(function(act) {
       var val = existingLog[act.id] || '';
-      var goalText = act.goalId && goals[act.goalId] ? ' — '+escHtml(goals[act.goalId].text) : '';
       html += '<div class="act-log-row">' +
         '<span class="act-log-name">'+escHtml(act.name)+'</span>' +
-        (goalText ? '<span class="act-log-goal">'+goalText+'</span>' : '') +
         '<div class="act-log-input-wrap">' +
-          '<input type="number" class="act-log-input" id="act-'+act.id+'"' +
+          '<input type="number" class="act-log-input" id="'+idPrefix+act.id+'"' +
             ' data-activity-id="'+act.id+'" min="0" max="168" step="0.5"' +
             ' value="'+(val||'')+'" placeholder="0"' +
             ' oninput="'+saveCallback+'" />' +
@@ -1317,6 +1315,72 @@ function renderActivityLogHtml(entry, saveCallback) {
     html += '</div>';
   });
   return html;
+}
+
+// ── Activities Tab ────────────────────────────────────────────────────────────
+function renderActivitiesTab(container) {
+  var entry    = getEntry(currentDate, 'evening') || {};
+  var weekKey  = getWeekKey(currentDate);
+  var review   = weeklyReviews[weekKey] || {};
+  var weekEnd  = shiftDate(weekKey, 6);
+  var weekLabel = formatDateShort(weekKey) + ' – ' + formatDateShort(weekEnd);
+
+  container.innerHTML =
+    '<div class="tab-content">' +
+    '<div class="section-header">' +
+      '<div><h2 class="section-title">Activities</h2>' +
+      '<p class="section-sub">Log how you spend your time each day and week.</p></div>' +
+    '</div>' +
+    '<div class="form-card">' +
+      '<div class="form-group">' +
+        '<label class="form-label">Today</label>' +
+        '<p class="form-hint">Roughly how many hours did you spend on each activity today?</p>' +
+        '<div id="activities-daily-section">' + renderActivityLogHtml(entry, 'scheduleActivitiesSave()', 'act-d-') + '</div>' +
+      '</div>' +
+      '<div class="form-group">' +
+        '<label class="form-label">This Week <span style="font-size:11px;font-style:italic;color:var(--muted2);font-weight:normal">' + weekLabel + '</span></label>' +
+        '<p class="form-hint">How many hours did you spend on each activity this week?</p>' +
+        '<div id="activities-weekly-section">' + renderActivityLogHtml(review, 'scheduleActivitiesSave()', 'act-w-') + '</div>' +
+      '</div>' +
+    '</div>' +
+    '</div>';
+}
+
+function scheduleActivitiesSave() {
+  clearTimeout(activitiesTimer);
+  showSaveStatus('saving');
+  activitiesTimer = setTimeout(saveActivities, 800);
+}
+
+function saveActivities() {
+  activitiesTimer = null;
+
+  var dailySectionEl = document.getElementById('activities-daily-section');
+  if (dailySectionEl) {
+    var dailyLog = [];
+    dailySectionEl.querySelectorAll('.act-log-input').forEach(function(input) {
+      var hours = parseFloat(input.value) || 0;
+      if (hours > 0) dailyLog.push({ activityId: input.dataset.activityId, hours: hours });
+    });
+    var existing = getEntry(currentDate, 'evening') || {};
+    setEntry(currentDate, 'evening', Object.assign({}, existing, { activityLog: dailyLog }));
+  }
+
+  var weeklySectionEl = document.getElementById('activities-weekly-section');
+  if (weeklySectionEl) {
+    var weeklyLog = [];
+    weeklySectionEl.querySelectorAll('.act-log-input').forEach(function(input) {
+      var hours = parseFloat(input.value) || 0;
+      if (hours > 0) weeklyLog.push({ activityId: input.dataset.activityId, hours: hours });
+    });
+    var weekKey = getWeekKey(currentDate);
+    if (!weeklyReviews[weekKey]) weeklyReviews[weekKey] = {};
+    weeklyReviews[weekKey].activityLog = weeklyLog;
+    saveWeeklyReviews();
+  }
+
+  showSaveStatus('saved');
+  setTimeout(function() { showSaveStatus('idle'); }, 2000);
 }
 
 // ── Evening Tab ───────────────────────────────────────────────────────────────
@@ -1384,11 +1448,6 @@ function renderEveningTab(container) {
       '<div class="form-group">' +
         '<label class="form-label">Progress on Goals</label>' +
         goalProgressHtml +
-      '</div>' +
-      '<div class="form-group" id="activity-log-section">' +
-        '<label class="form-label">Activity Time Log</label>' +
-        '<p class="form-hint">Roughly how many hours did you spend on each activity today?</p>' +
-        renderActivityLogHtml(entry) +
       '</div>' +
       '<div class="form-group">' +
         '<label class="form-label">Mood &amp; Energy</label>' +
@@ -1532,22 +1591,16 @@ function saveEvening() {
     return { goalId: id, progressAtSave: goals[id] ? goals[id].progress : 0 };
   });
 
-  var activityLog = [];
-  document.querySelectorAll('#activity-log-section .act-log-input').forEach(function(input) {
-    var hours = parseFloat(input.value) || 0;
-    if (hours > 0) activityLog.push({ activityId: input.dataset.activityId, hours: hours });
-  });
-
-  setEntry(currentDate, 'evening', {
+  var existing = getEntry(currentDate, 'evening') || {};
+  setEntry(currentDate, 'evening', Object.assign({}, existing, {
     whatHappened: whatEl.value,
     mood:         selectedMood,
     moodNote:     moodNoteEl ? moodNoteEl.value : '',
     win:          winEl    ? winEl.value    : '',
     learning:     learnEl  ? learnEl.value  : '',
     kaizen:       kaizenEl ? kaizenEl.value : '',
-    goalProgress: goalProgress,
-    activityLog:  activityLog
-  });
+    goalProgress: goalProgress
+  }));
   showSaveStatus('saved');
   setTimeout(function() { showSaveStatus('idle'); }, 2000);
 }
@@ -1921,11 +1974,6 @@ function renderWeeklyTab(container) {
           ' oninput="scheduleWeeklySave()">' +
           escHtml(review.focus || '') + '</textarea>' +
       '</div>' +
-      '<div class="form-group" id="weekly-activity-log-section">' +
-        '<label class="form-label">Activity Time This Week</label>' +
-        '<p class="form-hint">How many hours did you spend on each activity this week?</p>' +
-        renderActivityLogHtml(review, 'scheduleWeeklySave()') +
-      '</div>' +
     '</div>' +
     (review.savedAt ? '<p class="last-saved">Last saved ' + fmtTime(review.savedAt) + '</p>' : '') +
     '</div>';
@@ -1943,21 +1991,15 @@ function saveWeekly() {
   if (!highlightsEl) return;
   var weekKey = getWeekKey(currentDate);
 
-  var activityLog = [];
-  document.querySelectorAll('#weekly-activity-log-section .act-log-input').forEach(function(input) {
-    var hours = parseFloat(input.value) || 0;
-    if (hours > 0) activityLog.push({ activityId: input.dataset.activityId, hours: hours });
-  });
-
-  weeklyReviews[weekKey] = {
+  var existing = weeklyReviews[weekKey] || {};
+  weeklyReviews[weekKey] = Object.assign({}, existing, {
     highlights:  highlightsEl.value,
     challenges:  (document.getElementById('field-w-challenges') || { value: '' }).value,
     learning:    (document.getElementById('field-w-learning')   || { value: '' }).value,
     kaizen:      (document.getElementById('field-w-kaizen')     || { value: '' }).value,
     focus:       (document.getElementById('field-w-focus')      || { value: '' }).value,
-    activityLog: activityLog,
     savedAt: new Date().toISOString()
-  };
+  });
   saveWeeklyReviews();
   showSaveStatus('saved');
   setTimeout(function() { showSaveStatus('idle'); }, 2000);
