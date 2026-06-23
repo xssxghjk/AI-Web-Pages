@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Eisenhower Matrix</title>
+  <title>Activity Buckets</title>
   <script src="../nav.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,10 +22,10 @@
       --muted2:   #7a6e60;
       --muted3:   #5a4e40;
 
-      --q1:      #c47070;  --q1-dim: rgba(196,112,112,0.08);  --q1-bdr: rgba(196,112,112,0.22);
-      --q2:      #6aaa80;  --q2-dim: rgba(106,170,128,0.08);  --q2-bdr: rgba(106,170,128,0.22);
-      --q3:      #6a9abb;  --q3-dim: rgba(106,154,187,0.08);  --q3-bdr: rgba(106,154,187,0.22);
-      --q4:      #8a7a5a;  --q4-dim: rgba(138,122,90,0.08);   --q4-bdr: rgba(138,122,90,0.20);
+      --goals:         #6aaa80;  --goals-dim: rgba(106,170,128,0.08);  --goals-bdr: rgba(106,170,128,0.22);
+      --chores:        #6a9abb;  --chores-dim: rgba(106,154,187,0.08); --chores-bdr: rgba(106,154,187,0.22);
+      --recreational:  #c4a44a;  --recreational-dim: rgba(196,164,74,0.08); --recreational-bdr: rgba(196,164,74,0.22);
+      --waste:         #b07070;  --waste-dim: rgba(176,112,112,0.08);  --waste-bdr: rgba(176,112,112,0.20);
     }
 
     html { scroll-behavior: smooth; }
@@ -36,6 +36,8 @@
       -webkit-font-smoothing: antialiased;
       line-height: 1.55;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
     body::before {
       content: "";
@@ -92,10 +94,10 @@
       display: flex; background: var(--surface2); margin-bottom: 0.55rem;
     }
     .dist-seg { height: 100%; transition: width 0.35s ease; min-width: 2px; }
-    .dist-seg.q1 { background: var(--q1); }
-    .dist-seg.q2 { background: var(--q2); }
-    .dist-seg.q3 { background: var(--q3); }
-    .dist-seg.q4 { background: var(--q4); }
+    .dist-seg.goals         { background: var(--goals); }
+    .dist-seg.chores        { background: var(--chores); }
+    .dist-seg.recreational  { background: var(--recreational); }
+    .dist-seg.waste         { background: var(--waste); }
     .dist-legend {
       display: flex; gap: 1.25rem; flex-wrap: wrap;
     }
@@ -106,10 +108,10 @@
     .dist-dot {
       width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
     }
-    .dist-dot.q1 { background: var(--q1); }
-    .dist-dot.q2 { background: var(--q2); }
-    .dist-dot.q3 { background: var(--q3); }
-    .dist-dot.q4 { background: var(--q4); }
+    .dist-dot.goals         { background: var(--goals); }
+    .dist-dot.chores        { background: var(--chores); }
+    .dist-dot.recreational  { background: var(--recreational); }
+    .dist-dot.waste         { background: var(--waste); }
     .dist-label { color: var(--muted); }
     .dist-hours { color: var(--text); }
     .dist-no-data {
@@ -125,34 +127,17 @@
       min-height: 0;
     }
 
-    /* ── AXIS GRID ── */
+    /* ── BUCKET GRID ── */
     .matrix-grid {
       display: grid;
-      grid-template-columns: 22px 1fr 1fr;
-      grid-template-rows: 22px 1fr 1fr;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
       grid-template-areas:
-        "corner  col1  col2"
-        "row1    q1    q2"
-        "row2    q3    q4";
-      gap: 3px;
+        "goals        chores"
+        "recreational waste";
+      gap: 6px;
       flex: 1; min-height: 460px;
     }
-    .ax-corner { grid-area: corner; }
-    .ax-col {
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.55rem; font-style: italic; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--muted3);
-    }
-    .ax-col1 { grid-area: col1; }
-    .ax-col2 { grid-area: col2; }
-    .ax-row {
-      display: flex; align-items: center; justify-content: center;
-      writing-mode: vertical-rl; transform: rotate(180deg);
-      font-size: 0.55rem; font-style: italic; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--muted3);
-    }
-    .ax-row1 { grid-area: row1; }
-    .ax-row2 { grid-area: row2; }
 
     /* ── QUADRANTS ── */
     .quadrant {
@@ -162,10 +147,10 @@
       overflow: hidden; min-height: 0;
       transition: border-color 0.15s;
     }
-    .q1 { grid-area: q1; background: var(--q1-dim); --qa: var(--q1); --qb: var(--q1-bdr); }
-    .q2 { grid-area: q2; background: var(--q2-dim); --qa: var(--q2); --qb: var(--q2-bdr); }
-    .q3 { grid-area: q3; background: var(--q3-dim); --qa: var(--q3); --qb: var(--q3-bdr); }
-    .q4 { grid-area: q4; background: var(--q4-dim); --qa: var(--q4); --qb: var(--q4-bdr); }
+    .qgoals        { grid-area: goals;        background: var(--goals-dim);        --qa: var(--goals);        --qb: var(--goals-bdr); }
+    .qchores       { grid-area: chores;       background: var(--chores-dim);       --qa: var(--chores);       --qb: var(--chores-bdr); }
+    .qrecreational { grid-area: recreational; background: var(--recreational-dim); --qa: var(--recreational); --qb: var(--recreational-bdr); }
+    .qwaste        { grid-area: waste;        background: var(--waste-dim);        --qa: var(--waste);        --qb: var(--waste-bdr); }
 
     .q-header {
       flex-shrink: 0; padding: 0.55rem 0.8rem 0.4rem;
@@ -237,7 +222,7 @@
     .act-row:hover .act-edit-btn,
     .act-row:hover .act-del-btn { opacity: 1; }
     .act-edit-btn:hover { color: var(--muted); }
-    .act-del-btn:hover  { color: var(--q1); }
+    .act-del-btn:hover  { color: var(--waste); }
 
     /* Empty state */
     .q-empty {
@@ -316,7 +301,7 @@
     .form-select:focus { outline: none; border-color: rgba(196,134,74,0.5); }
     .form-select option { background: var(--surface2); }
 
-    /* Quadrant picker in modal */
+    /* Bucket picker in modal */
     .quad-picker {
       display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
     }
@@ -332,10 +317,10 @@
     .quad-pick-btn .qpb-action { font-size: 0.8rem; }
     .quad-pick-btn .qpb-desc { font-size: 0.6rem; font-style: italic; opacity: 0.7; }
     .quad-pick-btn:hover { color: var(--text); border-color: var(--border2); background: rgba(255,255,255,0.03); }
-    .quad-pick-btn.selected-q1 { border-color: var(--q1); color: var(--q1); background: var(--q1-dim); }
-    .quad-pick-btn.selected-q2 { border-color: var(--q2); color: var(--q2); background: var(--q2-dim); }
-    .quad-pick-btn.selected-q3 { border-color: var(--q3); color: var(--q3); background: var(--q3-dim); }
-    .quad-pick-btn.selected-q4 { border-color: var(--q4); color: var(--q4); background: var(--q4-dim); }
+    .quad-pick-btn.selected-goals        { border-color: var(--goals);        color: var(--goals);        background: var(--goals-dim); }
+    .quad-pick-btn.selected-chores       { border-color: var(--chores);       color: var(--chores);       background: var(--chores-dim); }
+    .quad-pick-btn.selected-recreational { border-color: var(--recreational); color: var(--recreational); background: var(--recreational-dim); }
+    .quad-pick-btn.selected-waste        { border-color: var(--waste);        color: var(--waste);        background: var(--waste-dim); }
 
     /* Buttons */
     .btn {
@@ -353,7 +338,7 @@
       color: rgba(196,134,74,0.9);
     }
     .btn-primary:hover { background: rgba(196,134,74,0.2); border-color: rgba(196,134,74,0.6); color: #c4864a; }
-    .btn-danger:hover { border-color: var(--q1); color: var(--q1); }
+    .btn-danger:hover { border-color: var(--waste); color: var(--waste); }
 
     /* ── FOOTER ── */
     footer {
@@ -368,23 +353,15 @@
     footer a:hover { color: var(--text); }
 
     /* ── MOBILE ── */
-    @media (max-width: 700px) {
-      .matrix-outer { padding: 0.6rem 0.65rem 0.4rem; }
-      .matrix-grid {
-        grid-template-columns: 16px 1fr 1fr;
-        grid-template-rows: 16px 1fr 1fr;
-        min-height: 0; gap: 2px;
-      }
-      .q-desc { display: none; }
-    }
     @media (max-width: 480px) {
+      .matrix-outer { padding: 0.6rem 0.65rem 0.4rem; }
       .matrix-grid {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
-        grid-template-areas: "q1" "q2" "q3" "q4";
+        grid-template-areas: "goals" "chores" "recreational" "waste";
         min-height: 0; gap: 6px;
       }
-      .ax-corner, .ax-col1, .ax-col2, .ax-row1, .ax-row2 { display: none; }
+      .q-desc { display: none; }
       .quadrant { min-height: 160px; }
     }
   </style>
@@ -394,7 +371,7 @@
   <header class="hero">
     <div class="hero-row">
       <div class="hero-left">
-        <h1>Eisenhower Matrix</h1>
+        <h1>Activity Buckets</h1>
         <span class="hero-sub">activity landscape</span>
       </div>
       <div class="period-toggle" id="period-toggle">
@@ -415,82 +392,75 @@
   <div class="matrix-outer">
     <div class="matrix-grid" id="matrix-grid">
 
-      <div class="ax-corner"></div>
-      <div class="ax-col ax-col1">Urgent</div>
-      <div class="ax-col ax-col2">Not Urgent</div>
-      <div class="ax-row ax-row1">Important</div>
-
-      <div class="quadrant q1" id="quad-q1">
+      <div class="quadrant qgoals" id="quad-goals">
         <div class="q-header">
           <div class="q-label-group">
-            <div class="q-action">Do</div>
-            <div class="q-desc">Urgent &amp; Important</div>
+            <div class="q-action">Goals</div>
+            <div class="q-desc">Connected to long-term goals</div>
           </div>
-          <span class="q-total" id="total-q1"></span>
-          <button class="q-add-btn" data-q="q1" aria-label="Add activity">
+          <span class="q-total" id="total-goals"></span>
+          <button class="q-add-btn" data-q="goals" aria-label="Add activity">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
           </button>
         </div>
         <div class="q-body">
-          <p class="q-empty" id="empty-q1">No activities here.</p>
+          <p class="q-empty" id="empty-goals">No activities here.</p>
         </div>
       </div>
 
-      <div class="quadrant q2" id="quad-q2">
+      <div class="quadrant qchores" id="quad-chores">
         <div class="q-header">
           <div class="q-label-group">
-            <div class="q-action">Schedule</div>
-            <div class="q-desc">Not Urgent &amp; Important</div>
+            <div class="q-action">Chores</div>
+            <div class="q-desc">Regular duties &amp; responsibilities</div>
           </div>
-          <span class="q-total" id="total-q2"></span>
-          <button class="q-add-btn" data-q="q2" aria-label="Add activity">
+          <span class="q-total" id="total-chores"></span>
+          <button class="q-add-btn" data-q="chores" aria-label="Add activity">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
           </button>
         </div>
         <div class="q-body">
-          <p class="q-empty" id="empty-q2">No activities here.</p>
+          <p class="q-empty" id="empty-chores">No activities here.</p>
         </div>
       </div>
 
-      <div class="ax-row ax-row2">Not Important</div>
-
-      <div class="quadrant q3" id="quad-q3">
+      <div class="quadrant qrecreational" id="quad-recreational">
         <div class="q-header">
           <div class="q-label-group">
-            <div class="q-action">Delegate</div>
-            <div class="q-desc">Urgent &amp; Not Important</div>
+            <div class="q-action">Recreational</div>
+            <div class="q-desc">Leisure &amp; enjoyment</div>
           </div>
-          <span class="q-total" id="total-q3"></span>
-          <button class="q-add-btn" data-q="q3" aria-label="Add activity">
+          <span class="q-total" id="total-recreational"></span>
+          <button class="q-add-btn" data-q="recreational" aria-label="Add activity">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
           </button>
         </div>
         <div class="q-body">
-          <p class="q-empty" id="empty-q3">No activities here.</p>
+          <p class="q-empty" id="empty-recreational">No activities here.</p>
         </div>
       </div>
 
-      <div class="quadrant q4" id="quad-q4">
+      <div class="quadrant qwaste" id="quad-waste">
         <div class="q-header">
           <div class="q-label-group">
-            <div class="q-action">Eliminate</div>
-            <div class="q-desc">Not Urgent &amp; Not Important</div>
+            <div class="q-action">Waste of Time</div>
+            <div class="q-desc">Low-value time drains</div>
           </div>
-          <span class="q-total" id="total-q4"></span>
-          <button class="q-add-btn" data-q="q4" aria-label="Add activity">
+          <span class="q-total" id="total-waste"></span>
+          <button class="q-add-btn" data-q="waste" aria-label="Add activity">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
           </button>
         </div>
         <div class="q-body">
-          <p class="q-empty" id="empty-q4">No activities here.</p>
+          <p class="q-empty" id="empty-waste">No activities here.</p>
         </div>
       </div>
 
@@ -507,30 +477,30 @@
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label" for="modal-name">Activity name</label>
-          <input type="text" class="form-input" id="modal-name" maxlength="80" placeholder="e.g. Deep work, Team meetings…" autocomplete="off" />
+          <input type="text" class="form-input" id="modal-name" maxlength="80" placeholder="e.g. Deep work, Cooking, Climbing…" autocomplete="off" />
         </div>
         <div class="form-group">
-          <label class="form-label">Quadrant</label>
+          <label class="form-label">Bucket</label>
           <div class="quad-picker" id="quad-picker">
-            <button type="button" class="quad-pick-btn" data-q="q1">
-              <span class="qpb-action">Do</span>
-              <span class="qpb-desc">Urgent · Important</span>
+            <button type="button" class="quad-pick-btn" data-q="goals">
+              <span class="qpb-action">Goals</span>
+              <span class="qpb-desc">Long-term goal work</span>
             </button>
-            <button type="button" class="quad-pick-btn" data-q="q2">
-              <span class="qpb-action">Schedule</span>
-              <span class="qpb-desc">Not Urgent · Important</span>
+            <button type="button" class="quad-pick-btn" data-q="chores">
+              <span class="qpb-action">Chores</span>
+              <span class="qpb-desc">Duties &amp; responsibilities</span>
             </button>
-            <button type="button" class="quad-pick-btn" data-q="q3">
-              <span class="qpb-action">Delegate</span>
-              <span class="qpb-desc">Urgent · Not Important</span>
+            <button type="button" class="quad-pick-btn" data-q="recreational">
+              <span class="qpb-action">Recreational</span>
+              <span class="qpb-desc">Leisure &amp; enjoyment</span>
             </button>
-            <button type="button" class="quad-pick-btn" data-q="q4">
-              <span class="qpb-action">Eliminate</span>
-              <span class="qpb-desc">Not Urgent · Not Important</span>
+            <button type="button" class="quad-pick-btn" data-q="waste">
+              <span class="qpb-action">Waste of Time</span>
+              <span class="qpb-desc">Low-value drains</span>
             </button>
           </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="modal-goal-group">
           <label class="form-label" for="modal-goal">Link to goal (optional)</label>
           <select class="form-select" id="modal-goal">
             <option value="">— No goal —</option>
@@ -554,18 +524,20 @@
 
   <script>
   (function () {
-    var ACT_KEY  = 'eisenhower_v2';
+    var ACT_KEY  = 'eisenhower_v3';
     var ENT_KEY  = 'journal_entries';
     var GOAL_KEY = 'journal_goals';
-    var QUADS    = ['q1','q2','q3','q4'];
-    var QLABEL   = { q1:'Do', q2:'Schedule', q3:'Delegate', q4:'Eliminate' };
+    var QUADS    = ['goals','chores','recreational','waste'];
+    var QLABEL   = { goals:'Goals', chores:'Chores', recreational:'Recreational', waste:'Waste of Time' };
     var QDESC    = {
-      q1:'Urgent · Important', q2:'Not Urgent · Important',
-      q3:'Urgent · Not Important', q4:'Not Urgent · Not Important'
+      goals:'Connected to long-term goals',
+      chores:'Regular duties & responsibilities',
+      recreational:'Leisure & enjoyment',
+      waste:'Low-value time drains'
     };
 
     var activePeriod = 30;
-    var modalQ       = 'q1';
+    var modalQ       = 'goals';
     var editingId    = null;
 
     /* ── Storage helpers ── */
@@ -573,7 +545,7 @@
       try { var d = JSON.parse(localStorage.getItem(ACT_KEY)||'null');
         if (d && typeof d === 'object') return d;
       } catch(e) {}
-      return { q1:[], q2:[], q3:[], q4:[] };
+      return { goals:[], chores:[], recreational:[], waste:[] };
     }
     function saveActs(d) { localStorage.setItem(ACT_KEY, JSON.stringify(d)); }
     function loadGoals() {
@@ -593,10 +565,12 @@
       var stats   = {};
       Object.keys(entries).forEach(function(date) {
         if (date < cutStr) return;
-        var log = (entries[date].evening || {}).activityLog || [];
+        var ev = entries[date].evening || {};
+        var log = ev.activityLog || [];
         log.forEach(function(item) {
           stats[item.activityId] = (stats[item.activityId] || 0) + (item.hours || 0);
         });
+        /* also count weekly retro activity logs */
       });
       return stats;
     }
@@ -732,6 +706,12 @@
       render();
     }
 
+    /* ── Goal field visibility ── */
+    function updateGoalFieldVisibility() {
+      var group = document.getElementById('modal-goal-group');
+      if (group) group.style.display = modalQ === 'goals' ? '' : 'none';
+    }
+
     /* ── Modal ── */
     function openModal(defaultQ, actId) {
       editingId = actId || null;
@@ -752,7 +732,7 @@
       document.getElementById('modal-name').value = act ? act.name : '';
       document.getElementById('modal-delete').classList.toggle('hidden', !actId);
 
-      /* quadrant picker */
+      /* bucket picker */
       document.querySelectorAll('.quad-pick-btn').forEach(function(btn) {
         btn.className = 'quad-pick-btn';
         if (btn.dataset.q === modalQ) btn.classList.add('selected-'+modalQ);
@@ -767,6 +747,8 @@
           return '<option value="'+g.id+'"'+selected+'>'+escHtml(g.text)+'</option>';
         }).join('');
 
+      updateGoalFieldVisibility();
+
       document.getElementById('modal-overlay').classList.remove('hidden');
       setTimeout(function(){ document.getElementById('modal-name').focus(); }, 50);
     }
@@ -779,11 +761,12 @@
     function saveModal() {
       var name = document.getElementById('modal-name').value.trim();
       if (!name) { document.getElementById('modal-name').focus(); return; }
-      var goalId = document.getElementById('modal-goal').value || null;
+      /* only goals bucket can be linked to a goal */
+      var goalId = modalQ === 'goals' ? (document.getElementById('modal-goal').value || null) : null;
       var data   = loadActs();
 
       if (editingId) {
-        /* find and update (possibly moving quadrant) */
+        /* find and update (possibly moving bucket) */
         var found = false;
         QUADS.forEach(function(q) {
           var idx = (data[q]||[]).findIndex(function(a){ return a.id===editingId; });
@@ -846,6 +829,7 @@
           b.className = 'quad-pick-btn';
         });
         btn.classList.add('selected-'+modalQ);
+        updateGoalFieldVisibility();
       });
     });
 
