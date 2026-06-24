@@ -214,7 +214,7 @@
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2.5" width="11" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M1.5 5.5h11M4.5 1v3M9.5 1v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
         { key: 'todos',     href: '../todos/',                  text: 'To-Do List',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
-        { key: 'eisenhower', href: '../eisenhower-matrix/',      text: 'Eisenhower Matrix',
+        { key: 'activities', href: '../activities/',               text: 'Activities',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="7.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1.5" y="7.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="7.5" y="7.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>' },
         { key: 'trips',     href: '../trips/',                  text: 'Trips',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5C4.515 1.5 2.5 3.515 2.5 6c0 3.5 4.5 6.5 4.5 6.5s4.5-3 4.5-6.5c0-2.485-2.015-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="6" r="1.5" stroke="currentColor" stroke-width="1.4"/></svg>' },
@@ -253,7 +253,7 @@
     var p = window.location.pathname;
     if (/\/calendar(\/|$)/.test(p))               return 'calendar';
     if (/\/todos(\/|$)/.test(p))                  return 'todos';
-    if (/\/eisenhower-matrix(\/|$)/.test(p))      return 'eisenhower';
+    if (/\/activities(\/|$)/.test(p))              return 'activities';
     if (/\/trips(\/|$)/.test(p))                  return 'trips';
     if (/\/trip(\/|$)/.test(p))                   return 'trips';  // trip detail
     if (/\/marathon-training(\/|$)/.test(p))      return 'marathon';
