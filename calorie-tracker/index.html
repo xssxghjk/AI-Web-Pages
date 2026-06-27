@@ -831,7 +831,15 @@ canvas { display: block; width: 100%; }
       </div>
 
       <div class="dash-card">
-        <div class="dash-card-title">Averages</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <div class="dash-card-title" style="margin-bottom:0">Averages</div>
+          <div class="range-tabs" id="avg-range-tabs">
+            <button class="range-tab active" data-avg-range="30">30d</button>
+            <button class="range-tab" data-avg-range="60">60d</button>
+            <button class="range-tab" data-avg-range="90">90d</button>
+            <button class="range-tab" data-avg-range="0">Max</button>
+          </div>
+        </div>
         <div class="stat-grid">
           <div class="stat-box">
             <div class="stat-lbl">Avg Cal / Day</div>
@@ -1188,9 +1196,10 @@ function toast(msg, type = '') {
 
 // ── State ────────────────────────────────────────────────────────────────────
 let currentDate = dateStr(new Date());
-let monthlyRange = 30;
+let monthlyRange  = 30;
 let weightRange   = 30;
 let burnedRange   = 30;
+let averagesRange = 30;
 let pendingCounts = {};
 
 // ── Date navigation ──────────────────────────────────────────────────────────
@@ -2047,6 +2056,15 @@ document.getElementById('burned-range-tabs').addEventListener('click', e => {
   drawBurnedCaloriesChart();
 });
 
+document.getElementById('avg-range-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('[data-avg-range]');
+  if (!btn) return;
+  document.querySelectorAll('#avg-range-tabs .range-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  averagesRange = parseInt(btn.dataset.avgRange);
+  renderStats();
+});
+
 function renderDashboard() {
   renderWeightHistory();
   drawBurnedCaloriesChart();
@@ -2595,7 +2613,15 @@ function drawWeightSparkline(canvasId, days) {
 
 function renderStats() {
   const log = getLog();
-  const days = Object.keys(log);
+  let days = Object.keys(log);
+
+  if (averagesRange > 0) {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - averagesRange);
+    const cutoffStr = dateStr(cutoff);
+    days = days.filter(d => d >= cutoffStr);
+  }
+
   const daysLogged = days.length;
   document.getElementById('days-logged').textContent = daysLogged;
 
