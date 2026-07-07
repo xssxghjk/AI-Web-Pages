@@ -36,7 +36,7 @@ test.describe('mobile navigation', () => {
     const drawer = page.locator('#mobile-nav-drawer');
     await expect(drawer.getByRole('link', { name: 'Calendar' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Trips' })).toBeVisible();
-    await expect(drawer.getByRole('link', { name: 'Run & Walk' })).toBeVisible();
+    await expect(drawer.getByRole('link', { name: 'Daily 5K' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Journal' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Site Stats' })).toBeVisible();
   });
@@ -98,11 +98,11 @@ test.describe('mobile navigation', () => {
     await expect(page).toHaveURL(/\/trips\//);
   });
 
-  test('clicking Run & Walk link navigates to run walk tracker page', async ({ page }) => {
+  test('clicking Daily 5K link navigates to daily 5k tracker page', async ({ page }) => {
     await page.goto('/calendar/');
     await page.locator('#hamburger-btn').click();
-    await page.locator('#mobile-nav-drawer').getByRole('link', { name: 'Run & Walk' }).click();
-    await expect(page).toHaveURL(/\/marathon-training\//);
+    await page.locator('#mobile-nav-drawer').getByRole('link', { name: 'Daily 5K' }).click();
+    await expect(page).toHaveURL(/\/daily-5k-tracker\//);
   });
 
   test('calendar main uses minimal side padding on mobile to maximise grid width', async ({ page }) => {

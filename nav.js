@@ -223,7 +223,7 @@
     {
       label: 'Self Improvement',
       links: [
-        { key: 'marathon',   href: '../marathon-training/',  text: 'Run & Walk',
+        { key: 'daily5k',    href: '../daily-5k-tracker/',   text: 'Daily 5K',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="3" r="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 12.5l1.5-4 1.5 2 1.5-2 1.5 4M7 5.5v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
         { key: 'bouldering', href: '../bouldering-tracker/', text: 'Bouldering',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 11.5c0 0 1.5-3 3-4s2-3 2-3 1 2 2 3 3 4 3 4H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="5.5" cy="7" r="0.8" fill="currentColor"/><circle cx="8" cy="8.5" r="0.8" fill="currentColor"/></svg>' },
@@ -256,7 +256,7 @@
     if (/\/activities(\/|$)/.test(p))              return 'activities';
     if (/\/trips(\/|$)/.test(p))                  return 'trips';
     if (/\/trip(\/|$)/.test(p))                   return 'trips';  // trip detail
-    if (/\/marathon-training(\/|$)/.test(p))      return 'marathon';
+    if (/\/daily-5k-tracker(\/|$)/.test(p))       return 'daily5k';
     if (/\/bouldering-tracker(\/|$)/.test(p))    return 'bouldering';
     if (/\/journal(\/|$)/.test(p))                return 'journal';
     if (/\/calorie-tracker(\/|$)/.test(p))        return 'calorie-tracker';
