@@ -515,7 +515,7 @@ function addDays(iso, n) {
   const dt = new Date(y, m-1, d+n);
   return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
 }
-function kcalFor(a, weight) { return ActivityCalc.runningKcal(weight, a.km || KM, a.time); }
+function kcalFor(a, weight) { return ActivityCalc.runningKcal(weight, a.km || KM); }
 function formatPace(minPerKm) {
   const m = Math.floor(minPerKm);
   return m + ':' + String(Math.round((minPerKm - m) * 60)).padStart(2, '0');

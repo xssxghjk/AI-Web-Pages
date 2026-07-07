@@ -5,13 +5,14 @@
 
 var ActivityCalc = (function() {
 
-  // Running: ~1 kcal / kg / km (steady-state rule of thumb).
-  // Falls back to 8.0 MET × weight × time when only duration is available.
-  function runningKcal(weightKg, km, timeMin) {
+  // Running: ~1 kcal / kg / km (steady-state rule of thumb), distance-based
+  // only. Every logged run is a fixed 5K regardless of how long it took, so
+  // pace/duration must never factor into the estimate — a slower run burns
+  // the same calories as a faster one over the same distance.
+  var RUNNING_KM = 5;
+  function runningKcal(weightKg, km) {
     if (!weightKg) return null;
-    if (km)      return Math.round(weightKg * km);
-    if (timeMin) return Math.round(8.0 * weightKg * timeMin / 60);
-    return null;
+    return Math.round(weightKg * (km || RUNNING_KM));
   }
 
   // Bouldering: effective MET accounts for ~1/5 active climbing + ~4/5 rest.

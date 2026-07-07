@@ -2756,9 +2756,8 @@ function getRunningActivity(dateStr) {
       const dayRuns = unified.filter(a => a.date === dateStr && a.type === 'run');
       if (dayRuns.length > 0) {
         const totalKm   = dayRuns.reduce((s, a) => s + (a.km   || 0), 0) || null;
-        const totalTime = dayRuns.reduce((s, a) => s + (a.time || 0), 0) || null;
         const w = getClosestWeightForDate(dateStr);
-        return { hasData: true, weight: w, km: totalKm, kcal: ActivityCalc.runningKcal(w?.kg, totalKm, totalTime) };
+        return { hasData: true, weight: w, km: totalKm, kcal: ActivityCalc.runningKcal(w?.kg, totalKm) };
       }
     }
     // Fallback: c2hm_v1 (old marathon tracker storage)
