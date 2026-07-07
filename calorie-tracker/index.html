@@ -2858,8 +2858,8 @@ function renderActivity(date) {
   list.innerHTML = sports.map(s => {
     let kcalHtml;
     if (!s.data) {
-      kcalHtml = `<a href="../marathon-training/" class="activity-details-btn" style="text-decoration:none">+ Log Walk</a>`;
-      if (s.type === 'running') kcalHtml = `<a href="../marathon-training/" class="activity-details-btn" style="text-decoration:none">+ Log Run</a>`;
+      kcalHtml = `<a href="../walk-tracker/" class="activity-details-btn" style="text-decoration:none">+ Log Walk</a>`;
+      if (s.type === 'running') kcalHtml = `<a href="../daily-5k-tracker/" class="activity-details-btn" style="text-decoration:none">+ Log Run</a>`;
     } else if (s.data.kcal != null) {
       kcalHtml = `<span class="activity-kcal-val">~${s.data.kcal.toLocaleString()} kcal</span>
          <button class="activity-details-btn" onclick="openSportDetails('${s.type}','${date}')">details ↗</button>`;
@@ -2963,7 +2963,7 @@ function openSportDetails(type, date) {
           <td style="font-family:'Space Mono',monospace;color:var(--accent);font-weight:700">~${d.kcal}</td>
         </tr></tbody>
       </table>` : '<div style="color:var(--muted2);font-size:12px;font-style:italic">No weight logged — add a body weight entry to enable estimates.</div>'}
-      <div style="font-size:11px;color:var(--muted2);margin-top:12px;font-style:italic">Rough estimate. Log walks in the Run &amp; Walk Tracker.</div>`;
+      <div style="font-size:11px;color:var(--muted2);margin-top:12px;font-style:italic">Rough estimate. Log walks in the Walk Tracker.</div>`;
 
   } else if (type === 'workout') {
     const d = getWorkoutActivity(date);
