@@ -1060,12 +1060,12 @@
         runEntry = Object.values(mDays).find(function(d) { return d && d.completedDate === iso; }) || null;
       }
       var runCal = 0;
-      if (runEntry) runCal = ActivityCalc.runningKcal(weightKg, runEntry.km ? parseFloat(runEntry.km) : null, runEntry.time ? parseFloat(runEntry.time) : null) || 0;
+      if (runEntry) runCal = ActivityCalc.runningKcal(weightKg, runEntry.km ? parseFloat(runEntry.km) : null) || 0;
       var unifiedRuns = (data.unifiedActivities || []).filter(function(a) { return a && a.date === iso && a.type === 'run'; });
       if (unifiedRuns.length > 0) {
         var uRunKm   = unifiedRuns.reduce(function(s, a) { return s + parseFloat(a.km   || 0); }, 0) || null;
         var uRunTime = unifiedRuns.reduce(function(s, a) { return s + parseFloat(a.time || 0); }, 0) || null;
-        runCal += ActivityCalc.runningKcal(weightKg, uRunKm, uRunTime) || 0;
+        runCal += ActivityCalc.runningKcal(weightKg, uRunKm) || 0;
         if (!runEntry) runEntry = { km: uRunKm, time: uRunTime, status: 'completed' };
       }
 
@@ -1770,14 +1770,14 @@
           var activeCats = MEAL_ORDER.filter(function(c) { return grouped[c] && grouped[c].length > 0; });
 
           var workoutCal = 0;
-          if (dayWorkout) workoutCal = ActivityCalc.runningKcal(weightKg, dayWorkout.km || null, dayWorkout.time || null) || 0;
+          if (dayWorkout) workoutCal = ActivityCalc.runningKcal(weightKg, dayWorkout.km || null) || 0;
           try {
             var _unifiedActs = JSON.parse(localStorage.getItem('activity_tracker_v1') || '[]') || [];
             var _dayRuns = _unifiedActs.filter(function(a) { return a && a.date === dateStr && a.type === 'run'; });
             if (_dayRuns.length > 0) {
               var _runKm   = _dayRuns.reduce(function(s, a) { return s + parseFloat(a.km   || 0); }, 0) || null;
               var _runTime = _dayRuns.reduce(function(s, a) { return s + parseFloat(a.time || 0); }, 0) || null;
-              workoutCal += ActivityCalc.runningKcal(weightKg, _runKm, _runTime) || 0;
+              workoutCal += ActivityCalc.runningKcal(weightKg, _runKm) || 0;
               if (!dayWorkout) dayWorkout = { km: _runKm, time: _runTime, status: 'completed' };
             }
           } catch(e) {}
