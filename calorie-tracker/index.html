@@ -492,6 +492,43 @@ canvas { display: block; width: 100%; }
 .wh-delta.down { color: var(--green); }
 .wh-delta.zero { color: var(--muted2); }
 
+/* ── GOALS ── */
+.goal-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.goal-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+  padding: 13px 15px; transition: border-color 0.15s;
+}
+.goal-card:hover { border-color: var(--bord2); }
+.goal-card-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.goal-card-info { flex: 1; min-width: 0; }
+.goal-card-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 3px;
+}
+.goal-card-kg { font-family: 'Space Mono', monospace; font-size: 21px; font-weight: 700; color: var(--text); }
+.goal-card-kg .unit { font-size: 11px; color: var(--muted); font-family: 'DM Serif Text', serif; font-weight: 400; }
+.goal-card-remaining { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.goal-card-status { font-size: 11px; text-align: right; flex-shrink: 0; max-width: 40%; line-height: 1.4; }
+.goal-card-status .status-date { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; display: block; }
+.goal-card-status.reached { color: var(--green); }
+.goal-card-status.ontrack { color: var(--text2); }
+.goal-card-status.off { color: var(--red); }
+.goal-card-status.unknown { color: var(--muted2); font-style: italic; }
+.goal-progress-track {
+  height: 6px; background: var(--surf3); border-radius: 3px; overflow: hidden; border: 1px solid var(--border);
+}
+.goal-progress-fill { height: 100%; background: var(--accent); transition: width 0.3s; border-radius: 3px; }
+.goal-progress-fill.reached { background: var(--green); }
+.goal-card-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+.goals-rate-summary {
+  font-size: 12px; color: var(--text2); display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 4px;
+}
+.goals-rate-summary .rate-lbl { color: var(--muted); margin-right: 5px; }
+.goals-rate-summary .rate-val { font-family: 'Space Mono', monospace; font-weight: 700; }
+.rate-val.down { color: var(--green); }
+.rate-val.up   { color: var(--red); }
+.rate-val.flat { color: var(--muted); }
+
 /* Chart legend */
 .chart-legend {
   display: flex; gap: 14px; margin-bottom: 8px; flex-wrap: wrap;
@@ -674,6 +711,7 @@ canvas { display: block; width: 100%; }
 <nav class="nav-tabs">
   <button class="tab-btn active" data-tab="log">Log</button>
   <button class="tab-btn" data-tab="dashboard">Dashboard</button>
+  <button class="tab-btn" data-tab="goals">Goals</button>
   <button class="tab-btn" data-tab="presets">My Foods</button>
 </nav>
 
@@ -892,6 +930,34 @@ canvas { display: block; width: 100%; }
     </div>
   </div>
 
+  <!-- ── GOALS TAB ── -->
+  <div class="tab-panel" id="tab-goals">
+    <div class="section-hdr">
+      <span class="section-title">Weight Goals</span>
+      <button class="btn btn-ghost btn-sm" id="new-goal-btn">+ Add Goal</button>
+    </div>
+    <div class="goal-list" id="goal-list"></div>
+    <div class="empty-state" id="goal-empty">No goals yet — set a target weight to start tracking progress.</div>
+
+    <div class="dash-card full">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <div class="dash-card-title" style="margin-bottom:0">Projection</div>
+        <div class="range-tabs" id="goal-range-tabs">
+          <button class="range-tab" data-grange="7">7d</button>
+          <button class="range-tab active" data-grange="30">30d</button>
+          <button class="range-tab" data-grange="90">90d</button>
+          <button class="range-tab" data-grange="0">All</button>
+        </div>
+      </div>
+      <div class="goals-rate-summary" id="goal-rate-summary"></div>
+      <canvas id="chart-projection" height="220" style="margin-top:8px"></canvas>
+      <div id="projection-empty" class="empty-state" style="display:none">Log at least two weight entries to see a projection.</div>
+      <div style="font-size:11px;color:var(--muted2);margin-top:10px;font-style:italic">
+        Projection is based on a linear trend of your logged weight entries in the selected window — actual results will vary.
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <footer class="app-footer">
@@ -1088,6 +1154,36 @@ canvas { display: block; width: 100%; }
   </div>
 </div>
 
+<!-- ── GOAL MODAL ── -->
+<div class="modal-overlay" id="goal-modal" role="dialog" aria-modal="true" aria-labelledby="goal-modal-title">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="goal-modal-title">Add Weight Goal</span>
+      <button class="modal-close" id="goal-modal-close" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="g-kg">Target Weight (kg)</label>
+        <input type="number" id="g-kg" class="form-input" placeholder="e.g. 70" min="20" max="400" step="0.1">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="g-label">Label (optional)</label>
+        <input type="text" id="g-label" class="form-input" placeholder="e.g. Summer goal" maxlength="40">
+      </div>
+      <input type="hidden" id="g-id">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="goal-modal-delete" style="margin-right:auto">Delete</button>
+      <button class="btn btn-ghost btn-sm" id="goal-modal-cancel">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="goal-modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── SPORT DETAILS MODAL ── -->
 <div class="modal-overlay" id="sport-modal" role="dialog" aria-modal="true" aria-labelledby="sport-modal-title">
   <div class="modal">
@@ -1130,6 +1226,7 @@ const LS = {
 const PRESETS_KEY = 'calorie_presets';
 const LOG_KEY     = 'calorie_log';
 const WEIGHTS_KEY = 'calorie_weights';
+const GOALS_KEY   = 'calorie_weight_goals';
 
 function getPresets()       { return LS.get(PRESETS_KEY, []); }
 function savePresets(arr)   { LS.set(PRESETS_KEY, arr); }
@@ -1137,6 +1234,8 @@ function getLog()           { return LS.get(LOG_KEY, {}); }
 function saveLog(obj)       { LS.set(LOG_KEY, obj); }
 function getWeights()       { return LS.get(WEIGHTS_KEY, {}); }
 function saveWeights(obj)   { LS.set(WEIGHTS_KEY, obj); }
+function getGoals()         { return LS.get(GOALS_KEY, []); }
+function saveGoals(arr)     { LS.set(GOALS_KEY, arr); }
 function getWeightForDate(dateStr) { return getWeights()[dateStr] || null; }
 function setWeightForDate(dateStr, kg) {
   const w = getWeights();
@@ -1200,6 +1299,7 @@ let monthlyRange  = 30;
 let weightRange   = 30;
 let burnedRange   = 30;
 let averagesRange = 30;
+let goalRange     = 30;
 let pendingCounts = {};
 
 // ── Date navigation ──────────────────────────────────────────────────────────
@@ -1237,6 +1337,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.add('active');
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     if (btn.dataset.tab === 'dashboard') renderDashboard();
+    if (btn.dataset.tab === 'goals') renderGoals();
   });
 });
 
@@ -1691,6 +1792,388 @@ function openWeightModalForDate(targetDate) {
   document.getElementById('weight-modal').classList.add('open');
   document.getElementById('w-kg').focus();
 }
+
+// ── Weight Goals & Projection ────────────────────────────────────────────────
+function formatShortDate(d) {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+
+// Linear regression of weight vs. days, over the given range (0 = all history).
+// Returns kg/day slope plus the most recently logged weight/date as the anchor point.
+function computeWeightTrend(rangeDays) {
+  const all = getWeightHistory();
+  if (all.length < 2) return null;
+
+  let data = all;
+  if (rangeDays > 0) {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - rangeDays);
+    const cutoffStr = dateStr(cutoff);
+    data = all.filter(e => e.date >= cutoffStr);
+    if (data.length < 2) data = all.slice(-2);
+  }
+
+  const t0 = parseDate(data[0].date).getTime();
+  const pts = data.map(e => ({ t: (parseDate(e.date).getTime() - t0) / 864e5, kg: e.kg }));
+  const n = pts.length;
+  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+  pts.forEach(p => { sumX += p.t; sumY += p.kg; sumXY += p.t * p.kg; sumX2 += p.t * p.t; });
+  const denom = n * sumX2 - sumX * sumX;
+  const slope = denom !== 0 ? (n * sumXY - sumX * sumY) / denom : 0;
+
+  const last = all[all.length - 1];
+  return { slope, n, data, lastDate: parseDate(last.date), currentKg: last.kg };
+}
+
+// Projects when (if ever, at the current trend) a target weight will be reached.
+function projectGoalDate(goalKg, trend) {
+  if (!trend) return { status: 'unknown' };
+  const diff = goalKg - trend.currentKg;
+  if (Math.abs(diff) < 0.05) return { status: 'reached' };
+  if (trend.slope === 0) return { status: 'off' };
+  if ((diff > 0 && trend.slope < 0) || (diff < 0 && trend.slope > 0)) return { status: 'off' };
+  const days = diff / trend.slope;
+  if (!isFinite(days) || days < 0) return { status: 'off' };
+  const date = new Date(trend.lastDate);
+  date.setDate(date.getDate() + Math.round(days));
+  return { status: 'ontrack', days: Math.round(days), date };
+}
+
+function formatGoalStatus(proj) {
+  if (proj.status === 'reached') return { cls: 'reached', html: 'Reached &#127881;' };
+  if (proj.status === 'unknown') return { cls: 'unknown', html: 'Not enough data' };
+  if (proj.status === 'off')     return { cls: 'off', html: 'Trending away from goal' };
+  const days = proj.days;
+  const daysLbl = days === 0 ? 'today' : days === 1 ? 'in 1 day' : days < 60 ? `in ${days} days` : `in ~${Math.round(days / 30)} mo`;
+  return { cls: 'ontrack', html: `<span class="status-date">${esc(formatShortDate(proj.date))}</span>${esc(daysLbl)}` };
+}
+
+function goalProgressPercent(goalKg, currentKg, startKg) {
+  if (startKg == null || currentKg == null) return 0;
+  const total = goalKg - startKg;
+  if (Math.abs(total) < 1e-6) return 100;
+  const pct = ((currentKg - startKg) / total) * 100;
+  return Math.max(0, Math.min(100, pct));
+}
+
+function renderGoalCard(g, currentKg, startKg, trend) {
+  const proj = currentKg == null ? { status: 'unknown' } : projectGoalDate(g.kg, trend);
+  const status = formatGoalStatus(proj);
+  const pct = goalProgressPercent(g.kg, currentKg, startKg);
+  const remaining = currentKg != null ? g.kg - currentKg : null;
+  const remainingLbl = remaining == null ? 'No weight logged yet'
+    : Math.abs(remaining) < 0.05 ? 'Goal reached'
+    : (remaining > 0 ? '+' : '−') + Math.abs(remaining).toFixed(1) + ' kg to go';
+
+  return `
+    <div class="goal-card">
+      <div class="goal-card-top">
+        <div class="goal-card-info">
+          ${g.label ? `<div class="goal-card-label">${esc(g.label)}</div>` : ''}
+          <div class="goal-card-kg">${g.kg.toFixed(1)}<span class="unit"> kg</span></div>
+          <div class="goal-card-remaining">${esc(remainingLbl)}</div>
+        </div>
+        <div class="goal-card-status ${status.cls}">${status.html}</div>
+        <div class="goal-card-actions">
+          <button class="icon-btn" data-goal-edit="${esc(g.id)}" title="Edit">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
+              <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="icon-btn del" data-goal-del="${esc(g.id)}" title="Delete">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+              <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="goal-progress-track">
+        <div class="goal-progress-fill ${pct >= 100 ? 'reached' : ''}" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+}
+
+function renderGoalRateSummary(trend) {
+  const el = document.getElementById('goal-rate-summary');
+  if (!trend) {
+    el.innerHTML = '<span style="color:var(--muted2);font-style:italic">Log at least two weight entries to calculate a trend.</span>';
+    return;
+  }
+  const perDay  = trend.slope;
+  const perWeek = perDay * 7;
+  const cls = perDay < -0.01 ? 'down' : perDay > 0.01 ? 'up' : 'flat';
+  el.innerHTML = `
+    <span><span class="rate-lbl">Avg rate</span><span class="rate-val ${cls}">${perDay >= 0 ? '+' : ''}${perDay.toFixed(2)} kg/day</span></span>
+    <span><span class="rate-lbl">Per week</span><span class="rate-val ${cls}">${perWeek >= 0 ? '+' : ''}${perWeek.toFixed(2)} kg</span></span>
+    <span><span class="rate-lbl">Based on</span><span class="rate-val" style="color:var(--text2)">${trend.n} entries</span></span>`;
+}
+
+function renderGoals() {
+  const goals   = getGoals();
+  const listEl  = document.getElementById('goal-list');
+  const emptyEl = document.getElementById('goal-empty');
+  const history = getWeightHistory();
+  const trend   = computeWeightTrend(goalRange);
+  const currentKg = history.length ? history[history.length - 1].kg : null;
+  const startKg   = history.length ? history[0].kg : null;
+
+  if (goals.length === 0) {
+    listEl.innerHTML = '';
+    emptyEl.style.display = '';
+  } else {
+    emptyEl.style.display = 'none';
+    const sorted = [...goals].sort((a, b) => {
+      if (currentKg == null) return 0;
+      return Math.abs(a.kg - currentKg) - Math.abs(b.kg - currentKg);
+    });
+    listEl.innerHTML = sorted.map(g => renderGoalCard(g, currentKg, startKg, trend)).join('');
+
+    listEl.querySelectorAll('[data-goal-edit]').forEach(btn => {
+      btn.addEventListener('click', () => openGoalModal(btn.dataset.goalEdit));
+    });
+    listEl.querySelectorAll('[data-goal-del]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        saveGoals(getGoals().filter(g => g.id !== btn.dataset.goalDel));
+        renderGoals();
+        toast('Goal removed');
+      });
+    });
+  }
+
+  renderGoalRateSummary(trend);
+  drawProjectionChart(goals, history, trend);
+}
+
+function drawProjectionChart(goals, history, trend) {
+  const canvas  = document.getElementById('chart-projection');
+  const emptyEl = document.getElementById('projection-empty');
+  if (!canvas) return;
+
+  if (history.length < 2) {
+    canvas.style.display = 'none';
+    emptyEl.style.display = '';
+    return;
+  }
+  canvas.style.display = '';
+  emptyEl.style.display = 'none';
+
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.style.width = '';
+  canvas.style.height = '';
+  const W = canvas.offsetWidth;
+  if (!canvas.dataset.chartHeight) canvas.dataset.chartHeight = canvas.getAttribute('height') || '220';
+  const H = parseInt(canvas.dataset.chartHeight) || 220;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = { top: 16, right: 78, bottom: 32, left: 50 };
+  const cW = W - pad.left - pad.right;
+  const cH = H - pad.top  - pad.bottom;
+
+  const firstDate = parseDate(history[0].date);
+  const lastDate  = parseDate(history[history.length - 1].date);
+  let horizonDate = new Date(lastDate);
+  horizonDate.setDate(horizonDate.getDate() + 30);
+
+  const goalProjections = goals.map(g => ({ goal: g, proj: projectGoalDate(g.kg, trend) }));
+  const reachableDates = goalProjections.filter(gp => gp.proj.status === 'ontrack').map(gp => gp.proj.date);
+  if (reachableDates.length) {
+    const maxReach = new Date(Math.max(...reachableDates.map(d => d.getTime())));
+    const cap = new Date(lastDate);
+    cap.setDate(cap.getDate() + 730); // cap horizon at ~2 years so the chart stays readable
+    if (maxReach.getTime() > horizonDate.getTime()) {
+      horizonDate = maxReach.getTime() > cap.getTime() ? cap : maxReach;
+    }
+  }
+
+  const totalMs = horizonDate.getTime() - firstDate.getTime() || 1;
+  function xPos(d) { return pad.left + ((d.getTime() - firstDate.getTime()) / totalMs) * cW; }
+
+  const kgs = history.map(e => e.kg);
+  goals.forEach(g => kgs.push(g.kg));
+  if (trend) kgs.push(trend.currentKg + trend.slope * ((horizonDate - lastDate) / 864e5));
+  const minKg = Math.min(...kgs);
+  const maxKg = Math.max(...kgs);
+  const spread = maxKg - minKg || 1;
+  const yMin = minKg - spread * 0.12;
+  const yMax = maxKg + spread * 0.12;
+  function yPos(kg) { return pad.top + cH - ((kg - yMin) / (yMax - yMin)) * cH; }
+
+  // Grid lines
+  const gridCount = 4;
+  ctx.strokeStyle = 'rgba(58,48,37,0.8)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= gridCount; i++) {
+    const kg = yMin + (yMax - yMin) * (i / gridCount);
+    const y = yPos(kg);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cW, y); ctx.stroke();
+    ctx.fillStyle = '#5a5040';
+    ctx.font = '10px DM Serif Text, Georgia, serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(kg.toFixed(1), pad.left - 4, y + 3);
+  }
+
+  // "Latest entry" vertical marker — divides actual history from the projection
+  const latestX = xPos(lastDate);
+  ctx.beginPath();
+  ctx.moveTo(latestX, pad.top);
+  ctx.lineTo(latestX, pad.top + cH);
+  ctx.strokeStyle = 'rgba(154,138,118,0.35)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 3]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Goal horizontal lines + labels
+  goals.forEach(g => {
+    const y = yPos(g.kg);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(pad.left + cW, y);
+    ctx.strokeStyle = 'rgba(122,184,122,0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#7ab87a';
+    ctx.font = '10px Space Mono, monospace';
+    ctx.textAlign = 'left';
+    const maxLabelW = pad.right - 10;
+    let label = g.kg.toFixed(1) + ' kg';
+    if (g.label) {
+      let full = label + ' · ' + g.label;
+      while (ctx.measureText(full).width > maxLabelW && full.length > label.length + 3) {
+        full = full.slice(0, -2) + '…';
+      }
+      label = ctx.measureText(full).width <= maxLabelW ? full : label;
+    }
+    ctx.fillText(label, pad.left + cW + 6, y + 3);
+  });
+
+  // Actual history line + dots
+  ctx.beginPath();
+  history.forEach((d, i) => {
+    const x = xPos(parseDate(d.date)), y = yPos(d.kg);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = '#c4864a';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  history.forEach(d => {
+    const x = xPos(parseDate(d.date)), y = yPos(d.kg);
+    ctx.beginPath();
+    ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#c4864a';
+    ctx.fill();
+  });
+
+  // Projected dashed line from the latest entry to the horizon
+  if (trend && trend.slope !== 0) {
+    const horizonKg = trend.currentKg + trend.slope * ((horizonDate - lastDate) / 864e5);
+    ctx.beginPath();
+    ctx.moveTo(xPos(lastDate), yPos(trend.currentKg));
+    ctx.lineTo(xPos(horizonDate), yPos(horizonKg));
+    ctx.strokeStyle = trend.slope < 0 ? 'rgba(122,184,122,0.85)' : 'rgba(196,106,106,0.85)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Markers where the projection crosses each reachable goal
+  goalProjections.forEach(({ goal, proj }) => {
+    if (proj.status !== 'ontrack' || proj.date.getTime() > horizonDate.getTime()) return;
+    const x = xPos(proj.date), y = yPos(goal.kg);
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#1c1814';
+    ctx.fill();
+    ctx.strokeStyle = '#7ab87a';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
+
+  // X-axis labels
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const labelFor = d => months[d.getMonth()] + ' ' + d.getDate();
+  ctx.fillStyle = '#5a5040';
+  ctx.font = '9px DM Serif Text, Georgia, serif';
+  ctx.textAlign = 'left';
+  ctx.fillText(labelFor(firstDate), pad.left, H - pad.bottom + 14);
+  ctx.textAlign = 'center';
+  ctx.fillText('Latest', latestX, H - pad.bottom + 14);
+  ctx.textAlign = 'right';
+  ctx.fillText(labelFor(horizonDate), pad.left + cW, H - pad.bottom + 14);
+}
+
+// ── Goal modal ────────────────────────────────────────────────────────────────
+function openGoalModal(id) {
+  const goal = id ? getGoals().find(g => g.id === id) : null;
+  document.getElementById('goal-modal-title').textContent = goal ? 'Edit Weight Goal' : 'Add Weight Goal';
+  document.getElementById('g-kg').value = goal ? goal.kg : '';
+  document.getElementById('g-label').value = goal ? (goal.label || '') : '';
+  document.getElementById('g-id').value = goal ? goal.id : '';
+  document.getElementById('goal-modal-delete').style.display = goal ? '' : 'none';
+  document.getElementById('goal-modal').classList.add('open');
+  document.getElementById('g-kg').focus();
+}
+
+function closeGoalModal() {
+  document.getElementById('goal-modal').classList.remove('open');
+}
+
+document.getElementById('new-goal-btn').addEventListener('click', () => openGoalModal(null));
+document.getElementById('goal-modal-close').addEventListener('click', closeGoalModal);
+document.getElementById('goal-modal-cancel').addEventListener('click', closeGoalModal);
+document.getElementById('goal-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeGoalModal();
+});
+
+document.getElementById('goal-modal-save').addEventListener('click', () => {
+  const kg = parseFloat(document.getElementById('g-kg').value);
+  if (!kg || kg <= 0) { toast('Please enter a valid target weight', 'error'); return; }
+  const label  = document.getElementById('g-label').value.trim();
+  const editId = document.getElementById('g-id').value;
+
+  const goals = getGoals();
+  if (editId) {
+    const idx = goals.findIndex(g => g.id === editId);
+    if (idx >= 0) goals[idx] = { ...goals[idx], kg, label };
+    toast('Goal updated', 'success');
+  } else {
+    goals.push({ id: uid(), kg, label, createdAt: new Date().toISOString() });
+    toast('Goal added', 'success');
+  }
+  saveGoals(goals);
+  closeGoalModal();
+  renderGoals();
+});
+
+document.getElementById('goal-modal-delete').addEventListener('click', () => {
+  const editId = document.getElementById('g-id').value;
+  if (editId) {
+    saveGoals(getGoals().filter(g => g.id !== editId));
+    toast('Goal removed');
+  }
+  closeGoalModal();
+  renderGoals();
+});
+
+document.getElementById('goal-range-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('[data-grange]');
+  if (!btn) return;
+  document.querySelectorAll('#goal-range-tabs .range-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  goalRange = parseInt(btn.dataset.grange);
+  renderGoals();
+});
 
 // ── Add food to log ──────────────────────────────────────────────────────────
 function addToLog(entry) {
@@ -2673,7 +3156,7 @@ function renderTopFoods() {
 
 // ── Export / Import ──────────────────────────────────────────────────────────
 document.getElementById('export-json-btn').addEventListener('click', () => {
-  const data = { presets: getPresets(), log: getLog(), weights: getWeights(), exportedAt: new Date().toISOString() };
+  const data = { presets: getPresets(), log: getLog(), weights: getWeights(), goals: getGoals(), exportedAt: new Date().toISOString() };
   downloadFile('calorie-tracker.json', JSON.stringify(data, null, 2), 'application/json');
   toast('Exported JSON', 'success');
 });
@@ -2705,6 +3188,7 @@ document.getElementById('import-file').addEventListener('change', e => {
       if (data.presets) savePresets(data.presets);
       if (data.log)     saveLog(data.log);
       if (data.weights) saveWeights(data.weights);
+      if (data.goals)   saveGoals(data.goals);
       renderLog();
       renderPresets();
       toast('Import successful', 'success');
