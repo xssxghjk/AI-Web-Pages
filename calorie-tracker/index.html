@@ -496,9 +496,21 @@ canvas { display: block; width: 100%; }
 .goal-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
 .goal-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
-  padding: 13px 15px; transition: border-color 0.15s;
+  padding: 13px 15px; transition: border-color 0.15s, opacity 0.15s;
 }
 .goal-card:hover { border-color: var(--bord2); }
+.goal-card.disabled { opacity: 0.5; }
+.goal-toggle {
+  position: relative; flex-shrink: 0; width: 30px; height: 17px; border-radius: 9px;
+  background: var(--surf3); border: 1px solid var(--border); cursor: pointer; padding: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+.goal-toggle::after {
+  content: ''; position: absolute; top: 1px; left: 1px; width: 13px; height: 13px; border-radius: 50%;
+  background: var(--muted); transition: transform 0.15s, background 0.15s;
+}
+.goal-toggle.on { background: var(--green-d); border-color: var(--green-b); }
+.goal-toggle.on::after { transform: translateX(13px); background: var(--green); }
 .goal-card-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
 .goal-card-info { flex: 1; min-width: 0; }
 .goal-card-label {
@@ -1858,6 +1870,7 @@ function goalProgressPercent(goalKg, currentKg, startKg) {
 }
 
 function renderGoalCard(g, currentKg, startKg, trend) {
+  const enabled = g.enabled !== false;
   const proj = currentKg == null ? { status: 'unknown' } : projectGoalDate(g.kg, trend);
   const status = formatGoalStatus(proj);
   const pct = goalProgressPercent(g.kg, currentKg, startKg);
@@ -1867,8 +1880,9 @@ function renderGoalCard(g, currentKg, startKg, trend) {
     : (remaining > 0 ? '+' : '−') + Math.abs(remaining).toFixed(1) + ' kg to go';
 
   return `
-    <div class="goal-card">
+    <div class="goal-card ${enabled ? '' : 'disabled'}">
       <div class="goal-card-top">
+        <button class="goal-toggle ${enabled ? 'on' : ''}" data-goal-toggle="${esc(g.id)}" title="${enabled ? 'Hide from graph' : 'Show in graph'}" aria-label="Toggle goal visibility"></button>
         <div class="goal-card-info">
           ${g.label ? `<div class="goal-card-label">${esc(g.label)}</div>` : ''}
           <div class="goal-card-kg">${g.kg.toFixed(1)}<span class="unit"> kg</span></div>
@@ -1939,10 +1953,19 @@ function renderGoals() {
         toast('Goal removed');
       });
     });
+    listEl.querySelectorAll('[data-goal-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const all = getGoals();
+        const target = all.find(g => g.id === btn.dataset.goalToggle);
+        if (target) target.enabled = target.enabled === false;
+        saveGoals(all);
+        renderGoals();
+      });
+    });
   }
 
   renderGoalRateSummary(trend);
-  drawProjectionChart(goals, history, trend);
+  drawProjectionChart(goals.filter(g => g.enabled !== false), history, trend);
 }
 
 function drawProjectionChart(goals, history, trend) {
