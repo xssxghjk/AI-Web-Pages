@@ -221,6 +221,7 @@ body::before {
 .log-info { flex: 1; min-width: 0; }
 .log-name { font-size: 13px; color: var(--text); font-weight: 400; }
 .log-qty { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.log-ratio { font-size: 10px; color: var(--muted2); margin-top: 1px; font-family: 'Space Mono', monospace; }
 .log-macros {
   display: flex; gap: 12px; flex-shrink: 0;
   font-family: 'Space Mono', monospace; font-size: 12px;
@@ -271,6 +272,7 @@ body::before {
 }
 .preset-cal { color: var(--accent); }
 .preset-prot { color: var(--green); }
+.preset-ratio { color: var(--muted); }
 .preset-actions { display: flex; gap: 4px; margin-top: 4px; }
 
 /* ── MODAL ── */
@@ -361,6 +363,7 @@ body::before {
 .quick-info { flex: 1; min-width: 0; }
 .quick-name { font-size: 12px; color: var(--text); }
 .quick-sub { font-size: 10px; color: var(--muted); }
+.quick-ratio { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; }
 .quick-macros {
   font-family: 'Space Mono', monospace; font-size: 11px;
   display: flex; gap: 8px; flex-shrink: 0;
@@ -976,6 +979,7 @@ canvas { display: block; width: 100%; }
           <input type="number" id="ng-prot" class="form-input" placeholder="e.g. 150" min="0">
         </div>
       </div>
+      <div id="ng-ratio-hint" style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5"></div>
       <button class="btn btn-primary btn-sm" id="ng-save-btn" style="margin-top:12px">Save Goals</button>
     </div>
 
@@ -1081,6 +1085,9 @@ canvas { display: block; width: 100%; }
             <input type="number" id="m-prot" class="form-input" placeholder="31" min="0">
           </div>
         </div>
+        <div class="form-row" style="margin-top:-6px;margin-bottom:12px">
+          <div style="font-size:11px;color:var(--muted);grid-column:1/-1" id="m-ratio-hint"></div>
+        </div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="m-cat">Category</label>
@@ -1155,6 +1162,7 @@ canvas { display: block; width: 100%; }
           <input type="number" id="p-prot" class="form-input" placeholder="31" min="0">
         </div>
       </div>
+      <div style="font-size:11px;color:var(--muted);margin:-6px 0 12px" id="p-ratio-hint"></div>
       <div class="form-group">
         <label class="form-label" for="p-cat">Category</label>
         <select id="p-cat" class="form-select">
@@ -1472,6 +1480,7 @@ function renderLog() {
         <div class="log-info">
           <div class="log-name">${esc(entry.name)}</div>
           <div class="log-qty">${esc(qty)}</div>
+          <div class="log-ratio">${proteinDensityLabel(entry.protein, entry.calories)}</div>
         </div>
         <div class="log-macros">
           <span class="log-cal">${cal} kcal</span>
@@ -1550,7 +1559,21 @@ function loadNutritionGoalsForm() {
   const g = getNutritionGoals();
   document.getElementById('ng-cal').value  = g.calories || '';
   document.getElementById('ng-prot').value = g.protein  || '';
+  updateGoalRatioHint();
 }
+
+function updateGoalRatioHint() {
+  const cal  = parseFloat(document.getElementById('ng-cal').value)  || 0;
+  const prot = parseFloat(document.getElementById('ng-prot').value) || 0;
+  const hint = document.getElementById('ng-ratio-hint');
+  if (cal > 0 && prot > 0) {
+    hint.textContent = `To hit both goals, average ${proteinDensityLabel(prot, cal)} across what you eat — favor foods at or above that density.`;
+  } else {
+    hint.textContent = '';
+  }
+}
+document.getElementById('ng-cal').addEventListener('input', updateGoalRatioHint);
+document.getElementById('ng-prot').addEventListener('input', updateGoalRatioHint);
 
 document.getElementById('ng-save-btn').addEventListener('click', () => {
   const cal  = parseFloat(document.getElementById('ng-cal').value);
@@ -1565,6 +1588,7 @@ document.getElementById('ng-save-btn').addEventListener('click', () => {
     protein:  prot > 0 ? prot : null
   });
   renderLog();
+  updateGoalRatioHint();
   toast('Nutrition goals saved', 'success');
 });
 
@@ -2339,6 +2363,7 @@ function renderPresets() {
       <div class="preset-macros">
         <span class="preset-cal">${Math.round(p.calories)} kcal</span>
         <span class="preset-prot">${Math.round(p.protein * 10) / 10}g protein</span>
+        <span class="preset-ratio">${proteinDensityLabel(p.protein, p.calories)}</span>
       </div>
       <div class="preset-actions">
         <button class="btn btn-primary btn-xs" data-quick-log="${p.id}" title="Log 1 serving">Log</button>
@@ -2411,7 +2436,19 @@ function resetFoodModal() {
   document.getElementById('m-save-preset').checked = false;
   pendingCounts = {};
   document.getElementById('quick-summary').style.display = 'none';
+  updateManualRatioHint();
 }
+
+function updateManualRatioHint() {
+  const cal  = parseFloat(document.getElementById('m-cal').value)  || 0;
+  const prot = parseFloat(document.getElementById('m-prot').value) || 0;
+  const hint = document.getElementById('m-ratio-hint');
+  hint.textContent = (cal > 0 && prot > 0)
+    ? `Protein density: ${proteinDensityLabel(prot, cal)}`
+    : '';
+}
+document.getElementById('m-cal').addEventListener('input', updateManualRatioHint);
+document.getElementById('m-prot').addEventListener('input', updateManualRatioHint);
 
 function setFoodMode(mode) {
   foodModalMode = mode;
@@ -2499,6 +2536,7 @@ function renderQuickList() {
       <div class="quick-info">
         <div class="quick-name">${esc(p.name)}</div>
         <div class="quick-sub">${esc(p.servingSize + p.servingUnit)} &middot; ${capFirst(p.category)}</div>
+        <div class="quick-ratio">${proteinDensityLabel(p.protein, p.calories)}</div>
       </div>
       <div class="quick-macros">
         <span style="color:var(--accent)">${Math.round(p.calories)} kcal</span>
@@ -2600,8 +2638,20 @@ function openPresetModal(editId) {
     document.getElementById('p-prot').value          = '';
     document.getElementById('p-cat').value           = 'snack';
   }
+  updatePresetRatioHint();
   document.getElementById('preset-modal').classList.add('open');
 }
+
+function updatePresetRatioHint() {
+  const cal  = parseFloat(document.getElementById('p-cal').value)  || 0;
+  const prot = parseFloat(document.getElementById('p-prot').value) || 0;
+  const hint = document.getElementById('p-ratio-hint');
+  hint.textContent = (cal > 0 && prot > 0)
+    ? `Protein density: ${proteinDensityLabel(prot, cal)}`
+    : '';
+}
+document.getElementById('p-cal').addEventListener('input', updatePresetRatioHint);
+document.getElementById('p-prot').addEventListener('input', updatePresetRatioHint);
 
 function closePresetModal() {
   document.getElementById('preset-modal').classList.remove('open');
@@ -3343,6 +3393,15 @@ function esc(s) {
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function capFirst(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
+// Protein density: grams of protein per 100 kcal — lets foods be compared by "protein efficiency".
+function proteinDensity(protein, calories) {
+  if (!calories || calories <= 0) return null;
+  return Math.round((protein / calories) * 100 * 10) / 10;
+}
+function proteinDensityLabel(protein, calories) {
+  const d = proteinDensity(protein, calories);
+  return d === null ? '—g/100kcal' : `${d}g/100kcal`;
+}
 
 // ── Activity: cross-sport calorie burn ───────────────────────────────────────
 
