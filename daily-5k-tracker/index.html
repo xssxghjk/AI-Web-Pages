@@ -110,6 +110,25 @@ body::before {
 }
 .stat-lbl { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
+/* PB hero */
+.pb-hero {
+  background: linear-gradient(135deg, var(--ab2), var(--ab) 60%, transparent);
+  border: 1px solid var(--ab2);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  flex-wrap: wrap;
+}
+.pb-hero-lbl {
+  font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700;
+}
+.pb-hero-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
+.pb-hero-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 44px; font-weight: 700; color: var(--accent); line-height: 1;
+}
+
 /* Log form */
 .form-card {
   background: var(--surf);
@@ -367,6 +386,7 @@ body::before {
 
   <!-- ── Overview ─────────────────────────────────────────────────────────── -->
   <div class="tab-panel active" id="tab-overview">
+    <div class="pb-hero" id="pb-hero"></div>
     <div class="stats-row" id="stats-row"></div>
 
     <div class="hm-card">
@@ -409,6 +429,14 @@ body::before {
   <!-- ── Statistics ───────────────────────────────────────────────────────── -->
   <div class="tab-panel" id="tab-statistics">
     <div class="stats-summary" id="stat-summary"></div>
+
+    <div class="chart-card" style="border-color:var(--ab2)">
+      <div class="chart-title">
+        PB Progression
+        <span class="chart-sub">mm:ss · every new record</span>
+      </div>
+      <div class="chart-wrap" id="chart-pb"></div>
+    </div>
 
     <div class="chart-card">
       <div class="chart-title">
@@ -519,6 +547,13 @@ function kcalFor(a, weight) { return ActivityCalc.runningKcal(weight, a.km || KM
 function formatPace(minPerKm) {
   const m = Math.floor(minPerKm);
   return m + ':' + String(Math.round((minPerKm - m) * 60)).padStart(2, '0');
+}
+
+// ── Personal best ──────────────────────────────────────────────────────────
+function personalBest() {
+  const timed = runs().filter(a => a.time > 0);
+  if (!timed.length) return null;
+  return timed.reduce((best, a) => a.time < best.time ? a : best, timed[0]);
 }
 
 // ── Streaks ────────────────────────────────────────────────────────────────
@@ -690,7 +725,7 @@ function renderStatistics() {
   const totalKm   = subset.reduce((s,a) => s+(a.km||KM), 0);
   const totalMin  = subset.reduce((s,a) => s+(a.time||0), 0);
   const totalKcal = subset.reduce((s,a) => s+(kcalFor(a,weight)||0), 0);
-  const avgMin    = subset.length ? totalMin/subset.length : 0;
+  const pb        = personalBest();
 
   const paceData  = sorted.filter(a => a.time>0);
   const paces     = paceData.map(a => a.time/(a.km||KM));
@@ -709,9 +744,9 @@ function renderStatistics() {
       <div class="summary-val">${totalMin>=60 ? Math.round(totalMin/60*10)/10+'h' : (totalMin||'—')+(totalMin?'m':'')}</div>
       <div class="summary-lbl">Total Time</div>
     </div>
-    <div class="summary-card">
-      <div class="summary-val">${avgMin>0 ? Math.round(avgMin)+'m' : '—'}</div>
-      <div class="summary-lbl">Avg Time</div>
+    <div class="summary-card" style="border-color:var(--ab2); background:var(--ab)">
+      <div class="summary-val" style="color:var(--accent)">${pb ? formatPace(pb.time) : '—'}</div>
+      <div class="summary-lbl">Personal Best</div>
     </div>
     <div class="summary-card">
       <div class="summary-val">${bestPace ? formatPace(bestPace)+'/km' : '—'}</div>
@@ -721,6 +756,18 @@ function renderStatistics() {
       <div class="summary-val">${totalKcal>0 ? '~'+totalKcal.toLocaleString() : '—'}</div>
       <div class="summary-lbl">Total kcal</div>
     </div>`;
+
+  // Chart 0: PB progression (every new record over time)
+  const accentColor = '#c4864a';
+  let runningBest = Infinity;
+  const pbRecords = paceData.reduce((acc, a) => {
+    if (a.time < runningBest) {
+      runningBest = a.time;
+      acc.push({ y: a.time, label: fmtDate(a.date), tip: fmtDate(a.date) + ': ' + formatPace(a.time) + ' — new PB' });
+    }
+    return acc;
+  }, []);
+  document.getElementById('chart-pb').innerHTML = lineChart(pbRecords, accentColor);
 
   // Chart 1: Pace / Speed over time
   const showSpeed = currentPaceUnit === 'speed';
@@ -776,6 +823,18 @@ function renderStats() {
   const totalKcal = subset.reduce((s,a)  => s+(kcalFor(a,weight)||0), 0);
   const { current, best } = streakStats();
   const nw = !weight;
+  const pb = personalBest();
+  document.getElementById('pb-hero').innerHTML = pb ? `
+    <div>
+      <div class="pb-hero-lbl">🏆 Personal Best</div>
+      <div class="pb-hero-sub">${fmtDate(pb.date)}</div>
+    </div>
+    <div class="pb-hero-val">${formatPace(pb.time)}</div>` : `
+    <div>
+      <div class="pb-hero-lbl">🏆 Personal Best</div>
+      <div class="pb-hero-sub">Log a run to set your PB</div>
+    </div>
+    <div class="pb-hero-val">—</div>`;
   document.getElementById('stats-row').innerHTML = `
     <div class="stat-card">
       <div class="stat-val">${subset.length}</div>
