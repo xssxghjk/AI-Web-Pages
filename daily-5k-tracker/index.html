@@ -430,6 +430,14 @@ body::before {
   <div class="tab-panel" id="tab-statistics">
     <div class="stats-summary" id="stat-summary"></div>
 
+    <div class="chart-card" style="border-color:var(--ab2)">
+      <div class="chart-title">
+        PB Progression
+        <span class="chart-sub">mm:ss · every new record</span>
+      </div>
+      <div class="chart-wrap" id="chart-pb"></div>
+    </div>
+
     <div class="chart-card">
       <div class="chart-title">
         <span id="chart1-label">Pace Over Time</span>
@@ -748,6 +756,18 @@ function renderStatistics() {
       <div class="summary-val">${totalKcal>0 ? '~'+totalKcal.toLocaleString() : '—'}</div>
       <div class="summary-lbl">Total kcal</div>
     </div>`;
+
+  // Chart 0: PB progression (every new record over time)
+  const accentColor = '#c4864a';
+  let runningBest = Infinity;
+  const pbRecords = paceData.reduce((acc, a) => {
+    if (a.time < runningBest) {
+      runningBest = a.time;
+      acc.push({ y: a.time, label: fmtDate(a.date), tip: fmtDate(a.date) + ': ' + formatPace(a.time) + ' — new PB' });
+    }
+    return acc;
+  }, []);
+  document.getElementById('chart-pb').innerHTML = lineChart(pbRecords, accentColor);
 
   // Chart 1: Pace / Speed over time
   const showSpeed = currentPaceUnit === 'speed';
