@@ -155,6 +155,16 @@ body::before {
 .summary-unit { font-size: 11px; color: var(--muted); margin-left: 3px; font-family: 'DM Serif Text', serif; }
 .summary-card-weight:hover { border-color: var(--bord2); }
 .summary-card-weight:hover .summary-val { color: var(--accent); }
+.summary-goal-track {
+  height: 4px; background: var(--surf3); border-radius: 2px; overflow: hidden;
+  border: 1px solid var(--border); margin-top: 8px;
+}
+.summary-goal-fill { height: 100%; background: var(--accent); transition: width 0.3s; border-radius: 2px; }
+.summary-goal-fill.fill-green { background: var(--green); }
+.summary-goal-fill.fill-red   { background: var(--red); }
+.summary-goal-text { font-size: 10px; color: var(--muted); margin-top: 5px; font-family: 'Space Mono', monospace; }
+.summary-goal-text.over { color: var(--red); }
+.summary-goal-text.met  { color: var(--green); }
 
 /* ── SECTION HEADER ── */
 .section-hdr {
@@ -736,11 +746,19 @@ canvas { display: block; width: 100%; }
         <div class="summary-label">Calories</div>
         <div class="summary-val accent" id="sum-cal">0</div>
         <div class="summary-unit">kcal today</div>
+        <div class="summary-goal-track" id="cal-goal-track" style="display:none">
+          <div class="summary-goal-fill" id="cal-goal-fill"></div>
+        </div>
+        <div class="summary-goal-text" id="cal-goal-text" style="display:none"></div>
       </div>
       <div class="summary-card">
         <div class="summary-label">Protein</div>
         <div class="summary-val" id="sum-prot">0</div>
         <div class="summary-unit">g today</div>
+        <div class="summary-goal-track" id="prot-goal-track" style="display:none">
+          <div class="summary-goal-fill fill-green" id="prot-goal-fill"></div>
+        </div>
+        <div class="summary-goal-text" id="prot-goal-text" style="display:none"></div>
       </div>
       <div class="summary-card summary-card-weight" id="weight-card" style="cursor:pointer" title="Log body weight for this day">
         <div class="summary-label">Body Weight</div>
@@ -944,6 +962,23 @@ canvas { display: block; width: 100%; }
 
   <!-- ── GOALS TAB ── -->
   <div class="tab-panel" id="tab-goals">
+    <div class="section-hdr">
+      <span class="section-title">Nutrition Goals</span>
+    </div>
+    <div class="goal-card" style="margin-bottom:20px">
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="ng-cal">Daily Calorie Goal (kcal)</label>
+          <input type="number" id="ng-cal" class="form-input" placeholder="e.g. 2200" min="0">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="ng-prot">Daily Protein Goal (g)</label>
+          <input type="number" id="ng-prot" class="form-input" placeholder="e.g. 150" min="0">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" id="ng-save-btn" style="margin-top:12px">Save Goals</button>
+    </div>
+
     <div class="section-hdr">
       <span class="section-title">Weight Goals</span>
       <button class="btn btn-ghost btn-sm" id="new-goal-btn">+ Add Goal</button>
@@ -1239,6 +1274,7 @@ const PRESETS_KEY = 'calorie_presets';
 const LOG_KEY     = 'calorie_log';
 const WEIGHTS_KEY = 'calorie_weights';
 const GOALS_KEY   = 'calorie_weight_goals';
+const NUTRITION_GOALS_KEY = 'calorie_nutrition_goals';
 
 function getPresets()       { return LS.get(PRESETS_KEY, []); }
 function savePresets(arr)   { LS.set(PRESETS_KEY, arr); }
@@ -1248,6 +1284,8 @@ function getWeights()       { return LS.get(WEIGHTS_KEY, {}); }
 function saveWeights(obj)   { LS.set(WEIGHTS_KEY, obj); }
 function getGoals()         { return LS.get(GOALS_KEY, []); }
 function saveGoals(arr)     { LS.set(GOALS_KEY, arr); }
+function getNutritionGoals()     { return LS.get(NUTRITION_GOALS_KEY, { calories: null, protein: null }); }
+function saveNutritionGoals(obj) { LS.set(NUTRITION_GOALS_KEY, obj); }
 function getWeightForDate(dateStr) { return getWeights()[dateStr] || null; }
 function setWeightForDate(dateStr, kg) {
   const w = getWeights();
@@ -1349,7 +1387,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.add('active');
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     if (btn.dataset.tab === 'dashboard') renderDashboard();
-    if (btn.dataset.tab === 'goals') renderGoals();
+    if (btn.dataset.tab === 'goals') { renderGoals(); loadNutritionGoalsForm(); }
   });
 });
 
@@ -1375,6 +1413,7 @@ function renderLog() {
     document.getElementById('sum-cal').textContent = '0';
     document.getElementById('sum-prot').textContent = '0';
     updateWeightCard();
+    updateNutritionGoalUI(0, 0);
     return;
   }
 
@@ -1458,11 +1497,76 @@ function renderLog() {
   document.getElementById('total-prot').textContent  = (Math.round(totalProt * 10) / 10) + ' g';
   document.getElementById('total-count').textContent = entries.length;
   updateWeightCard();
+  updateNutritionGoalUI(totalCal, totalProt);
 
   list.querySelectorAll('[data-del]').forEach(btn => {
     btn.addEventListener('click', () => deleteLogEntry(btn.dataset.del));
   });
 }
+
+// ── Nutrition goals ──────────────────────────────────────────────────────────
+function updateNutritionGoalUI(totalCal, totalProt) {
+  const goals = getNutritionGoals();
+
+  const calTrack = document.getElementById('cal-goal-track');
+  const calFill  = document.getElementById('cal-goal-fill');
+  const calText  = document.getElementById('cal-goal-text');
+  if (goals.calories > 0) {
+    const over = totalCal > goals.calories;
+    const pct  = Math.min((totalCal / goals.calories) * 100, 100);
+    calTrack.style.display = '';
+    calText.style.display  = '';
+    calFill.style.width = pct + '%';
+    calFill.classList.toggle('fill-red', over);
+    calText.classList.toggle('over', over);
+    calText.textContent = over
+      ? `${Math.round(totalCal - goals.calories)} kcal over ${Math.round(goals.calories)} goal`
+      : `${Math.round(goals.calories - totalCal)} kcal left of ${Math.round(goals.calories)}`;
+  } else {
+    calTrack.style.display = 'none';
+    calText.style.display  = 'none';
+  }
+
+  const protTrack = document.getElementById('prot-goal-track');
+  const protFill  = document.getElementById('prot-goal-fill');
+  const protText  = document.getElementById('prot-goal-text');
+  if (goals.protein > 0) {
+    const met = totalProt >= goals.protein;
+    const pct = Math.min((totalProt / goals.protein) * 100, 100);
+    protTrack.style.display = '';
+    protText.style.display  = '';
+    protFill.style.width = pct + '%';
+    protText.classList.toggle('met', met);
+    protText.textContent = met
+      ? `Goal reached · +${Math.round((totalProt - goals.protein) * 10) / 10}g`
+      : `${Math.round((goals.protein - totalProt) * 10) / 10}g left of ${goals.protein}g`;
+  } else {
+    protTrack.style.display = 'none';
+    protText.style.display  = 'none';
+  }
+}
+
+function loadNutritionGoalsForm() {
+  const g = getNutritionGoals();
+  document.getElementById('ng-cal').value  = g.calories || '';
+  document.getElementById('ng-prot').value = g.protein  || '';
+}
+
+document.getElementById('ng-save-btn').addEventListener('click', () => {
+  const cal  = parseFloat(document.getElementById('ng-cal').value);
+  const prot = parseFloat(document.getElementById('ng-prot').value);
+  if ((document.getElementById('ng-cal').value && (isNaN(cal) || cal < 0)) ||
+      (document.getElementById('ng-prot').value && (isNaN(prot) || prot < 0))) {
+    toast('Please enter valid goal values', 'error');
+    return;
+  }
+  saveNutritionGoals({
+    calories: cal > 0 ? cal : null,
+    protein:  prot > 0 ? prot : null
+  });
+  renderLog();
+  toast('Nutrition goals saved', 'success');
+});
 
 function deleteLogEntry(id) {
   const log = getLog();
@@ -3516,6 +3620,7 @@ fetch('../version.json').then(r => r.json()).then(v => {
 // ── Init ─────────────────────────────────────────────────────────────────────
 setDate(dateStr(new Date()));
 renderPresets();
+loadNutritionGoalsForm();
 </script>
 </body>
 </html>
