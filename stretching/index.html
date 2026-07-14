@@ -207,14 +207,33 @@ body::before {
 .ex-card.done { background: rgba(78,201,148,0.05); border-color: rgba(78,201,148,0.25); }
 
 .ex-top { display: flex; align-items: flex-start; gap: 10px; }
-.ex-icon-wrap { width: 46px; height: 46px; flex-shrink: 0; }
-.ex-icon-wrap svg { width: 100%; height: 100%; }
+.ex-icon-wrap {
+  width: 46px; height: 46px; flex-shrink: 0;
+  position: relative;
+  background: none; border: none; padding: 0; cursor: pointer;
+}
+.ex-icon-wrap svg { width: 100%; height: 100%; transition: transform 0.15s; }
+.ex-icon-wrap:hover svg, .ex-icon-wrap:focus-visible svg { transform: scale(1.1); }
+.ex-icon-wrap::after {
+  content: '';
+  position: absolute; right: -3px; bottom: -3px;
+  width: 15px; height: 15px; border-radius: 50%;
+  background: var(--surf2); border: 1px solid var(--bord2);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a8a76' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='10' cy='10' r='6'/%3E%3Cpath d='M15 15L21 21'/%3E%3C/svg%3E");
+  background-size: 9px 9px; background-repeat: no-repeat; background-position: center;
+}
 .ex-heading { flex: 1; min-width: 0; }
+.ex-name-btn {
+  background: none; border: none; padding: 0; cursor: pointer;
+  text-align: left; font: inherit; color: inherit;
+}
 .ex-name {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 15.5px; font-weight: 700; font-style: italic;
-  line-height: 1.25;
+  line-height: 1.25; border-bottom: 1px dashed transparent;
+  transition: border-color 0.15s;
 }
+.ex-name-btn:hover .ex-name, .ex-name-btn:focus-visible .ex-name { border-bottom-color: var(--muted); }
 .ex-target { font-size: 10.5px; color: var(--muted); font-style: italic; margin-top: 2px; }
 .ex-prescription {
   font-family: 'Space Mono', monospace; font-size: 10.5px;
@@ -269,6 +288,85 @@ body::before {
 .science-body-inner li { font-size: 12px; color: var(--text2); line-height: 1.65; margin-bottom: 9px; }
 .science-body-inner li b { color: var(--text); font-weight: 600; }
 .science-note { font-size: 11px; color: var(--muted); font-style: italic; margin-top: 6px; }
+
+/* ── DEMO MODAL ── */
+.demo-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(12,10,7,0.78);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.2s ease;
+}
+.demo-overlay.open { opacity: 1; visibility: visible; }
+.demo-modal {
+  background: var(--surface);
+  border: 1px solid var(--bord2);
+  border-top: 3px solid var(--mc, var(--accent));
+  max-width: 460px; width: 100%;
+  max-height: 88vh; overflow-y: auto;
+  padding: 26px 24px 22px;
+  position: relative;
+  transform: translateY(10px);
+  transition: transform 0.2s ease;
+}
+.demo-overlay.open .demo-modal { transform: translateY(0); }
+.demo-close {
+  position: absolute; top: 10px; right: 10px;
+  width: 30px; height: 30px;
+  background: none; border: 1px solid var(--bord2);
+  color: var(--text2); font-size: 18px; line-height: 1;
+  cursor: pointer; transition: all 0.15s;
+}
+.demo-close:hover { border-color: var(--text2); color: var(--text); }
+.demo-icon-wrap {
+  width: 110px; height: 110px; margin: 0 auto 14px;
+  color: var(--mc, var(--accent));
+}
+.demo-icon-wrap svg { width: 100%; height: 100%; }
+.demo-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 22px; font-weight: 700; font-style: italic;
+  text-align: center; line-height: 1.25;
+}
+.demo-meta {
+  text-align: center; font-size: 11px; color: var(--muted);
+  font-style: italic; margin-top: 6px;
+}
+.demo-meta .demo-prescription {
+  font-family: 'Space Mono', monospace; font-style: normal;
+  color: var(--text2); margin-top: 2px; display: block;
+}
+.demo-cue {
+  margin: 16px 0; padding: 10px 12px;
+  border-left: 3px solid var(--mc, var(--accent));
+  background: var(--surf2);
+  font-size: 12.5px; color: var(--text2); line-height: 1.6; font-style: italic;
+}
+.demo-steps-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--muted); font-style: italic; margin-bottom: 8px;
+}
+.demo-steps { list-style: none; counter-reset: demostep; }
+.demo-steps li {
+  counter-increment: demostep;
+  display: flex; gap: 10px;
+  font-size: 12.5px; color: var(--text); line-height: 1.6;
+  margin-bottom: 10px;
+}
+.demo-steps li::before {
+  content: counter(demostep);
+  font-family: 'Space Mono', monospace; font-weight: 700; font-size: 11px;
+  color: var(--mc, var(--accent));
+  border: 1px solid var(--bord2);
+  width: 20px; height: 20px; border-radius: 50%;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.demo-pnf {
+  font-size: 11px; color: var(--muted); font-style: italic;
+  border-top: 1px dashed var(--border); padding-top: 10px; margin-top: 4px; line-height: 1.55;
+}
+.demo-pnf:empty { display: none; }
 
 /* ── FOOTER ── */
 .app-footer {
@@ -344,6 +442,19 @@ body::before {
 
 </div>
 
+<div class="demo-overlay" id="demo-overlay" aria-hidden="true">
+  <div class="demo-modal" role="dialog" aria-modal="true" aria-labelledby="demo-name">
+    <button type="button" class="demo-close" id="demo-close" aria-label="Close demonstration">&times;</button>
+    <div class="demo-icon-wrap" id="demo-icon"></div>
+    <div class="demo-name" id="demo-name"></div>
+    <div class="demo-meta" id="demo-meta"></div>
+    <div class="demo-cue" id="demo-cue"></div>
+    <div class="demo-steps-label">How To Do It</div>
+    <ol class="demo-steps" id="demo-steps"></ol>
+    <p class="demo-pnf" id="demo-pnf"></p>
+  </div>
+</div>
+
 <footer class="app-footer">
   <span id="footer-ver"></span>
 </footer>
@@ -414,82 +525,257 @@ const MODULES = [
 const STRETCHES = [
   { id:'leg-swing-front', name:'Front-to-Back Leg Swings', phase:'dynamic', tags:['split','general','boulder'],
     target:'Hip flexors · Hamstrings · Hip capsule', reps:'10 each leg', sides:true, estSec:40, icon:'legSwing',
-    cue:'Hold a wall for balance. Swing one leg forward and back in a controlled arc — let range grow each rep, don’t force it.' },
+    cue:'Hold a wall for balance. Swing one leg forward and back in a controlled arc — let range grow each rep, don’t force it.',
+    steps:[
+      'Stand side-on to a wall or sturdy chair, feet together, and rest one hand on it for balance.',
+      'Shift your weight onto the leg nearest the wall; let the outside leg hang loose.',
+      'Swing the loose leg forward to about hip height, then back behind you — like a pendulum, not a kick.',
+      'Keep your torso upright and core braced; let the range grow gradually over the reps instead of forcing it.',
+      'Finish all reps, then turn around and repeat with the other leg.'
+    ] },
   { id:'leg-swing-side', name:'Side-to-Side Leg Swings', phase:'dynamic', tags:['split','boulder'],
     target:'Adductors · Abductors', reps:'10 each leg', sides:true, estSec:40, icon:'legSwingSide',
-    cue:'Swing one leg across your body and back out to the side. Keep your torso upright, swinging from the hip.' },
+    cue:'Swing one leg across your body and back out to the side. Keep your torso upright, swinging from the hip.',
+    steps:[
+      'Face a wall or chair with both hands resting on it for support.',
+      'Balance on one leg, letting the other hang relaxed in front of you.',
+      'Swing the loose leg across your body (in front of the standing leg), then back out to the side.',
+      'Keep your hips and shoulders facing forward — the motion comes from the hip, not from twisting your torso.',
+      'Finish your reps, then switch legs.'
+    ] },
   { id:'hip-circles', name:'Standing Hip Circles', phase:'dynamic', tags:['split','general','boulder'],
     target:'Hip joint capsule', reps:'8 each direction, each leg', sides:true, estSec:45, icon:'hipCircle',
-    cue:'Lift your knee and trace a large circle with it, both directions. Keep the standing leg stable.' },
+    cue:'Lift your knee and trace a large circle with it, both directions. Keep the standing leg stable.',
+    steps:[
+      'Stand tall next to a wall for light balance support.',
+      'Lift one knee to hip height, thigh roughly parallel to the floor.',
+      'Trace a large, slow circle with your knee — out to the side, back, and around.',
+      'Keep the standing leg soft and stable; let the circle come from the hip joint.',
+      'Complete all reps in one direction, reverse direction, then repeat on the other leg.'
+    ] },
   { id:'arm-circles', name:'Arm Circles', phase:'dynamic', tags:['general','boulder'],
     target:'Shoulders · Rotator cuff', reps:'10 each direction', sides:false, estSec:25, icon:'armCircle',
-    cue:'Big, slow circles — small at first, growing larger. Reverse direction halfway through.' },
+    cue:'Big, slow circles — small at first, growing larger. Reverse direction halfway through.',
+    steps:[
+      'Stand with feet shoulder-width apart, arms extended straight out to your sides at shoulder height.',
+      'Begin making small circles with your hands, about the size of a dinner plate.',
+      'Gradually widen the circles over the first few reps until they\'re as big as comfortably possible.',
+      'Keep your shoulders down, away from your ears, throughout.',
+      'Complete the reps, then reverse direction and repeat.'
+    ] },
   { id:'cat-cow', name:'Cat–Cow Flow', phase:'dynamic', tags:['toe','general','boulder'],
     target:'Spine · Lower back', reps:'8 slow cycles', sides:false, estSec:35, icon:'catCow',
-    cue:'On hands and knees, alternate arching and rounding your spine with your breath.' },
+    cue:'On hands and knees, alternate arching and rounding your spine with your breath.',
+    steps:[
+      'Get on hands and knees, hands under shoulders, knees under hips.',
+      'Inhale: drop your belly, lift your chest and tailbone, look slightly up (cow).',
+      'Exhale: round your spine toward the ceiling, tuck your chin and tailbone (cat).',
+      'Move slowly, syncing each transition with a full breath.',
+      'Repeat the flow for all cycles.'
+    ] },
   { id:'worlds-greatest', name:'World’s Greatest Stretch', phase:'dynamic', tags:['split','general','boulder'],
     target:'Hips · Hamstrings · T-spine', reps:'5 each side', sides:true, estSec:40, icon:'worldsGreatest',
-    cue:'Step into a deep lunge, drop the back knee, then rotate your torso and reach the same-side arm skyward.' },
+    cue:'Step into a deep lunge, drop the back knee, then rotate your torso and reach the same-side arm skyward.',
+    steps:[
+      'From standing, step one foot forward into a long lunge, lowering the back knee toward the floor.',
+      'Place both hands on the floor inside your front foot.',
+      'Rotate your torso and reach the arm on the same side as your front leg straight up toward the ceiling, following it with your eyes.',
+      'Return your hand to the floor, then briefly straighten your front leg to feel the hamstring before re-bending.',
+      'Step back to standing and repeat on the other side.'
+    ] },
   { id:'ankle-circles', name:'Ankle Circles', phase:'dynamic', tags:['general','boulder'],
     target:'Ankles', reps:'10 each direction, each foot', sides:true, estSec:30, icon:'ankleCircle',
-    cue:'Lift one foot and circle at the ankle. Smooth, full range, both directions.' },
+    cue:'Lift one foot and circle at the ankle. Smooth, full range, both directions.',
+    steps:[
+      'Stand on one leg (holding a wall for balance) or sit with one leg extended.',
+      'Lift the other foot slightly off the ground.',
+      'Circle your foot slowly at the ankle, making the circle as large as feels smooth.',
+      'Complete the reps in one direction, then reverse.',
+      'Switch feet and repeat.'
+    ] },
 
   { id:'toe-touch', name:'Standing Toe Touch', phase:'static', tags:['toe','general'],
     target:'Hamstrings · Lower back · Calves', hold:30, reps:3, sides:false, estSec:90, icon:'forwardFold',
-    cue:'Feet hip-width, soft knees, fold from the hips and let your arms hang. Relax your neck.' },
+    cue:'Feet hip-width, soft knees, fold from the hips and let your arms hang. Relax your neck.',
+    steps:[
+      'Stand with feet hip-width apart, knees soft (not locked).',
+      'Exhale and hinge forward from your hips, letting your head and arms hang heavy.',
+      'Let your spine round naturally — don\'t force your hands to the floor.',
+      'Hold, breathing steadily, sinking a little deeper with each exhale.',
+      'Roll back up slowly, one vertebra at a time.'
+    ] },
   { id:'seated-fold', name:'Seated Forward Fold', phase:'static', tags:['toe','general'],
     target:'Hamstrings · Spine', hold:30, reps:2, sides:false, estSec:60, icon:'seatedFold',
-    cue:'Legs extended, hinge from the hips reaching for your feet — keep your back long, not rounded.' },
+    cue:'Legs extended, hinge from the hips reaching for your feet — keep your back long, not rounded.',
+    steps:[
+      'Sit on the floor with legs extended straight in front of you, feet flexed.',
+      'Sit up tall, then hinge forward from the hips (not the lower back).',
+      'Reach toward your feet, keeping your spine as long as possible rather than rounding hard.',
+      'Hold at the point of mild tension, relaxing your shoulders and neck.',
+      'Release slowly back up to sitting.'
+    ] },
   { id:'standing-hamstring', name:'Elevated Hamstring Stretch', phase:'static', tags:['toe','split','general'],
     target:'Hamstrings', hold:25, reps:2, sides:true, estSec:100, icon:'standingHamstring',
-    cue:'Rest your heel on a chair or step, keep the leg straight, and hinge forward from the hips.' },
+    cue:'Rest your heel on a chair or step, keep the leg straight, and hinge forward from the hips.',
+    steps:[
+      'Find a step, chair, or low table roughly knee-to-hip height.',
+      'Rest one heel on it with the leg straight, toes pointed up.',
+      'Keep your standing leg slightly bent and your back flat.',
+      'Hinge forward from the hips over the raised leg until you feel a stretch in the back of the thigh.',
+      'Hold, then switch legs.'
+    ] },
   { id:'wall-calf', name:'Wall Calf Stretch', phase:'static', tags:['toe','general','boulder'],
     target:'Calves · Achilles', hold:25, reps:2, sides:true, estSec:100, icon:'wallCalf',
-    cue:'Hands on a wall, back leg straight with heel pressed down. Lean in until you feel the stretch.' },
+    cue:'Hands on a wall, back leg straight with heel pressed down. Lean in until you feel the stretch.',
+    steps:[
+      'Face a wall, hands flat against it at shoulder height.',
+      'Step one foot back, keeping that leg straight and the heel pressed into the floor.',
+      'Bend your front knee and lean your hips toward the wall until you feel the stretch in the back leg\'s calf.',
+      'Keep both feet pointing straight ahead.',
+      'Hold, then switch legs.'
+    ] },
   { id:'standing-quad', name:'Standing Quad Stretch', phase:'static', tags:['split','general','boulder'],
     target:'Quadriceps · Hip flexors', hold:25, reps:2, sides:true, estSec:100, icon:'standingQuad',
-    cue:'Grab your ankle behind you, knees together, hips pushed slightly forward. Hold something for balance.' },
+    cue:'Grab your ankle behind you, knees together, hips pushed slightly forward. Hold something for balance.',
+    steps:[
+      'Stand near a wall or chair for balance.',
+      'Bend one knee and grab that foot or ankle behind you.',
+      'Keep your knees close together and gently pull your heel toward your glutes.',
+      'Tuck your pelvis slightly and push your hips forward for a deeper stretch through the front of the thigh.',
+      'Hold, then switch legs.'
+    ] },
   { id:'hip-flexor-lunge', name:'Kneeling Hip Flexor Lunge', phase:'static', tags:['split','general','boulder'],
     target:'Hip flexors · Psoas', hold:30, reps:2, sides:true, estSec:120, icon:'hipFlexorLunge',
     cue:'Half-kneel, tuck your pelvis under, and shift weight forward until you feel the front of the back hip stretch.',
-    pnfNote:'PNF option: gently drive the back hip into the floor for 5s, relax, then sink deeper. Repeat 3×.' },
+    pnfNote:'PNF option: gently drive the back hip into the floor for 5s, relax, then sink deeper. Repeat 3×.',
+    steps:[
+      'Kneel on one knee (pad it if needed), other foot planted flat in front, that knee bent 90°.',
+      'Tuck your pelvis under — imagine flattening your lower back.',
+      'Shift your weight forward over the front foot until you feel a stretch in the front of the back hip.',
+      'Keep your torso upright; add a gentle side-reach overhead for extra stretch if comfortable.',
+      'Hold, then switch sides. Try the PNF option below for a deeper release.'
+    ] },
   { id:'butterfly', name:'Butterfly Stretch', phase:'static', tags:['split','general','boulder'],
     target:'Adductors · Groin', hold:30, reps:2, sides:false, estSec:60, icon:'butterfly',
     cue:'Soles of your feet together, spine tall, gently press your knees toward the floor with your elbows.',
-    pnfNote:'PNF option: press your knees up into your hands for 5s, relax, then let them drop lower. Repeat 3×.' },
+    pnfNote:'PNF option: press your knees up into your hands for 5s, relax, then let them drop lower. Repeat 3×.',
+    steps:[
+      'Sit with the soles of your feet pressed together, knees falling out to the sides.',
+      'Hold your feet or ankles and sit up tall through the spine.',
+      'Rest your elbows on your knees or thighs and gently press downward.',
+      'Lean your chest slightly forward from the hips for more stretch, if comfortable.',
+      'Hold, breathing and relaxing deeper each exhale. Try the PNF option below for extra range.'
+    ] },
   { id:'frog', name:'Frog Stretch', phase:'static', tags:['split','boulder'],
     target:'Adductors · Hips', hold:30, reps:1, sides:false, estSec:30, icon:'frog',
-    cue:'Knees wide on the floor, forearms down, rock your hips back slowly. Advanced — ease in gradually.' },
+    cue:'Knees wide on the floor, forearms down, rock your hips back slowly. Advanced — ease in gradually.',
+    steps:[
+      'Start on hands and knees, then widen your knees out to each side as far as comfortable.',
+      'Turn your feet outward so the inside edges of your feet rest on the floor.',
+      'Lower onto your forearms and slowly rock your hips backward toward your heels.',
+      'Stop the moment you feel a firm stretch — this one deepens quickly, so ease in gradually.',
+      'Hold, then rock gently forward to release.'
+    ] },
   { id:'pigeon', name:'Pigeon Pose', phase:'static', tags:['split','general','boulder'],
     target:'Glutes · Hip external rotators', hold:30, reps:2, sides:true, estSec:120, icon:'pigeon',
-    cue:'Front shin angled under your torso, back leg extended straight behind. Fold forward over the front shin.' },
+    cue:'Front shin angled under your torso, back leg extended straight behind. Fold forward over the front shin.',
+    steps:[
+      'From hands and knees, bring one knee forward and angle the shin across your body.',
+      'Slide the opposite leg straight back behind you, hips squared to the front as much as possible.',
+      'Walk your hands forward and fold your torso over the front shin.',
+      'Keep the back leg\'s hip pointed down toward the floor, not rolled to the side.',
+      'Hold, then switch sides.'
+    ] },
   { id:'ninety-ninety', name:'90/90 Hip Switch', phase:'static', tags:['split','boulder'],
     target:'Hip internal & external rotation', hold:30, reps:2, sides:true, estSec:120, icon:'ninetyNinety',
-    cue:'Sit with your front leg bent 90° in front, back leg bent 90° to the side. Lean over the front shin, then switch.' },
+    cue:'Sit with your front leg bent 90° in front, back leg bent 90° to the side. Lean over the front shin, then switch.',
+    steps:[
+      'Sit on the floor with your front leg bent 90° out in front of you.',
+      'Bend your back leg 90° out to the side behind you, both shins angled roughly parallel to each other\'s edges.',
+      'Sit up tall, then hinge forward over the front shin.',
+      'Keep both sit bones grounded as much as possible.',
+      'Hold, then rotate your whole body to switch which leg is in front.'
+    ] },
   { id:'side-lunge-adductor', name:'Side Lunge Adductor Rock', phase:'static', tags:['split','general','boulder'],
     target:'Adductors', hold:25, reps:2, sides:true, estSec:100, icon:'sideLunge',
-    cue:'Wide stance, sink into one bent knee while the other leg stays straight. Rock side to side or hold.' },
+    cue:'Wide stance, sink into one bent knee while the other leg stays straight. Rock side to side or hold.',
+    steps:[
+      'Stand with feet wide, toes pointing forward or slightly out.',
+      'Shift your weight to one side, bending that knee while keeping the other leg straight.',
+      'Sit your hips back and down over the bent knee, keeping your chest up.',
+      'Feel the stretch along the inner thigh of the straight leg.',
+      'Hold, or rock gently side to side, then switch.'
+    ] },
   { id:'seated-twist', name:'Seated Spinal Twist', phase:'static', tags:['general','boulder'],
     target:'Spine · Obliques', hold:20, reps:2, sides:true, estSec:80, icon:'seatedTwist',
-    cue:'Cross one leg over, rotate your torso toward the bent knee, using your arm as leverage.' },
+    cue:'Cross one leg over, rotate your torso toward the bent knee, using your arm as leverage.',
+    steps:[
+      'Sit with legs extended, then cross one foot over the opposite knee.',
+      'Sit up tall through the spine.',
+      'Place the opposite elbow outside the bent knee and rotate your torso toward that leg.',
+      'Use your back hand on the floor behind you for leverage, twisting from the ribs, not just the neck.',
+      'Hold, then repeat on the other side.'
+    ] },
   { id:'doorway-chest', name:'Doorway Chest Stretch', phase:'static', tags:['general','boulder'],
     target:'Chest · Front shoulders', hold:25, reps:2, sides:false, estSec:50, icon:'doorwayChest',
-    cue:'Forearms on a doorframe, elbows near shoulder height, step forward until your chest opens up.' },
+    cue:'Forearms on a doorframe, elbows near shoulder height, step forward until your chest opens up.',
+    steps:[
+      'Stand in a doorway with forearms resting on each side of the frame, elbows at roughly shoulder height.',
+      'Step one foot forward through the doorway.',
+      'Lean your body weight forward until you feel a stretch across your chest and front shoulders.',
+      'Keep your core braced so your lower back doesn\'t overarch.',
+      'Hold, then step back to release.'
+    ] },
   { id:'cross-body-shoulder', name:'Cross-Body Shoulder Stretch', phase:'static', tags:['general','boulder'],
     target:'Posterior shoulder', hold:20, reps:2, sides:true, estSec:80, icon:'crossBodyShoulder',
-    cue:'Pull one straight arm across your chest with the other arm, keeping the shoulder relaxed down.' },
+    cue:'Pull one straight arm across your chest with the other arm, keeping the shoulder relaxed down.',
+    steps:[
+      'Bring one straight arm across the front of your chest.',
+      'Use your other forearm (below the elbow, not on the joint) to gently pull it closer.',
+      'Keep the pulled shoulder relaxed down and away from your ear.',
+      'Hold, feeling the stretch in the back of the shoulder.',
+      'Switch arms.'
+    ] },
   { id:'overhead-lat', name:'Overhead Lat Stretch', phase:'static', tags:['general','boulder'],
     target:'Lats · Triceps', hold:20, reps:2, sides:true, estSec:80, icon:'overheadLat',
-    cue:'Reach one arm overhead and bend sideways at the waist, feeling the stretch down your side.' },
+    cue:'Reach one arm overhead and bend sideways at the waist, feeling the stretch down your side.',
+    steps:[
+      'Stand or kneel tall, and reach one arm straight overhead.',
+      'Grasp that wrist with your other hand.',
+      'Gently pull the raised arm up and over to the opposite side, bending at the waist.',
+      'Keep your hips square and avoid twisting — the bend should be a clean side-lean.',
+      'Hold, then switch sides.'
+    ] },
   { id:'wrist-flexor', name:'Wrist Flexor Stretch', phase:'static', tags:['boulder'],
     target:'Forearm flexors (grip)', hold:15, reps:2, sides:true, estSec:60, icon:'wristFlexor',
-    cue:'Arm out, palm up, gently pull your fingers back toward you with the other hand. Key for climbers’ forearms.' },
+    cue:'Arm out, palm up, gently pull your fingers back toward you with the other hand. Key for climbers’ forearms.',
+    steps:[
+      'Extend one arm in front of you, palm facing up.',
+      'With your other hand, gently pull the fingers of the extended hand back toward your body.',
+      'Keep the extended elbow straight for a deeper stretch, or slightly bent if it\'s too intense.',
+      'Hold, feeling the stretch along the inside of your forearm.',
+      'Switch arms.'
+    ] },
   { id:'wrist-extensor', name:'Wrist Extensor Stretch', phase:'static', tags:['boulder'],
     target:'Forearm extensors', hold:15, reps:2, sides:true, estSec:60, icon:'wristExtensor',
-    cue:'Arm out, palm down, gently press the back of your hand down and toward you.' },
+    cue:'Arm out, palm down, gently press the back of your hand down and toward you.',
+    steps:[
+      'Extend one arm in front of you, palm facing down.',
+      'Let that wrist relax downward, then use your other hand to gently press the back of the hand further down and toward you.',
+      'Keep the extended elbow straight or slightly bent, whichever allows a clean stretch.',
+      'Hold, feeling the stretch along the top of your forearm.',
+      'Switch arms.'
+    ] },
   { id:'childs-pose', name:'Child’s Pose Reach', phase:'static', tags:['toe','general','boulder'],
     target:'Lats · Spine · Hips', hold:30, reps:1, sides:false, estSec:30, icon:'childsPose',
-    cue:'Knees wide, hips to heels, walk your hands forward and let your chest sink toward the floor.' }
+    cue:'Knees wide, hips to heels, walk your hands forward and let your chest sink toward the floor.',
+    steps:[
+      'Kneel on the floor, big toes touching, knees spread wide.',
+      'Sit your hips back toward your heels.',
+      'Walk your hands forward and lower your chest toward the floor between your knees.',
+      'Let your forehead rest down and relax your shoulders away from your ears.',
+      'Hold, breathing deeply, sinking a little further with each exhale.'
+    ] }
 ];
 
 /* ── Date / storage helpers ── */
@@ -642,9 +928,9 @@ function renderExerciseGrid(containerId, list, entry) {
     const showPnf = ex.pnfNote && selectedModules.includes('split');
     return '<div class="ex-card ec-' + mod + (done ? ' done' : '') + '" data-id="' + ex.id + '">' +
       '<div class="ex-top">' +
-        '<div class="ex-icon-wrap"><svg viewBox="0 0 100 100" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">' + ICONS[ex.icon] + '</svg></div>' +
+        '<button type="button" class="ex-icon-wrap" data-id="' + ex.id + '" title="View demonstration" aria-label="View demonstration for ' + escHtml(ex.name) + '"><svg viewBox="0 0 100 100" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">' + ICONS[ex.icon] + '</svg></button>' +
         '<div class="ex-heading">' +
-          '<div class="ex-name">' + ex.name + '</div>' +
+          '<button type="button" class="ex-name-btn" data-id="' + ex.id + '"><div class="ex-name">' + ex.name + '</div></button>' +
           '<div class="ex-target">' + ex.target + '</div>' +
           '<div class="ex-prescription">' + prescriptionText(ex) + '</div>' +
         '</div>' +
@@ -665,7 +951,46 @@ function renderExerciseGrid(containerId, list, entry) {
       renderAll();
     });
   });
+
+  grid.querySelectorAll('.ex-icon-wrap, .ex-name-btn').forEach(btn => {
+    btn.addEventListener('click', () => openDemo(btn.dataset.id));
+  });
 }
+
+/* ── Demo modal ── */
+function openDemo(id) {
+  const ex = STRETCHES.find(e => e.id === id);
+  if (!ex) return;
+  const mod = primaryModuleFor(ex);
+  const modColor = 'var(--' + mod + ')';
+
+  const modal = document.querySelector('.demo-modal');
+  modal.style.setProperty('--mc', modColor);
+  document.getElementById('demo-icon').innerHTML = '<svg viewBox="0 0 100 100" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round">' + ICONS[ex.icon] + '</svg>';
+  document.getElementById('demo-name').textContent = ex.name;
+  document.getElementById('demo-meta').innerHTML = escHtml(ex.target) + '<span class="demo-prescription">' + escHtml(prescriptionText(ex)) + '</span>';
+  document.getElementById('demo-cue').textContent = ex.cue;
+  document.getElementById('demo-steps').innerHTML = (ex.steps || []).map(s => '<li>' + escHtml(s) + '</li>').join('');
+  document.getElementById('demo-pnf').textContent = ex.pnfNote || '';
+
+  document.getElementById('demo-overlay').classList.add('open');
+  document.getElementById('demo-overlay').setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDemo() {
+  document.getElementById('demo-overlay').classList.remove('open');
+  document.getElementById('demo-overlay').setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('demo-close').addEventListener('click', closeDemo);
+document.getElementById('demo-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'demo-overlay') closeDemo();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeDemo();
+});
 
 function renderAll() {
   renderModuleGrid();
