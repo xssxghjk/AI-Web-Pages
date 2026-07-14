@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stretching Regimen</title>
+<script src="../nav.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Serif+Text:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #1c1814;
+  --surface: #252018;
+  --surf2:   #2e2820;
+  --border:  #3a3025;
+  --bord2:   #4a4030;
+  --accent:  #c4864a;
+  --text:    #e8dfd0;
+  --text2:   #9a8a76;
+  --muted:   #7a6e60;
+  --muted2:  #5a5040;
+
+  --split:      #b3789a;  --split-rgb:      179,120,154;
+  --toe:        #6aaa80;  --toe-rgb:        106,170,128;
+  --general:    #c4864a;  --general-rgb:    196,134,74;
+  --boulder:    #6a9abb;  --boulder-rgb:    106,154,187;
+}
+html { overflow-x: hidden; }
+body {
+  font-family: 'DM Serif Text', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.55;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle, rgba(232,223,208,0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--text);
+  padding: 14px 20px;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-inner { max-width: 980px; margin: 0 auto; }
+.app-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 24px; font-weight: 700; font-style: italic;
+}
+.app-title span { color: var(--accent); }
+.header-sub {
+  font-size: 10px; color: var(--muted);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  font-style: italic; margin-top: 3px;
+}
+
+/* ── MAIN ── */
+.main {
+  max-width: 980px; margin: 0 auto;
+  padding: 24px 16px 70px;
+  position: relative; z-index: 1;
+}
+
+.section-label {
+  font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--muted);
+  font-style: italic; margin-bottom: 12px;
+}
+
+/* ── INTRO ── */
+.intro { margin-bottom: 22px; max-width: 720px; }
+.intro-text { font-size: 14px; color: var(--text2); line-height: 1.7; }
+.intro-safety {
+  font-size: 11.5px; color: var(--muted); font-style: italic;
+  margin-top: 8px;
+}
+
+/* ── MODULE PICKER ── */
+.module-picker { margin-bottom: 26px; }
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.module-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  padding: 14px 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  display: flex; flex-direction: column; gap: 8px;
+  color: var(--text);
+  font-family: inherit;
+}
+.module-card:hover { transform: translateY(-1px); }
+.module-card.mod-split   { --mc: var(--split);   --mc-rgb: var(--split-rgb); }
+.module-card.mod-toe     { --mc: var(--toe);     --mc-rgb: var(--toe-rgb); }
+.module-card.mod-general { --mc: var(--general); --mc-rgb: var(--general-rgb); }
+.module-card.mod-boulder { --mc: var(--boulder); --mc-rgb: var(--boulder-rgb); }
+.module-card.selected {
+  border-left-color: var(--mc);
+  border-color: rgba(var(--mc-rgb), 0.4);
+  background: rgba(var(--mc-rgb), 0.07);
+}
+.module-top { display: flex; align-items: center; gap: 10px; }
+.module-icon {
+  width: 34px; height: 34px; flex-shrink: 0;
+  color: var(--muted2);
+  transition: color 0.15s;
+}
+.module-card.selected .module-icon { color: var(--mc); }
+.module-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 17px; font-weight: 700; font-style: italic;
+  flex: 1;
+}
+.module-check {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 1.5px solid var(--bord2); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.module-card.selected .module-check {
+  border-color: var(--mc); background: var(--mc);
+}
+.module-check svg { width: 9px; height: 9px; opacity: 0; }
+.module-card.selected .module-check svg { opacity: 1; }
+.module-desc { font-size: 11.5px; color: var(--text2); line-height: 1.55; }
+.module-count {
+  font-size: 10px; color: var(--muted); font-style: italic;
+  letter-spacing: 0.04em;
+}
+.module-card.selected .module-count { color: var(--mc); }
+
+/* ── SUMMARY BAR ── */
+.regimen-summary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 14px 18px;
+  margin-bottom: 26px;
+  display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
+}
+.rs-stat { display: flex; flex-direction: column; gap: 2px; }
+.rs-label {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--muted); font-style: italic;
+}
+.rs-value {
+  font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700;
+  color: var(--text);
+}
+.rs-progress { flex: 1; min-width: 160px; }
+.rs-bar-track {
+  height: 6px; background: var(--surf2); border: 1px solid var(--border);
+  margin-top: 6px; overflow: hidden;
+}
+.rs-bar-fill {
+  height: 100%; background: var(--accent);
+  transition: width 0.25s ease;
+}
+.rs-actions { display: flex; gap: 8px; margin-left: auto; }
+.rs-btn {
+  background: none; border: 1px solid var(--bord2);
+  color: var(--text2); padding: 6px 12px;
+  font-family: 'DM Serif Text', Georgia, serif;
+  font-size: 11.5px; cursor: pointer;
+  transition: all 0.15s; white-space: nowrap;
+}
+.rs-btn:hover { border-color: var(--text2); color: var(--text); }
+.rs-streak { color: var(--accent); }
+.rs-streak .rs-value::after { content: ' 🔥'; font-size: 12px; }
+
+/* ── EXERCISE GRID ── */
+.regimen { margin-bottom: 30px; }
+.ex-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 10px;
+}
+.ex-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.ex-card.ec-split   { border-left-color: var(--split); }
+.ex-card.ec-toe     { border-left-color: var(--toe); }
+.ex-card.ec-general { border-left-color: var(--general); }
+.ex-card.ec-boulder { border-left-color: var(--boulder); }
+.ex-card.ec-split   .ex-icon-wrap { color: var(--split); }
+.ex-card.ec-toe     .ex-icon-wrap { color: var(--toe); }
+.ex-card.ec-general .ex-icon-wrap { color: var(--general); }
+.ex-card.ec-boulder .ex-icon-wrap { color: var(--boulder); }
+.ex-card.done { background: rgba(78,201,148,0.05); border-color: rgba(78,201,148,0.25); }
+
+.ex-top { display: flex; align-items: flex-start; gap: 10px; }
+.ex-icon-wrap { width: 46px; height: 46px; flex-shrink: 0; }
+.ex-icon-wrap svg { width: 100%; height: 100%; }
+.ex-heading { flex: 1; min-width: 0; }
+.ex-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 15.5px; font-weight: 700; font-style: italic;
+  line-height: 1.25;
+}
+.ex-target { font-size: 10.5px; color: var(--muted); font-style: italic; margin-top: 2px; }
+.ex-prescription {
+  font-family: 'Space Mono', monospace; font-size: 10.5px;
+  color: var(--text2); letter-spacing: 0.02em;
+}
+.ex-cue { font-size: 11.5px; color: var(--text2); line-height: 1.55; }
+.ex-pnf {
+  font-size: 10.5px; color: var(--muted); font-style: italic;
+  border-top: 1px dashed var(--border); padding-top: 6px; line-height: 1.5;
+}
+.ex-check {
+  margin-top: auto;
+  background: none; border: 1px solid var(--bord2);
+  color: var(--text2); padding: 7px 10px;
+  font-family: 'Space Mono', monospace; font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.15s;
+}
+.ex-check:hover { border-color: var(--text2); color: var(--text); }
+.ex-check.checked {
+  border-color: rgba(78,201,148,0.5); color: #4ec994;
+  background: rgba(78,201,148,0.08);
+}
+
+.empty-state {
+  color: var(--muted); font-style: italic; font-size: 12.5px;
+  padding: 20px; text-align: center; border: 1px dashed var(--border);
+}
+
+/* ── SCIENCE PANEL ── */
+.science-panel {
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.science-toggle {
+  width: 100%; text-align: left;
+  background: none; border: none; color: var(--text);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 15px; font-weight: 700; font-style: italic;
+  padding: 14px 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.science-toggle .chev { transition: transform 0.2s; color: var(--muted); font-size: 13px; }
+.science-toggle.open .chev { transform: rotate(180deg); }
+.science-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.science-body.open { max-height: 900px; }
+.science-body-inner { padding: 0 18px 18px; }
+.science-body-inner ul { padding-left: 18px; }
+.science-body-inner li { font-size: 12px; color: var(--text2); line-height: 1.65; margin-bottom: 9px; }
+.science-body-inner li b { color: var(--text); font-weight: 600; }
+.science-note { font-size: 11px; color: var(--muted); font-style: italic; margin-top: 6px; }
+
+/* ── FOOTER ── */
+.app-footer {
+  text-align: center; padding: 18px;
+  font-size: 10.5px; color: var(--muted2);
+  border-top: 1px solid var(--border);
+  position: relative; z-index: 1;
+}
+
+@media (max-width: 640px) {
+  .module-grid { grid-template-columns: 1fr; }
+  .ex-grid { grid-template-columns: 1fr; }
+  .regimen-summary { flex-direction: column; align-items: stretch; }
+  .rs-actions { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="app-title">Stretch<span>ing</span> Regimen</div>
+    <div class="header-sub">Modular Flexibility Training</div>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="intro">
+    <p class="intro-text">
+      Pick one or more focus modules below and your daily regimen builds itself — a short
+      dynamic warm-up followed by static holds, sized to what the research actually supports
+      rather than folklore.
+    </p>
+    <p class="intro-safety">Stretch to mild tension, never pain. Skip anything that doesn't feel right for your body.</p>
+  </div>
+
+  <div class="module-picker">
+    <div class="section-label">Choose Your Focus</div>
+    <div class="module-grid" id="module-grid"></div>
+  </div>
+
+  <div class="regimen-summary" id="regimen-summary"></div>
+
+  <div class="regimen">
+    <div class="section-label">Warm-Up — Dynamic Mobility</div>
+    <div class="ex-grid" id="warmup-grid"></div>
+  </div>
+
+  <div class="regimen">
+    <div class="section-label">Static Holds</div>
+    <div class="ex-grid" id="static-grid"></div>
+  </div>
+
+  <div class="science-panel">
+    <button class="science-toggle" id="science-toggle">
+      <span>The Science Behind This</span>
+      <span class="chev">▾</span>
+    </button>
+    <div class="science-body" id="science-body">
+      <div class="science-body-inner">
+        <ul>
+          <li><b>Dosage.</b> ACSM guidance calls for stretching major muscle groups at least 2–3 days a week, ideally most days, holding each static stretch roughly 10–30 seconds for 2–4 rounds — that's the baseline used for every hold/rep count above.</li>
+          <li><b>PNF vs. static.</b> Contract-relax (PNF) stretching and plain static stretching produce comparable range-of-motion gains in most studies — so PNF is offered as an optional technique on split-focused stretches, not a requirement.</li>
+          <li><b>Learning a split.</b> Consistency (3–5×/week) matters more than any single long session, and pairing passive static holds with active control drills (dynamic warm-ups, contract-relax) builds flexibility you can actually use under load, not just when relaxed.</li>
+          <li><b>Bouldering.</b> Research comparing climbers finds elite climbers have measurably greater hip flexion and abduction than intermediates, and functional shoulder external rotation is linked to climbing performance — this module weights hip openers, rotational drills, and forearm/wrist care accordingly.</li>
+          <li><b>Flexibility vs. mobility.</b> Flexibility is how far you can passively be stretched; mobility is how far you can actively move under control. The dynamic warm-up trains mobility, the static block trains flexibility — you need both.</li>
+        </ul>
+        <p class="science-note">Informational, not medical advice. If you have an injury or joint condition, check with a physical therapist before starting.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="app-footer">
+  <span id="footer-ver"></span>
+</footer>
+
+<script>fetch('../version.json').then(r=>r.json()).then(v=>{document.getElementById('footer-ver').textContent='v'+v.version;}).catch(()=>{});</script>
+
+<script>
+(function () {
+'use strict';
+
+const LS_MODULES = 'stretch_modules_v1';
+const LS_LOG     = 'stretch_log_v1';
+
+/* ── Icons (viewBox 0 0 100 100, stroke inherited via wrapper) ── */
+const ICONS = {
+  legSwing: '<circle cx="50" cy="18" r="8"/><path d="M50 26 L48 55"/><path d="M48 55 L40 88"/><path d="M48 55 L75 60 L85 40"/><path d="M49 32 L30 45"/><path d="M49 32 L60 20"/><path d="M78 30 Q92 45 83 42" stroke-dasharray="3 6" opacity="0.5"/>',
+  legSwingSide: '<circle cx="45" cy="18" r="8"/><path d="M45 26 L48 55"/><path d="M48 55 L52 88"/><path d="M48 55 L78 50"/><path d="M46 32 L25 28"/><path d="M46 32 L60 25"/><path d="M80 35 Q90 50 78 58" stroke-dasharray="3 6" opacity="0.5"/>',
+  hipCircle: '<circle cx="40" cy="18" r="8"/><path d="M40 26 L42 55"/><path d="M42 55 L36 88"/><path d="M42 55 L60 60 L58 75"/><path d="M41 32 L25 40"/><path d="M41 32 L55 35"/><ellipse cx="49" cy="55" rx="16" ry="12" stroke-dasharray="3 6" opacity="0.5"/>',
+  armCircle: '<circle cx="50" cy="15" r="8"/><path d="M50 23 L50 60"/><path d="M50 60 L40 90"/><path d="M50 60 L60 90"/><path d="M50 30 L35 45"/><path d="M50 30 L70 20"/><ellipse cx="58" cy="27" rx="14" ry="14" stroke-dasharray="3 6" opacity="0.5"/>',
+  catCow: '<circle cx="20" cy="55" r="7"/><path d="M27 58 L36 55"/><path d="M36 55 Q55 40 75 55"/><path d="M35 55 L33 85"/><path d="M75 55 L80 85"/><path d="M20 62 L18 82"/><path d="M55 30 L55 20 M51 24 L55 20 L59 24"/>',
+  worldsGreatest: '<circle cx="35" cy="20" r="8"/><path d="M35 28 L45 55"/><path d="M45 55 L30 70 L25 90"/><path d="M45 55 L70 75 L85 88"/><path d="M42 32 L60 10"/><path d="M42 32 L25 45"/>',
+  ankleCircle: '<path d="M50 15 L50 60"/><path d="M50 60 L70 66 L67 73 L50 68 Z"/><ellipse cx="50" cy="60" rx="20" ry="14" stroke-dasharray="3 6" opacity="0.5"/>',
+  forwardFold: '<path d="M48 55 L45 90"/><path d="M52 55 L55 90"/><path d="M50 55 C50 40 35 25 25 20"/><circle cx="23" cy="18" r="8"/><path d="M45 35 L30 45 L27 68"/>',
+  seatedFold: '<path d="M25 75 L85 78"/><path d="M85 78 L88 68"/><path d="M25 75 Q35 50 55 30"/><circle cx="58" cy="25" r="7"/><path d="M40 45 L80 72"/>',
+  standingHamstring: '<path d="M40 55 L35 90"/><path d="M40 55 L70 48"/><path d="M62 50 L80 50 L80 60"/><path d="M40 55 Q45 40 60 35"/><circle cx="63" cy="32" r="7"/><path d="M45 42 L68 46"/>',
+  wallCalf: '<path d="M85 10 L85 95" opacity="0.4"/><circle cx="50" cy="20" r="7"/><path d="M50 27 L55 58"/><path d="M55 35 L82 25"/><path d="M55 40 L82 40"/><path d="M55 58 L60 75 L58 90"/><path d="M55 58 L35 80 L25 92"/>',
+  standingQuad: '<circle cx="50" cy="20" r="7"/><path d="M50 27 L50 55"/><path d="M50 55 L47 90"/><path d="M50 55 L60 75 L55 58"/><path d="M53 35 L55 58"/><path d="M48 35 L30 30"/>',
+  hipFlexorLunge: '<circle cx="45" cy="22" r="8"/><path d="M45 30 L45 55"/><path d="M45 55 L60 65 L58 85"/><path d="M45 55 L30 75 L20 90"/><path d="M40 35 L55 50"/>',
+  butterfly: '<circle cx="50" cy="38" r="8"/><path d="M50 46 L50 75"/><path d="M50 75 L30 60 L45 85"/><path d="M50 75 L70 60 L55 85"/><path d="M45 55 L30 60"/><path d="M55 55 L70 60"/>',
+  frog: '<circle cx="30" cy="42" r="7"/><path d="M50 60 L35 45"/><path d="M35 45 L25 55"/><path d="M35 45 L45 55"/><path d="M50 60 L25 75 L20 88"/><path d="M50 60 L75 75 L80 88"/>',
+  pigeon: '<circle cx="27" cy="32" r="7"/><path d="M45 60 Q42 45 30 35"/><path d="M35 42 L15 50"/><path d="M45 60 L60 68 L40 72"/><path d="M45 60 L65 80 L85 90"/>',
+  ninetyNinety: '<circle cx="28" cy="42" r="7"/><path d="M50 70 Q40 55 30 45"/><path d="M40 50 L32 65"/><path d="M50 70 L30 65 L35 85"/><path d="M50 70 L70 75 L85 65"/>',
+  sideLunge: '<circle cx="52" cy="23" r="7"/><path d="M52 30 L50 55"/><path d="M50 55 L30 70 L28 90"/><path d="M50 55 L75 60 L90 58"/><path d="M48 35 L30 40"/><path d="M55 35 L45 45"/>',
+  seatedTwist: '<circle cx="57" cy="38" r="7"/><path d="M50 75 L55 45"/><path d="M50 75 L35 72 L38 88"/><path d="M50 75 L65 68 L60 85"/><path d="M50 50 L30 55"/><path d="M55 50 L75 45"/>',
+  doorwayChest: '<path d="M20 10 L20 95" opacity="0.4"/><path d="M80 10 L80 95" opacity="0.4"/><circle cx="50" cy="20" r="8"/><path d="M50 28 L50 60"/><path d="M50 60 L40 92"/><path d="M50 60 L60 92"/><path d="M46 35 L22 25"/><path d="M54 35 L78 25"/>',
+  crossBodyShoulder: '<circle cx="50" cy="18" r="8"/><path d="M50 26 L50 58"/><path d="M50 58 L42 90"/><path d="M50 58 L58 90"/><path d="M50 32 L25 40"/><path d="M50 35 L28 42"/><circle cx="27" cy="41" r="3"/>',
+  overheadLat: '<path d="M50 60 L46 92"/><path d="M50 60 L54 92"/><path d="M50 60 Q60 40 68 20"/><circle cx="70" cy="15" r="7"/><path d="M60 35 L80 15"/><path d="M48 45 L38 52"/>',
+  wristFlexor: '<path d="M20 60 L55 58"/><path d="M55 58 L70 50"/><path d="M65 52 L75 45"/><circle cx="70" cy="52" r="3"/><circle cx="20" cy="60" r="3" opacity="0.5"/>',
+  wristExtensor: '<path d="M20 55 L55 55"/><path d="M55 55 L68 68"/><path d="M60 58 L70 65"/><circle cx="61" cy="61" r="3"/><circle cx="20" cy="55" r="3" opacity="0.5"/>',
+  childsPose: '<path d="M65 75 L75 85 L60 88"/><path d="M65 75 Q50 55 25 50"/><circle cx="20" cy="48" r="7"/><path d="M40 55 L15 58"/><path d="M35 60 L12 65"/>'
+};
+
+/* ── Modules ── */
+const MODULES = [
+  {
+    id: 'split', name: 'Learning a Split', color: 'split',
+    desc: 'Progressive hip flexor, hamstring & adductor work to build toward front and side splits, with optional contract-relax (PNF) drills.',
+    icon: '<circle cx="50" cy="18" r="9"/><path d="M50 26 L50 45"/><path d="M50 45 L15 88"/><path d="M50 45 L85 88"/>'
+  },
+  {
+    id: 'toe', name: 'Touch Your Toes', color: 'toe',
+    desc: 'Posterior-chain focus — hamstrings, calves & lower back — for a full, relaxed forward fold.',
+    icon: '<path d="M40 25 L36 60"/><path d="M40 25 C40 12 26 5 16 3"/><circle cx="14" cy="4" r="8"/><path d="M35 15 L20 22 L18 45"/>'
+  },
+  {
+    id: 'general', name: 'General Flexibility', color: 'general',
+    desc: 'Full-body maintenance across every major joint — the baseline ACSM recommends for everyone.',
+    icon: '<circle cx="50" cy="18" r="9"/><path d="M50 27 L50 62"/><path d="M50 62 L30 92"/><path d="M50 62 L70 92"/><path d="M50 35 L20 20"/><path d="M50 35 L80 20"/>'
+  },
+  {
+    id: 'boulder', name: 'Bouldering Mobility', color: 'boulder',
+    desc: 'Hip rotation, shoulder external rotation & forearm care — the mobility that separates strong climbers.',
+    icon: '<path d="M10 85 L35 40 L50 60 L65 25 L92 85 Z"/><circle cx="65" cy="18" r="7"/>'
+  }
+];
+
+/* ── Exercises ── */
+const STRETCHES = [
+  { id:'leg-swing-front', name:'Front-to-Back Leg Swings', phase:'dynamic', tags:['split','general','boulder'],
+    target:'Hip flexors · Hamstrings · Hip capsule', reps:'10 each leg', sides:true, estSec:40, icon:'legSwing',
+    cue:'Hold a wall for balance. Swing one leg forward and back in a controlled arc — let range grow each rep, don’t force it.' },
+  { id:'leg-swing-side', name:'Side-to-Side Leg Swings', phase:'dynamic', tags:['split','boulder'],
+    target:'Adductors · Abductors', reps:'10 each leg', sides:true, estSec:40, icon:'legSwingSide',
+    cue:'Swing one leg across your body and back out to the side. Keep your torso upright, swinging from the hip.' },
+  { id:'hip-circles', name:'Standing Hip Circles', phase:'dynamic', tags:['split','general','boulder'],
+    target:'Hip joint capsule', reps:'8 each direction, each leg', sides:true, estSec:45, icon:'hipCircle',
+    cue:'Lift your knee and trace a large circle with it, both directions. Keep the standing leg stable.' },
+  { id:'arm-circles', name:'Arm Circles', phase:'dynamic', tags:['general','boulder'],
+    target:'Shoulders · Rotator cuff', reps:'10 each direction', sides:false, estSec:25, icon:'armCircle',
+    cue:'Big, slow circles — small at first, growing larger. Reverse direction halfway through.' },
+  { id:'cat-cow', name:'Cat–Cow Flow', phase:'dynamic', tags:['toe','general','boulder'],
+    target:'Spine · Lower back', reps:'8 slow cycles', sides:false, estSec:35, icon:'catCow',
+    cue:'On hands and knees, alternate arching and rounding your spine with your breath.' },
+  { id:'worlds-greatest', name:'World’s Greatest Stretch', phase:'dynamic', tags:['split','general','boulder'],
+    target:'Hips · Hamstrings · T-spine', reps:'5 each side', sides:true, estSec:40, icon:'worldsGreatest',
+    cue:'Step into a deep lunge, drop the back knee, then rotate your torso and reach the same-side arm skyward.' },
+  { id:'ankle-circles', name:'Ankle Circles', phase:'dynamic', tags:['general','boulder'],
+    target:'Ankles', reps:'10 each direction, each foot', sides:true, estSec:30, icon:'ankleCircle',
+    cue:'Lift one foot and circle at the ankle. Smooth, full range, both directions.' },
+
+  { id:'toe-touch', name:'Standing Toe Touch', phase:'static', tags:['toe','general'],
+    target:'Hamstrings · Lower back · Calves', hold:30, reps:3, sides:false, estSec:90, icon:'forwardFold',
+    cue:'Feet hip-width, soft knees, fold from the hips and let your arms hang. Relax your neck.' },
+  { id:'seated-fold', name:'Seated Forward Fold', phase:'static', tags:['toe','general'],
+    target:'Hamstrings · Spine', hold:30, reps:2, sides:false, estSec:60, icon:'seatedFold',
+    cue:'Legs extended, hinge from the hips reaching for your feet — keep your back long, not rounded.' },
+  { id:'standing-hamstring', name:'Elevated Hamstring Stretch', phase:'static', tags:['toe','split','general'],
+    target:'Hamstrings', hold:25, reps:2, sides:true, estSec:100, icon:'standingHamstring',
+    cue:'Rest your heel on a chair or step, keep the leg straight, and hinge forward from the hips.' },
+  { id:'wall-calf', name:'Wall Calf Stretch', phase:'static', tags:['toe','general','boulder'],
+    target:'Calves · Achilles', hold:25, reps:2, sides:true, estSec:100, icon:'wallCalf',
+    cue:'Hands on a wall, back leg straight with heel pressed down. Lean in until you feel the stretch.' },
+  { id:'standing-quad', name:'Standing Quad Stretch', phase:'static', tags:['split','general','boulder'],
+    target:'Quadriceps · Hip flexors', hold:25, reps:2, sides:true, estSec:100, icon:'standingQuad',
+    cue:'Grab your ankle behind you, knees together, hips pushed slightly forward. Hold something for balance.' },
+  { id:'hip-flexor-lunge', name:'Kneeling Hip Flexor Lunge', phase:'static', tags:['split','general','boulder'],
+    target:'Hip flexors · Psoas', hold:30, reps:2, sides:true, estSec:120, icon:'hipFlexorLunge',
+    cue:'Half-kneel, tuck your pelvis under, and shift weight forward until you feel the front of the back hip stretch.',
+    pnfNote:'PNF option: gently drive the back hip into the floor for 5s, relax, then sink deeper. Repeat 3×.' },
+  { id:'butterfly', name:'Butterfly Stretch', phase:'static', tags:['split','general','boulder'],
+    target:'Adductors · Groin', hold:30, reps:2, sides:false, estSec:60, icon:'butterfly',
+    cue:'Soles of your feet together, spine tall, gently press your knees toward the floor with your elbows.',
+    pnfNote:'PNF option: press your knees up into your hands for 5s, relax, then let them drop lower. Repeat 3×.' },
+  { id:'frog', name:'Frog Stretch', phase:'static', tags:['split','boulder'],
+    target:'Adductors · Hips', hold:30, reps:1, sides:false, estSec:30, icon:'frog',
+    cue:'Knees wide on the floor, forearms down, rock your hips back slowly. Advanced — ease in gradually.' },
+  { id:'pigeon', name:'Pigeon Pose', phase:'static', tags:['split','general','boulder'],
+    target:'Glutes · Hip external rotators', hold:30, reps:2, sides:true, estSec:120, icon:'pigeon',
+    cue:'Front shin angled under your torso, back leg extended straight behind. Fold forward over the front shin.' },
+  { id:'ninety-ninety', name:'90/90 Hip Switch', phase:'static', tags:['split','boulder'],
+    target:'Hip internal & external rotation', hold:30, reps:2, sides:true, estSec:120, icon:'ninetyNinety',
+    cue:'Sit with your front leg bent 90° in front, back leg bent 90° to the side. Lean over the front shin, then switch.' },
+  { id:'side-lunge-adductor', name:'Side Lunge Adductor Rock', phase:'static', tags:['split','general','boulder'],
+    target:'Adductors', hold:25, reps:2, sides:true, estSec:100, icon:'sideLunge',
+    cue:'Wide stance, sink into one bent knee while the other leg stays straight. Rock side to side or hold.' },
+  { id:'seated-twist', name:'Seated Spinal Twist', phase:'static', tags:['general','boulder'],
+    target:'Spine · Obliques', hold:20, reps:2, sides:true, estSec:80, icon:'seatedTwist',
+    cue:'Cross one leg over, rotate your torso toward the bent knee, using your arm as leverage.' },
+  { id:'doorway-chest', name:'Doorway Chest Stretch', phase:'static', tags:['general','boulder'],
+    target:'Chest · Front shoulders', hold:25, reps:2, sides:false, estSec:50, icon:'doorwayChest',
+    cue:'Forearms on a doorframe, elbows near shoulder height, step forward until your chest opens up.' },
+  { id:'cross-body-shoulder', name:'Cross-Body Shoulder Stretch', phase:'static', tags:['general','boulder'],
+    target:'Posterior shoulder', hold:20, reps:2, sides:true, estSec:80, icon:'crossBodyShoulder',
+    cue:'Pull one straight arm across your chest with the other arm, keeping the shoulder relaxed down.' },
+  { id:'overhead-lat', name:'Overhead Lat Stretch', phase:'static', tags:['general','boulder'],
+    target:'Lats · Triceps', hold:20, reps:2, sides:true, estSec:80, icon:'overheadLat',
+    cue:'Reach one arm overhead and bend sideways at the waist, feeling the stretch down your side.' },
+  { id:'wrist-flexor', name:'Wrist Flexor Stretch', phase:'static', tags:['boulder'],
+    target:'Forearm flexors (grip)', hold:15, reps:2, sides:true, estSec:60, icon:'wristFlexor',
+    cue:'Arm out, palm up, gently pull your fingers back toward you with the other hand. Key for climbers’ forearms.' },
+  { id:'wrist-extensor', name:'Wrist Extensor Stretch', phase:'static', tags:['boulder'],
+    target:'Forearm extensors', hold:15, reps:2, sides:true, estSec:60, icon:'wristExtensor',
+    cue:'Arm out, palm down, gently press the back of your hand down and toward you.' },
+  { id:'childs-pose', name:'Child’s Pose Reach', phase:'static', tags:['toe','general','boulder'],
+    target:'Lats · Spine · Hips', hold:30, reps:1, sides:false, estSec:30, icon:'childsPose',
+    cue:'Knees wide, hips to heels, walk your hands forward and let your chest sink toward the floor.' }
+];
+
+/* ── Date / storage helpers ── */
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function toIso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function todayIso() { return toIso(new Date()); }
+
+function loadModules() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(LS_MODULES));
+    if (Array.isArray(raw) && raw.length) return raw.filter(id => MODULES.some(m => m.id === id));
+  } catch (e) {}
+  return ['general'];
+}
+function saveModules(arr) { localStorage.setItem(LS_MODULES, JSON.stringify(arr)); }
+
+function loadLog() {
+  try { return JSON.parse(localStorage.getItem(LS_LOG)) || {}; } catch (e) { return {}; }
+}
+function saveLog(log) { localStorage.setItem(LS_LOG, JSON.stringify(log)); }
+
+let selectedModules = loadModules();
+let log = loadLog();
+if (!selectedModules.length) selectedModules = ['general'];
+
+function currentRegimen() {
+  return STRETCHES.filter(ex => ex.tags.some(t => selectedModules.includes(t)));
+}
+
+function ensureTodayEntry() {
+  const today = todayIso();
+  const requiredIds = currentRegimen().map(e => e.id);
+  if (!log[today]) log[today] = { required: requiredIds, done: [] };
+  else {
+    log[today].required = requiredIds;
+    log[today].done = (log[today].done || []).filter(id => requiredIds.includes(id));
+  }
+  saveLog(log);
+  return log[today];
+}
+
+function calcStreak() {
+  let streak = 0;
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  for (let i = 0; i < 730; i++) {
+    const d = new Date(now); d.setDate(now.getDate() - i);
+    const iso = toIso(d);
+    const entry = log[iso];
+    const complete = !!(entry && entry.required && entry.required.length > 0 && entry.done.length === entry.required.length);
+    if (i === 0) {
+      if (complete) streak++;
+      continue; // today not finished yet — benefit of doubt, don't break the streak
+    }
+    if (complete) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function primaryModuleFor(ex) {
+  for (const m of MODULES) {
+    if (selectedModules.includes(m.id) && ex.tags.includes(m.id)) return m.id;
+  }
+  return ex.tags[0];
+}
+
+function prescriptionText(ex) {
+  if (ex.phase === 'dynamic') return ex.reps;
+  return ex.hold + 's hold × ' + ex.reps + (ex.sides ? ' · each side' : '');
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── Render ── */
+function renderModuleGrid() {
+  const grid = document.getElementById('module-grid');
+  grid.innerHTML = MODULES.map(m => {
+    const count = STRETCHES.filter(ex => ex.tags.includes(m.id)).length;
+    const selected = selectedModules.includes(m.id);
+    return '<button type="button" class="module-card mod-' + m.id + (selected ? ' selected' : '') + '" data-id="' + m.id + '" aria-pressed="' + selected + '">' +
+      '<div class="module-top">' +
+        '<div class="module-icon"><svg viewBox="0 0 100 100" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">' + m.icon + '</svg></div>' +
+        '<div class="module-name">' + m.name + '</div>' +
+        '<div class="module-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="#1c1814" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
+      '</div>' +
+      '<div class="module-desc">' + m.desc + '</div>' +
+      '<div class="module-count">' + count + ' exercises</div>' +
+    '</button>';
+  }).join('');
+
+  grid.querySelectorAll('.module-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      if (selectedModules.includes(id)) {
+        if (selectedModules.length === 1) return; // keep at least one module active
+        selectedModules = selectedModules.filter(m => m !== id);
+      } else {
+        selectedModules = selectedModules.concat(id);
+      }
+      saveModules(selectedModules);
+      renderAll();
+    });
+  });
+}
+
+function renderSummary(regimen, entry) {
+  const totalSec = regimen.reduce((s, ex) => s + ex.estSec, 0);
+  const mins = Math.max(1, Math.round(totalSec / 60));
+  const done = entry.done.length;
+  const total = entry.required.length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const streak = calcStreak();
+
+  const el = document.getElementById('regimen-summary');
+  el.innerHTML =
+    '<div class="rs-stat"><span class="rs-label">Exercises</span><span class="rs-value">' + regimen.length + '</span></div>' +
+    '<div class="rs-stat"><span class="rs-label">Est. Time</span><span class="rs-value">~' + mins + ' min</span></div>' +
+    '<div class="rs-stat rs-streak"><span class="rs-label">Streak</span><span class="rs-value">' + streak + '</span></div>' +
+    '<div class="rs-stat rs-progress"><span class="rs-label">Today — ' + done + ' / ' + total + '</span>' +
+      '<div class="rs-bar-track"><div class="rs-bar-fill" style="width:' + pct + '%"></div></div>' +
+    '</div>' +
+    '<div class="rs-actions">' +
+      '<button class="rs-btn" id="mark-all-btn">Mark All Done</button>' +
+      '<button class="rs-btn" id="reset-today-btn">Reset Today</button>' +
+    '</div>';
+
+  document.getElementById('mark-all-btn').addEventListener('click', () => {
+    entry.done = entry.required.slice();
+    saveLog(log);
+    renderAll();
+  });
+  document.getElementById('reset-today-btn').addEventListener('click', () => {
+    entry.done = [];
+    saveLog(log);
+    renderAll();
+  });
+}
+
+function renderExerciseGrid(containerId, list, entry) {
+  const grid = document.getElementById(containerId);
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty-state">No exercises in this section for your current selection.</div>';
+    return;
+  }
+  grid.innerHTML = list.map(ex => {
+    const done = entry.done.includes(ex.id);
+    const mod = primaryModuleFor(ex);
+    const showPnf = ex.pnfNote && selectedModules.includes('split');
+    return '<div class="ex-card ec-' + mod + (done ? ' done' : '') + '" data-id="' + ex.id + '">' +
+      '<div class="ex-top">' +
+        '<div class="ex-icon-wrap"><svg viewBox="0 0 100 100" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">' + ICONS[ex.icon] + '</svg></div>' +
+        '<div class="ex-heading">' +
+          '<div class="ex-name">' + ex.name + '</div>' +
+          '<div class="ex-target">' + ex.target + '</div>' +
+          '<div class="ex-prescription">' + prescriptionText(ex) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<p class="ex-cue">' + ex.cue + '</p>' +
+      (showPnf ? '<p class="ex-pnf">' + ex.pnfNote + '</p>' : '') +
+      '<button type="button" class="ex-check' + (done ? ' checked' : '') + '" data-id="' + ex.id + '" aria-pressed="' + done + '">' + (done ? '✓ Done' : 'Mark Done') + '</button>' +
+    '</div>';
+  }).join('');
+
+  grid.querySelectorAll('.ex-check').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const idx = entry.done.indexOf(id);
+      if (idx >= 0) entry.done.splice(idx, 1);
+      else entry.done.push(id);
+      saveLog(log);
+      renderAll();
+    });
+  });
+}
+
+function renderAll() {
+  renderModuleGrid();
+  const regimen = currentRegimen();
+  const entry = ensureTodayEntry();
+  renderSummary(regimen, entry);
+  renderExerciseGrid('warmup-grid', regimen.filter(ex => ex.phase === 'dynamic'), entry);
+  renderExerciseGrid('static-grid', regimen.filter(ex => ex.phase === 'static'), entry);
+}
+
+document.getElementById('science-toggle').addEventListener('click', () => {
+  const btn = document.getElementById('science-toggle');
+  const body = document.getElementById('science-body');
+  btn.classList.toggle('open');
+  body.classList.toggle('open');
+});
+
+renderAll();
+
+})();
+</script>
+
+</body>
+</html>
