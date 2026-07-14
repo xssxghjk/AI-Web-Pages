@@ -258,6 +258,42 @@ body::before {
   background: rgba(78,201,148,0.08);
 }
 
+/* ── EXERCISE TIMER ── */
+.ex-timer {
+  border-top: 1px dashed var(--border);
+  padding-top: 8px;
+}
+.ex-timer-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ex-timer-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.ex-timer-phase {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--muted); font-style: italic;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ex-timer-clock {
+  font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700;
+  color: var(--text); font-variant-numeric: tabular-nums;
+}
+.ex-timer.running .ex-timer-phase { color: var(--mc, var(--accent)); }
+.ex-timer.running .ex-timer-clock { color: var(--mc, var(--accent)); }
+.ex-timer.complete .ex-timer-phase, .ex-timer.complete .ex-timer-clock { color: #4ec994; }
+.ex-timer-controls { display: flex; gap: 6px; flex-shrink: 0; }
+.ex-timer-btn {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  border: 1px solid var(--bord2); background: none; color: var(--text2);
+  cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.ex-timer-btn:hover { border-color: var(--text2); color: var(--text); }
+.ex-timer.running .ex-timer-start { border-color: var(--mc, var(--accent)); color: var(--mc, var(--accent)); }
+.ex-timer.complete .ex-timer-start { border-color: #4ec994; color: #4ec994; }
+.ex-timer-track {
+  height: 4px; background: var(--surf2); border: 1px solid var(--border);
+  margin-top: 8px; overflow: hidden;
+}
+.ex-timer-fill { height: 100%; width: 0%; background: var(--mc, var(--accent)); transition: width 0.2s linear; }
+.ex-timer.complete .ex-timer-fill { background: #4ec994; }
+
 .empty-state {
   color: var(--muted); font-style: italic; font-size: 12.5px;
   padding: 20px; text-align: center; border: 1px dashed var(--border);
@@ -467,6 +503,7 @@ body::before {
 
 const LS_MODULES = 'stretch_modules_v1';
 const LS_LOG     = 'stretch_log_v1';
+const LS_SOUND   = 'stretch_sound_v1';
 
 /* ── Icons (viewBox 0 0 100 100, stroke inherited via wrapper) ── */
 const ICONS = {
@@ -800,6 +837,242 @@ function saveLog(log) { localStorage.setItem(LS_LOG, JSON.stringify(log)); }
 let selectedModules = loadModules();
 let log = loadLog();
 if (!selectedModules.length) selectedModules = ['general'];
+let soundEnabled = localStorage.getItem(LS_SOUND) !== '0';
+
+/* ── Timer engine ── */
+const TRANSITION_SEC = 4;
+const timers = {}; // exId -> { plan, idx, remaining, running, endsAt, lastTickSecond, started, done, intervalId }
+let audioCtx = null;
+
+function getAudioCtx() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  if (!audioCtx) audioCtx = new AC();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function beep(freq, dur, delay, type, peak) {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    const t0 = ctx.currentTime + (delay || 0);
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(peak || 0.18, t0 + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.03);
+  } catch (e) {}
+}
+
+function cueSegmentStart(kind) {
+  if (kind === 'rest') { beep(520, 0.12, 0, 'sine', 0.15); beep(520, 0.12, 0.16, 'sine', 0.15); }
+  else beep(740, 0.16, 0, 'sine', 0.2);
+}
+function cueCountdownTick() { beep(880, 0.07, 0, 'square', 0.1); }
+function cueComplete() {
+  beep(660, 0.14, 0, 'sine', 0.2);
+  beep(880, 0.14, 0.16, 'sine', 0.2);
+  beep(1100, 0.24, 0.32, 'sine', 0.22);
+}
+
+function holdLabel(ex, side, repIdx, repTotal) {
+  const parts = [];
+  if (side) parts.push(side);
+  if (repTotal > 1) parts.push('Set ' + repIdx + '/' + repTotal);
+  if (!parts.length) parts.push('Hold');
+  return parts.join(' · ');
+}
+
+function buildTimerPlan(ex) {
+  const plan = [];
+  if (ex.phase === 'static') {
+    const sides = ex.sides ? ['Left side', 'Right side'] : [null];
+    for (let r = 1; r <= ex.reps; r++) {
+      for (const side of sides) {
+        plan.push({ kind: 'hold', seconds: ex.hold, label: holdLabel(ex, side, r, ex.reps) });
+        plan.push({ kind: 'rest', seconds: TRANSITION_SEC, label: ex.sides ? 'Switch sides' : 'Rest' });
+      }
+    }
+    plan.pop();
+  } else if (ex.sides) {
+    const half = Math.max(1, Math.round(ex.estSec / 2));
+    plan.push({ kind: 'move', seconds: half, label: 'First side · ' + ex.reps });
+    plan.push({ kind: 'rest', seconds: TRANSITION_SEC, label: 'Switch sides' });
+    plan.push({ kind: 'move', seconds: Math.max(1, ex.estSec - half), label: 'Second side · ' + ex.reps });
+  } else {
+    plan.push({ kind: 'move', seconds: Math.max(1, ex.estSec), label: ex.reps });
+  }
+  return plan;
+}
+
+function formatClock(totalSec) {
+  const s = Math.max(0, Math.round(totalSec));
+  return Math.floor(s / 60) + ':' + pad(s % 60);
+}
+
+function markExerciseDone(id) {
+  const entry = ensureTodayEntry();
+  if (!entry.done.includes(id)) {
+    entry.done.push(id);
+    saveLog(log);
+  }
+  renderAll();
+}
+
+function updateTimerDom(id) {
+  const wrap = document.getElementById('timer-wrap-' + id);
+  if (!wrap) return;
+  const state = timers[id];
+  const ex = STRETCHES.find(e => e.id === id);
+  const phaseEl = document.getElementById('timer-phase-' + id);
+  const clockEl = document.getElementById('timer-clock-' + id);
+  const fillEl = document.getElementById('timer-fill-' + id);
+  const startBtn = document.getElementById('timer-start-' + id);
+
+  if (!state) {
+    const plan = buildTimerPlan(ex);
+    wrap.classList.remove('running', 'complete');
+    phaseEl.textContent = 'Ready';
+    clockEl.textContent = formatClock(plan[0].seconds);
+    fillEl.style.width = '0%';
+    startBtn.textContent = '▶';
+    startBtn.setAttribute('aria-label', 'Start timer for ' + ex.name);
+    return;
+  }
+
+  wrap.classList.toggle('running', state.running);
+  wrap.classList.toggle('complete', state.done);
+
+  if (state.done) {
+    phaseEl.textContent = 'Complete';
+    clockEl.textContent = '0:00';
+    fillEl.style.width = '100%';
+    startBtn.textContent = '✓';
+    startBtn.setAttribute('aria-label', 'Timer complete');
+    return;
+  }
+
+  const totalPlanned = state.plan.reduce((s, seg) => s + seg.seconds, 0);
+  const elapsedBefore = state.plan.slice(0, state.idx).reduce((s, seg) => s + seg.seconds, 0);
+  const segElapsed = state.plan[state.idx].seconds - state.remaining;
+  const pct = Math.min(100, Math.round(((elapsedBefore + segElapsed) / totalPlanned) * 100));
+
+  phaseEl.textContent = state.plan[state.idx].label;
+  clockEl.textContent = formatClock(state.remaining);
+  fillEl.style.width = pct + '%';
+  startBtn.textContent = state.running ? '❙❙' : '▶';
+  startBtn.setAttribute('aria-label', (state.running ? 'Pause' : 'Start') + ' timer for ' + ex.name);
+}
+
+function advanceSegment(id) {
+  const state = timers[id];
+  state.idx++;
+  if (state.idx >= state.plan.length) {
+    clearInterval(state.intervalId);
+    state.running = false;
+    state.done = true;
+    state.remaining = 0;
+    cueComplete();
+    markExerciseDone(id);
+    return;
+  }
+  const seg = state.plan[state.idx];
+  state.remaining = seg.seconds;
+  state.endsAt = Date.now() + seg.seconds * 1000;
+  state.lastTickSecond = seg.seconds;
+  cueSegmentStart(seg.kind);
+  updateTimerDom(id);
+}
+
+function tickTimer(id) {
+  const state = timers[id];
+  if (!state || !state.running) return;
+  const msLeft = state.endsAt - Date.now();
+  const secLeft = Math.max(0, Math.ceil(msLeft / 1000));
+  if (secLeft !== state.lastTickSecond) {
+    state.lastTickSecond = secLeft;
+    if (state.plan[state.idx].kind !== 'rest' && secLeft > 0 && secLeft <= 3) cueCountdownTick();
+  }
+  state.remaining = secLeft;
+  if (msLeft <= 0) {
+    advanceSegment(id);
+    return;
+  }
+  updateTimerDom(id);
+}
+
+function toggleTimer(ex) {
+  let state = timers[ex.id];
+  if (!state) {
+    const plan = buildTimerPlan(ex);
+    state = timers[ex.id] = { plan, idx: 0, remaining: plan[0].seconds, running: false, started: false, done: false };
+  }
+  if (state.done) return;
+  if (state.running) {
+    clearInterval(state.intervalId);
+    state.running = false;
+    state.remaining = Math.max(0, Math.ceil((state.endsAt - Date.now()) / 1000));
+  } else {
+    if (!state.started) {
+      cueSegmentStart(state.plan[0].kind);
+      state.started = true;
+    }
+    state.running = true;
+    state.endsAt = Date.now() + state.remaining * 1000;
+    state.lastTickSecond = state.remaining;
+    state.intervalId = setInterval(() => tickTimer(ex.id), 200);
+  }
+  updateTimerDom(ex.id);
+}
+
+function resetTimerHandler(ex) {
+  const state = timers[ex.id];
+  if (state && state.intervalId) clearInterval(state.intervalId);
+  delete timers[ex.id];
+  updateTimerDom(ex.id);
+}
+
+function renderTimerBlock(ex) {
+  const state = timers[ex.id];
+  let phase, clock, pct, running, done;
+  if (state) {
+    if (state.done) {
+      phase = 'Complete'; clock = '0:00'; pct = 100; running = false; done = true;
+    } else {
+      const totalPlanned = state.plan.reduce((s, seg) => s + seg.seconds, 0);
+      const elapsedBefore = state.plan.slice(0, state.idx).reduce((s, seg) => s + seg.seconds, 0);
+      const segElapsed = state.plan[state.idx].seconds - state.remaining;
+      pct = Math.min(100, Math.round(((elapsedBefore + segElapsed) / totalPlanned) * 100));
+      phase = state.plan[state.idx].label;
+      clock = formatClock(state.remaining);
+      running = state.running; done = false;
+    }
+  } else {
+    const plan = buildTimerPlan(ex);
+    phase = 'Ready'; clock = formatClock(plan[0].seconds); pct = 0; running = false; done = false;
+  }
+  const btnGlyph = done ? '✓' : (running ? '❙❙' : '▶');
+  return '<div class="ex-timer' + (running ? ' running' : '') + (done ? ' complete' : '') + '" id="timer-wrap-' + ex.id + '">' +
+    '<div class="ex-timer-row">' +
+      '<div class="ex-timer-info">' +
+        '<span class="ex-timer-phase" id="timer-phase-' + ex.id + '">' + escHtml(phase) + '</span>' +
+        '<span class="ex-timer-clock" id="timer-clock-' + ex.id + '">' + clock + '</span>' +
+      '</div>' +
+      '<div class="ex-timer-controls">' +
+        '<button type="button" class="ex-timer-btn ex-timer-start" id="timer-start-' + ex.id + '" data-timer-id="' + ex.id + '" aria-label="' + (running ? 'Pause' : 'Start') + ' timer for ' + escHtml(ex.name) + '">' + btnGlyph + '</button>' +
+        '<button type="button" class="ex-timer-btn ex-timer-reset" data-timer-reset="' + ex.id + '" aria-label="Reset timer for ' + escHtml(ex.name) + '">↺</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="ex-timer-track"><div class="ex-timer-fill" id="timer-fill-' + ex.id + '" style="width:' + pct + '%"></div></div>' +
+  '</div>';
+}
 
 function currentRegimen() {
   return STRETCHES.filter(ex => ex.tags.some(t => selectedModules.includes(t)));
@@ -900,10 +1173,16 @@ function renderSummary(regimen, entry) {
       '<div class="rs-bar-track"><div class="rs-bar-fill" style="width:' + pct + '%"></div></div>' +
     '</div>' +
     '<div class="rs-actions">' +
+      '<button class="rs-btn" id="sound-toggle-btn">' + (soundEnabled ? '🔊 Sound On' : '🔇 Sound Off') + '</button>' +
       '<button class="rs-btn" id="mark-all-btn">Mark All Done</button>' +
       '<button class="rs-btn" id="reset-today-btn">Reset Today</button>' +
     '</div>';
 
+  document.getElementById('sound-toggle-btn').addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem(LS_SOUND, soundEnabled ? '1' : '0');
+    renderAll();
+  });
   document.getElementById('mark-all-btn').addEventListener('click', () => {
     entry.done = entry.required.slice();
     saveLog(log);
@@ -926,7 +1205,7 @@ function renderExerciseGrid(containerId, list, entry) {
     const done = entry.done.includes(ex.id);
     const mod = primaryModuleFor(ex);
     const showPnf = ex.pnfNote && selectedModules.includes('split');
-    return '<div class="ex-card ec-' + mod + (done ? ' done' : '') + '" data-id="' + ex.id + '">' +
+    return '<div class="ex-card ec-' + mod + (done ? ' done' : '') + '" data-id="' + ex.id + '" style="--mc: var(--' + mod + ')">' +
       '<div class="ex-top">' +
         '<button type="button" class="ex-icon-wrap" data-id="' + ex.id + '" title="View demonstration" aria-label="View demonstration for ' + escHtml(ex.name) + '"><svg viewBox="0 0 100 100" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">' + ICONS[ex.icon] + '</svg></button>' +
         '<div class="ex-heading">' +
@@ -937,6 +1216,7 @@ function renderExerciseGrid(containerId, list, entry) {
       '</div>' +
       '<p class="ex-cue">' + ex.cue + '</p>' +
       (showPnf ? '<p class="ex-pnf">' + ex.pnfNote + '</p>' : '') +
+      renderTimerBlock(ex) +
       '<button type="button" class="ex-check' + (done ? ' checked' : '') + '" data-id="' + ex.id + '" aria-pressed="' + done + '">' + (done ? '✓ Done' : 'Mark Done') + '</button>' +
     '</div>';
   }).join('');
@@ -954,6 +1234,19 @@ function renderExerciseGrid(containerId, list, entry) {
 
   grid.querySelectorAll('.ex-icon-wrap, .ex-name-btn').forEach(btn => {
     btn.addEventListener('click', () => openDemo(btn.dataset.id));
+  });
+
+  grid.querySelectorAll('.ex-timer-start').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ex = STRETCHES.find(e => e.id === btn.dataset.timerId);
+      if (ex) toggleTimer(ex);
+    });
+  });
+  grid.querySelectorAll('[data-timer-reset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ex = STRETCHES.find(e => e.id === btn.dataset.timerReset);
+      if (ex) resetTimerHandler(ex);
+    });
   });
 }
 
