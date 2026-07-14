@@ -233,6 +233,8 @@
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M7 4v3l2 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
         { key: 'workout', href: '../workout/', text: 'Workout',
           icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1.5 7h1.5M11 7h1.5M3 7h8M3 5v4M11 5v4M5 3.5V5M5 9v1.5M9 3.5V5M9 9v1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' },
+        { key: 'stretching', href: '../stretching/', text: 'Stretching',
+          icon: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5c0 3-4.5 4.5-4.5 8a4.5 4.5 0 0 0 9 0c0-3.5-4.5-5-4.5-8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>' },
       ]
     },
     {
@@ -261,6 +263,7 @@
     if (/\/journal(\/|$)/.test(p))                return 'journal';
     if (/\/calorie-tracker(\/|$)/.test(p))        return 'calorie-tracker';
     if (/\/workout(\/|$)/.test(p))                return 'workout';
+    if (/\/stretching(\/|$)/.test(p))             return 'stretching';
     if (/\/project-stats(\/|$)/.test(p))          return 'project-stats';
     if (/\/profile(\/|$)/.test(p))               return 'profile';
     return null;

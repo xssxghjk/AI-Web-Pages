@@ -80,6 +80,14 @@ test('todos page loads', async ({ page }) => {
   expect(sidebarVisible || hamburgerVisible).toBe(true);
 });
 
+test('stretching page loads', async ({ page }) => {
+  await page.goto('/stretching/');
+  await expect(page).toHaveTitle(/Stretching/);
+  const sidebarVisible = await page.locator('.sidebar').isVisible();
+  const hamburgerVisible = await page.locator('#hamburger-btn').isVisible();
+  expect(sidebarVisible || hamburgerVisible).toBe(true);
+});
+
 test('activities page loads', async ({ page }) => {
   await page.goto('/activities/');
   await expect(page).toHaveTitle(/Activity Buckets/);
