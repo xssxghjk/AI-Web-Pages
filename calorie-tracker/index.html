@@ -2805,7 +2805,8 @@ function drawBurnedCaloriesChart() {
   canvas.style.width  = '';
   canvas.style.height = '';
   const W = canvas.offsetWidth;
-  const H = parseInt(canvas.getAttribute('height')) || 200;
+  if (!canvas.dataset.chartHeight) canvas.dataset.chartHeight = canvas.getAttribute('height') || '200';
+  const H = parseInt(canvas.dataset.chartHeight) || 200;
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
   canvas.style.width  = W + 'px';
