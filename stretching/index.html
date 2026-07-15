@@ -143,6 +143,57 @@ body::before {
 }
 .module-card.selected .module-count { color: var(--mc); }
 
+/* ── DURATION PICKER ── */
+.duration-picker { margin-bottom: 26px; }
+.duration-control {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 18px 20px 14px;
+}
+.duration-control input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 4px;
+  background: var(--surf2);
+  border: 1px solid var(--border);
+  outline: none; cursor: pointer;
+  margin: 6px 0 14px;
+}
+.duration-control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1.5px var(--accent);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.duration-control input[type="range"]:hover::-webkit-slider-thumb,
+.duration-control input[type="range"]:focus-visible::-webkit-slider-thumb { transform: scale(1.15); }
+.duration-control input[type="range"]::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--accent); border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1.5px var(--accent);
+  cursor: pointer;
+}
+.duration-control input[type="range"]::-moz-range-track {
+  height: 4px; background: var(--surf2); border: 1px solid var(--border);
+}
+.duration-ticks { display: flex; justify-content: space-between; }
+.duration-tick {
+  background: none; border: none; padding: 4px 2px; cursor: pointer;
+  font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted);
+  transition: color 0.15s;
+}
+.duration-tick:first-child { text-align: left; }
+.duration-tick:nth-child(2) { text-align: center; }
+.duration-tick:last-child { text-align: right; }
+.duration-tick.active { color: var(--accent); font-weight: 700; }
+.duration-desc {
+  font-size: 11.5px; color: var(--text2); font-style: italic;
+  margin-top: 10px; line-height: 1.5;
+}
+
 /* ── SUMMARY BAR ── */
 .regimen-summary {
   background: var(--surface);
@@ -445,6 +496,19 @@ body::before {
     <div class="module-grid" id="module-grid"></div>
   </div>
 
+  <div class="duration-picker">
+    <div class="section-label">Stretch Duration</div>
+    <div class="duration-control">
+      <input type="range" id="duration-slider" min="0" max="2" step="1" value="1" aria-label="Stretch duration: short, medium, or long">
+      <div class="duration-ticks">
+        <button type="button" class="duration-tick" data-lvl="0">Short</button>
+        <button type="button" class="duration-tick" data-lvl="1">Medium</button>
+        <button type="button" class="duration-tick" data-lvl="2">Long</button>
+      </div>
+    </div>
+    <p class="duration-desc" id="duration-desc"></p>
+  </div>
+
   <div class="regimen-summary" id="regimen-summary"></div>
 
   <div class="regimen">
@@ -501,9 +565,10 @@ body::before {
 (function () {
 'use strict';
 
-const LS_MODULES = 'stretch_modules_v1';
-const LS_LOG     = 'stretch_log_v1';
-const LS_SOUND   = 'stretch_sound_v1';
+const LS_MODULES  = 'stretch_modules_v1';
+const LS_LOG      = 'stretch_log_v1';
+const LS_SOUND    = 'stretch_sound_v1';
+const LS_DURATION = 'stretch_duration_v1';
 
 /* ── Icons (viewBox 0 0 100 100, stroke inherited via wrapper) ── */
 const ICONS = {
@@ -556,6 +621,16 @@ const MODULES = [
     desc: 'Hip rotation, shoulder external rotation & forearm care — the mobility that separates strong climbers.',
     icon: '<path d="M10 85 L35 40 L50 60 L65 25 L92 85 Z"/><circle cx="65" cy="18" r="7"/>'
   }
+];
+
+/* ── Duration levels ── */
+const DURATION_LEVELS = [
+  { id: 'short', label: 'Short', holdDelta: -10, repsDelta: -1, dynRepsDelta: -2, dynSecDelta: -10,
+    desc: 'Quicker holds, one fewer set per stretch — good for a tight schedule.' },
+  { id: 'medium', label: 'Medium', holdDelta: 0, repsDelta: 0, dynRepsDelta: 0, dynSecDelta: 0,
+    desc: 'Standard ACSM dosage — the baseline this regimen is built on.' },
+  { id: 'long', label: 'Long', holdDelta: 10, repsDelta: 1, dynRepsDelta: 2, dynSecDelta: 10,
+    desc: 'Deeper holds, an extra set per stretch — for when you have time to sink in.' }
 ];
 
 /* ── Exercises ── */
@@ -834,10 +909,17 @@ function loadLog() {
 }
 function saveLog(log) { localStorage.setItem(LS_LOG, JSON.stringify(log)); }
 
+function loadDuration() {
+  const raw = parseInt(localStorage.getItem(LS_DURATION), 10);
+  return (raw >= 0 && raw <= 2) ? raw : 1;
+}
+function saveDuration(idx) { localStorage.setItem(LS_DURATION, String(idx)); }
+
 let selectedModules = loadModules();
 let log = loadLog();
 if (!selectedModules.length) selectedModules = ['general'];
 let soundEnabled = localStorage.getItem(LS_SOUND) !== '0';
+let durationIdx = loadDuration();
 
 /* ── Timer engine ── */
 const TRANSITION_SEC = 4;
@@ -930,7 +1012,7 @@ function updateTimerDom(id) {
   const wrap = document.getElementById('timer-wrap-' + id);
   if (!wrap) return;
   const state = timers[id];
-  const ex = STRETCHES.find(e => e.id === id);
+  const ex = findScaledEx(id);
   const phaseEl = document.getElementById('timer-phase-' + id);
   const clockEl = document.getElementById('timer-clock-' + id);
   const fillEl = document.getElementById('timer-fill-' + id);
@@ -1076,6 +1158,30 @@ function renderTimerBlock(ex) {
 
 function currentRegimen() {
   return STRETCHES.filter(ex => ex.tags.some(t => selectedModules.includes(t)));
+}
+
+function currentDurationLevel() { return DURATION_LEVELS[durationIdx]; }
+
+function scaledExercise(ex) {
+  const lvl = currentDurationLevel();
+  if (ex.phase === 'static') {
+    const hold = Math.max(10, ex.hold + lvl.holdDelta);
+    const reps = Math.max(1, ex.reps + lvl.repsDelta);
+    const estSec = hold * reps * (ex.sides ? 2 : 1);
+    return Object.assign({}, ex, { hold, reps, estSec });
+  }
+  const reps = ex.reps.replace(/^(\d+)/, m => String(Math.max(1, parseInt(m, 10) + lvl.dynRepsDelta)));
+  const estSec = Math.max(15, ex.estSec + lvl.dynSecDelta);
+  return Object.assign({}, ex, { reps, estSec });
+}
+
+function findScaledEx(id) {
+  const ex = STRETCHES.find(e => e.id === id);
+  return ex ? scaledExercise(ex) : null;
+}
+
+function scaledRegimen() {
+  return currentRegimen().map(scaledExercise);
 }
 
 function ensureTodayEntry() {
@@ -1238,7 +1344,7 @@ function renderExerciseGrid(containerId, list, entry) {
 
   grid.querySelectorAll('.ex-timer-start').forEach(btn => {
     btn.addEventListener('click', () => {
-      const ex = STRETCHES.find(e => e.id === btn.dataset.timerId);
+      const ex = findScaledEx(btn.dataset.timerId);
       if (ex) toggleTimer(ex);
     });
   });
@@ -1252,7 +1358,7 @@ function renderExerciseGrid(containerId, list, entry) {
 
 /* ── Demo modal ── */
 function openDemo(id) {
-  const ex = STRETCHES.find(e => e.id === id);
+  const ex = findScaledEx(id);
   if (!ex) return;
   const mod = primaryModuleFor(ex);
   const modColor = 'var(--' + mod + ')';
@@ -1285,9 +1391,34 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeDemo();
 });
 
+function renderDurationControl() {
+  document.getElementById('duration-slider').value = String(durationIdx);
+  document.querySelectorAll('.duration-tick').forEach(btn => {
+    btn.classList.toggle('active', Number(btn.dataset.lvl) === durationIdx);
+  });
+  document.getElementById('duration-desc').textContent = currentDurationLevel().desc;
+}
+
+function setDuration(idx) {
+  if (idx === durationIdx) return;
+  durationIdx = idx;
+  saveDuration(idx);
+  Object.keys(timers).forEach(id => {
+    if (timers[id].intervalId) clearInterval(timers[id].intervalId);
+    delete timers[id];
+  });
+  renderAll();
+}
+
+document.getElementById('duration-slider').addEventListener('input', e => setDuration(parseInt(e.target.value, 10)));
+document.querySelectorAll('.duration-tick').forEach(btn => {
+  btn.addEventListener('click', () => setDuration(Number(btn.dataset.lvl)));
+});
+
 function renderAll() {
   renderModuleGrid();
-  const regimen = currentRegimen();
+  renderDurationControl();
+  const regimen = scaledRegimen();
   const entry = ensureTodayEntry();
   renderSummary(regimen, entry);
   renderExerciseGrid('warmup-grid', regimen.filter(ex => ex.phase === 'dynamic'), entry);
