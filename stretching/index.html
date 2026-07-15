@@ -529,7 +529,9 @@ body::before {
     <div class="science-body" id="science-body">
       <div class="science-body-inner">
         <ul>
-          <li><b>Dosage.</b> ACSM guidance calls for stretching major muscle groups at least 2–3 days a week, ideally most days, holding each static stretch roughly 10–30 seconds for 2–4 rounds — that's the baseline used for every hold/rep count above.</li>
+          <li><b>Why every hold is ~30 seconds.</b> Studies on hamstring and quad stretching find range-of-motion gains plateau around a 30-second hold — going to 60 seconds doesn't add much more. So instead of shortening the hold for a quicker session, every static stretch here always runs a full ~30s; Short/Medium/Long change which stretches are included, not how long each one lasts.</li>
+          <li><b>Repetition matters.</b> ACSM guidance calls for 2–4 rounds of each static stretch, not one long hold — repeated bouts relax tissue and reduce stretch tolerance more than a single hold of equal total time. Every stretch below runs at least 2 sets, and Long mode adds a third or fourth round rather than a longer one.</li>
+          <li><b>Trimming by importance, not by the clock.</b> Short mode isn't the Medium routine sped up — it keeps only the core stretch for each major muscle group (hamstrings, calves, hips, quads, chest, and forearms for climbers) and drops the supplementary and advanced stretches, which return in Medium and Long as time allows.</li>
           <li><b>PNF vs. static.</b> Contract-relax (PNF) stretching and plain static stretching produce comparable range-of-motion gains in most studies — so PNF is offered as an optional technique on split-focused stretches, not a requirement.</li>
           <li><b>Learning a split.</b> Consistency (3–5×/week) matters more than any single long session, and pairing passive static holds with active control drills (dynamic warm-ups, contract-relax) builds flexibility you can actually use under load, not just when relaxed.</li>
           <li><b>Bouldering.</b> Research comparing climbers finds elite climbers have measurably greater hip flexion and abduction than intermediates, and functional shoulder external rotation is linked to climbing performance — this module weights hip openers, rotational drills, and forearm/wrist care accordingly.</li>
@@ -623,20 +625,24 @@ const MODULES = [
   }
 ];
 
-/* ── Duration levels ── */
+/* ── Duration levels ──
+   Every hold stays a fixed ~30s — research shows going longer than that adds
+   little extra range of motion. So Short/Medium/Long don't shrink the holds,
+   they change *which* stretches are included (by importance) and how many
+   sets/reps of each you do. */
 const DURATION_LEVELS = [
-  { id: 'short', label: 'Short', holdDelta: -10, repsDelta: -1, dynRepsDelta: -2, dynSecDelta: -10,
-    desc: 'Quicker holds, one fewer set per stretch — good for a tight schedule.' },
-  { id: 'medium', label: 'Medium', holdDelta: 0, repsDelta: 0, dynRepsDelta: 0, dynSecDelta: 0,
-    desc: 'Standard ACSM dosage — the baseline this regimen is built on.' },
-  { id: 'long', label: 'Long', holdDelta: 10, repsDelta: 1, dynRepsDelta: 2, dynSecDelta: 10,
-    desc: 'Deeper holds, an extra set per stretch — for when you have time to sink in.' }
+  { id: 'short', label: 'Short', priorityMax: 1, setsDelta: 0, dynRepsDelta: 0, dynSecDelta: 0,
+    desc: 'Core stretches only, covering every major muscle group — still a full ~30s hold for 2+ sets each. Trims the list, not the dose.' },
+  { id: 'medium', label: 'Medium', priorityMax: 2, setsDelta: 0, dynRepsDelta: 0, dynSecDelta: 0,
+    desc: 'Core + supporting stretches at standard ACSM dosage — ~30s holds, 2–3 sets each.' },
+  { id: 'long', label: 'Long', priorityMax: 3, setsDelta: 1, dynRepsDelta: 2, dynSecDelta: 10,
+    desc: 'The full regimen, plus an extra set per stretch — for when you have time to sink in.' }
 ];
 
 /* ── Exercises ── */
 const STRETCHES = [
   { id:'leg-swing-front', name:'Front-to-Back Leg Swings', phase:'dynamic', tags:['split','general','boulder'],
-    target:'Hip flexors · Hamstrings · Hip capsule', reps:'10 each leg', sides:true, estSec:40, icon:'legSwing',
+    target:'Hip flexors · Hamstrings · Hip capsule', reps:'10 each leg', sides:true, estSec:40, icon:'legSwing', priority:1,
     cue:'Hold a wall for balance. Swing one leg forward and back in a controlled arc — let range grow each rep, don’t force it.',
     steps:[
       'Stand side-on to a wall or sturdy chair, feet together, and rest one hand on it for balance.',
@@ -646,7 +652,7 @@ const STRETCHES = [
       'Finish all reps, then turn around and repeat with the other leg.'
     ] },
   { id:'leg-swing-side', name:'Side-to-Side Leg Swings', phase:'dynamic', tags:['split','boulder'],
-    target:'Adductors · Abductors', reps:'10 each leg', sides:true, estSec:40, icon:'legSwingSide',
+    target:'Adductors · Abductors', reps:'10 each leg', sides:true, estSec:40, icon:'legSwingSide', priority:2,
     cue:'Swing one leg across your body and back out to the side. Keep your torso upright, swinging from the hip.',
     steps:[
       'Face a wall or chair with both hands resting on it for support.',
@@ -656,7 +662,7 @@ const STRETCHES = [
       'Finish your reps, then switch legs.'
     ] },
   { id:'hip-circles', name:'Standing Hip Circles', phase:'dynamic', tags:['split','general','boulder'],
-    target:'Hip joint capsule', reps:'8 each direction, each leg', sides:true, estSec:45, icon:'hipCircle',
+    target:'Hip joint capsule', reps:'8 each direction, each leg', sides:true, estSec:45, icon:'hipCircle', priority:1,
     cue:'Lift your knee and trace a large circle with it, both directions. Keep the standing leg stable.',
     steps:[
       'Stand tall next to a wall for light balance support.',
@@ -666,7 +672,7 @@ const STRETCHES = [
       'Complete all reps in one direction, reverse direction, then repeat on the other leg.'
     ] },
   { id:'arm-circles', name:'Arm Circles', phase:'dynamic', tags:['general','boulder'],
-    target:'Shoulders · Rotator cuff', reps:'10 each direction', sides:false, estSec:25, icon:'armCircle',
+    target:'Shoulders · Rotator cuff', reps:'10 each direction', sides:false, estSec:25, icon:'armCircle', priority:1,
     cue:'Big, slow circles — small at first, growing larger. Reverse direction halfway through.',
     steps:[
       'Stand with feet shoulder-width apart, arms extended straight out to your sides at shoulder height.',
@@ -676,7 +682,7 @@ const STRETCHES = [
       'Complete the reps, then reverse direction and repeat.'
     ] },
   { id:'cat-cow', name:'Cat–Cow Flow', phase:'dynamic', tags:['toe','general','boulder'],
-    target:'Spine · Lower back', reps:'8 slow cycles', sides:false, estSec:35, icon:'catCow',
+    target:'Spine · Lower back', reps:'8 slow cycles', sides:false, estSec:35, icon:'catCow', priority:1,
     cue:'On hands and knees, alternate arching and rounding your spine with your breath.',
     steps:[
       'Get on hands and knees, hands under shoulders, knees under hips.',
@@ -686,7 +692,7 @@ const STRETCHES = [
       'Repeat the flow for all cycles.'
     ] },
   { id:'worlds-greatest', name:'World’s Greatest Stretch', phase:'dynamic', tags:['split','general','boulder'],
-    target:'Hips · Hamstrings · T-spine', reps:'5 each side', sides:true, estSec:40, icon:'worldsGreatest',
+    target:'Hips · Hamstrings · T-spine', reps:'5 each side', sides:true, estSec:40, icon:'worldsGreatest', priority:2,
     cue:'Step into a deep lunge, drop the back knee, then rotate your torso and reach the same-side arm skyward.',
     steps:[
       'From standing, step one foot forward into a long lunge, lowering the back knee toward the floor.',
@@ -696,7 +702,7 @@ const STRETCHES = [
       'Step back to standing and repeat on the other side.'
     ] },
   { id:'ankle-circles', name:'Ankle Circles', phase:'dynamic', tags:['general','boulder'],
-    target:'Ankles', reps:'10 each direction, each foot', sides:true, estSec:30, icon:'ankleCircle',
+    target:'Ankles', reps:'10 each direction, each foot', sides:true, estSec:30, icon:'ankleCircle', priority:3,
     cue:'Lift one foot and circle at the ankle. Smooth, full range, both directions.',
     steps:[
       'Stand on one leg (holding a wall for balance) or sit with one leg extended.',
@@ -707,7 +713,7 @@ const STRETCHES = [
     ] },
 
   { id:'toe-touch', name:'Standing Toe Touch', phase:'static', tags:['toe','general'],
-    target:'Hamstrings · Lower back · Calves', hold:30, reps:3, sides:false, estSec:90, icon:'forwardFold',
+    target:'Hamstrings · Lower back · Calves', hold:30, reps:3, sides:false, estSec:90, icon:'forwardFold', priority:1,
     cue:'Feet hip-width, soft knees, fold from the hips and let your arms hang. Relax your neck.',
     steps:[
       'Stand with feet hip-width apart, knees soft (not locked).',
@@ -717,7 +723,7 @@ const STRETCHES = [
       'Roll back up slowly, one vertebra at a time.'
     ] },
   { id:'seated-fold', name:'Seated Forward Fold', phase:'static', tags:['toe','general'],
-    target:'Hamstrings · Spine', hold:30, reps:2, sides:false, estSec:60, icon:'seatedFold',
+    target:'Hamstrings · Spine', hold:30, reps:2, sides:false, estSec:60, icon:'seatedFold', priority:2,
     cue:'Legs extended, hinge from the hips reaching for your feet — keep your back long, not rounded.',
     steps:[
       'Sit on the floor with legs extended straight in front of you, feet flexed.',
@@ -727,7 +733,7 @@ const STRETCHES = [
       'Release slowly back up to sitting.'
     ] },
   { id:'standing-hamstring', name:'Elevated Hamstring Stretch', phase:'static', tags:['toe','split','general'],
-    target:'Hamstrings', hold:25, reps:2, sides:true, estSec:100, icon:'standingHamstring',
+    target:'Hamstrings', hold:30, reps:2, sides:true, estSec:120, icon:'standingHamstring', priority:1,
     cue:'Rest your heel on a chair or step, keep the leg straight, and hinge forward from the hips.',
     steps:[
       'Find a step, chair, or low table roughly knee-to-hip height.',
@@ -737,7 +743,7 @@ const STRETCHES = [
       'Hold, then switch legs.'
     ] },
   { id:'wall-calf', name:'Wall Calf Stretch', phase:'static', tags:['toe','general','boulder'],
-    target:'Calves · Achilles', hold:25, reps:2, sides:true, estSec:100, icon:'wallCalf',
+    target:'Calves · Achilles', hold:30, reps:2, sides:true, estSec:120, icon:'wallCalf', priority:1,
     cue:'Hands on a wall, back leg straight with heel pressed down. Lean in until you feel the stretch.',
     steps:[
       'Face a wall, hands flat against it at shoulder height.',
@@ -747,7 +753,7 @@ const STRETCHES = [
       'Hold, then switch legs.'
     ] },
   { id:'standing-quad', name:'Standing Quad Stretch', phase:'static', tags:['split','general','boulder'],
-    target:'Quadriceps · Hip flexors', hold:25, reps:2, sides:true, estSec:100, icon:'standingQuad',
+    target:'Quadriceps · Hip flexors', hold:30, reps:2, sides:true, estSec:120, icon:'standingQuad', priority:1,
     cue:'Grab your ankle behind you, knees together, hips pushed slightly forward. Hold something for balance.',
     steps:[
       'Stand near a wall or chair for balance.',
@@ -757,7 +763,7 @@ const STRETCHES = [
       'Hold, then switch legs.'
     ] },
   { id:'hip-flexor-lunge', name:'Kneeling Hip Flexor Lunge', phase:'static', tags:['split','general','boulder'],
-    target:'Hip flexors · Psoas', hold:30, reps:2, sides:true, estSec:120, icon:'hipFlexorLunge',
+    target:'Hip flexors · Psoas', hold:30, reps:2, sides:true, estSec:120, icon:'hipFlexorLunge', priority:1,
     cue:'Half-kneel, tuck your pelvis under, and shift weight forward until you feel the front of the back hip stretch.',
     pnfNote:'PNF option: gently drive the back hip into the floor for 5s, relax, then sink deeper. Repeat 3×.',
     steps:[
@@ -768,7 +774,7 @@ const STRETCHES = [
       'Hold, then switch sides. Try the PNF option below for a deeper release.'
     ] },
   { id:'butterfly', name:'Butterfly Stretch', phase:'static', tags:['split','general','boulder'],
-    target:'Adductors · Groin', hold:30, reps:2, sides:false, estSec:60, icon:'butterfly',
+    target:'Adductors · Groin', hold:30, reps:2, sides:false, estSec:60, icon:'butterfly', priority:1,
     cue:'Soles of your feet together, spine tall, gently press your knees toward the floor with your elbows.',
     pnfNote:'PNF option: press your knees up into your hands for 5s, relax, then let them drop lower. Repeat 3×.',
     steps:[
@@ -779,7 +785,7 @@ const STRETCHES = [
       'Hold, breathing and relaxing deeper each exhale. Try the PNF option below for extra range.'
     ] },
   { id:'frog', name:'Frog Stretch', phase:'static', tags:['split','boulder'],
-    target:'Adductors · Hips', hold:30, reps:1, sides:false, estSec:30, icon:'frog',
+    target:'Adductors · Hips', hold:30, reps:2, sides:false, estSec:60, icon:'frog', priority:3,
     cue:'Knees wide on the floor, forearms down, rock your hips back slowly. Advanced — ease in gradually.',
     steps:[
       'Start on hands and knees, then widen your knees out to each side as far as comfortable.',
@@ -789,7 +795,7 @@ const STRETCHES = [
       'Hold, then rock gently forward to release.'
     ] },
   { id:'pigeon', name:'Pigeon Pose', phase:'static', tags:['split','general','boulder'],
-    target:'Glutes · Hip external rotators', hold:30, reps:2, sides:true, estSec:120, icon:'pigeon',
+    target:'Glutes · Hip external rotators', hold:30, reps:2, sides:true, estSec:120, icon:'pigeon', priority:1,
     cue:'Front shin angled under your torso, back leg extended straight behind. Fold forward over the front shin.',
     steps:[
       'From hands and knees, bring one knee forward and angle the shin across your body.',
@@ -799,7 +805,7 @@ const STRETCHES = [
       'Hold, then switch sides.'
     ] },
   { id:'ninety-ninety', name:'90/90 Hip Switch', phase:'static', tags:['split','boulder'],
-    target:'Hip internal & external rotation', hold:30, reps:2, sides:true, estSec:120, icon:'ninetyNinety',
+    target:'Hip internal & external rotation', hold:30, reps:2, sides:true, estSec:120, icon:'ninetyNinety', priority:2,
     cue:'Sit with your front leg bent 90° in front, back leg bent 90° to the side. Lean over the front shin, then switch.',
     steps:[
       'Sit on the floor with your front leg bent 90° out in front of you.',
@@ -809,7 +815,7 @@ const STRETCHES = [
       'Hold, then rotate your whole body to switch which leg is in front.'
     ] },
   { id:'side-lunge-adductor', name:'Side Lunge Adductor Rock', phase:'static', tags:['split','general','boulder'],
-    target:'Adductors', hold:25, reps:2, sides:true, estSec:100, icon:'sideLunge',
+    target:'Adductors', hold:30, reps:2, sides:true, estSec:120, icon:'sideLunge', priority:2,
     cue:'Wide stance, sink into one bent knee while the other leg stays straight. Rock side to side or hold.',
     steps:[
       'Stand with feet wide, toes pointing forward or slightly out.',
@@ -819,7 +825,7 @@ const STRETCHES = [
       'Hold, or rock gently side to side, then switch.'
     ] },
   { id:'seated-twist', name:'Seated Spinal Twist', phase:'static', tags:['general','boulder'],
-    target:'Spine · Obliques', hold:20, reps:2, sides:true, estSec:80, icon:'seatedTwist',
+    target:'Spine · Obliques', hold:30, reps:2, sides:true, estSec:120, icon:'seatedTwist', priority:2,
     cue:'Cross one leg over, rotate your torso toward the bent knee, using your arm as leverage.',
     steps:[
       'Sit with legs extended, then cross one foot over the opposite knee.',
@@ -829,7 +835,7 @@ const STRETCHES = [
       'Hold, then repeat on the other side.'
     ] },
   { id:'doorway-chest', name:'Doorway Chest Stretch', phase:'static', tags:['general','boulder'],
-    target:'Chest · Front shoulders', hold:25, reps:2, sides:false, estSec:50, icon:'doorwayChest',
+    target:'Chest · Front shoulders', hold:30, reps:2, sides:false, estSec:60, icon:'doorwayChest', priority:1,
     cue:'Forearms on a doorframe, elbows near shoulder height, step forward until your chest opens up.',
     steps:[
       'Stand in a doorway with forearms resting on each side of the frame, elbows at roughly shoulder height.',
@@ -839,7 +845,7 @@ const STRETCHES = [
       'Hold, then step back to release.'
     ] },
   { id:'cross-body-shoulder', name:'Cross-Body Shoulder Stretch', phase:'static', tags:['general','boulder'],
-    target:'Posterior shoulder', hold:20, reps:2, sides:true, estSec:80, icon:'crossBodyShoulder',
+    target:'Posterior shoulder', hold:30, reps:2, sides:true, estSec:120, icon:'crossBodyShoulder', priority:2,
     cue:'Pull one straight arm across your chest with the other arm, keeping the shoulder relaxed down.',
     steps:[
       'Bring one straight arm across the front of your chest.',
@@ -849,7 +855,7 @@ const STRETCHES = [
       'Switch arms.'
     ] },
   { id:'overhead-lat', name:'Overhead Lat Stretch', phase:'static', tags:['general','boulder'],
-    target:'Lats · Triceps', hold:20, reps:2, sides:true, estSec:80, icon:'overheadLat',
+    target:'Lats · Triceps', hold:30, reps:2, sides:true, estSec:120, icon:'overheadLat', priority:2,
     cue:'Reach one arm overhead and bend sideways at the waist, feeling the stretch down your side.',
     steps:[
       'Stand or kneel tall, and reach one arm straight overhead.',
@@ -859,7 +865,7 @@ const STRETCHES = [
       'Hold, then switch sides.'
     ] },
   { id:'wrist-flexor', name:'Wrist Flexor Stretch', phase:'static', tags:['boulder'],
-    target:'Forearm flexors (grip)', hold:15, reps:2, sides:true, estSec:60, icon:'wristFlexor',
+    target:'Forearm flexors (grip)', hold:30, reps:2, sides:true, estSec:120, icon:'wristFlexor', priority:1,
     cue:'Arm out, palm up, gently pull your fingers back toward you with the other hand. Key for climbers’ forearms.',
     steps:[
       'Extend one arm in front of you, palm facing up.',
@@ -869,7 +875,7 @@ const STRETCHES = [
       'Switch arms.'
     ] },
   { id:'wrist-extensor', name:'Wrist Extensor Stretch', phase:'static', tags:['boulder'],
-    target:'Forearm extensors', hold:15, reps:2, sides:true, estSec:60, icon:'wristExtensor',
+    target:'Forearm extensors', hold:30, reps:2, sides:true, estSec:120, icon:'wristExtensor', priority:1,
     cue:'Arm out, palm down, gently press the back of your hand down and toward you.',
     steps:[
       'Extend one arm in front of you, palm facing down.',
@@ -879,7 +885,7 @@ const STRETCHES = [
       'Switch arms.'
     ] },
   { id:'childs-pose', name:'Child’s Pose Reach', phase:'static', tags:['toe','general','boulder'],
-    target:'Lats · Spine · Hips', hold:30, reps:1, sides:false, estSec:30, icon:'childsPose',
+    target:'Lats · Spine · Hips', hold:30, reps:2, sides:false, estSec:60, icon:'childsPose', priority:3,
     cue:'Knees wide, hips to heels, walk your hands forward and let your chest sink toward the floor.',
     steps:[
       'Kneel on the floor, big toes touching, knees spread wide.',
@@ -1156,19 +1162,19 @@ function renderTimerBlock(ex) {
   '</div>';
 }
 
-function currentRegimen() {
-  return STRETCHES.filter(ex => ex.tags.some(t => selectedModules.includes(t)));
-}
-
 function currentDurationLevel() { return DURATION_LEVELS[durationIdx]; }
+
+function currentRegimen() {
+  const lvl = currentDurationLevel();
+  return STRETCHES.filter(ex => ex.tags.some(t => selectedModules.includes(t)) && ex.priority <= lvl.priorityMax);
+}
 
 function scaledExercise(ex) {
   const lvl = currentDurationLevel();
   if (ex.phase === 'static') {
-    const hold = Math.max(10, ex.hold + lvl.holdDelta);
-    const reps = Math.max(1, ex.reps + lvl.repsDelta);
-    const estSec = hold * reps * (ex.sides ? 2 : 1);
-    return Object.assign({}, ex, { hold, reps, estSec });
+    const reps = Math.min(4, ex.reps + lvl.setsDelta);
+    const estSec = ex.hold * reps * (ex.sides ? 2 : 1);
+    return Object.assign({}, ex, { reps, estSec });
   }
   const reps = ex.reps.replace(/^(\d+)/, m => String(Math.max(1, parseInt(m, 10) + lvl.dynRepsDelta)));
   const estSec = Math.max(15, ex.estSec + lvl.dynSecDelta);
