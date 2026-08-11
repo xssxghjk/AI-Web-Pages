@@ -430,6 +430,34 @@ const FAB_WORLD_TOUR = [
   },
 
   {
+    id: 'fab-calling-bilbao-2026',
+    title: 'Calling – Bilbao',
+    destination: 'Bilbao, Spain',
+    region: 'Europe',
+    status: 'fab-event',
+    startDate: '2026-09-25',
+    endDate: '2026-09-27',
+    displayDates: 'Sep 25–27, 2026',
+    description: 'The Calling (Sealed Deck + Booster Draft) + Silver Age Showdown at Bilbao Exhibition Centre (BEC), Spain.',
+    link: 'https://fabtcg.com/organised-play/2026/calling-bilbao/',
+    tags: ['FaB', 'Calling', 'World Tour'],
+  },
+
+  {
+    id: 'fab-calling-atlanta-2026',
+    title: 'Calling – Atlanta (Calling 100)',
+    destination: 'Atlanta, USA',
+    region: 'Americas',
+    status: 'fab-event',
+    startDate: '2026-10-02',
+    endDate: '2026-10-04',
+    displayDates: 'Oct 2–4, 2026',
+    description: 'Calling 100 milestone weekend — Living Legend Calling, Classic Constructed Calling & Silver Age Showdown at Atlanta Marriott Marquis, Georgia.',
+    link: 'https://fabtcg.com/organised-play/2026/calling-atlanta/',
+    tags: ['FaB', 'Calling', 'World Tour'],
+  },
+
+  {
     id: 'fab-calling-kyoto-2026',
     title: 'Calling – Kyoto',
     destination: 'Kyoto, Japan',
@@ -525,6 +553,20 @@ const FAB_WORLD_TOUR = [
     description: 'The Calling (Classic Constructed, $20K) at Hyatt Regency Portland.',
     link: 'https://fabtcg.com/organised-play/',
     tags: ['FaB', 'Calling', 'World Tour'],
+  },
+
+  {
+    id: 'fab-pro-tour-london-2027',
+    title: 'Pro Tour – London',
+    destination: 'London, UK',
+    region: 'Europe',
+    status: 'fab-event',
+    startDate: '2027-02-25',
+    endDate: '2027-02-28',
+    displayDates: 'Feb 25–28, 2027',
+    description: 'Pro Tour: London, opening event of the 2027 World Tour season — the first of three Pro Tours.',
+    link: 'https://fabtcg.com/articles/announcing-pro-tour-london/',
+    tags: ['FaB', 'Pro Tour', 'World Tour'],
   },
 
 ];
